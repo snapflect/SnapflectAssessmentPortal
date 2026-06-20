@@ -1,0 +1,292 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+001 SECURITY SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+001 Security Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Security & User Management
+Depends On
+None
+Next Module
+002 Governance Foundation Schema
+Approved For
+DDL Generation
+
+1. PURPOSE
+The Security Schema establishes the foundational identity, authentication, authorization, and account management capabilities of the Snapflect Assessment Portal.
+This module is the root dependency for all other database modules.
+The schema supports:
+User Registration
+User Authentication
+Role-Based Access Control (RBAC)
+Session Management
+Password Reset
+Email Verification
+User Profile Management
+Security Auditing Support
+
+2. TABLES IN SCOPE
+Identity Management
+usersuser_profiles
+
+Authorization
+rolespermissionsuser_rolesrole_permissions
+
+Authentication
+user_sessionspassword_resetsemail_verifications
+
+3. TABLE CREATION ORDER
+The following order shall be used during schema deployment.
+Phase 1
+usersrolespermissions
+Reason:
+No external dependencies.
+
+Phase 2
+user_profiles
+Depends on:
+users
+
+Phase 3
+user_rolesrole_permissions
+Depends on:
+usersrolespermissions
+
+Phase 4
+user_sessionspassword_resetsemail_verifications
+Depends on:
+users
+
+4. ENTITY RELATIONSHIP MODEL
+User → Profile
+Relationship:
+1 User    ↔1 User Profile
+Constraint:
+UNIQUE(user_id)
+
+User → Roles
+Relationship:
+User  ↔User Roles  ↔Roles
+Supports:
+Many-to-Many
+
+Role → Permissions
+Relationship:
+Role  ↔Role Permissions  ↔Permissions
+Supports:
+Many-to-Many
+
+User → Sessions
+Relationship:
+1 User    ↔Many Sessions
+
+User → Password Resets
+Relationship:
+1 User    ↔Many Password Reset Requests
+
+User → Email Verifications
+Relationship:
+1 User    ↔Many Email Verification Requests
+
+5. PRIMARY KEY STRATEGY
+All tables shall use:
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARYKEY
+Characteristics:
+Clustered Index
+Internal Identifier
+Never Exposed Publicly
+
+6. UUID STRATEGY
+Every table shall contain:
+uuid CHAR(36) NOTNULL
+Constraint:
+UNIQUE(uuid)
+Purpose:
+API references
+URL references
+External integrations
+Public identifiers
+Internal numeric IDs must never be exposed externally.
+
+7. AUDIT FIELD STRATEGY
+Standard Audit Columns
+Mutable entities shall contain:
+created_by BIGINT UNSIGNED NULLcreated_date DATETIME(3) NOTNULLmodified_by BIGINT UNSIGNED NULLmodified_date DATETIME(3) NULL
+
+Soft Delete Audit Columns
+Where applicable:
+deleted_by BIGINT UNSIGNED NULLdeleted_date DATETIME(3) NULL
+
+8. SOFT DELETE STRATEGY
+Soft Delete Enabled
+usersuser_profilesrolespermissions
+Required columns:
+is_active TINYINT(1)is_deleted TINYINT(1)deleted_by BIGINT UNSIGNEDdeleted_date DATETIME(3)
+
+Soft Delete Not Required
+user_rolesrole_permissionsuser_sessionspassword_resetsemail_verifications
+Reason:
+Historical records must be preserved.
+
+9. UNIQUE CONSTRAINT STRATEGY
+users
+UNIQUE(uuid)UNIQUE(email)UNIQUE(mobile_number)
+
+user_profiles
+UNIQUE(uuid)UNIQUE(user_id)
+
+roles
+UNIQUE(uuid)UNIQUE(role_name)UNIQUE(role_code)
+
+permissions
+UNIQUE(uuid)UNIQUE(permission_code)
+
+user_roles
+UNIQUE(uuid)UNIQUE(user_id, role_id)
+
+role_permissions
+UNIQUE(uuid)UNIQUE(role_id, permission_id)
+
+10. FOREIGN KEY STRATEGY
+users
+Self-referencing audit fields:
+created_by -> users(id)modified_by -> users(id)deleted_by -> users(id)
+
+user_profiles
+user_id -> users(id)created_by -> users(id)modified_by -> users(id)
+
+user_roles
+user_id -> users(id)role_id ->roles(id)assigned_by -> users(id)
+
+role_permissions
+role_id ->roles(id)permission_id -> permissions(id)assigned_by -> users(id)
+
+user_sessions
+user_id -> users(id)
+
+password_resets
+user_id -> users(id)
+
+email_verifications
+user_id -> users(id)
+
+11. INDEX STRATEGY
+users
+UX_users_uuidUX_users_emailUX_users_mobile_numberIX_users_statusIX_users_is_active
+
+roles
+UX_roles_role_nameUX_roles_role_code
+
+permissions
+UX_permissions_permission_code
+
+user_roles
+UX_user_roles_user_roleIX_user_roles_userIX_user_roles_role
+
+role_permissions
+UX_role_permissions_role_permissionIX_role_permissions_roleIX_role_permissions_permission
+
+user_sessions
+IX_user_sessions_userIX_user_sessions_statusIX_user_sessions_last_activity
+
+password_resets
+IX_password_resets_userIX_password_resets_status
+
+email_verifications
+IX_email_verifications_userIX_email_verifications_status
+
+12. ENUMERATION DEFINITIONS
+User Status
+ActivePending VerificationLockedSuspendedDeleted
+
+Session Status
+ActiveExpiredRevokedLogged Out
+
+Password Reset Status
+PendingUsedExpired
+
+Email Verification Status
+PendingVerifiedExpired
+
+13. ROLE SEED DATA
+SUPER_ADMIN
+Full system access.
+
+ASSESSMENT_ADMIN
+Assessment management access.
+
+USER
+Assessment participation access.
+
+14. PERMISSION STRATEGY
+Format:
+module.action
+Examples:
+technology.createtechnology.edittechnology.publishassessment.createassessment.publishquestion.createquestion.editreview.approvereport.export
+
+15. INITIAL DATA LOADING ORDER
+Step 1
+Insert Roles
+
+Step 2
+Insert Permissions
+
+Step 3
+Insert Role-Permission Mappings
+
+Step 4
+Create Initial Super Admin
+
+Step 5
+Assign SUPER_ADMIN Role
+
+16. SECURITY RULES
+Password Storage
+Algorithm:
+BCrypt
+Cost Factor:
+12
+
+Lockout Policy
+5 Failed Login Attempts30 Minute Lockout
+
+Email Verification
+Required for self-registration.
+
+JWT Tokens
+Raw JWT values must never be stored.
+Only:
+JWT Token IDRefresh Token ID
+may be persisted.
+
+17. DEPLOYMENT VALIDATION CHECKLIST
+✓ Table Order Verified
+✓ Dependency Order Verified
+✓ PK Strategy Verified
+✓ UUID Strategy Verified
+✓ FK Strategy Verified
+✓ Soft Delete Strategy Verified
+✓ Audit Strategy Verified
+✓ Index Strategy Verified
+✓ RBAC Strategy Verified
+✓ Seed Strategy Verified
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+APPROVAL
+Document:
+001 Security Schema DesignVersion 1.0
+Status:
+FINALAPPROVED FOR DDL GENERATION
+Next Deliverable:
+001_security_schema.sql
+
+END OF DOCUMENT

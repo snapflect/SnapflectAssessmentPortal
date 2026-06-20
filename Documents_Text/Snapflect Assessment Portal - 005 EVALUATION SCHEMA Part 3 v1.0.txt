@@ -1,0 +1,166 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+005_EVALUATION_SCHEMA.SQL
+PART 3 – MANUAL REVIEW & RESULT PUBLICATION
+Version 1.0
+
+MODULE
+Evaluation
+
+TABLES
+```text id=“ev3_001”manual_review_queue
+review_assignments
+result_publications
+---# DEPENDS ON```text id="ev3_002"005_EVALUATION_SCHEMA.SQL – PART 1005_EVALUATION_SCHEMA.SQL – PART 2evaluation_resultsassessment_attempt_questionsusers
+
+PURPOSE
+This module completes the Evaluation domain.
+It provides:
+```text id=“ev3_003”Manual Review Workflow
+Reviewer Assignment
+Appeal Processing Foundation
+Result Publication
+Certification Release Governance
+Publication Approval Workflow
+---# MANUAL_REVIEW_QUEUE## PurposeStores evaluation items requiring human review.Supports:```text id="ev3_004"Essay ReviewCoding ReviewAI EscalationAppealsCertification Validation
+
+Review Scope Types
+```text id=“ev3_005”Assessment
+Question
+Section
+---```sql id="ev3_006"CREATE TABLE manual_review_queue(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    evaluation_result_id BIGINT UNSIGNED NOT NULL,    attempt_question_id BIGINT UNSIGNED NULL,    review_scope VARCHAR(50)        NOT NULL DEFAULT 'Assessment',    queue_status VARCHAR(50)        NOT NULL DEFAULT 'Pending',    priority VARCHAR(50)        NOT NULL DEFAULT 'Medium',    appeal_reference VARCHAR(100) NULL,    assigned_date DATETIME(3) NULL,    completed_date DATETIME(3) NULL,    created_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    modified_date DATETIME(3) NULL,    PRIMARY KEY (id),    CONSTRAINT ux_manual_review_queue_uuid        UNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+MANUAL_REVIEW_QUEUE FOREIGN KEYS
+```sql id=“ev3_007”ALTER TABLE manual_review_queueADD CONSTRAINT fk_manual_review_queue_resultFOREIGN KEY (evaluation_result_id)REFERENCES evaluation_results(id);
+ALTER TABLE manual_review_queueADD CONSTRAINT fk_manual_review_queue_questionFOREIGN KEY (attempt_question_id)REFERENCES assessment_attempt_questions(id);
+---# MANUAL_REVIEW_QUEUE INDEXES```sql id="ev3_008"CREATE INDEX ix_manual_review_queue_statusON manual_review_queue(queue_status);CREATE INDEX ix_manual_review_queue_priorityON manual_review_queue(priority);CREATE INDEX ix_manual_review_queue_scopeON manual_review_queue(review_scope);CREATE INDEX ix_manual_review_queue_createdON manual_review_queue(created_date);CREATE INDEX ix_manual_review_queue_assignedON manual_review_queue(assigned_date);CREATE INDEX ix_manual_review_queue_resultON manual_review_queue(evaluation_result_id);
+
+QUEUE STATUS VALUES
+Application validation shall enforce:
+```text id=“ev3_009”Pending
+Assigned
+InReview
+Completed
+Rejected
+Escalated
+---# PRIORITY VALUESApplication validation shall enforce:```text id="ev3_010"LowMediumHighCritical
+
+REVIEW_ASSIGNMENTS
+Purpose
+Tracks reviewer assignments and decisions.
+Supports:
+```text id=“ev3_011”Single Reviewer
+Multiple Reviewer
+Escalation Review
+Appeal Review
+---```sql id="ev3_012"CREATE TABLE review_assignments(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    manual_review_queue_id BIGINT UNSIGNED NOT NULL,    reviewer_user_id BIGINT UNSIGNED NOT NULL,    assignment_status VARCHAR(50)        NOT NULL DEFAULT 'Assigned',    review_decision VARCHAR(50) NULL,    review_notes TEXT NULL,    review_metadata_json JSON NULL,    assigned_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    completed_date DATETIME(3) NULL,    created_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    PRIMARY KEY (id),    CONSTRAINT ux_review_assignments_uuid        UNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+REVIEW_ASSIGNMENTS FOREIGN KEYS
+```sql id=“ev3_013”ALTER TABLE review_assignmentsADD CONSTRAINT fk_review_assignments_queueFOREIGN KEY (manual_review_queue_id)REFERENCES manual_review_queue(id);
+ALTER TABLE review_assignmentsADD CONSTRAINT fk_review_assignments_reviewerFOREIGN KEY (reviewer_user_id)REFERENCES users(id);
+---# REVIEW_ASSIGNMENTS INDEXES```sql id="ev3_014"CREATE INDEX ix_review_assignments_queueON review_assignments(manual_review_queue_id);CREATE INDEX ix_review_assignments_reviewerON review_assignments(reviewer_user_id);CREATE INDEX ix_review_assignments_statusON review_assignments(assignment_status);CREATE INDEX ix_review_assignments_decisionON review_assignments(review_decision);
+
+ASSIGNMENT STATUS VALUES
+Application validation shall enforce:
+```text id=“ev3_015”Assigned
+Accepted
+Completed
+Declined
+---# REVIEW DECISION VALUESApplication validation shall enforce:```text id="ev3_016"ApprovedRejectedNeedsChangesEscalated
+
+REVIEW METADATA STRATEGY
+Field:
+text id="ev3_017" review_metadata_json
+supports future:
+```text id=“ev3_018”Evidence
+AI Reviewer Feedback
+Scoring Breakdown
+Review Attachments
+Compliance Notes
+---# RESULT_PUBLICATIONS## PurposeControls result visibility.Separates:```text id="ev3_019"Evaluation Completion
+from:
+text id="ev3_020" Candidate Visibility
+
+Supported Scenarios
+```text id=“ev3_021”Immediate Publish
+Scheduled Publish
+Bulk Publish
+Certification Release Window
+Manager Approval Workflow
+---```sql id="ev3_022"CREATE TABLE result_publications(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    evaluation_result_id BIGINT UNSIGNED NOT NULL,    publication_status VARCHAR(50)        NOT NULL DEFAULT 'Draft',    scheduled_publication_date DATETIME(3) NULL,    publication_date DATETIME(3) NULL,    approved_by BIGINT UNSIGNED NULL,    approved_date DATETIME(3) NULL,    publication_batch_id CHAR(36) NULL,    publication_notes TEXT NULL,    created_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    modified_date DATETIME(3) NULL,    PRIMARY KEY (id),    CONSTRAINT ux_result_publications_uuid        UNIQUE (uuid),    CONSTRAINT ux_result_publications_result        UNIQUE (evaluation_result_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+RESULT_PUBLICATIONS FOREIGN KEYS
+```sql id=“ev3_023”ALTER TABLE result_publicationsADD CONSTRAINT fk_result_publications_resultFOREIGN KEY (evaluation_result_id)REFERENCES evaluation_results(id);
+ALTER TABLE result_publicationsADD CONSTRAINT fk_result_publications_approved_byFOREIGN KEY (approved_by)REFERENCES users(id);
+---# RESULT_PUBLICATIONS INDEXES```sql id="ev3_024"CREATE INDEX ix_result_publications_statusON result_publications(publication_status);CREATE INDEX ix_result_publications_scheduledON result_publications(scheduled_publication_date);CREATE INDEX ix_result_publications_publication_dateON result_publications(publication_date);CREATE INDEX ix_result_publications_batchON result_publications(publication_batch_id);
+
+PUBLICATION STATUS VALUES
+Application validation shall enforce:
+```text id=“ev3_025”Draft
+Scheduled
+Published
+Unpublished
+Cancelled
+---# PUBLICATION APPROVAL GOVERNANCEWhen:```text id="ev3_026"publication_status = Published
+the platform should ensure:
+text id="ev3_027" publication_date
+is populated.
+
+When approval workflow is enabled:
+```text id=“ev3_028”approved_by
+approved_date
+must be populated before publication.---# CERTIFICATION RELEASE GOVERNANCEField:```text id="ev3_029"publication_batch_id
+supports:
+```text id=“ev3_030”Certification Cohorts
+Scheduled Releases
+Bulk Publication Operations
+---# APPEAL SUPPORTField:```text id="ev3_031"appeal_reference
+provides linkage to future:
+```text id=“ev3_032”Appeals Module
+Case Management
+Review Escalation
+without schema changes.---# REVIEW WORKFLOW```text id="ev3_033"Evaluation Result        ↓Manual Review Queue        ↓Reviewer Assignment        ↓Review Decision        ↓Updated Evaluation Result        ↓Result Publication
+
+VALIDATION CHECKLIST
+✓ Manual Review Workflow Applied
+✓ Multi Reviewer Support Applied
+✓ Escalation Support Applied
+✓ Appeal Foundation Applied
+✓ Publication Scheduling Applied
+✓ Publication Approval Workflow Applied
+✓ Certification Release Governance Applied
+✓ Evaluation Separation Applied
+✓ Audit Compatibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+005_EVALUATION_SCHEMA.SQL – PART 3
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+```text id=“ev3_034”evaluation_rules
+evaluation_rule_versions
+assessment_evaluation_rules
+evaluation_jobs
+evaluation_results
+manual_review_queue
+review_assignments
+result_publications
+Evaluation Module Completion:```text id="ev3_035"100%
+
+NEXT STEP
+Perform:
+text id="ev3_036" Evaluation Schema Master Review v1.0
+Review Scope:
+```text id=“ev3_037”Part 1
+Part 2
+Part 3
+Validation Areas:```text id="ev3_038"Rule Engine IntegrityEvaluation ProcessingResult VersioningManual Review WorkflowPublication WorkflowCertification ReadinessAI ReadinessPerformance & Index Strategy
+After successful review:
+```text id=“ev3_039”Freeze:
+005_EVALUATION_SCHEMA v1.0 FINAL```
+
+END OF DOCUMENT

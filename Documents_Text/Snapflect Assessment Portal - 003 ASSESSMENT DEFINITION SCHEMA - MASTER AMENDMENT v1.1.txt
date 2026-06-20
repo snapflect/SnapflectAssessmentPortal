@@ -1,0 +1,234 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003 ASSESSMENT DEFINITION SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+003 Assessment Definition Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2, Part 2 Amendment v1.1, Part 3, Part 4
+Amendment Type
+Production Readiness Enhancement
+Approval Status
+Approved
+Effective Version
+003 Assessment Definition Schema v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all findings identified during:
+Assessment Definition Schema Master Review v1.0
+The review identified:
+0 Critical Issues0 High Severity Issues0 Medium Severity Issues1 Schema Enhancement4 Governance Enhancements
+This amendment elevates the Assessment Definition module from:
+Production Ready
+to:
+Enterprise Production Ready
+while maintaining full backward compatibility.
+
+2. SCHEMA ENHANCEMENT
+2.1 Question Option Randomization Support
+Reason
+The current architecture supports:
+Question Bank Randomization
+through:
+question_bank_versions.randomize_question_order
+However many assessment engines require:
+Question remains fixedOptions are randomized
+Example:
+Version A
+A. InterfaceB. ClassC. MethodD. Delegate
+Version B
+C. MethodA. InterfaceD. DelegateB. Class
+without modifying the Question itself.
+
+Approved Enhancement
+Table
+question_versions
+New Column
+randomize_option_order TINYINT(1)NOTNULLDEFAULT0
+
+Column Meaning
+0 = Fixed Option Order1 = Randomized Option Order
+
+Runtime Behavior
+When:
+randomize_option_order = 1
+Runtime engine shall randomize display order of options.
+When:
+randomize_option_order = 0
+Options shall be displayed using:
+question_options.display_order
+
+Updated Question Version Definition
+The approved logical structure becomes:
+question_versionsquestion_typedifficulty_levelmarksnegative_marksestimated_duration_minutesis_randomizablerandomize_option_ordermetadata_json
+
+3. GOVERNANCE ENHANCEMENTS
+3.1 Negative Mark Validation Rule
+Rule
+negative_marks <= marks
+must always be true.
+
+Invalid Example
+Marks = 1Negative Marks = 2
+
+Valid Example
+Marks = 2Negative Marks = 0.50
+
+Enforcement
+Application Validation Layer
+
+3.2 Single Choice Validation Rule
+Applies To
+question_type = SingleChoice
+
+Rule
+Exactly one answer must be marked:
+is_correct = 1
+
+Valid Example
+A = CorrectB = IncorrectC = IncorrectD = Incorrect
+
+Invalid Example
+A = CorrectC = Correct
+
+Enforcement
+Application Validation Layer
+
+3.3 Multiple Choice Validation Rule
+Applies To
+question_type = MultipleChoice
+
+Rule
+At least one correct answer must exist.
+
+Valid Example
+A = CorrectC = CorrectD = Correct
+
+Invalid Example
+No Correct Answers
+
+Enforcement
+Application Validation Layer
+
+3.4 Random Selection Validation Rule
+Applies To
+question_bank_versions.selection_strategy=RandomSelection
+
+Rule
+question_count > 0
+must be true.
+
+Additional Rule
+question_count<=available active questions
+must be true.
+
+Invalid Example
+Question Count = 20Available Questions = 10
+
+Enforcement
+Application Validation Layer
+
+4. UPDATED VERSION-SAFE HIERARCHY
+The approved hierarchy remains:
+Technology Version        ↓Assessment Version        ↓Section Version        ↓Question Bank Version        ↓Question Version        ↓Question Options        ↓Question Answers
+
+5. RUNTIME COMPATIBILITY VALIDATION
+This amendment improves compatibility with:
+Assessment Execution EngineQuestion RandomizationDraft Save EngineAssessment ReplayReview ModuleReporting ModuleAnalytics Module
+No breaking changes introduced.
+
+6. AI READINESS VALIDATION
+The approved design continues to support:
+Bloom TaxonomySkill MappingDifficulty MetricsTopic ClassificationAI Generated ContentAI Recommendations
+through:
+question_versions.metadata_json
+No changes required.
+
+7. IMPACT ANALYSIS
+Artifact
+Impact
+PRD v1.2 FINAL
+No Change
+ERD v1.1 FINAL
+No Change
+Database Standards v1.1 FINAL
+No Change
+Data Dictionary v1.1 FINAL
+Clarification Only
+Assessment Definition Part 1
+No Change
+Assessment Definition Part 2
+No Change
+Assessment Definition Part 2 Amendment v1.1
+No Change
+Assessment Definition Part 3
+No Change
+Assessment Definition Part 4
+Updated
+Runtime Module
+Improved
+Review Module
+Improved
+Reporting Module
+Improved
+
+8. FINAL VALIDATION SUMMARY
+Area
+Result
+Normalization
+PASS
+Version Integrity
+PASS
+Runtime Compatibility
+PASS
+Review Compatibility
+PASS
+Reporting Compatibility
+PASS
+AI Readiness
+PASS
+Historical Reconstruction
+PASS
+Publication Workflow
+PASS
+Security Alignment
+PASS
+Governance Alignment
+PASS
+
+9. FINAL APPROVED BASELINE
+The Assessment Definition module now consists of:
+technologiestechnology_versionsassessmentsassessment_versionssectionssection_versionssection_question_banksquestion_banksquestion_bank_versionsquestionsquestion_versionsquestion_optionsquestion_answers
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+003 Assessment Definition SchemaMaster Amendment
+Version:
+v1.1
+Status:
+APPROVEDMERGED INTO BASELINE
+
+FINAL MODULE STATUS
+003_ASSESSMENT_DEFINITION_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Data Dictionary v1.1 FINAL✓Security Schema v1.0 FINAL✓Governance Foundation Schema v1.0 FINAL✓Assessment Definition Schema v1.1 FINAL✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+004_ASSESSMENT_EXECUTION_SCHEMA
+Core Runtime Tables:
+assessment_attemptsassessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questionsquestion_responsesdraft_savestimers
+This module will implement the complete assessment execution lifecycle from:
+Start Assessment        ↓Navigate Sections        ↓Answer Questions        ↓Save Draft        ↓Resume        ↓Submit        ↓Evaluation
+
+END OF DOCUMENT

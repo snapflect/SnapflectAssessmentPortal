@@ -1,0 +1,273 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRD
+PART 2 AMENDMENT v1.1
+ASSESSMENT DEFINITION MANAGEMENT ENHANCEMENTS
+This amendment updates Part 2 of the PRD and becomes part of the authoritative document.
+
+A2.1 ASSESSMENT ASSIGNMENT STRATEGY
+Purpose
+The platform shall support both:
+Self-Service Assessments
+Users browse available assessments and start them voluntarily.
+Flow:
+User→ Browse Assessments→ Start Assessment→ Complete Assessment
+
+Assigned Assessments
+Administrators assign assessments to specific users.
+Flow:
+Administrator→ Assign Assessment→ User Receives Notification→ User Completes Assessment
+
+Assignment Types
+Self-Service
+Assigned
+Mandatory Assigned
+
+Assignment Properties
+Assessment
+Assigned User
+Assigned By
+Assigned Date
+Due Date
+Priority
+Instructions
+Status
+
+Assignment Statuses
+Assigned
+Accepted
+Started
+Completed
+Expired
+Cancelled
+
+Business Rules
+Assigned assessments may have due dates.
+Mandatory assignments cannot be declined.
+Expired assignments cannot be started.
+Assignments must be auditable.
+
+A2.2 ASSESSMENT AVAILABILITY WINDOW
+Purpose
+Control when assessments may be started.
+
+Assessment Properties
+Available From
+Available To
+
+Business Rules
+Users may start assessments only within the availability window.
+Existing in-progress attempts remain valid even if availability expires.
+Availability validation must occur before assessment start.
+Availability dates are version-controlled.
+
+Example
+Assessment:
+.NET Developer Assessment
+Available From:
+01-Aug-2026
+Available To:
+31-Aug-2026
+After 31-Aug-2026:
+New attempts cannot be started.
+
+A2.3 ASSESSMENT INSTRUCTIONS, TERMS & DISCLAIMERS
+Purpose
+Provide legal, compliance and assessment guidance.
+
+Assessment Content
+Instructions
+Terms & Conditions
+Disclaimer
+Privacy Notice
+Assessment Guidelines
+
+Versioning Rules
+Instructions are versioned.
+Terms are versioned.
+Disclaimers are versioned.
+Published versions become immutable.
+
+Snapshot Requirement
+Assessment instructions must be included in assessment snapshots.
+Assessment terms must be included in assessment snapshots.
+Assessment disclaimers must be included in assessment snapshots.
+
+A2.4 SECTION PASSING RULES
+Purpose
+Allow assessments to enforce section-level competency requirements.
+
+Section Properties
+Minimum Pass Percentage
+Mandatory Pass Flag
+Weightage
+
+Assessment Properties
+Overall Pass Rule
+Section Pass Rule
+Combined Pass Rule
+
+Example
+Overall Assessment Pass:
+70%
+AND
+C# Section:
+50%
+ASP.NET Core Section:
+50%
+SQL Section:
+50%
+User fails if any mandatory section fails.
+
+Business Rules
+Section pass rules are configurable.
+Section pass rules are versioned.
+Section pass rules participate in scoring.
+
+A2.5 ASSESSMENT PUBLISH VALIDATION CHECKLIST
+Purpose
+Prevent invalid assessments from being published.
+
+Validation Checklist
+Technology Exists
+Assessment Exists
+At Least One Section Exists
+At Least One Question Bank Exists
+At Least One Question Exists
+Answer Keys Exist
+Duration Configured
+Pass Criteria Configured
+Availability Window Valid
+Assessment Status Valid
+
+Publish Result
+Validation Success
+→ Publish Allowed
+Validation Failure
+→ Publish Blocked
+
+Validation Report
+The system shall display validation errors before publishing.
+Administrators must resolve all blocking issues.
+
+A2.6 QUESTION USAGE IMPACT ANALYSIS
+Purpose
+Prevent accidental impact when modifying reusable questions.
+
+Usage Information
+Technology Count
+Assessment Count
+Section Count
+Question Bank Count
+Attempt Count
+
+Example
+Question:
+“Explain Dependency Injection”
+Used In:
+3 Assessments
+5 Sections
+8 Question Banks
+
+Administrative Actions
+View Usage
+View Dependencies
+View Impact
+Create New Version
+
+Business Rules
+Impact analysis must be displayed before editing published questions.
+Historical attempts must not be affected.
+
+A2.7 QUESTION RANDOMIZATION STRATEGY
+Purpose
+Support configurable random question selection.
+
+Randomization Modes
+None
+Assessment Level
+Section Level
+Question Bank Level
+
+Assessment Level
+Questions are randomly selected from the entire assessment pool.
+
+Section Level
+Questions are randomly selected from section pools.
+
+Question Bank Level
+Questions are randomly selected from specific question banks.
+
+Question Pool Properties
+Total Questions Available
+Questions To Pick
+Randomization Enabled
+Shuffle Options
+
+Example
+Question Bank:
+ASP.NET Core Fundamentals
+Total Questions:
+100
+Questions To Pick:
+20
+Result:
+20 random questions selected per attempt.
+
+Business Rules
+Randomization occurs at assessment start.
+Selected questions become part of snapshot.
+Question selection must be reproducible through snapshot records.
+
+A2.8 UPDATED ASSESSMENT PROPERTIES
+The Assessment entity shall additionally contain:
+Assignment Type
+Available From
+Available To
+Instructions
+Terms & Conditions
+Disclaimer
+Overall Pass Rule
+Section Pass Rule
+Randomization Strategy
+Question Pool Configuration
+
+A2.9 UPDATED SECTION PROPERTIES
+The Section entity shall additionally contain:
+Minimum Pass Percentage
+Mandatory Pass Flag
+Questions To Pick
+Randomization Enabled
+
+A2.10 NEW DATABASE ENTITIES INTRODUCED
+assessment_assignments
+question_usage_analysis
+assessment_publish_validations
+
+A2.11 NEW API DOMAINS INTRODUCED
+/api/assignments
+/api/assessment-validations
+/api/question-usage
+
+A2.12 NEW RBAC PERMISSIONS INTRODUCED
+assignment.create
+assignment.edit
+assignment.cancel
+assignment.view
+assessment.publish
+assessment.validate
+question.usage.view
+
+A2.13 DATA INTEGRITY REQUIREMENTS
+Published assessments shall not be editable directly.
+Published questions shall use versioning.
+Snapshots shall preserve:
+Questions
+Answers
+Instructions
+Terms
+Disclaimers
+Pass Rules
+Randomization Results
+Historical attempts shall remain immutable.
+
+END OF PART 2 AMENDMENT v1.1

@@ -1,0 +1,159 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL
+PART 3 – RESPONSES & DRAFT MANAGEMENT
+Version 1.0
+
+MODULE
+Assessment Execution
+
+TABLES
+question_responsesdraft_saves
+
+DEPENDS ON
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 1004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 2assessment_attemptsassessment_attempt_questions
+
+TARGET PLATFORM
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+PURPOSE
+This module completes the Assessment Execution architecture.
+It manages:
+Candidate ResponsesDraft SaveResume RecoveryAuto SubmissionEvaluation SupportManual Review Support
+
+QUESTION_RESPONSES
+Purpose
+Stores the latest candidate response for a runtime question.
+Response history is intentionally not stored.
+Only the most recent response is maintained.
+Response changes are tracked through:
+assessment_attempt_questions.response_count
+
+CREATETABLE question_responses(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    attempt_question_id BIGINT UNSIGNED NOTNULL,    response_value LONGTEXT NULL,    response_status VARCHAR(50)NOTNULLDEFAULT'Draft',    response_date DATETIME(3) NULL,    evaluated_date DATETIME(3) NULL,    requires_manual_review TINYINT(1)NOTNULLDEFAULT0,    is_final_answer TINYINT(1)NOTNULLDEFAULT0,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_date DATETIME(3)NULL,PRIMARYKEY (id),CONSTRAINT ux_question_responses_uuidUNIQUE (uuid),CONSTRAINT ux_question_responses_attempt_questionUNIQUE (attempt_question_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTION_RESPONSES FOREIGN KEYS
+ALTERTABLE question_responsesADDCONSTRAINT fk_question_responses_attempt_questionFOREIGNKEY (attempt_question_id)REFERENCES assessment_attempt_questions(id);
+
+QUESTION_RESPONSES INDEXES
+CREATEINDEX ix_question_responses_attempt_questionON question_responses(attempt_question_id);CREATEINDEX ix_question_responses_statusON question_responses(response_status);CREATEINDEX ix_question_responses_manual_reviewON question_responses(requires_manual_review);CREATEINDEX ix_question_responses_evaluated_dateON question_responses(evaluated_date);
+
+RESPONSE STATUS VALUES
+Application validation shall enforce:
+DraftFinalAutoSubmitted
+
+RESPONSE STORAGE STANDARD
+Single Choice
+A
+
+Multiple Choice
+A,C,D
+
+Text
+Dependency Injection
+
+Number
+42
+
+Future Compatible
+EssayCodingFile Upload References
+without schema changes.
+
+MANUAL REVIEW STRATEGY
+Field:
+requires_manual_review
+supports:
+Essay QuestionsCoding QuestionsAI EscalationHuman Validation
+
+DRAFT_SAVES
+Purpose
+Stores the latest recoverable assessment draft.
+Supports:
+Auto SaveManual SaveResumeRecoveryFuture Mobile Offline Sync
+
+Storage Strategy
+One active draft per assessment attempt.
+New saves overwrite previous snapshots.
+
+CREATETABLE draft_saves(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    attempt_id BIGINT UNSIGNED NOTNULL,    draft_version INTNOTNULLDEFAULT1,    client_save_guid CHAR(36) NULL,    payload_checksum VARCHAR(128) NULL,    last_saved_question_id BIGINT UNSIGNED NULL,    save_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    draft_payload_json JSON NOTNULL,PRIMARYKEY (id),CONSTRAINT ux_draft_saves_uuidUNIQUE (uuid),CONSTRAINT ux_draft_saves_attemptUNIQUE (attempt_id),CONSTRAINT ux_draft_saves_client_guidUNIQUE (client_save_guid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+DRAFT_SAVES FOREIGN KEYS
+ALTERTABLE draft_savesADDCONSTRAINT fk_draft_saves_attemptFOREIGNKEY (attempt_id)REFERENCES assessment_attempts(id);ALTERTABLE draft_savesADDCONSTRAINT fk_draft_saves_last_questionFOREIGNKEY (last_saved_question_id)REFERENCES assessment_attempt_questions(id);
+
+DRAFT_SAVES INDEXES
+CREATEINDEX ix_draft_saves_attemptON draft_saves(attempt_id);CREATEINDEX ix_draft_saves_save_dateON draft_saves(save_date);CREATEINDEX ix_draft_saves_last_questionON draft_saves(last_saved_question_id);CREATEINDEX ix_draft_saves_checksumON draft_saves(payload_checksum);
+
+DRAFT VERSION STRATEGY
+Example:
+Draft Version 1Draft Version 2Draft Version 3
+Only one row exists.
+Version increments with each save.
+
+CHECKSUM STRATEGY
+Field:
+payload_checksum
+stores:
+SHA256 Hash
+of the payload.
+Purpose:
+Detect Duplicate SavesReduce Unnecessary WritesImprove Performance
+
+CLIENT SAVE GUID STRATEGY
+Field:
+client_save_guid
+supports future:
+Mobile Offline ModeConflict ResolutionSynchronization
+
+RESUME STRATEGY
+Resume workflow:
+Assessment Attempt        ↓Draft Save        ↓last_saved_question_id        ↓Assessment Attempt Question
+Allows immediate restoration of candidate position.
+
+DATA RETENTION GOVERNANCE
+Draft records should be automatically removed:
+After Successful SubmissionORAfter Attempt Expiration
+
+Enforcement
+Application Services Layer
+No database trigger required.
+
+EVALUATION SUPPORT
+Response records support:
+Immediate EvaluationBatch EvaluationManual ReviewAI Evaluation
+through:
+response_statusrequires_manual_reviewevaluated_date
+
+VALIDATION CHECKLIST
+✓ Latest Response Strategy Applied
+✓ Manual Review Support Applied
+✓ Draft Save Strategy Applied
+✓ Resume Recovery Applied
+✓ Auto Save Support Applied
+✓ Offline Sync Readiness Applied
+✓ Checksum Optimization Applied
+✓ Evaluation Support Applied
+✓ AI Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 3
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+assessment_attemptsattempt_timersassessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questionsquestion_responsesdraft_saves
+Execution Module Completion:
+100%
+
+NEXT STEP
+Perform:
+Assessment Execution Schema Master Review v1.0
+Review Scope:
+Part 1Part 2Part 3
+Validation Areas:
+Runtime Snapshot IntegrityResume LogicEvaluation ArchitectureDraft RecoveryAnalytics ReadinessReporting CompatibilityAI ReadinessPerformance & Index Strategy
+After successful review:
+Freeze:004_ASSESSMENT_EXECUTION_SCHEMA v1.1 FINAL
+
+END OF DOCUMENT

@@ -1,0 +1,182 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+007 NOTIFICATION SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+007 Notification Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Notification
+Depends On
+Security, Assessment, Evaluation, Certification
+Approved For
+Architecture Review
+
+1. PURPOSE
+The Notification module provides centralized communication management across the platform.
+Supports:
+Email NotificationsSMS NotificationsPush NotificationsIn-App NotificationsSystem AlertsReminder ServicesCertificate NotificationsAssessment Notifications
+
+2. DESIGN PRINCIPLES
+Channel Agnostic
+The platform should support multiple channels without schema redesign.
+EmailSMSPushInAppWebhook
+
+Template Driven
+All outbound notifications should originate from templates.
+Benefits:
+ConsistencyLocalizationBrandingAuditability
+
+Asynchronous Processing
+Notifications should be queued.
+Never sent directly from business transactions.
+
+Delivery Traceability
+Every notification attempt must be auditable.
+
+3. NOTIFICATION LIFECYCLE
+Business Event        ↓Notification Template        ↓Notification Queue        ↓Channel Provider        ↓Delivery Result        ↓Audit Logs
+
+4. TABLES IN SCOPE
+Template Management
+notification_templatesnotification_template_versions
+
+Channel Management
+notification_channels
+
+Processing
+notification_queue
+
+Delivery Tracking
+notification_delivery_logs
+
+User Preferences
+notification_preferences
+
+Subscription Management
+notification_subscriptions
+
+5. NOTIFICATION_TEMPLATES
+Purpose
+Logical notification definitions.
+Examples:
+AssessmentAssignedAssessmentReminderAssessmentCompletedCertificateIssuedCertificateRevokedPasswordReset
+
+Versioning
+Templates must support versioning.
+
+Core Attributes
+template_codetemplate_namenotification_typestatus
+
+6. NOTIFICATION_TEMPLATE_VERSIONS
+Purpose
+Stores immutable template content.
+Supports:
+Email SubjectEmail BodySMS ContentPush ContentLocalization
+
+Core Attributes
+template_idversion_numberchannel_typesubjectcontent
+
+7. NOTIFICATION_CHANNELS
+Purpose
+Defines available delivery channels.
+Examples:
+EmailSMSPushInAppWebhook
+
+Core Attributes
+channel_codechannel_nameprovider_namestatus
+
+8. NOTIFICATION_QUEUE
+Purpose
+Stores pending notifications.
+Supports:
+Immediate DeliveryScheduled DeliveryRetry ProcessingBulk Delivery
+
+Core Attributes
+template_version_idrecipient_user_idchannel_idscheduled_datestatus
+
+Status Values
+PendingQueuedProcessingSentFailedCancelled
+
+9. NOTIFICATION_DELIVERY_LOGS
+Purpose
+Stores delivery attempts.
+Supports:
+Provider ResponseFailure TrackingRetry AnalysisAudit Reporting
+
+Core Attributes
+notification_queue_iddelivery_statusprovider_referenceattempt_numberdelivery_date
+
+10. NOTIFICATION_PREFERENCES
+Purpose
+Stores user notification preferences.
+Examples:
+Email EnabledSMS DisabledPush EnabledMarketing Disabled
+
+Core Attributes
+user_idchannel_idis_enabled
+
+11. NOTIFICATION_SUBSCRIPTIONS
+Purpose
+Stores event subscriptions.
+Supports:
+Assessment AlertsCertificate AlertsSystem AlertsAdministrative Alerts
+
+Core Attributes
+user_idevent_codeis_subscribed
+
+12. CHANNEL TYPES
+Application-controlled values:
+EmailSMSPushInAppWebhook
+
+13. DELIVERY PROVIDER READINESS
+Future support:
+SendGridAWS SESTwilioFirebase FCMWhatsApp Providers
+through provider metadata.
+
+14. LOCALIZATION READINESS
+Template versions should support:
+LanguageLocaleRegional Content
+without schema redesign.
+
+15. AUDIT INTEGRATION
+All notification operations should generate:
+audit_logsactivity_logs
+events.
+Examples:
+Notification SentNotification FailedNotification RetriedPreference Changed
+
+16. VALIDATION CHECKLIST
+✓ Template Versioning Defined
+✓ Multi-Channel Support Defined
+✓ Queue Architecture Defined
+✓ Delivery Tracking Defined
+✓ User Preferences Defined
+✓ Subscription Management Defined
+✓ Localization Readiness Defined
+✓ Provider Abstraction Defined
+
+APPROVAL STATUS
+Document:
+007 Notification Schema Design
+Version:
+1.0
+Status:
+APPROVED FOR ARCHITECTURE REVIEW
+
+NEXT STEP
+Perform:
+Notification Architecture Review v1.0
+before generating:
+007_NOTIFICATION_SCHEMA.SQL – PART 1
+Review Scope:
+notification_templatesnotification_template_versionsnotification_channels
+These tables form the foundation of all platform communications and should be validated before DDL generation.
+
+END OF DOCUMENT

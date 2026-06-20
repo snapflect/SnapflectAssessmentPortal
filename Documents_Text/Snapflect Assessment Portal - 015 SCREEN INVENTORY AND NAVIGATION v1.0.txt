@@ -1,0 +1,279 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+015_SCREEN_INVENTORY_AND_NAVIGATION
+Version 1.0
+Status: APPROVED BASELINE
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Screen Inventory and Navigation
+Version
+1.0
+Status
+FINAL
+Based On
+PRD v1.2 FINAL
+Based On
+ERD v1.1 FINAL
+Based On
+013_PLATFORM_SOLUTION_ARCHITECTURE v1.0
+Based On
+014_PLATFORM_API_ARCHITECTURE v1.0
+Applies To
+UI Development
+Applies To
+Laravel Blade Development
+Applies To
+Cursor AI Development
+
+1. PURPOSE
+This document defines:
+All Platform ScreensNavigation StructureDashboard ArchitectureUser JourneysMenu StructureScreen Naming StandardsScreen Ownership
+This document becomes the authoritative UI blueprint for Snapflect.
+
+2. USER PERSONAS
+The platform supports the following personas:
+Platform AdministratorOrganization AdministratorAssessment ManagerQuestion AuthorQuestion ReviewerEvaluatorCandidateBilling AdministratorSupport AdministratorAuditor
+
+3. NAVIGATION MODEL
+Approved Navigation Structure:
+Top Navigation      +Left Navigation Menu      +Role Based Visibility
+
+4. PRIMARY MENU STRUCTURE
+DashboardSecurityGovernanceAssessment ManagementQuestion BanksAssignmentsAssessment ExecutionEvaluationCertificationNotificationsReporting & AnalyticsAI ProctoringBillingAuditPlatform OperationsProfile
+
+5. DASHBOARD ARCHITECTURE
+5.1 Platform Administrator Dashboard
+Displays:
+OrganizationsUsersAssessmentsCertificatesRevenueNotificationsSystem HealthPlatform KPIs
+
+5.2 Organization Administrator Dashboard
+Displays:
+UsersAssessmentsCandidatesResultsCertificatesUsage Metrics
+
+5.3 Assessment Manager Dashboard
+Displays:
+Draft AssessmentsPublished AssessmentsAssignmentsPending EvaluationsRecent Results
+
+5.4 Candidate Dashboard
+Displays:
+Assigned AssessmentsIn Progress AssessmentsCompleted AssessmentsCertificatesNotifications
+
+5.5 Billing Dashboard
+Displays:
+Subscription StatusUsageInvoicesPaymentsRevenue Metrics
+
+6. SECURITY MODULE SCREENS
+Authentication
+LoginForgotPasswordResetPasswordChangePassword
+
+User Management
+UserListUserCreateUserEditUserDetailsUserRoleAssignment
+
+Role Management
+RoleListRoleCreateRoleEditRolePermissions
+
+Permission Management
+PermissionListPermissionDetails
+
+7. GOVERNANCE MODULE SCREENS
+SettingsDashboardSystemSettingsMasterDataManagementTemplateManagementApprovalWorkflowListApprovalWorkflowDetailsConfigurationHistory
+
+8. TECHNOLOGY MANAGEMENT SCREENS
+TechnologyListTechnologyCreateTechnologyEditTechnologyDetailsTechnologyVersionHistory
+
+9. ASSESSMENT MANAGEMENT SCREENS
+AssessmentListAssessmentCreateAssessmentEditAssessmentDetailsAssessmentVersionHistoryAssessmentPublishAssessmentCloneAssessmentPreview
+
+10. SECTION MANAGEMENT SCREENS
+SectionListSectionCreateSectionEditSectionDetailsSectionVersionHistory
+
+11. QUESTION BANK SCREENS
+QuestionBankListQuestionBankCreateQuestionBankEditQuestionBankDetailsQuestionBankVersionHistoryQuestionBankApproval
+
+12. QUESTION MANAGEMENT SCREENS
+QuestionListQuestionCreateQuestionEditQuestionDetailsQuestionVersionHistoryQuestionApprovalQuestionImportQuestionExport
+
+13. ASSIGNMENT MANAGEMENT SCREENS
+AssignmentListAssignmentCreateAssignmentEditAssignmentDetailsAssignmentCandidateMappingAssignmentHistory
+
+14. ASSESSMENT EXECUTION SCREENS
+Candidate Screens
+AssessmentLaunchAssessmentInstructionsAssessmentAttemptQuestionNavigationAssessmentReviewAssessmentSubmitDraftRecovery
+
+Administrative Screens
+AttemptListAttemptDetailsAttemptHistoryAttemptSnapshots
+
+15. EVALUATION MODULE SCREENS
+EvaluationQueueEvaluationDetailsRubricScoringManualReviewResultReviewResultPublishResultHistory
+
+16. CERTIFICATION MODULE SCREENS
+CertificateListCertificateDetailsCertificateVerificationCertificateRevocationCertificateTemplateListCertificateTemplateEditCertificateHistory
+
+17. NOTIFICATION MODULE SCREENS
+NotificationDashboardNotificationTemplatesNotificationCreateNotificationSubscriptionsNotificationDeliveryLogsNotificationHistory
+
+18. REPORTING & ANALYTICS SCREENS
+Executive Reporting
+ExecutiveDashboardPlatformAnalyticsOrganizationAnalytics
+
+Assessment Reporting
+AssessmentAnalyticsAssessmentPerformanceAssessmentCompletion
+
+Candidate Reporting
+CandidateAnalyticsCandidatePerformanceCandidateProgress
+
+Certification Reporting
+CertificateAnalyticsCertificateVerificationAnalytics
+
+Billing Reporting
+BillingAnalyticsRevenueDashboard
+
+19. AI PROCTORING SCREENS
+ProctoringDashboardProctoringSessionListProctoringSessionDetailsViolationReviewEvidenceViewerAIDetectionReviewProctoringReports
+
+20. BILLING MODULE SCREENS
+Subscription Management
+SubscriptionPlansSubscriptionPlanDetailsCustomerSubscriptionsSubscriptionUsage
+
+Invoicing
+InvoiceListInvoiceDetailsInvoicePayments
+
+Payments
+PaymentListPaymentDetailsPaymentTransactionsPaymentReconciliation
+
+21. AUDIT MODULE SCREENS
+AuditDashboardAuditEventsAuditEventDetailsIntegrationEventsImportHistoryExportHistory
+
+22. PLATFORM OPERATIONS SCREENS
+ScheduledTasksTaskExecutionHistoryApplicationHealthSystemAnnouncementsSystemMonitoring
+
+23. PROFILE SCREENS
+MyProfileEditProfileChangePasswordMyNotificationsMyCertificates
+
+24. SCREEN STANDARDS
+Every management module should provide:
+ListCreateEditView DetailsHistory
+where applicable.
+
+25. LIST SCREEN STANDARDS
+Every list screen should support:
+SearchFilteringSortingPaginationExportRole Based Actions
+
+26. BREADCRUMB STANDARD
+Example:
+Dashboard  >Assessment Management  >Assessments  >Assessment Details
+All screens must support breadcrumbs.
+
+27. NAVIGATION SECURITY
+Menu visibility must be controlled through:
+RBACRolesPermissions
+Unauthorized screens must never be visible.
+
+28. RESPONSIVE DESIGN STANDARD
+Supported Devices:
+DesktopLaptopTablet
+Mobile support:
+Candidate Assessment ScreensDashboard ScreensCertificate Verification
+
+29. CURSOR AI UI GOVERNANCE
+Cursor SHALL:
+Generate ScreensGenerate FormsGenerate TablesGenerate LayoutsGenerate Navigation Menus
+
+Cursor SHALL NOT:
+Invent New ScreensInvent New WorkflowsInvent New PermissionsInvent New Navigation Paths
+All screens must originate from:
+PRDERDApproved Architecture Documents
+
+30. ESTIMATED SCREEN COUNT
+Module
+Approximate Screens
+Security
+12
+Governance
+7
+Technology
+5
+Assessment Management
+8
+Section Management
+5
+Question Banks
+6
+Question Management
+8
+Assignments
+6
+Assessment Execution
+10
+Evaluation
+7
+Certification
+7
+Notifications
+6
+Reporting & Analytics
+12
+AI Proctoring
+7
+Billing
+8
+Audit
+6
+Operations
+5
+Profile
+5
+
+Estimated Total:
+120+ Screens
+
+31. UI DEVELOPMENT PHASES
+Phase 1
+AuthenticationRBACUsersRoles
+
+Phase 2
+TechnologyAssessmentsSections
+
+Phase 3
+Question BanksQuestions
+
+Phase 4
+AssignmentsAssessment Execution
+
+Phase 5
+EvaluationResults
+
+Phase 6
+Certification
+
+Phase 7
+NotificationsReporting
+
+Phase 8
+AuditOperations
+
+Phase 9
+AI ProctoringBilling
+
+32. PLATFORM UI STATUS
+Aligned With:
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓Schemas 001–012✓
+
+APPROVAL STATUS
+Document:
+015_SCREEN_INVENTORY_AND_NAVIGATION
+Version:
+v1.0
+Status:
+APPROVEDFROZEN
+
+NEXT STEP
+Proceed to:
+016_RBAC_MATRIX v1.0
+This document will define:
+RolesPermissionsModule AccessScreen AccessAction PermissionsAPI Authorization Matrix
+and becomes the authoritative authorization blueprint for the entire platform.
+
+END OF DOCUMENT

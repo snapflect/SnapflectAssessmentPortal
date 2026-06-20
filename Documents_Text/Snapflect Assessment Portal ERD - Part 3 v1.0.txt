@@ -1,0 +1,431 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+ENTITY RELATIONSHIP DIAGRAM (ERD)
+PART 3 – RUNTIME LAYER & SNAPSHOT ARCHITECTURE
+VERSION 1.0
+
+1. DOMAIN OVERVIEW
+The Runtime Layer manages:
+Assessment Assignments
+Assessment Attempts
+Assessment Execution
+Snapshots
+Question Responses
+Scoring
+Results
+Reviews
+Ratings
+Acknowledgements
+Randomization Tracking
+Assignment Tracking
+
+2. RUNTIME ARCHITECTURE
+Assessment Definition Layer
+Technology→ Assessment→ Section→ Question Bank→ Question
+Execution Layer
+User    |    +---- Assessment Assignment    |    +---- Assessment Attempt              |              +---- Snapshot              |              +---- Attempt Questions              |              +---- Attempt Answers              |              +---- Assessment Result              |              +---- Review              |              +---- Rating              |              +---- Acknowledgement
+
+3. ENTITY RELATIONSHIP DIAGRAM
+users   |   | 1 : M   |assessment_assignmentsusers   |   | 1 : M   |assessment_attempts   |   | 1 : 1   |attempt_snapshotsassessment_attempts   |   | 1 : M   |attempt_questionsattempt_questions   |   | 1 : M   |attempt_answersassessment_attempts   |   | 1 : 1   |assessment_resultsassessment_attempts   |   | 1 : M   |assessment_reviewsassessment_reviews   |   | 1 : M   |assessment_review_commentsassessment_reviews   |   | 1 : M   |assessment_ratingsassessment_reviews   |   | 1 : M   |review_acknowledgementsassessment_attempts   |   | 1 : M   |randomization_audit_logsassessment_assignments   |   | 1 : M   |assignment_activity_logs
+
+4. ASSESSMENT_ASSIGNMENTS
+Purpose
+Supports administrator-driven assessment assignment.
+
+Table
+assessment_assignments
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+assessment_id → assessments.id
+assigned_by → users.id
+
+Columns
+id
+user_id
+assessment_id
+assigned_by
+assignment_type
+priority
+instructions
+assigned_date
+due_date
+accepted_date
+completed_date
+status
+created_date
+modified_date
+is_active
+is_deleted
+
+Statuses
+Assigned
+Accepted
+Started
+Completed
+Expired
+Cancelled
+
+Relationships
+1 User
+→ Many Assignments
+1 Assessment
+→ Many Assignments
+
+5. ASSESSMENT_ATTEMPTS
+Purpose
+Represents a user attempt.
+
+Table
+assessment_attempts
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+assessment_id → assessments.id
+assignment_id → assessment_assignments.id (nullable)
+
+Columns
+id
+user_id
+assessment_id
+assignment_id
+attempt_number
+status
+started_date
+submitted_date
+completed_date
+duration_seconds
+progress_percentage
+randomization_seed
+failure_reason
+snapshot_version
+created_date
+modified_date
+
+Statuses
+Draft
+In Progress
+Submitted
+Auto Submitted
+Timed Out
+Scored
+Reviewed
+Completed
+
+Relationships
+1 User
+→ Many Attempts
+1 Attempt
+→ 1 Snapshot
+1 Attempt
+→ Many Attempt Questions
+1 Attempt
+→ 1 Result
+
+6. ATTEMPT_SNAPSHOTS
+Purpose
+Stores immutable assessment snapshots.
+
+Snapshot Strategy
+Hybrid Snapshot Architecture
+
+Table
+attempt_snapshots
+
+Primary Key
+id
+
+Foreign Keys
+attempt_id → assessment_attempts.id
+
+Columns
+id
+attempt_id
+snapshot_version
+assessment_version
+randomization_seed
+snapshot_json
+created_date
+
+Stored Content
+Assessment
+Sections
+Question Banks
+Questions
+Options
+Answers
+Instructions
+Terms
+Disclaimers
+Pass Rules
+Section Rules
+Selected Questions
+Randomization Rules
+Scoring Rules
+Version Information
+
+Rules
+Immutable
+Auditable
+Reproducible
+
+7. ATTEMPT_QUESTIONS
+Purpose
+Stores selected questions for an attempt.
+
+Table
+attempt_questions
+
+Primary Key
+id
+
+Foreign Keys
+attempt_id
+question_id
+section_id
+
+Columns
+id
+attempt_id
+question_id
+section_id
+display_order
+marks
+negative_marks
+question_status
+time_spent_seconds
+created_date
+
+Question Status
+Not Started
+Answered
+Skipped
+Bookmarked
+Finalized
+
+8. ATTEMPT_ANSWERS
+Purpose
+Stores user responses.
+
+Table
+attempt_answers
+
+Primary Key
+id
+
+Foreign Keys
+attempt_question_id
+
+Columns
+id
+attempt_question_id
+answer_value
+answer_json
+is_correct
+marks_awarded
+answered_date
+created_date
+
+Notes
+Supports:
+MCQ
+Multiple Choice
+Descriptive
+Fill In Blank
+Scenario Based
+Future Question Types
+
+9. ASSESSMENT_RESULTS
+Purpose
+Stores final scoring results.
+
+Table
+assessment_results
+
+Primary Key
+id
+
+Foreign Keys
+attempt_id
+
+Columns
+id
+attempt_id
+total_questions
+answered_questions
+skipped_questions
+correct_answers
+incorrect_answers
+score
+percentage
+section_pass_status
+overall_pass_status
+performance_level
+failure_reason
+acknowledgement_status
+generated_date
+
+Performance Levels
+Beginner
+Intermediate
+Advanced
+Expert
+
+10. ASSESSMENT_REVIEWS
+Purpose
+Stores review records.
+
+Table
+assessment_reviews
+
+Primary Key
+id
+
+Foreign Keys
+attempt_id
+reviewed_by → users.id
+
+Columns
+id
+attempt_id
+reviewed_by
+review_status
+review_date
+review_comments
+created_date
+
+Statuses
+Pending
+Reviewed
+Approved
+Rejected
+
+11. ASSESSMENT_REVIEW_COMMENTS
+Purpose
+Stores structured review feedback.
+
+Table
+assessment_review_comments
+
+Columns
+id
+review_id
+comment_type
+comment_text
+visibility
+created_date
+
+Visibility
+User Visible
+Internal Only
+
+12. ASSESSMENT_RATINGS
+Purpose
+Stores reviewer ratings.
+
+Table
+assessment_ratings
+
+Columns
+id
+review_id
+rating
+rating_notes
+created_date
+
+Rating Scale
+1–5
+
+13. REVIEW_ACKNOWLEDGEMENTS
+Purpose
+Tracks acknowledgement of feedback.
+
+Table
+review_acknowledgements
+
+Foreign Keys
+review_id
+user_id
+
+Columns
+id
+review_id
+user_id
+status
+acknowledgement_notes
+acknowledged_date
+created_date
+
+Statuses
+Pending
+Acknowledged
+Expired
+
+14. RANDOMIZATION_AUDIT_LOGS
+Purpose
+Audit question selection.
+
+Table
+randomization_audit_logs
+
+Columns
+id
+attempt_id
+randomization_strategy
+randomization_seed
+selected_question_count
+execution_date
+created_date
+
+15. ASSIGNMENT_ACTIVITY_LOGS
+Purpose
+Track assignment lifecycle.
+
+Table
+assignment_activity_logs
+
+Columns
+id
+assignment_id
+activity_type
+activity_details
+performed_by
+activity_date
+created_date
+
+Activity Types
+Assigned
+Accepted
+Started
+Completed
+Expired
+Cancelled
+
+16. DATA INTEGRITY RULES
+Assessment attempts must never reference mutable scoring logic.
+Snapshots are authoritative.
+Results must be reproducible.
+Randomized question sets must remain fixed.
+Review acknowledgements must be auditable.
+Historical attempts must remain immutable.
+
+17. PART 3 REVIEW CHECKLIST
+✓ Assignment Architecture
+✓ Attempt Architecture
+✓ Hybrid Snapshot Architecture
+✓ Randomization Tracking
+✓ Question Responses
+✓ Scoring Support
+✓ Review Workflow
+✓ Ratings
+✓ Acknowledgements
+✓ Auditability
+✓ Historical Accuracy
+✓ Snapshot Integrity
+
+END OF ERD PART 3VERSION 1.0

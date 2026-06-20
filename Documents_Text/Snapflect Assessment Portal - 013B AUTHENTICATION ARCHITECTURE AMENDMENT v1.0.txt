@@ -1,0 +1,245 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+013B_AUTHENTICATION_ARCHITECTURE_AMENDMENT
+Version 1.0
+Status: APPROVED AMENDMENT
+Authentication Baseline Correction
+Supersedes Authentication References in 013, 017A, 018, 020, 021, 022
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Authentication Architecture Amendment
+Version
+1.0
+Status
+APPROVED
+Amendment Type
+Architecture Correction
+Priority
+Critical
+Effective Date
+Immediate
+
+1. PURPOSE
+This amendment resolves the authentication architecture inconsistency identified during Cursor readiness validation.
+Conflicting references existed across the architecture package regarding:
+```text id=“a1m4e2”JWT Authentication
+Custom Refresh Tokens
+Laravel Sanctum
+Session Authentication
+This amendment establishes a single approved authentication strategy for MVP implementation.---# 2. CONFLICT IDENTIFIEDVarious documents referenced:### Option A```text id="b2n5f7"JWTAccess TokenRefresh TokenCustom Token Lifecycle
+
+Option B
+```text id=“c3p6g8”Laravel Sanctum
+Personal Access Tokens
+Laravel Native Security
+---This ambiguity creates implementation risk.---# 3. FINAL AUTHENTICATION DECISIONThe official Snapflect MVP authentication architecture shall be:```text id="d4q7h9"Laravel AuthenticationLaravel SanctumRole Based AuthorizationPolicy Based AuthorizationSession-Based Web Authentication
+
+Custom JWT implementation is removed from MVP scope.
+
+4. DECISION RATIONALE
+Laravel Alignment
+Sanctum provides:
+```text id=“e5r8i0”Official Laravel Support
+Long-Term Maintainability
+Security Updates
+Native Integration
+---## Hostinger AlignmentShared hosting benefits from:```text id="f6s9j1"Simpler ConfigurationLower ComplexityNo JWT Key ManagementNo Token Rotation Infrastructure
+
+Cursor AI Alignment
+Cursor generates more reliable code when using:
+```text id=“g7t0k2”Laravel Native Authentication
+Sanctum Middleware
+Laravel Policies
+than custom JWT frameworks.---# 5. APPROVED AUTHENTICATION MODEL## Browser Authentication```text id="h8u1l3"User LoginLaravel SessionSanctum AuthenticationRemember Me Support
+
+Authorization
+```text id=“i9v2m4”Roles
+Permissions
+Policies
+RBAC Matrix
+Source:```text id="j0w3n5"016_RBAC_MATRIX
+
+6. USER LOGIN FLOW
+```text id=“k1x4o6”Login Page↓
+Credential Validation↓
+User Active Check↓
+Organization Active Check↓
+Role Validation↓
+Create Session↓
+Redirect Dashboard
+---# 7. PASSWORD POLICYMinimum Requirements```text id="l2y5p7"Minimum Length: 12Uppercase RequiredLowercase RequiredNumber RequiredSpecial Character Required
+
+Password Storage
+text id="m3z6q8" bcrypt
+or
+text id="n4a7r9" Argon2id
+Laravel default preferred.
+
+8. MULTI-FACTOR AUTHENTICATION
+MVP Status
+```text id=“o5b8s0”Optional
+Not Mandatory
+---Future Support```text id="p6c9t1"Email OTPAuthenticator AppSMS OTP
+
+9. SESSION MANAGEMENT
+Approved
+text id="q7d0u2" Database Sessions
+
+Session Storage
+text id="r8e1v3" sessions table
+
+Tracked Fields
+```text id=“s9f2w4”User
+IP Address
+Browser
+Login Time
+Last Activity
+---# 10. REMEMBER ME SUPPORTApproved```text id="t0g3x5"Remember Me Cookie
+Laravel standard implementation.
+
+11. PASSWORD RESET FLOW
+Approved
+```text id=“u1h4y6”Forgot Password
+Email Link
+Secure Token
+Password Reset
+---Table```text id="v2i5z7"password_reset_tokens
+
+12. ACCOUNT LOCKOUT POLICY
+Threshold
+text id="w3j6a8" 5 Failed Attempts
+
+Lock Duration
+text id="x4k7b9" 30 Minutes
+
+Audit Required
+text id="y5l8c0" Yes
+
+13. AUTHORIZATION ARCHITECTURE
+Authentication
+text id="z6m9d1" Who Are You?
+Handled by:
+```text id=“a7n0e2”Laravel Auth
+Sanctum
+---Authorization```text id="b8o1f3"What Can You Do?
+Handled by:
+```text id=“c9p2g4”Policies
+Permissions
+Roles
+---# 14. POLICY ENFORCEMENTMandatory```text id="d0q3h5"AssessmentPolicyUserPolicyRolePolicyOrganizationPolicyResultPolicyCertificatePolicy
+
+Controllers must use:
+php id="e1r4i6" $this->authorize(...)
+
+15. AUDIT REQUIREMENTS
+Mandatory Events
+```text id=“f2s5j7”Login Success
+Login Failure
+Logout
+Password Reset
+Password Change
+Account Locked
+Role Change
+Permission Change
+---Source```text id="g3t6k8"009_INTEGRATION_AUDIT_SCHEMA
+
+16. API AUTHENTICATION STRATEGY
+Internal Blade Pages
+text id="h4u7l9" Session Authentication
+
+REST APIs
+text id="i5v8m0" Sanctum Protected
+
+Middleware
+php id="j6w9n1" auth:sanctum
+
+17. REJECTED FOR MVP
+The following are removed:
+```text id=“k7x0o2”Custom JWT
+Custom Refresh Tokens
+Token Rotation Framework
+External Identity Providers
+---Future Consideration```text id="l8y1p3"Azure ADGoogle OAuthSSOSAML
+
+Not part of MVP.
+
+18. DOCUMENT AMENDMENTS
+017A_SECURITY_OPENAPI
+Replace:
+text id="m9z2q4" JWT Authentication
+With:
+text id="n0a3r5" Sanctum Authentication
+
+018_API_IMPLEMENTATION_MASTER_PLAN
+Replace:
+text id="o1b4s6" JWT Strategy
+With:
+text id="p2c5t7" Laravel Sanctum Strategy
+
+020_DEVELOPMENT_SPRINT_MASTER_PLAN
+Replace:
+text id="q3d6u8" JWT Login
+With:
+text id="r4e7v9" Sanctum Login
+
+021_CURSOR_AI_DEVELOPMENT_PLAYBOOK
+Replace:
+text id="s5f8w0" JWT Authentication
+With:
+text id="t6g9x1" Laravel Sanctum
+
+022_MVP_EXECUTION_PACKAGE
+Replace:
+text id="u7h0y2" Refresh Token Infrastructure
+With:
+text id="v8i1z3" Sanctum Session Management
+
+19. CURSOR GENERATION RULE
+Cursor shall generate:
+```text id=“w9j2a4”Sanctum Installation
+Auth Controllers
+Login Logic
+Logout Logic
+Password Reset
+Session Tracking
+Policies
+---Cursor shall NOT generate:```text id="x0k3b5"JWT LibrariesRefresh Token SystemsCustom Token RotationJWT Middleware
+
+20. CURSOR READINESS IMPACT
+Resolved
+text id="y1l4c6" Authentication Architecture Conflict
+Status
+text id="z2m5d7" RESOLVED ✓
+
+21. FINAL AUTHENTICATION BASELINE
+Official MVP Authentication Stack
+```text id=“a3n6e8”Laravel Auth
+Laravel Sanctum
+Database Sessions
+RBAC
+Policies
+Audit Logging
+---# 22. IMPLEMENTATION READINESS STATUSResolved Issues```text id="b4o7f9"Organization Hierarchy Gap✓Frontend Conflict✓Authentication Conflict✓
+
+Remaining Non-Blocking Items
+```text id=“c5p8g0”017L Billing OpenAPI
+023 Review Framework
+---# APPROVAL STATUSDocument```text id="d6q9h1"013B_AUTHENTICATION_ARCHITECTURE_AMENDMENT
+Version
+text id="e7r0i2" v1.0
+Status
+```text id=“f8s1j3”APPROVED
+BASELINE AMENDMENT ACTIVE
+CURSOR READY
+SPRINT 01 READY
+---# NEXT RECOMMENDED STEPBefore starting code generation:```text id="g9t2k4"Update 018Update 020Update 021Update 022
+to formally incorporate:
+```text id=“h0u3l5”002A Organization Hierarchy
+013A Frontend Amendment
+013B Authentication Amendment
+Then run one final Cursor Readiness Validation.Target:```text id="i1v4m6"Readiness Score > 95
+At that point, you can confidently begin Sprint 01 implementation.
+
+END OF DOCUMENT

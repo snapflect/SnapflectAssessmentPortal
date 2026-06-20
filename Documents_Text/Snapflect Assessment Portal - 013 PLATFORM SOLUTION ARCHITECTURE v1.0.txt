@@ -1,0 +1,298 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+013_PLATFORM_SOLUTION_ARCHITECTURE
+Version 1.0
+Status: APPROVED BASELINE
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Platform Solution Architecture
+Version
+1.0
+Status
+FINAL
+Based On
+PRD v1.2 FINAL
+Based On
+ERD v1.1 FINAL
+Based On
+Database Standards v1.1 FINAL
+Based On
+Platform Architecture Baseline v1.0
+Applies To
+All Application Development
+Applies To
+Cursor AI Development
+Applies To
+Future Cloud Migration
+
+1. PURPOSE
+This document defines the complete application architecture for the Snapflect Assessment Portal.
+It serves as the implementation blueprint connecting:
+PRD    ↓ERD    ↓Database Schemas    ↓Application Architecture    ↓API Design    ↓UI Development    ↓Production Deployment
+This document becomes the authoritative implementation architecture for all future development.
+
+2. ARCHITECTURE PRINCIPLES
+The platform shall follow:
+Separation of ConcernsModular ArchitectureConfiguration Driven DesignAuditability FirstSecurity FirstVersioning FirstSnapshot IntegrityMulti-Tenant ReadinessFuture Cloud Portability
+
+3. TECHNOLOGY STACK
+Backend
+PHP 8.3+Laravel 12 LTSComposerREST APIs
+
+Frontend
+Laravel BladeBootstrap 5JavaScriptAJAXjQuery (Limited Usage)Chart.js
+
+Database
+MySQL 8+InnoDButf8mb4_0900_ai_ci
+
+Hosting
+Phase 1
+Hostinger Shared Hosting
+Phase 2
+Hostinger VPS
+Future
+AzureAWSDocker
+without redesign.
+
+4. HIGH LEVEL ARCHITECTURE
+┌───────────────────────────────┐│        Presentation Layer      ││  Blade + Bootstrap + AJAX      │└──────────────┬────────────────┘               │               ▼┌───────────────────────────────┐│         Controller Layer       ││      HTTP Request Handling     │└──────────────┬────────────────┘               │               ▼┌───────────────────────────────┐│          Service Layer         ││       Business Logic           │└──────────────┬────────────────┘               │               ▼┌───────────────────────────────┐│        Repository Layer        ││      Database Operations       │└──────────────┬────────────────┘               │               ▼┌───────────────────────────────┐│            MySQL              │└───────────────────────────────┘
+
+5. SOLUTION STRUCTURE
+snapflect/docs/database/storage/tests/app/bootstrap/config/public/resources/routes/vendor/
+
+6. APPLICATION STRUCTURE
+App Folder
+app/Core/Modules/Shared/Services/Repositories/Policies/Jobs/Events/Listeners/Notifications/
+
+7. MODULE ARCHITECTURE
+Each major schema becomes a module.
+
+Security Module
+UsersRolesPermissionsAuthenticationAuthorizationSessions
+
+Governance Module
+SettingsApprovalsTemplatesConfigurations
+
+Assessment Definition Module
+TechnologiesAssessmentsSectionsQuestion BanksQuestionsAttachments
+
+Assessment Execution Module
+AssignmentsAttemptsAnswersDraft SavesSnapshots
+
+Evaluation Module
+ScoringManual ReviewsRubricsResults
+
+Certification Module
+CertificatesVerificationRevocationDigital Signatures
+
+Notification Module
+TemplatesQueueSubscriptionsDelivery Logs
+
+Reporting Module
+DashboardsKPIsAnalyticsExports
+
+Integration Module
+Audit EventsImportsExportsIntegration Events
+
+Platform Operations Module
+Scheduled TasksHealth MonitoringAnnouncements
+
+AI Proctoring Module
+SessionsEventsViolationsEvidenceAI DetectionReviews
+
+Billing Module
+PlansSubscriptionsInvoicesPaymentsTransactions
+
+8. CONTROLLER ARCHITECTURE
+Controllers shall only:
+Validate RequestsAuthorize AccessCall ServicesReturn Responses
+
+Controllers SHALL NOT
+Contain Business LogicContain SQL QueriesContain Workflow LogicContain Complex Calculations
+
+9. SERVICE ARCHITECTURE
+Services are the business engine.
+Examples:
+AssessmentServiceQuestionServiceAttemptServiceEvaluationServiceCertificateServiceNotificationServiceBillingServiceProctoringService
+
+Service Responsibilities
+Business RulesWorkflow ExecutionValidationState TransitionsCross Module Coordination
+
+10. REPOSITORY ARCHITECTURE
+Repositories handle all data access.
+Examples:
+AssessmentRepositoryQuestionRepositoryAttemptRepositoryCertificateRepositoryInvoiceRepository
+
+Repository Responsibilities
+Database QueriesSearchFilteringPaginationPersistence
+
+Repository Restrictions
+No Business LogicNo Authorization Logic
+
+11. MODEL ARCHITECTURE
+Laravel Eloquent Models shall represent:
+Database Tables
+Examples:
+UserAssessmentQuestionAssessmentAttemptAssessmentResultCertificateInvoice
+
+Model Restrictions
+No Workflow LogicNo Reporting LogicNo Cross Module Logic
+
+12. SECURITY ARCHITECTURE
+Authentication:
+Laravel Sanctum
+
+Authorization:
+RBACRolesPermissions
+
+Security Flow:
+User   ↓Authentication   ↓Authorization   ↓Controller   ↓Service
+
+13. RBAC ARCHITECTURE
+All permissions originate from:
+rolespermissionsrole_permissionsuser_roles
+
+Permission Checks:
+MiddlewarePoliciesService Validation
+
+14. SNAPSHOT ARCHITECTURE
+Approved Architecture:
+Hybrid Snapshot Architecture
+
+Runtime Tables:
+attempt_questionsattempt_answersassessment_results
+
+Historical Snapshot:
+attempt_snapshots
+
+Rule:
+Reporting uses runtime tables.Auditing uses snapshots.
+
+15. FILE STORAGE ARCHITECTURE
+Database Stores:
+Metadata
+
+File System Stores:
+DocumentsImagesCertificatesEvidence
+
+Storage Location:
+/storage/app
+
+Future Compatible With:
+Azure Blob StorageAWS S3
+
+16. NOTIFICATION ARCHITECTURE
+Approved Pattern:
+Hybrid Notification Architecture
+
+Persist:
+Template VersionSubject SnapshotMessage Snapshot
+
+Benefits:
+AuditabilityTemplate EvolutionHistorical Accuracy
+
+17. REPORTING ARCHITECTURE
+Reporting Source:
+assessment_resultsattempt_questionsattempt_answers
+
+Avoid:
+Duplicate Reporting TablesRedundant Aggregates
+
+Analytics Strategy:
+Derived AnalyticsScheduled SnapshotsKPI Services
+
+18. AI PROCTORING ARCHITECTURE
+Workflow:
+Assessment Start      ↓Proctoring Session      ↓Monitoring Events      ↓AI Detection      ↓Violation      ↓Evidence      ↓Review
+
+Evidence Storage:
+Metadata → DatabaseFiles → File System
+
+19. BILLING ARCHITECTURE
+Workflow:
+Plan   ↓Subscription   ↓Usage   ↓Invoice   ↓Payment   ↓Transaction
+
+Revenue Source Of Truth:
+InvoicesPaymentsTransactions
+
+20. BACKGROUND PROCESSING
+Hostinger Compatible Approach:
+Laravel SchedulerCron Jobs
+
+Examples:
+Notification ProcessingAnalytics RefreshSubscription RenewalCertificate Expiry ChecksCleanup Tasks
+
+21. ERROR HANDLING ARCHITECTURE
+Global Exception Handler:
+Validation ExceptionsAuthorization ExceptionsBusiness ExceptionsSystem Exceptions
+
+Response Standard:
+{"success":false,"message":"Error message","errors":[]}
+
+22. AUDIT ARCHITECTURE
+All critical operations generate:
+audit_events
+Examples:
+Assessment PublishedAttempt SubmittedCertificate IssuedInvoice GeneratedRole Assigned
+
+23. CURSOR AI DEVELOPMENT RULES
+Cursor SHALL:
+Generate ControllersGenerate ServicesGenerate RepositoriesGenerate ModelsGenerate DTOsGenerate Unit Tests
+
+Cursor SHALL NOT:
+Redesign SchemaCreate New Business EntitiesModify Snapshot ArchitectureModify RBAC ArchitectureModify Audit Architecture
+
+24. DEVELOPMENT PHASES
+Phase 1
+SecurityRBACUser Management
+
+Phase 2
+Assessment Definition
+
+Phase 3
+Assessment Execution
+
+Phase 4
+Evaluation
+
+Phase 5
+Certification
+
+Phase 6
+NotificationsReporting
+
+Phase 7
+OperationsAuditIntegrations
+
+Phase 8
+AI Proctoring
+
+Phase 9
+Billing
+
+25. PRODUCTION READINESS REQUIREMENTS
+Must Support:
+100,000+ CandidatesMulti-Tenant DeploymentsHorizontal GrowthCloud MigrationAudit ComplianceVersioningHistorical Preservation
+
+26. PLATFORM ARCHITECTURE STATUS
+Aligned With:
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Platform Architecture Baseline v1.0✓Schemas 001–012✓
+
+APPROVAL STATUS
+Document:
+013_PLATFORM_SOLUTION_ARCHITECTURE
+Version:
+v1.0
+Status:
+APPROVEDFROZEN
+
+NEXT STEP
+Proceed to:
+014_PLATFORM_API_ARCHITECTURE v1.0
+This document will define:
+REST StandardsAPI VersioningAuthenticationPaginationFilteringSortingError ContractsResponse ContractsEndpoint Design Standards
+and becomes the authoritative API blueprint for Cursor AI development.
+
+END OF DOCUMENT

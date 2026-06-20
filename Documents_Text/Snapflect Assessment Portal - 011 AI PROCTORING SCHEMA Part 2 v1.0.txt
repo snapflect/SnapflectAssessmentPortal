@@ -1,0 +1,156 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+011_AI_PROCTORING_SCHEMA.SQL
+PART 2 – AI DETECTION, EVIDENCE MANAGEMENT & REVIEW WORKFLOW
+Version 1.0
+
+MODULE
+AI Proctoring
+
+TABLES
+ai_detection_resultsmedia_evidenceproctoring_reviews
+
+DEPENDS ON
+011_AI_PROCTORING_SCHEMA.SQL – PART 1proctoring_sessionsproctoring_violations001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes:
+AI Detection ResultsEvidence ManagementHuman Review WorkflowFraud InvestigationAppeal ReadinessCompliance Auditability
+
+AI_DETECTION_RESULTS
+Purpose
+Stores AI-generated detection outputs and model decisions.
+Examples:
+Face DetectionObject DetectionVoice AnalysisGaze TrackingVirtual Machine DetectionDevice Detection
+
+Governance
+AI detections are immutable records.
+AI detections may or may not generate violations.
+
+CREATETABLE ai_detection_results(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    proctoring_session_id BIGINT UNSIGNED NOTNULL,    correlation_id CHAR(36) NULL,    detection_type VARCHAR(100) NOTNULL,    detection_engine VARCHAR(100) NOTNULL,    confidence_score DECIMAL(5,2) NOTNULL,    risk_level VARCHAR(50) NOTNULL,    result_json JSON NOTNULL,    metadata_json JSON NULL,    detection_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_ai_detection_results_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+AI_DETECTION_RESULTS FOREIGN KEYS
+ALTERTABLE ai_detection_resultsADDCONSTRAINT fk_ai_detection_results_sessionFOREIGNKEY (proctoring_session_id)REFERENCES proctoring_sessions(id);
+
+AI_DETECTION_RESULTS INDEXES
+CREATEINDEX ix_ai_detection_results_sessionON ai_detection_results(proctoring_session_id);CREATEINDEX ix_ai_detection_results_typeON ai_detection_results(detection_type);CREATEINDEX ix_ai_detection_results_riskON ai_detection_results(risk_level);CREATEINDEX ix_ai_detection_results_dateON ai_detection_results(detection_date);CREATEINDEX ix_ai_detection_results_session_dateON ai_detection_results(    proctoring_session_id,    detection_date);CREATEINDEX ix_ai_detection_results_correlationON ai_detection_results(correlation_id);
+
+RISK LEVEL VALUES
+Application validation shall enforce:
+LowMediumHighCritical
+
+CONFIDENCE SCORE GOVERNANCE
+Range:
+0.00 → 100.00
+Examples:
+98.50 = Very High Confidence75.00 = Moderate Confidence35.00 = Low Confidence
+
+MEDIA_EVIDENCE
+Purpose
+Stores immutable evidence supporting detections, violations, and reviews.
+Examples:
+ScreenshotWebcam ImageAudio ClipVideo ClipScreen Recording
+
+Governance
+Evidence records are immutable.
+Evidence files must never be modified after capture.
+
+CREATETABLE media_evidence(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    correlation_id CHAR(36) NULL,    detection_result_id BIGINT UNSIGNED NULL,    violation_id BIGINT UNSIGNED NULL,    evidence_type VARCHAR(50) NOTNULL,    file_reference VARCHAR(2000) NOTNULL,    file_checksum VARCHAR(512) NOTNULL,    retention_expiry_date DATETIME(3) NULL,    metadata_json JSON NULL,    captured_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_media_evidence_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+MEDIA_EVIDENCE FOREIGN KEYS
+ALTERTABLE media_evidenceADDCONSTRAINT fk_media_evidence_detectionFOREIGNKEY (detection_result_id)REFERENCES ai_detection_results(id);ALTERTABLE media_evidenceADDCONSTRAINT fk_media_evidence_violationFOREIGNKEY (violation_id)REFERENCES proctoring_violations(id);
+
+MEDIA_EVIDENCE INDEXES
+CREATEINDEX ix_media_evidence_typeON media_evidence(evidence_type);CREATEINDEX ix_media_evidence_detectionON media_evidence(detection_result_id);CREATEINDEX ix_media_evidence_violationON media_evidence(violation_id);CREATEINDEX ix_media_evidence_retentionON media_evidence(retention_expiry_date);CREATEINDEX ix_media_evidence_correlationON media_evidence(correlation_id);
+
+EVIDENCE TYPES
+Application validation shall enforce:
+ScreenshotWebcamImageAudioClipVideoClipScreenRecording
+
+FILE INTEGRITY GOVERNANCE
+Field:
+file_checksum
+stores evidence integrity hash.
+Recommended:
+SHA-256
+checksum generation.
+
+RETENTION GOVERNANCE
+Field:
+retention_expiry_date
+supports:
+Privacy ComplianceStorage GovernanceRetention Policies
+
+PROCTORING_REVIEWS
+Purpose
+Supports human investigation and review workflow.
+Examples:
+Violation ConfirmedViolation DismissedAssessment ClearedInvestigation Escalated
+
+Governance
+Human reviewers may override AI findings.
+Review outcomes become authoritative decisions.
+
+CREATETABLE proctoring_reviews(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    correlation_id CHAR(36) NULL,    proctoring_session_id BIGINT UNSIGNED NOTNULL,    reviewed_by BIGINT UNSIGNED NOTNULL,    review_outcome VARCHAR(50) NOTNULL,    final_risk_score DECIMAL(5,2) NULL,    review_duration_minutes INTNULL,    evidence_summary TEXT NULL,    review_comments TEXT NULL,    metadata_json JSON NULL,    review_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_proctoring_reviews_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+PROCTORING_REVIEWS FOREIGN KEYS
+ALTERTABLE proctoring_reviewsADDCONSTRAINT fk_proctoring_reviews_sessionFOREIGNKEY (proctoring_session_id)REFERENCES proctoring_sessions(id);ALTERTABLE proctoring_reviewsADDCONSTRAINT fk_proctoring_reviews_userFOREIGNKEY (reviewed_by)REFERENCES users(id);
+
+PROCTORING_REVIEWS INDEXES
+CREATEINDEX ix_proctoring_reviews_outcomeON proctoring_reviews(review_outcome);CREATEINDEX ix_proctoring_reviews_reviewerON proctoring_reviews(reviewed_by);CREATEINDEX ix_proctoring_reviews_dateON proctoring_reviews(review_date);CREATEINDEX ix_proctoring_reviews_sessionON proctoring_reviews(proctoring_session_id);CREATEINDEX ix_proctoring_reviews_correlationON proctoring_reviews(correlation_id);
+
+REVIEW OUTCOME VALUES
+Application validation shall enforce:
+ClearedConfirmedEscalatedFurtherInvestigation
+
+FINAL RISK SCORE GOVERNANCE
+Range:
+0.00 → 100.00
+Represents reviewer-adjusted risk assessment.
+
+REVIEW AUTHORITY GOVERNANCE
+Review outcomes may:
+Confirm ViolationsDismiss ViolationsEscalate CasesClear Candidates
+Human review decisions supersede AI recommendations.
+
+CORRELATION GOVERNANCE
+Field:
+correlation_id
+supports traceability across:
+Monitoring Event      ↓AI Detection      ↓Violation      ↓Evidence      ↓Human Review
+
+VALIDATION CHECKLIST
+✓ AI Detection Framework Applied
+✓ Detection Engine Tracking Applied
+✓ Explainability Applied
+✓ Evidence Governance Applied
+✓ File Integrity Validation Applied
+✓ Retention Governance Applied
+✓ Human Review Workflow Applied
+✓ Human Override Support Applied
+✓ Correlation Tracking Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+011_AI_PROCTORING_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+proctoring_sessionsproctoring_eventsproctoring_violationsai_detection_resultsmedia_evidenceproctoring_reviews
+AI Proctoring Completion:
+100%
+
+NEXT STEP
+Perform:
+AI Proctoring Schema Master Review v1.0
+Review Scope:
+Part 1Part 2
+Validation Areas:
+Session GovernanceAI ExplainabilityEvidence ManagementViolation TrackingHuman Review WorkflowFraud InvestigationAppeal ReadinessCompliance Auditability
+After successful review:
+Freeze:011_AI_PROCTORING_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

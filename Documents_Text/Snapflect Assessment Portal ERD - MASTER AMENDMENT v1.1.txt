@@ -1,0 +1,263 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+ENTITY RELATIONSHIP DIAGRAM (ERD)
+MASTER AMENDMENT v1.1
+VERSION 1.1 FINALIZATION UPDATE
+This amendment updates:
+ERD Part 1 v1.0
+ERD Part 2 v1.0
+ERD Part 3 v1.0
+ERD Part 4 v1.0
+Purpose:
+To apply the findings from the Master ERD Review v1.0 and finalize the ERD for schema generation.
+
+ERD-A1
+QUESTION VERSIONING ENHANCEMENT
+Affected Entity
+questions
+
+Purpose
+Support immutable published questions and controlled versioning.
+
+New Columns
+parent_question_id BIGINT NULLis_current_version BIT NOTNULLDEFAULT1
+
+Relationship
+Question v1      |      |      +---- Question v2                 |                 |                 +---- Question v3
+
+Business Rules
+Published questions shall not be edited directly.
+New versions shall be created when modifications affect assessment behavior.
+Historical snapshots shall continue referencing the original version.
+Only one version shall have:
+is_current_version =1
+within a version chain.
+
+ERD-A2
+QUESTION BANK VERSIONING ENHANCEMENT
+Affected Entity
+question_banks
+
+Purpose
+Support immutable published question banks.
+
+New Columns
+parent_question_bank_id BIGINT NULLis_current_version BIT NOTNULLDEFAULT1
+
+Relationship
+Question Bank v1        |        +---- Question Bank v2                   |                   +---- Question Bank v3
+
+Business Rules
+Published question banks shall not be modified directly.
+Versioning shall preserve historical assessment definitions.
+Only one active version shall exist within a version chain.
+
+ERD-A3
+SECTION VERSIONING ENHANCEMENT
+Affected Entity
+assessment_sections
+
+Purpose
+Support immutable published section structures.
+
+New Columns
+parent_section_id BIGINT NULLis_current_version BIT NOTNULLDEFAULT1
+
+Relationship
+Section v1      |      +---- Section v2                |                +---- Section v3
+
+Business Rules
+Published sections shall not be modified directly.
+Versioning shall preserve historical assessment structure.
+Only one current version shall exist in a version chain.
+
+ERD-A4
+CONTENT APPROVAL ENHANCEMENT
+Affected Entity
+content_approvals
+
+Purpose
+Provide structured approval workflow support.
+
+New Columns
+approval_version INTapproval_level INTapproval_status VARCHAR(50)
+
+Approval Statuses
+Pending
+In Review
+Approved
+Rejected
+Cancelled
+
+Example
+Assessment
+↓
+Level 1 Review
+↓
+Level 2 Review
+↓
+Approved
+
+Business Rules
+Approval history shall remain immutable.
+Multiple approval levels shall be supported.
+Approval workflow shall support future governance requirements.
+
+ERD-A5
+SOFT DELETE STANDARDIZATION
+Purpose
+Establish consistent deletion strategy.
+
+Required Soft Delete Columns
+is_deleted BIT NOTNULLDEFAULT0deleted_by BIGINT NULLdeleted_date DATETIME NULL
+
+Applicable Entities
+Security Layer
+users
+roles
+permissions
+
+Assessment Definition Layer
+technologies
+assessments
+assessment_sections
+question_banks
+questions
+
+Runtime Layer
+assessment_assignments
+
+Governance Layer
+notification_templates
+system_settings
+
+Business Rules
+Records shall not be physically deleted.
+Soft deleted records shall be excluded from normal application queries.
+Administrative recovery may be supported.
+
+ERD-A6
+AUDIT FIELD STANDARDIZATION
+Purpose
+Establish consistent auditability.
+
+Standard Audit Fields
+created_by BIGINT NULLcreated_date DATETIME NOTNULLmodified_by BIGINT NULLmodified_date DATETIME NULL
+
+Mandatory Entities
+Security Layer
+users
+roles
+permissions
+user_profiles
+
+Assessment Definition Layer
+technologies
+assessments
+assessment_sections
+question_banks
+questions
+content_approvals
+
+Runtime Layer
+assessment_assignments
+
+Governance Layer
+notification_templates
+system_settings
+
+Business Rules
+Creation and modification events must be traceable.
+Audit fields shall support future compliance requirements.
+
+ERD-A7
+ATTACHMENT VERSIONING (RECOMMENDED)
+Affected Entity
+attachments
+
+Purpose
+Support controlled file replacement.
+
+New Columns
+version_number INTDEFAULT1is_current_version BIT DEFAULT1
+
+Example
+Question Diagram v1
+↓
+Question Diagram v2
+↓
+Question Diagram v3
+
+Classification
+Recommended Enhancement
+Not Mandatory for V1 Release
+
+ERD-A8
+SCHEMA GENERATION REQUIREMENTS
+The schema generation phase shall additionally enforce:
+
+Composite Uniqueness
+assessment_attempts
+UNIQUE( user_id, assessment_id, attempt_number)
+
+Current Version Uniqueness
+questions
+question_banks
+assessment_sections
+Only one record within a version chain may have:
+is_current_version =1
+
+Soft Delete Consistency
+All designated entities must support soft delete.
+
+Audit Consistency
+All designated entities must support standard audit fields.
+
+ERD-A9
+FINAL ERD VALIDATION RESULT
+Naming Consistency
+PASS
+
+Relationship Integrity
+PASS
+
+Versioning Strategy
+PASS
+
+Soft Delete Strategy
+PASS
+
+Auditability
+PASS
+
+Snapshot Architecture
+PASS
+
+Assignment Architecture
+PASS
+
+Governance Architecture
+PASS
+
+Normalization
+PASS
+
+Circular Dependency Review
+PASS
+
+ERD VERSION UPDATE
+Previous Version:
+1.0
+
+Updated Version:
+1.1
+
+Status:
+FINAL
+Approved For:
+Database Schema Design
+RBAC Matrix Design
+API Contract Design
+Cursor AI Development
+
+END OF ERD MASTER AMENDMENT v1.1
+END OF ERD VERSION 1.1 FINAL

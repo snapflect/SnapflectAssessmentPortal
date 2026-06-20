@@ -1,0 +1,368 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017B_GOVERNANCE_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Governance OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Governance
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+002_GOVERNANCE_FOUNDATION_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+System SettingsConfiguration CategoriesMaster DataTemplatesTemplate VersionsApproval WorkflowsWorkflow StagesConfiguration HistoryGovernance Controls
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Governance APIversion:1.0.0description: Governance and Configuration Management APIsservers:-url: /api/v1tags:-name: Settings-name: Configuration Categories-name: Templates-name: Workflows-name: Workflow Stages-name: Master Data
+
+3. SECURITY REQUIREMENTS
+Global Security:
+security:-BearerAuth:[]
+
+Permissions:
+Settings.ViewSettings.EditTemplate.ViewTemplate.CreateTemplate.EditWorkflow.ViewWorkflow.Manage
+
+4. SETTINGS APIS
+
+List Settings
+Endpoint
+GET /api/v1/settings
+Permission
+Settings.View
+Query Parameters
+pagepageSizesearchcategoryisActive
+Response
+{"success":true,"data":[],"pagination":{}}
+
+Get Setting
+Endpoint
+GET /api/v1/settings/{id}
+Permission
+Settings.View
+
+Create Setting
+Endpoint
+POST /api/v1/settings
+Permission
+Settings.Edit
+Request DTO
+{"key":"Assessment.MaxDuration","value":"180","category":"Assessment","description":"Maximum assessment duration in minutes"}
+Validation
+key            Required               Uniquevalue          Requiredcategory       Required
+Audit Event
+Setting Created
+
+Update Setting
+Endpoint
+PUT /api/v1/settings/{id}
+Permission
+Settings.Edit
+Audit Event
+Setting Updated
+
+Delete Setting
+Endpoint
+DELETE /api/v1/settings/{id}
+Permission
+Settings.Edit
+Behavior
+Soft Delete
+Audit Event
+Setting Deleted
+
+5. CONFIGURATION CATEGORY APIS
+
+List Categories
+Endpoint
+GET /api/v1/configuration-categories
+Permission
+Settings.View
+
+Get Category
+Endpoint
+GET /api/v1/configuration-categories/{id}
+Permission
+Settings.View
+
+Create Category
+Endpoint
+POST /api/v1/configuration-categories
+Permission
+Settings.Edit
+Request DTO
+{"name":"Assessment","description":"Assessment related settings"}
+
+Update Category
+Endpoint
+PUT /api/v1/configuration-categories/{id}
+Permission
+Settings.Edit
+
+6. TEMPLATE APIS
+
+Supported Types:
+EmailNotificationCertificateSystem
+
+List Templates
+Endpoint
+GET /api/v1/templates
+Permission
+Template.View
+Query Parameters
+pagepageSizetemplateTypestatus
+
+Get Template
+Endpoint
+GET /api/v1/templates/{id}
+Permission
+Template.View
+
+Create Template
+Endpoint
+POST /api/v1/templates
+Permission
+Template.Create
+Request DTO
+{"name":"Assessment Assigned","templateType":"Email","subject":"Assessment Assigned","body":"<html>...</html>"}
+Validation
+name             RequiredtemplateType     Requiredsubject          Requiredbody             Required
+Audit Event
+Template Created
+
+Update Template
+Endpoint
+PUT /api/v1/templates/{id}
+Permission
+Template.Edit
+Audit Event
+Template Updated
+
+Activate Template Version
+Endpoint
+POST /api/v1/templates/{id}/activate
+Permission
+Template.Edit
+Request DTO
+{"versionNumber":3}
+Audit Event
+Template Activated
+
+Template Versions
+Endpoint
+GET /api/v1/templates/{id}/versions
+Permission
+Template.View
+
+7. WORKFLOW APIS
+
+List Workflows
+Endpoint
+GET /api/v1/workflows
+Permission
+Workflow.View
+
+Get Workflow
+Endpoint
+GET /api/v1/workflows/{id}
+Permission
+Workflow.View
+
+Create Workflow
+Endpoint
+POST /api/v1/workflows
+Permission
+Workflow.Manage
+Request DTO
+{"name":"Question Approval Workflow","description":"Workflow for approving questions"}
+Audit Event
+Workflow Created
+
+Update Workflow
+Endpoint
+PUT /api/v1/workflows/{id}
+Permission
+Workflow.Manage
+Audit Event
+Workflow Updated
+
+Activate Workflow
+Endpoint
+POST /api/v1/workflows/{id}/activate
+Permission
+Workflow.Manage
+Audit Event
+Workflow Activated
+
+8. WORKFLOW STAGE APIS
+
+List Workflow Stages
+Endpoint
+GET /api/v1/workflows/{id}/stages
+Permission
+Workflow.View
+
+Create Workflow Stage
+Endpoint
+POST /api/v1/workflows/{id}/stages
+Permission
+Workflow.Manage
+Request DTO
+{"stageName":"Reviewer Approval","sequenceNumber":2,"approverRoleId":5}
+
+Update Workflow Stage
+Endpoint
+PUT /api/v1/workflow-stages/{id}
+Permission
+Workflow.Manage
+
+Delete Workflow Stage
+Endpoint
+DELETE /api/v1/workflow-stages/{id}
+Permission
+Workflow.Manage
+Behavior
+Soft Delete
+
+9. MASTER DATA APIS
+
+Supported Types:
+CountriesStatesLanguagesDifficultyLevelsQuestionCategoriesCertificateTypesNotificationChannelsAssessmentTypes
+
+List Master Data
+Endpoint
+GET /api/v1/master-data
+Permission
+Settings.View
+
+List By Type
+Endpoint
+GET /api/v1/master-data/{type}
+Permission
+Settings.View
+
+Create Master Data
+Endpoint
+POST /api/v1/master-data
+Permission
+Settings.Edit
+Request DTO
+{"type":"DifficultyLevels","code":"ADVANCED","name":"Advanced","sortOrder":3}
+
+Update Master Data
+Endpoint
+PUT /api/v1/master-data/{id}
+Permission
+Settings.Edit
+
+Delete Master Data
+Endpoint
+DELETE /api/v1/master-data/{id}
+Permission
+Settings.Edit
+Behavior
+Soft Delete
+
+10. CONFIGURATION HISTORY APIS
+
+List Configuration History
+Endpoint
+GET /api/v1/configuration-history
+Permission
+Settings.View
+Filters
+entityTypeentityIdmodifiedBydateFromdateTo
+
+Configuration History Details
+Endpoint
+GET /api/v1/configuration-history/{id}
+Permission
+Settings.View
+
+11. MULTI-TENANCY RULES
+Platform Administrator
+Global Configuration Access
+Can manage:
+Global SettingsGlobal TemplatesGlobal WorkflowsGlobal Master Data
+
+Organization Administrator
+Organization Scope Access
+Can manage:
+Organization SettingsOrganization TemplatesOrganization Workflows
+Cannot modify:
+Global Configuration
+
+12. VERSIONING RULES
+Templates:
+Version Controlled
+New template versions:
+Create New Version RecordPreserve HistoryAllow Activation
+
+Workflows:
+Version Controlled
+Changes:
+Preserve Previous Workflow Versions
+
+Settings:
+Configuration History Required
+
+13. AUDIT REQUIREMENTS
+Mandatory Audit Events:
+Setting CreatedSetting UpdatedSetting DeletedTemplate CreatedTemplate UpdatedTemplate ActivatedWorkflow CreatedWorkflow UpdatedWorkflow ActivatedWorkflow Stage ModifiedMaster Data Modified
+
+14. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions"}
+
+Conflict
+{"success":false,"code":"CONFLICT","message":"Configuration already exists"}
+
+15. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate:
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesMiddlewareFeature TestsSwagger Attributes
+
+Do Not Generate:
+New Governance EntitiesAlternative Configuration ModelsAlternative Approval Workflow Models
+
+16. IMPLEMENTATION PACKAGE STATUS
+Aligned With:
+002_GOVERNANCE_FOUNDATION_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document:
+017B_GOVERNANCE_OPENAPI
+Version:
+v1.0
+Status:
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017C_ASSESSMENT_DEFINITION_OPENAPI v1.0
+Coverage:
+TechnologiesAssessmentsSectionsQuestion BanksQuestionsQuestion VersionsQuestion ImportsQuestion ExportsAssessment Publishing
+This will be the first major business-domain API package and will drive a significant portion of the platform implementation.
+
+END OF DOCUMENT

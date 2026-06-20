@@ -1,0 +1,384 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRD
+PART 3 AMENDMENT v1.1
+ASSESSMENT EXECUTION, SNAPSHOTTING & EVALUATION ENHANCEMENTS
+This amendment updates Part 3 of the PRD and becomes part of the authoritative document.
+The purpose of this amendment is to operationalize the enhancements introduced in Part 2 Amendment v1.1.
+This amendment updates:
+Assessment Assignment Execution
+Assessment Start Validation
+Snapshot Architecture
+Section Pass Evaluation
+Progress Calculation
+Random Question Selection
+Review Acknowledgement
+
+A3.1 ASSESSMENT ASSIGNMENT EXECUTION
+Purpose
+Enable assigned assessments to participate in runtime execution.
+
+Assignment Lifecycle
+Assigned
+↓
+Accepted
+↓
+Started
+↓
+In Progress
+↓
+Submitted
+↓
+Completed
+
+Expiration Flow
+Assigned
+↓
+Expired
+↓
+Closed
+
+Assignment Validation
+Before starting an assessment:
+Validate User
+Validate Assignment Status
+Validate Due Date
+Validate Assessment Status
+Validate Availability Window
+Validate Attempt Rules
+
+Business Rules
+Mandatory assignments cannot be bypassed.
+Expired assignments cannot be started.
+Assignment status must be tracked independently from attempt status.
+All assignment actions must be auditable.
+
+A3.2 ASSESSMENT START VALIDATION ENGINE
+Purpose
+Ensure assessments are valid before execution begins.
+
+Validation Sequence
+User Validation
+Verify:
+Active User
+Authorized User
+Email Verified
+
+Assessment Validation
+Verify:
+Assessment Exists
+Assessment Published
+Assessment Active
+
+Assignment Validation
+Verify:
+Assignment Exists (if required)
+Assignment Active
+Assignment Not Expired
+
+Availability Validation
+Verify:
+Current Date >= Available From
+Current Date <= Available To
+
+Attempt Validation
+Verify:
+Maximum Attempts Not Exceeded
+Retake Rules Satisfied
+
+Content Validation
+Verify:
+Snapshot Can Be Generated
+Questions Available
+Answers Available
+Pass Rules Available
+
+Failure Handling
+Assessment Start Blocked
+Display User-Friendly Validation Message
+Audit Validation Failure
+
+A3.3 RANDOM QUESTION SELECTION ENGINE
+Purpose
+Support configurable assessment randomization.
+
+Execution Timing
+Randomization occurs once.
+Only during assessment start.
+Never during assessment execution.
+
+Selection Modes
+None
+Assessment Level
+Section Level
+Question Bank Level
+
+Example
+Question Bank:
+ASP.NET Core Fundamentals
+Available Questions:
+100
+Questions To Pick:
+20
+System:
+Randomly Selects 20
+Snapshot Stores Selected Questions
+
+Business Rules
+Random selection must be reproducible.
+Randomization seed must be stored.
+Selected questions become immutable.
+Question set cannot change after start.
+
+A3.4 SNAPSHOT ARCHITECTURE ENHANCEMENT
+Existing Snapshot Content
+Technology
+Assessment
+Sections
+Question Banks
+Questions
+Options
+Answers
+Scoring Rules
+
+Additional Snapshot Content
+Instructions
+Terms & Conditions
+Disclaimers
+Availability Rules
+Pass Rules
+Section Pass Rules
+Randomization Rules
+Selected Question Set
+Randomization Seed
+
+Snapshot Integrity Requirements
+Snapshot must be immutable.
+Snapshot must support historical replay.
+Snapshot must support result regeneration.
+Snapshot must support audits.
+
+A3.5 PROGRESS CALCULATION ENGINE
+Purpose
+Provide consistent progress reporting.
+
+Formula
+Progress %
+=
+Answered Questions
+÷
+Total Questions
+×
+100
+
+Example
+Total Questions:
+50
+Answered Questions:
+25
+Progress:
+50%
+
+Dashboard Usage
+User Dashboard
+Admin Dashboard
+Assessment Monitoring
+Reports
+Exports
+
+Business Rules
+Progress updates in real-time.
+Progress must be persisted.
+Progress survives Save Draft.
+Progress survives Resume.
+
+A3.6 SECTION PASS EVALUATION ENGINE
+Purpose
+Support section-level competency validation.
+
+Evaluation Types
+Assessment Pass Only
+Section Pass Only
+Combined Pass
+
+Combined Pass Example
+Overall Score:
+70%
+AND
+C# Section:
+50%
+AND
+ASP.NET Section:
+50%
+AND
+SQL Section:
+50%
+
+Evaluation Logic
+Assessment passes only when:
+Overall Pass Criteria Satisfied
+AND
+All Mandatory Sections Passed
+
+Result Output
+Assessment Result
+Section Results
+Pass Status
+Failure Reason
+
+Example Failure Reason
+Overall Score Passed
+Section Failed:
+ASP.NET Core
+Required:
+50%
+Achieved:
+35%
+
+A3.7 ENHANCED SCORING ENGINE
+Additional Inputs
+Assessment Pass Rules
+Section Pass Rules
+Question Weightage
+Section Weightage
+
+Additional Outputs
+Section Score
+Section Percentage
+Section Pass Status
+Assessment Pass Status
+Failure Reason
+
+A3.8 REVIEW ACKNOWLEDGEMENT WORKFLOW
+Purpose
+Allow users to acknowledge administrator feedback.
+
+Workflow
+Assessment Submitted
+↓
+Admin Reviews
+↓
+Admin Adds Feedback
+↓
+User Views Feedback
+↓
+User Acknowledges
+
+Acknowledgement Data
+User
+Review
+Acknowledgement Date
+Acknowledgement Notes
+
+Acknowledgement Statuses
+Pending
+Acknowledged
+Expired
+
+Business Rules
+Acknowledgement is optional by default.
+Can be made mandatory through configuration.
+All acknowledgements must be auditable.
+
+A3.9 REVIEW VISIBILITY ENHANCEMENT
+User View
+Score
+Percentage
+Comments
+Ratings
+Feedback
+Acknowledgement Status
+
+Administrator View
+Review Status
+Acknowledgement Status
+Acknowledgement Date
+Pending Acknowledgements
+
+A3.10 ATTEMPT RESULT ENHANCEMENT
+Additional Result Fields
+Progress Percentage
+Section Scores
+Section Percentages
+Section Pass Status
+Failure Reason
+Acknowledgement Status
+Snapshot Version
+
+A3.11 ATTEMPT HISTORY ENHANCEMENT
+Additional History Fields
+Assignment Type
+Assignment Status
+Progress %
+Review Status
+Acknowledgement Status
+
+A3.12 AUDIT EVENTS INTRODUCED
+Assignment Accepted
+Assignment Expired
+Assignment Cancelled
+Assessment Validation Failed
+Randomization Completed
+Snapshot Created
+Section Evaluation Completed
+Review Acknowledged
+
+A3.13 NEW DATABASE ENTITIES INTRODUCED
+review_acknowledgements
+assignment_activity_logs
+randomization_audit_logs
+
+A3.14 UPDATED DATABASE ENTITIES
+assessment_attempts
+attempt_snapshots
+assessment_results
+assessment_reviews
+assessment_review_comments
+
+New Fields Required
+assignment_id
+progress_percentage
+failure_reason
+randomization_seed
+acknowledgement_status
+
+A3.15 NEW API DOMAINS INTRODUCED
+/api/assignments/accept
+/api/assignments/status
+/api/progress
+/api/review-acknowledgements
+/api/section-results
+
+A3.16 NEW RBAC PERMISSIONS INTRODUCED
+assignment.accept
+assignment.status.view
+progress.view
+review.acknowledge
+section.result.view
+
+A3.17 DATA INTEGRITY REQUIREMENTS
+Assessment availability must be enforced.
+Assignment rules must be enforced.
+Randomized questions must remain fixed after start.
+Snapshots must preserve:
+Questions
+Answers
+Instructions
+Terms
+Disclaimers
+Randomization Results
+Pass Rules
+Section Rules
+Review acknowledgements must be auditable.
+Historical attempt data must remain immutable.
+
+A3.18 ACCEPTANCE CRITERIA
+Assessment cannot start outside availability window.
+Assignment rules must be enforced.
+Randomized question sets must remain unchanged.
+Progress calculation must be accurate.
+Section pass rules must be enforced.
+Review acknowledgement workflow must function correctly.
+Snapshot content must be reproducible.
+Historical scoring must remain accurate.
+
+END OF PART 3 AMENDMENT v1.1

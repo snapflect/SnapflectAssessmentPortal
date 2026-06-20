@@ -1,0 +1,159 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL
+PART 2 – CONFIGURATION MANAGEMENT LAYER
+VERSION 1.0
+Module
+Governance Foundation
+Tables
+text id="x0b8kd" system_settings
+Depends On
+```text id=“vuz7sq”001_SECURITY_SCHEMA.SQL v1.0 FINAL(users)
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL – PART 1
+## Target Platform```text id="0s1dxv"MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+SYSTEM_SETTINGS
+Purpose
+Provides centralized configuration management for the entire platform.
+Supports:
+Global Settings
+Technology Settings
+Assessment Settings
+Section Settings
+Question Bank Settings
+User Settings
+Role Settings
+The table is designed to support future platform growth without schema changes.
+
+```sql id=“d2wrlm”CREATE TABLE system_settings(id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+uuid CHAR(36) NOT NULL,scope_type VARCHAR(50) NOT NULL,scope_id BIGINT UNSIGNED NULL,setting_category VARCHAR(100) NOT NULL,setting_key VARCHAR(255) NOT NULL,setting_value TEXT NOT NULL,setting_data_type VARCHAR(50) NOT NULL,version_number INT NOT NULL DEFAULT 1,is_encrypted TINYINT(1)    NOT NULL DEFAULT 0,is_cacheable TINYINT(1)    NOT NULL DEFAULT 1,effective_from DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),effective_to DATETIME(3) NULL,description TEXT NULL,created_by BIGINT UNSIGNED NOT NULL,created_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),modified_by BIGINT UNSIGNED NULL,modified_date DATETIME(3) NULL,is_active TINYINT(1)    NOT NULL DEFAULT 1,is_deleted TINYINT(1)    NOT NULL DEFAULT 0,deleted_by BIGINT UNSIGNED NULL,deleted_date DATETIME(3) NULL,PRIMARY KEY (id),CONSTRAINT ux_system_settings_uuid    UNIQUE (uuid)
+)ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+---# SYSTEM_SETTINGS FOREIGN KEYS```sql id="vbm5hn"ALTER TABLE system_settingsADD CONSTRAINT fk_system_settings_created_byFOREIGN KEY (created_by)REFERENCES users(id);ALTER TABLE system_settingsADD CONSTRAINT fk_system_settings_modified_byFOREIGN KEY (modified_by)REFERENCES users(id);ALTER TABLE system_settingsADD CONSTRAINT fk_system_settings_deleted_byFOREIGN KEY (deleted_by)REFERENCES users(id);
+
+SYSTEM_SETTINGS UNIQUE CONSTRAINTS
+Only one active version of a setting should exist per scope.
+sql id="z75wwz" CREATE UNIQUE INDEX ux_system_settings_scope_key_version ON system_settings (     scope_type,     scope_id,     setting_key,     version_number );
+
+SYSTEM_SETTINGS INDEXES
+```sql id=“mj6zrk”CREATE INDEX ix_system_settings_scopeON system_settings(scope_type, scope_id);
+CREATE INDEX ix_system_settings_categoryON system_settings(setting_category);
+CREATE INDEX ix_system_settings_keyON system_settings(setting_key);
+CREATE INDEX ix_system_settings_data_typeON system_settings(setting_data_type);
+CREATE INDEX ix_system_settings_activeON system_settings(is_active);
+CREATE INDEX ix_system_settings_effective_fromON system_settings(effective_from);
+CREATE INDEX ix_system_settings_effective_toON system_settings(effective_to);
+CREATE INDEX ix_system_settings_cacheableON system_settings(is_cacheable);
+---# SUPPORTED SCOPE TYPESApplication validation shall enforce:```text id="3n8ylq"GlobalTechnologyAssessmentSectionQuestionBankUserRole
+
+SUPPORTED DATA TYPES
+Application validation shall enforce:
+```text id=“b5ng4w”String
+Integer
+Decimal
+Boolean
+JSON
+DateTime
+---# EXAMPLE CONFIGURATION CATEGORIESApplication validation shall enforce:```text id="h47p6f"AuthenticationAssessmentNotificationReportingSecuritySystemUserInterfaceEmailStorage
+
+EFFECTIVE DATING STRATEGY
+Settings may be scheduled.
+Example:
+```text id=“2t1r3u”Assessment Timer
+Current:30 Minutes
+Future:60 Minutes
+Effective:2027-01-01
+Supported through:```text id="3bgudf"effective_fromeffective_to
+
+CONFIGURATION RESOLUTION HIERARCHY
+Resolution order:
+text id="8w0b5l" Section ↓ Assessment ↓ Technology ↓ Global
+Additional supported scopes:
+```text id=“fek8ws”User
+Role
+are evaluated according to business rules implemented in application services.---# CONFIGURATION VERSIONING RULESConfiguration changes must never overwrite existing records.Example:```text id="x7vhb2"Assessment Timer v1↓Assessment Timer v2↓Assessment Timer v3
+Rules:
+New configuration = new row.
+Historical versions preserved.
+Previous versions remain queryable.
+Latest active version applied.
+
+ENCRYPTED SETTINGS STRATEGY
+Sensitive settings may be encrypted.
+Examples:
+```text id=“9g3ywx”SMTP Password
+Azure Storage Key
+AWS Secret Key
+API Credentials
+Supported through:```text id="24iwfx"is_encrypted = 1
+Encryption handled by application layer.
+
+CACHEABLE SETTINGS STRATEGY
+Examples:
+```text id=“r5kw5w”Assessment Timer
+Pagination Size
+Dashboard Settings
+may be cached.Supported through:```text id="xbg4m4"is_cacheable = 1
+
+Examples:
+```text id=“t0mh6v”SMTP Password
+API Secrets
+should not be cached.Supported through:```text id="mzb5yo"is_cacheable = 0
+
+SOFT DELETE STRATEGY
+Configuration records are never physically deleted.
+Use:
+```text id=“svjsm4”is_active
+is_deleted
+deleted_by
+deleted_date
+Historical versions remain available.---# GOVERNANCE RULES## New Configuration```text id="wk63uk"Insert New Row
+Never:
+text id="4hk6pt" Overwrite Existing Row
+
+Secret Values
+Secrets must be encrypted before persistence.
+
+Versioning
+Every configuration modification creates:
+text id="z8q4ph" New Version
+
+Historical Retrieval
+Historical versions remain accessible for audits.
+
+Scope Resolution
+Configuration services must resolve settings using the approved hierarchy.
+
+VALIDATION CHECKLIST
+✓ Scoped Configuration Architecture Applied
+✓ Configuration Versioning Applied
+✓ Effective Dating Applied
+✓ Encryption Support Added
+✓ Cacheability Support Added
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ Configuration Categories Added
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+text id="x9jx3v" APPROVED
+
+MODULE PROGRESS
+Completed:
+```text id=“kg7h5k”file_uploads
+attachments
+system_settings
+Governance Foundation Completion:```text id="3t53k0"60%
+
+NEXT STEP
+Before generating:
+text id="52ekn0" 002_GOVERNANCE_FOUNDATION_SCHEMA.SQL – PART 3
+I recommend a focused design review for:
+```text id=“u9d0ik”audit_logs
+activity_logs```
+These tables are permanent compliance records and should be reviewed carefully before DDL generation.
+
+END OF DOCUMENT

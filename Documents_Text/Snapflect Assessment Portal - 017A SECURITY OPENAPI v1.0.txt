@@ -1,0 +1,324 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017A_SECURITY_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Security OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Security
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+001_SECURITY_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+AuthenticationUsersRolesPermissionsUser Role AssignmentProfile ManagementPassword Management
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Security APIversion:1.0.0description: Security and Identity Management APIsservers:-url: /api/v1tags:-name: Authentication-name: Users-name: Roles-name: Permissions
+
+3. SECURITY SCHEME
+components:securitySchemes:BearerAuth:type: httpscheme: bearerbearerFormat: Sanctum
+
+4. REUSABLE RESPONSE SCHEMAS
+SuccessResponse
+SuccessResponse:type: objectproperties:success:type: booleanmessage:type: string
+
+ErrorResponse
+ErrorResponse:type: objectproperties:success:type: booleancode:type: stringmessage:type: stringerrors:type: array
+
+PaginationResponse
+Pagination:type: objectproperties:page:type: integerpageSize:type: integertotalRecords:type: integertotalPages:type: integer
+
+5. AUTHENTICATION APIS
+
+Login
+Endpoint
+POST /api/v1/auth/login
+Permission
+Anonymous
+Request DTO
+{"email":"user@example.com","password":"Password@123"}
+Validation
+email      Requiredpassword   Required
+Success Response
+{"success":true,"message":"Login successful","data":{"token":"jwt-or-sanctum-token","expiresAt":"2027-01-01T00:00:00Z","user":{"id":1,"email":"user@example.com","fullName":"John Smith"}}}
+Error Codes
+VALIDATION_ERRORUNAUTHORIZED
+
+Logout
+Endpoint
+POST /api/v1/auth/logout
+Permission
+Authenticated User
+Response
+{"success":true,"message":"Logout successful"}
+
+Current User
+Endpoint
+GET /api/v1/auth/me
+Permission
+Authenticated User
+Response
+{"success":true,"data":{"id":1,"firstName":"John","lastName":"Smith","email":"user@example.com","roles":[]}}
+
+Forgot Password
+Endpoint
+POST /api/v1/auth/forgot-password
+Request
+{"email":"user@example.com"}
+Response
+{"success":true,"message":"Password reset instructions sent."}
+
+Reset Password
+Endpoint
+POST /api/v1/auth/reset-password
+Request
+{"token":"","password":"","confirmPassword":""}
+Validation
+token              Requiredpassword           RequiredconfirmPassword    Must Match Password
+
+Change Password
+Endpoint
+POST /api/v1/auth/change-password
+Permission
+Authenticated User
+Request
+{"currentPassword":"","newPassword":"","confirmPassword":""}
+
+6. USER APIS
+
+List Users
+Endpoint
+GET /api/v1/users
+Permission
+User.View
+Query Parameters
+pagepageSizesearchstatusorganizationId
+Response
+{"success":true,"data":[],"pagination":{}}
+
+Get User
+Endpoint
+GET /api/v1/users/{id}
+Permission
+User.View
+
+Create User
+Endpoint
+POST /api/v1/users
+Permission
+User.Create
+Request DTO
+{"firstName":"John","lastName":"Smith","email":"john@example.com","phoneNumber":"","organizationId":1,"roleIds":[2,3]}
+Validation
+firstName       RequiredlastName        Requiredemail           Required                UniqueorganizationId  RequiredroleIds         Optional
+Success
+{"success":true,"message":"User created successfully"}
+Audit Event
+User Created
+
+Update User
+Endpoint
+PUT /api/v1/users/{id}
+Permission
+User.Edit
+Request DTO
+{"firstName":"","lastName":"","phoneNumber":""}
+Audit Event
+User Updated
+
+Delete User
+Endpoint
+DELETE /api/v1/users/{id}
+Permission
+User.Delete
+Behavior
+Soft Delete Only
+Audit Event
+User Deleted
+
+7. ROLE APIS
+
+List Roles
+Endpoint
+GET /api/v1/roles
+Permission
+Role.View
+
+Get Role
+Endpoint
+GET /api/v1/roles/{id}
+Permission
+Role.View
+
+Create Role
+Endpoint
+POST /api/v1/roles
+Permission
+Role.Create
+Request DTO
+{"name":"Assessment Manager","description":"Assessment Operations"}
+Audit Event
+Role Created
+
+Update Role
+Endpoint
+PUT /api/v1/roles/{id}
+Permission
+Role.Edit
+Audit Event
+Role Updated
+
+Delete Role
+Endpoint
+DELETE /api/v1/roles/{id}
+Permission
+Role.Delete
+Behavior
+Soft Delete
+Audit Event
+Role Deleted
+
+8. PERMISSION APIS
+
+List Permissions
+Endpoint
+GET /api/v1/permissions
+Permission
+Permission.View
+Response
+{"success":true,"data":[]}
+
+Get Permission
+Endpoint
+GET /api/v1/permissions/{id}
+Permission
+Permission.View
+
+9. USER ROLE ASSIGNMENT APIS
+
+Assign Roles
+Endpoint
+POST /api/v1/users/{id}/roles
+Permission
+User.Edit
+Request DTO
+{"roleIds":[1,2,3]}
+Audit Event
+Role Assigned
+
+Remove Role
+Endpoint
+DELETE /api/v1/users/{id}/roles/{roleId}
+Permission
+User.Edit
+Audit Event
+Role Removed
+
+Get User Roles
+Endpoint
+GET /api/v1/users/{id}/roles
+Permission
+User.View
+
+10. PROFILE APIS
+
+My Profile
+Endpoint
+GET /api/v1/profile
+Permission
+Authenticated User
+
+Update My Profile
+Endpoint
+PUT /api/v1/profile
+Permission
+Authenticated User
+Request DTO
+{"firstName":"","lastName":"","phoneNumber":""}
+
+11. MULTI-TENANT RULES
+Platform Administrator
+Can Access All Organizations
+
+Organization Administrator
+Can Access Own Organization Only
+
+Enforcement
+Every User API shall apply:
+Organization Scope Validation
+before data access.
+
+12. AUDIT REQUIREMENTS
+Mandatory Audit Events:
+User CreatedUser UpdatedUser DeletedRole CreatedRole UpdatedRole DeletedRole AssignedRole RemovedPassword ChangedPassword Reset
+
+13. SECURITY REQUIREMENTS
+Passwords:
+Never ReturnedNever LoggedNever Audited
+
+Storage:
+Laravel Hashbcrypt
+
+Tokens:
+Laravel Sanctum
+
+Rate Limiting:
+Login:5 Attempts / 15 MinutesForgot Password:3 Requests / Hour
+
+14. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Unauthorized
+{"success":false,"code":"UNAUTHORIZED","message":"Invalid credentials"}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions"}
+
+15. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate:
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesMiddlewareFeature TestsSwagger Attributes
+
+Do Not Generate:
+New RolesNew PermissionsAlternative Security Models
+
+16. IMPLEMENTATION PACKAGE STATUS
+Aligned With:
+001_SECURITY_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document:
+017A_SECURITY_OPENAPI
+Version:
+v1.0
+Status:
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017B_GOVERNANCE_OPENAPI v1.0
+Coverage:
+System SettingsTemplatesApproval WorkflowsConfiguration ManagementMaster DataGovernance Controls
+This completes the second foundation module before moving into Assessment Definition APIs.
+
+END OF DOCUMENT

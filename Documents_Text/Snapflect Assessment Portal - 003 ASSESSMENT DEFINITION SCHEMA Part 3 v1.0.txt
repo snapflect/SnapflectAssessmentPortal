@@ -1,0 +1,156 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL
+PART 3 – QUESTION BANK FOUNDATION
+VERSION 1.0
+Module
+Assessment Definition
+Tables
+question_banksquestion_bank_versions
+Depends On
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 2sectionssection_versionssection_question_banks001_SECURITY_SCHEMA.SQL v1.0 FINALusers
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+QUESTION_BANKS
+Purpose
+Represents reusable question bank libraries.
+Question Banks are independent content repositories and are not directly owned by:
+TechnologyAssessmentSection
+Instead, Question Banks are attached to Section Versions through:
+section_question_banks
+This architecture enables content reuse.
+
+CREATETABLE question_banks(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    question_bank_code VARCHAR(100) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'Custom',    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_question_banks_uuidUNIQUE (uuid),CONSTRAINT ux_question_banks_codeUNIQUE (question_bank_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTION_BANKS FOREIGN KEYS
+ALTERTABLE question_banksADDCONSTRAINT fk_question_banks_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE question_banksADDCONSTRAINT fk_question_banks_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE question_banksADDCONSTRAINT fk_question_banks_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+QUESTION_BANKS INDEXES
+CREATEINDEX ix_question_banks_statusON question_banks(status);CREATEINDEX ix_question_banks_ownershipON question_banks(ownership_type);CREATEINDEX ix_question_banks_is_activeON question_banks(is_active);
+
+SUPPORTED OWNERSHIP TYPES
+Application validation shall enforce:
+SystemCustomImported
+
+QUESTION BANK STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+QUESTION_BANK_VERSIONS
+Purpose
+Stores complete historical snapshots of Question Bank definitions.
+Uses Full Snapshot Versioning Architecture.
+
+CREATETABLE question_bank_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    question_bank_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    question_bank_name VARCHAR(255) NOTNULL,    question_bank_category VARCHAR(100) NOTNULL,    difficulty_level VARCHAR(50)NOTNULLDEFAULT'Medium',    selection_strategy VARCHAR(50)NOTNULLDEFAULT'AllQuestions',    question_count INTNULL,    randomize_question_order TINYINT(1)NOTNULLDEFAULT0,    estimated_duration_minutes INTNULL,    passing_percentage DECIMAL(5,2) NULL,    instructions TEXT NULL,    is_visible TINYINT(1)NOTNULLDEFAULT1,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_question_bank_versions_uuidUNIQUE (uuid),CONSTRAINT ux_question_bank_versions_versionUNIQUE (question_bank_id, version_number))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTION_BANK_VERSIONS FOREIGN KEYS
+ALTERTABLE question_bank_versionsADDCONSTRAINT fk_question_bank_versions_question_bankFOREIGNKEY (question_bank_id)REFERENCES question_banks(id);ALTERTABLE question_bank_versionsADDCONSTRAINT fk_question_bank_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+QUESTION_BANK_VERSIONS INDEXES
+CREATEINDEX ix_question_bank_versions_statusON question_bank_versions(version_status);CREATEINDEX ix_question_bank_versions_categoryON question_bank_versions(question_bank_category);CREATEINDEX ix_question_bank_versions_difficultyON question_bank_versions(difficulty_level);CREATEINDEX ix_question_bank_versions_selectionON question_bank_versions(selection_strategy);CREATEINDEX ix_question_bank_versions_visibleON question_bank_versions(is_visible);
+
+SUPPORTED DIFFICULTY LEVELS
+Application validation shall enforce:
+EasyMediumHardExpert
+
+SUPPORTED SELECTION STRATEGIES
+Application validation shall enforce:
+AllQuestionsRandomSelection
+
+RANDOMIZATION STRATEGY
+Supported through:
+randomize_question_order
+Values:
+0 = Fixed Order1 = Random Order
+
+QUESTION COUNT RULES
+When:
+selection_strategy = RandomSelection
+then:
+question_count
+must contain a valid value.
+
+When:
+selection_strategy = AllQuestions
+then:
+question_count
+may remain NULL.
+
+RUNTIME VALIDATION RULE
+Application services must enforce:
+question_count<=available active questions
+for the Question Bank Version.
+
+VISIBILITY RULES
+Question Banks with:
+is_visible = 0
+must not appear in administrative selection screens unless explicitly requested.
+
+VERSIONING GOVERNANCE
+Published versions:
+Read Only
+Changes require:
+New Draft Version
+
+Historical versions remain available for:
+Assessment ReplayReportingAuditHistorical Reconstruction
+
+PUBLICATION WORKFLOW
+Supported Version Status Values:
+DraftPublishedArchived
+
+Published Question Bank Versions may be linked to:
+Section Versions
+through:
+section_question_banks
+
+PART 2 AMENDMENT v1.1 INTEGRATION
+The approved architecture requires:
+section_question_banks.question_bank_version_id
+instead of:
+question_bank_id
+
+DEFERRED FOREIGN KEY
+Complete the deferred relationship:
+ALTERTABLE section_question_banksADDCONSTRAINT fk_section_question_banks_question_bank_versionFOREIGNKEY (question_bank_version_id)REFERENCES question_bank_versions(id);
+
+CODE IMMUTABILITY RULE
+The following value is immutable after creation:
+question_bank_code
+Changes require creation of a new Question Bank entity.
+
+VALIDATION CHECKLIST
+✓ Independent Question Bank Architecture Applied
+✓ Full Snapshot Versioning Applied
+✓ Version-Safe Section Mapping Applied
+✓ Question Selection Strategy Supported
+✓ Randomization Strategy Supported
+✓ Difficulty Levels Supported
+✓ Visibility Controls Supported
+✓ Publication Workflow Supported
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 3
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+technologiestechnology_versionsassessmentsassessment_versionssectionssection_versionssection_question_banksquestion_banksquestion_bank_versions
+Assessment Definition Completion:
+75%
+
+NEXT STEP
+Perform a focused architecture review for:
+questionsquestion_versionsquestion_optionsquestion_answers
+before generating:
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 4
+This is the final and most detailed content layer of the Assessment Definition module.
+
+END OF DOCUMENT

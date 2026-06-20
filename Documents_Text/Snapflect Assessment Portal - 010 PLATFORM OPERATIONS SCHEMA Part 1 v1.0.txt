@@ -1,0 +1,154 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+010_PLATFORM_OPERATIONS_SCHEMA.SQL
+PART 1 – CONFIGURATION, FEATURE FLAGS & BACKGROUND PROCESSING
+Version 1.0
+
+MODULE
+Platform Operations
+
+TABLES
+system_settingsfeature_flagsbackground_jobsjob_executions
+
+DEPENDS ON
+001_SECURITY_SCHEMA.SQLusers009_INTEGRATION_AUDIT_SCHEMA.SQLaudit_events
+
+PURPOSE
+This module establishes the operational control foundation of the platform.
+It provides:
+Configuration ManagementFeature Flag GovernanceBackground Job FrameworkExecution DiagnosticsScheduler ReadinessOperational MonitoringEnterprise SaaS Readiness
+
+SYSTEM_SETTINGS
+Purpose
+Stores runtime platform configuration.
+Examples:
+PasswordPolicySessionTimeoutAssessmentTimeLimitCertificateExpiryDays
+
+CREATETABLE system_settings(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    setting_key VARCHAR(255) NOTNULL,    setting_value LONGTEXT NOTNULL,    setting_data_type VARCHAR(50) NOTNULL,    setting_scope VARCHAR(50)NOTNULLDEFAULT'Global',    version_number INTNOTNULLDEFAULT1,    status VARCHAR(50)NOTNULLDEFAULT'Active',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_system_settings_uuidUNIQUE (uuid),CONSTRAINT ux_system_settings_key_scopeUNIQUE        (            setting_key,            setting_scope        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SYSTEM_SETTINGS FOREIGN KEYS
+ALTERTABLE system_settingsADDCONSTRAINT fk_system_settings_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE system_settingsADDCONSTRAINT fk_system_settings_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+SYSTEM_SETTINGS INDEXES
+CREATEINDEX ix_system_settings_scopeON system_settings(setting_scope);CREATEINDEX ix_system_settings_statusON system_settings(status);CREATEINDEX ix_system_settings_typeON system_settings(setting_data_type);
+
+SETTING DATA TYPES
+Application validation shall enforce:
+StringIntegerDecimalBooleanJSON
+
+SETTING SCOPES
+Application validation shall enforce:
+GlobalOrganizationEnvironment
+
+SETTING STATUS VALUES
+Application validation shall enforce:
+ActiveInactiveDeprecated
+
+FEATURE_FLAGS
+Purpose
+Controls feature availability and rollout.
+Examples:
+NewAssessmentUIAIEvaluationAdvancedAnalyticsBulkCertification
+
+CREATETABLE feature_flags(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    feature_code VARCHAR(100) NOTNULL,    feature_name VARCHAR(255) NOTNULL,    is_enabled TINYINT(1)NOTNULLDEFAULT0,    rollout_percentage DECIMAL(5,2)NOTNULLDEFAULT0.00,    targeting_rules_json JSON NULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_feature_flags_uuidUNIQUE (uuid),CONSTRAINT ux_feature_flags_codeUNIQUE (feature_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+FEATURE_FLAGS FOREIGN KEYS
+ALTERTABLE feature_flagsADDCONSTRAINT fk_feature_flags_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE feature_flagsADDCONSTRAINT fk_feature_flags_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+FEATURE_FLAGS INDEXES
+CREATEINDEX ix_feature_flags_enabledON feature_flags(is_enabled);CREATEINDEX ix_feature_flags_statusON feature_flags(status);CREATEINDEX ix_feature_flags_rolloutON feature_flags(rollout_percentage);
+
+FEATURE FLAG STATUS VALUES
+Application validation shall enforce:
+DraftEnabledDisabledRetired
+
+TARGETING RULES EXAMPLE
+{"organizations":[1,2,3],"roles":["Admin"],"environments":["Production"]}
+Stored in:
+targeting_rules_json
+
+BACKGROUND_JOBS
+Purpose
+Defines executable platform jobs.
+Examples:
+CertificateGenerationNotificationDispatchAnalyticsSnapshotGenerationAuditArchival
+
+CREATETABLE background_jobs(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    job_code VARCHAR(100) NOTNULL,    job_name VARCHAR(255) NOTNULL,    job_type VARCHAR(100) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'System',    max_retry_count INTNOTNULLDEFAULT3,    job_configuration_json JSON NULL,    status VARCHAR(50)NOTNULLDEFAULT'Active',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_background_jobs_uuidUNIQUE (uuid),CONSTRAINT ux_background_jobs_codeUNIQUE (job_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+BACKGROUND_JOBS FOREIGN KEYS
+ALTERTABLE background_jobsADDCONSTRAINT fk_background_jobs_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE background_jobsADDCONSTRAINT fk_background_jobs_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+BACKGROUND_JOBS INDEXES
+CREATEINDEX ix_background_jobs_typeON background_jobs(job_type);CREATEINDEX ix_background_jobs_statusON background_jobs(status);CREATEINDEX ix_background_jobs_ownershipON background_jobs(ownership_type);
+
+OWNERSHIP TYPES
+Application validation shall enforce:
+SystemOperationalAnalyticsIntegration
+
+BACKGROUND JOB STATUS VALUES
+Application validation shall enforce:
+ActiveInactiveRetired
+
+JOB_EXECUTIONS
+Purpose
+Tracks execution history for background jobs.
+Supports:
+SuccessFailureRetryPerformance MonitoringOperational Diagnostics
+
+CREATETABLE job_executions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    background_job_id BIGINT UNSIGNED NOTNULL,    correlation_id CHAR(36) NULL,    schedule_reference VARCHAR(255) NULL,    execution_status VARCHAR(50)NOTNULLDEFAULT'Pending',    execution_duration_ms BIGINT NULL,    executed_by_worker VARCHAR(100) NULL,    error_message TEXT NULL,    started_date DATETIME(3) NULL,    completed_date DATETIME(3) NULL,    retry_attempt INTNOTNULLDEFAULT0,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_job_executions_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+JOB_EXECUTIONS FOREIGN KEYS
+ALTERTABLE job_executionsADDCONSTRAINT fk_job_executions_jobFOREIGNKEY (background_job_id)REFERENCES background_jobs(id);
+
+JOB_EXECUTIONS INDEXES
+CREATEINDEX ix_job_executions_jobON job_executions(background_job_id);CREATEINDEX ix_job_executions_statusON job_executions(execution_status);CREATEINDEX ix_job_executions_workerON job_executions(executed_by_worker);CREATEINDEX ix_job_executions_startedON job_executions(started_date);CREATEINDEX ix_job_executions_completedON job_executions(completed_date);CREATEINDEX ix_job_executions_status_startedON job_executions(    execution_status,    started_date);CREATEINDEX ix_job_executions_correlationON job_executions(correlation_id);
+
+EXECUTION STATUS VALUES
+Application validation shall enforce:
+PendingRunningCompletedFailedCancelledRetrying
+
+EXECUTION DIAGNOSTICS
+Fields:
+execution_duration_mserror_messageexecuted_by_worker
+support:
+Performance MonitoringWorker DiagnosticsFailure InvestigationCapacity Planning
+
+CORRELATION GOVERNANCE
+correlation_id
+supports traceability across:
+Background Jobs      ↓Notifications      ↓Integrations      ↓Audit Events
+
+VALIDATION CHECKLIST
+✓ Configuration Governance Applied
+✓ Feature Targeting Applied
+✓ Feature Lifecycle Applied
+✓ Background Job Framework Applied
+✓ Retry Governance Applied
+✓ Execution Diagnostics Applied
+✓ Worker Attribution Applied
+✓ Scheduler Readiness Applied
+✓ SaaS Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+010_PLATFORM_OPERATIONS_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+system_settingsfeature_flagsbackground_jobsjob_executions
+Platform Operations Completion:
+50%
+
+NEXT STEP
+Perform architecture review for:
+scheduled_tasksapplication_healthsystem_announcements
+before generating:
+010_PLATFORM_OPERATIONS_SCHEMA.SQL – PART 2
+This phase will establish:
+Scheduler FrameworkApplication MonitoringHealth TrackingSystem CommunicationsOperational VisibilityProduction Operations
+and complete the Platform Operations module.
+
+END OF DOCUMENT

@@ -1,0 +1,281 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+004 ASSESSMENT EXECUTION SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+004 Assessment Execution Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Assessment Execution
+Depends On
+Security Schema v1.0 FINAL, Governance Foundation Schema v1.0 FINAL, Assessment Definition Schema v1.1 FINAL
+Approved For
+DDL Generation
+
+1. PURPOSE
+The Assessment Execution module is responsible for the complete runtime lifecycle of an assessment attempt.
+This module transforms:
+text id="x1" Assessment Content
+into:
+text id="x2" Candidate Assessment Attempt
+and manages:
+Assessment Start
+Question Navigation
+Timer Management
+Save Draft
+Resume Attempt
+Submission
+Auto Submission
+Evaluation Readiness
+Attempt Replay
+
+2. EXECUTION ARCHITECTURE
+Approved Runtime Model
+text id="x3" Assessment Version         ↓ Assessment Attempt         ↓ Attempt Sections         ↓ Attempt Question Banks         ↓ Attempt Questions         ↓ Question Responses
+
+Design Principle
+The execution layer must never rely on live content.
+All runtime entities reference immutable versioned content.
+This guarantees:
+```text id=“x4”Historical Replay
+Audit Accuracy
+Review Accuracy
+Reporting Accuracy
+---# 3. TABLES IN SCOPE## Runtime Tables```text id="x5"assessment_attemptsattempt_timersassessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questionsquestion_responsesdraft_saves
+
+4. ATTEMPT LIFECYCLE
+Workflow
+text id="x6" Start Assessment         ↓ In Progress         ↓ Save Draft (Optional)         ↓ Resume (Optional)         ↓ Submit         ↓ Evaluation         ↓ Completed
+
+Auto Submission Workflow
+text id="x7" Start Assessment         ↓ Timer Expired         ↓ Auto Submit         ↓ Evaluation
+
+5. ASSESSMENT_ATTEMPTS
+Purpose
+Represents a candidate assessment attempt.
+One record per assessment attempt.
+
+Relationships
+text id="x8" User         ↓ Assessment Attempt         ↓ Attempt Sections
+
+Core Attributes
+```text id=“x9”user_id
+assessment_version_id
+attempt_number
+attempt_guid
+attempt_status
+submission_reason
+started_date
+submitted_date
+score
+percentage
+result_status
+---## Attempt Status Values```text id="x10"NotStartedInProgressPausedSubmittedEvaluatedExpiredCancelled
+
+Submission Reason Values
+```text id=“x11”Manual
+AutoSubmit
+AdminSubmit
+---## Result Status Values```text id="x12"PassFailPending
+
+6. ATTEMPT_TIMERS
+Purpose
+Stores timer state for assessment execution.
+Supports future timer expansion.
+
+Core Attributes
+```text id=“x13”attempt_id
+timer_type
+allocated_seconds
+remaining_seconds
+started_date
+last_updated_date
+---## Supported Timer Types```text id="x14"AssessmentSection
+
+Future Expansion
+text id="x15" Question
+supported without schema change.
+
+7. ASSESSMENT_ATTEMPT_SECTIONS
+Purpose
+Snapshot of Sections presented during an attempt.
+
+Relationships
+text id="x16" Assessment Attempt         ↓ Attempt Sections
+
+Core Attributes
+```text id=“x17”attempt_id
+section_version_id
+display_order
+section_status
+---## Section Status Values```text id="x18"NotStartedInProgressCompletedSkipped
+
+8. ASSESSMENT_ATTEMPT_QUESTION_BANKS
+Purpose
+Snapshot of Question Banks used during an attempt.
+Supports random selection scenarios.
+
+Relationships
+text id="x19" Attempt Section         ↓ Attempt Question Bank
+
+Core Attributes
+```text id=“x20”attempt_section_id
+question_bank_version_id
+display_order
+---## Runtime BenefitPreserves exact Question Bank Version used by the candidate.---# 9. ASSESSMENT_ATTEMPT_QUESTIONS## PurposeRepresents the exact questions delivered to a candidate.Supports:```text id="x21"Random SelectionRandom OrderingHistorical Replay
+
+Relationships
+text id="x22" Attempt Question Bank         ↓ Attempt Questions
+
+Core Attributes
+```text id=“x23”attempt_question_bank_id
+question_version_id
+display_order
+question_status
+is_answered
+---## Question Status Values```text id="x24"NotVisitedVisitedAnsweredSkipped
+
+10. QUESTION_RESPONSES
+Purpose
+Stores candidate responses.
+Supports all approved question types.
+
+Relationships
+text id="x25" Attempt Question         ↓ Question Responses
+
+Core Attributes
+```text id=“x26”attempt_question_id
+response_value
+response_date
+is_final_answer
+---## Response Examples### Single Choice```text id="x27"A
+
+Multiple Choice
+text id="x28" A,C,D
+
+Text
+text id="x29" Dependency Injection
+
+Number
+text id="x30" 42
+
+Future Compatible
+```text id=“x31”Essay
+Coding
+File Upload
+---# 11. DRAFT_SAVES## PurposeSupports draft recovery and resume functionality.---## Relationships```text id="x32"Assessment Attempt        ↓Draft Saves
+
+Core Attributes
+```text id=“x33”attempt_id
+save_date
+draft_payload_json
+---## BenefitResume operations do not need to reconstruct state from multiple tables.---# 12. SNAPSHOT STRATEGY## Approved ApproachStore references to immutable version entities.Example:```text id="x34"assessment_version_idsection_version_idquestion_bank_version_idquestion_version_id
+
+Rejected Approach
+text id="x35" Store full content snapshots
+Reason:
+text id="x36" Versioned entities are already immutable.
+No duplication required.
+
+13. RESUME STRATEGY
+Attempt Identifier
+text id="x37" attempt_guid
+used as the runtime resume identifier.
+
+Current Position Tracking
+Assessment Attempt stores:
+```text id=“x38”current_section_version_id
+current_question_version_id
+---## PurposeSupports:```text id="x39"Resume Exactly Where Candidate Left Off
+
+14. EVALUATION STRATEGY
+Evaluation results belong to:
+text id="x40" assessment_attempts
+
+Stored Fields
+```text id=“x41”score
+percentage
+result_status
+---## BenefitsSupports:```text id="x42"ReportingCertificationAnalytics
+without duplicating evaluation data.
+
+15. RANDOMIZATION STRATEGY
+Question Bank Level
+```text id=“x43”RandomSelection
+AllQuestions
+---## Question Level```text id="x44"is_randomizable
+
+Option Level
+text id="x45" randomize_option_order
+
+Result
+Candidate receives a deterministic runtime snapshot.
+
+16. AUDIT INTEGRATION
+All execution events are auditable through:
+```text id=“x46”audit_logs
+activity_logs
+---## Examples```text id="x47"Assessment StartedDraft SavedAssessment SubmittedTimer ExpiredEvaluation Completed
+
+17. ATTACHMENT INTEGRATION
+Execution module does not own attachments.
+All attachments remain associated with content entities.
+
+18. INDEX STRATEGY
+assessment_attempts
+```text id=“x48”user_id
+assessment_version_id
+attempt_status
+attempt_guid
+---## assessment_attempt_sections```text id="x49"attempt_idsection_version_id
+
+assessment_attempt_question_banks
+```text id=“x50”attempt_section_id
+question_bank_version_id
+---## assessment_attempt_questions```text id="x51"attempt_question_bank_idquestion_version_idquestion_status
+
+question_responses
+```text id=“x52”attempt_question_id
+is_final_answer
+---## draft_saves```text id="x53"attempt_idsave_date
+
+19. VALIDATION CHECKLIST
+✓ Runtime Snapshot Architecture Applied
+✓ Version-Safe References Applied
+✓ Save Draft Strategy Applied
+✓ Resume Strategy Applied
+✓ Auto Submission Strategy Applied
+✓ Evaluation Strategy Applied
+✓ Attempt Numbering Applied
+✓ Timer Architecture Applied
+✓ Randomization Compatibility Applied
+✓ Reporting Compatibility Applied
+✓ Audit Compatibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+APPROVAL STATUS
+Document:
+text id="x54" 004 Assessment Execution Schema Design
+Version:
+text id="x55" 1.0
+Status:
+text id="x56" FINAL APPROVED FOR DDL GENERATION
+
+NEXT STEP
+Perform:
+text id="x57" Assessment Execution Architecture Review v1.0
+before generating:
+text id="x58" 004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 1
+Tables:
+```text id=“x59”assessment_attempts
+attempt_timers```
+These are the foundation tables for the runtime engine and should be validated before DDL generation.
+
+END OF DOCUMENT

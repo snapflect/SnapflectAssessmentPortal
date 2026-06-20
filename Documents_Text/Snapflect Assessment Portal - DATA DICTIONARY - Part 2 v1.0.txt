@@ -1,0 +1,611 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+DATA DICTIONARY
+PART 2 – ASSESSMENT DEFINITION LAYER
+VERSION 1.0
+Status: Draft for Review
+Based On:
+Master PRD v1.2 FINAL
+ERD v1.1 FINAL
+Database Standards & Conventions v1.1 FINAL
+
+1. TECHNOLOGIES
+Purpose
+Represents the highest-level assessment classification.
+Example:
+.NET
+Java
+Angular
+React
+Azure
+AWS
+SQL Server
+
+Table Name
+technologies
+
+Columns
+Column
+Data Type
+Nullable
+Default
+PK
+FK
+Unique
+Description
+id
+BIGINT UNSIGNED
+No
+Auto Increment
+Yes
+No
+Yes
+Primary key
+uuid
+CHAR(36)
+No
+-
+No
+No
+Yes
+Public identifier
+technology_code
+VARCHAR(100)
+No
+-
+No
+No
+Yes
+Unique technology code
+technology_name
+VARCHAR(200)
+No
+-
+No
+No
+Yes
+Technology name
+display_name
+VARCHAR(200)
+No
+-
+No
+No
+No
+UI display name
+description
+TEXT
+Yes
+NULL
+No
+No
+No
+Description
+icon_url
+VARCHAR(500)
+Yes
+NULL
+No
+No
+No
+Technology icon
+banner_url
+VARCHAR(500)
+Yes
+NULL
+No
+No
+No
+Technology banner
+display_order
+INT
+No
+0
+No
+No
+No
+UI ordering
+status
+VARCHAR(50)
+No
+Draft
+No
+No
+No
+Lifecycle status
+created_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Audit
+created_date
+DATETIME(3)
+No
+Current Timestamp
+No
+No
+No
+Created
+modified_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Modified By
+modified_date
+DATETIME(3)
+Yes
+NULL
+No
+No
+No
+Modified Date
+is_active
+TINYINT(1)
+No
+1
+No
+No
+No
+Active Flag
+is_deleted
+TINYINT(1)
+No
+0
+No
+No
+No
+Soft Delete
+
+Business Rules
+Technology name must be unique.
+Technology code must be unique.
+Technologies can contain multiple assessments.
+
+2. ASSESSMENTS
+Purpose
+Represents a complete assessment definition.
+
+Table Name
+assessments
+
+Versioning
+Supported.
+Published assessments cannot be edited.
+New versions must be created.
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+technology_id
+BIGINT UNSIGNED
+parent_assessment_id
+BIGINT UNSIGNED
+assessment_code
+VARCHAR(100)
+assessment_name
+VARCHAR(255)
+description
+TEXT
+instructions
+TEXT
+terms_conditions
+TEXT
+disclaimer
+TEXT
+duration_minutes
+INT
+passing_percentage
+DECIMAL(5,2)
+difficulty_level
+VARCHAR(50)
+assignment_type
+VARCHAR(50)
+available_from
+DATETIME(3)
+available_to
+DATETIME(3)
+overall_pass_rule
+VARCHAR(100)
+section_pass_rule
+VARCHAR(100)
+randomization_strategy
+VARCHAR(100)
+version_number
+INT
+is_current_version
+TINYINT(1)
+status
+VARCHAR(50)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+is_active
+TINYINT(1)
+is_deleted
+TINYINT(1)
+
+Difficulty Levels
+BeginnerIntermediateAdvancedExpert
+
+Assessment Status Lifecycle
+DraftUnder ReviewApprovedPublishedArchived
+
+Business Rules
+Published assessments are read-only.
+New version required for changes.
+One current version per assessment lineage.
+
+3. ASSESSMENT_SECTIONS
+Purpose
+Logical subdivision of assessments.
+
+Table Name
+assessment_sections
+
+Versioning
+Supported.
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+assessment_id
+BIGINT UNSIGNED
+parent_section_id
+BIGINT UNSIGNED
+section_code
+VARCHAR(100)
+section_name
+VARCHAR(255)
+description
+TEXT
+display_order
+INT
+weightage
+DECIMAL(5,2)
+minimum_pass_percentage
+DECIMAL(5,2)
+mandatory_pass_flag
+TINYINT(1)
+questions_to_pick
+INT
+randomization_enabled
+TINYINT(1)
+version_number
+INT
+is_current_version
+TINYINT(1)
+status
+VARCHAR(50)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+is_active
+TINYINT(1)
+is_deleted
+TINYINT(1)
+
+Business Rules
+Sections belong to assessments.
+Display order controls UI ordering.
+Randomization can be enabled per section.
+
+4. QUESTION_BANKS
+Purpose
+Reusable collections of questions.
+
+Table Name
+question_banks
+
+Versioning
+Supported.
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+section_id
+BIGINT UNSIGNED
+parent_question_bank_id
+BIGINT UNSIGNED
+question_bank_code
+VARCHAR(100)
+question_bank_name
+VARCHAR(255)
+description
+TEXT
+difficulty_level
+VARCHAR(50)
+question_pool_size
+INT
+version_number
+INT
+is_current_version
+TINYINT(1)
+status
+VARCHAR(50)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+is_active
+TINYINT(1)
+is_deleted
+TINYINT(1)
+
+Difficulty Levels
+BeginnerIntermediateAdvancedExpert
+
+5. QUESTIONS
+Purpose
+Master repository of reusable questions.
+
+Table Name
+questions
+
+Versioning
+Supported.
+Published questions are immutable.
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+parent_question_id
+BIGINT UNSIGNED
+question_code
+VARCHAR(100)
+question_text
+TEXT
+question_description
+TEXT
+question_type
+VARCHAR(50)
+difficulty_level
+VARCHAR(50)
+marks
+DECIMAL(8,2)
+negative_marks
+DECIMAL(8,2)
+explanation
+TEXT
+estimated_time_seconds
+INT
+version_number
+INT
+is_current_version
+TINYINT(1)
+status
+VARCHAR(50)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+is_active
+TINYINT(1)
+is_deleted
+TINYINT(1)
+
+Supported Question Types
+Single ChoiceMultiple ChoiceTrue FalseFill In BlankDescriptiveCode SnippetScenario BasedCase Study
+
+Difficulty Levels
+BeginnerIntermediateAdvancedExpert
+
+Governance Rules
+Published question versions:
+Read Only
+Changes require:
+New Version Creation
+
+6. QUESTION_BANK_QUESTIONS
+Purpose
+Maps questions to question banks.
+Supports question reuse.
+
+Table Name
+question_bank_questions
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+question_bank_id
+BIGINT UNSIGNED
+question_id
+BIGINT UNSIGNED
+display_order
+INT
+is_mandatory
+TINYINT(1)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+
+Unique Constraint
+(question_bank_id, question_id)
+
+7. QUESTION_OPTIONS
+Purpose
+Stores selectable answer options.
+
+Table Name
+question_options
+
+Supported Question Types
+Single ChoiceMultiple ChoiceTrue False
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+question_id
+BIGINT UNSIGNED
+option_text
+TEXT
+display_order
+INT
+is_correct
+TINYINT(1)
+status
+VARCHAR(50)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+
+8. QUESTION_ANSWERS
+Purpose
+Stores expected answers for non-option based questions.
+
+Table Name
+question_answers
+
+Supported Types
+Fill In BlankDescriptiveCode SnippetScenario BasedCase Study
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+question_id
+BIGINT UNSIGNED
+answer_text
+TEXT
+answer_format
+VARCHAR(100)
+evaluation_type
+VARCHAR(100)
+status
+VARCHAR(50)
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+
+Business Rules
+Not used for MCQ questions.
+Supports future AI-assisted evaluation.
+
+9. CONTENT_APPROVALS
+Purpose
+Generic approval workflow.
+
+Table Name
+content_approvals
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+entity_type
+VARCHAR(50)
+entity_id
+BIGINT UNSIGNED
+approval_version
+INT
+approval_level
+INT
+approval_status
+VARCHAR(50)
+requested_by
+BIGINT UNSIGNED
+requested_date
+DATETIME(3)
+reviewed_by
+BIGINT UNSIGNED
+reviewed_date
+DATETIME(3)
+comments
+TEXT
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+
+Supported Entity Types
+AssessmentSectionQuestion BankQuestion
+
+Approval Statuses
+PendingIn ReviewApprovedRejectedCancelled
+
+INDEX STRATEGY
+assessments
+UX_assessments_uuidUX_assessments_codeIX_assessments_technologyIX_assessments_statusIX_assessments_current_version
+
+assessment_sections
+IX_sections_assessmentIX_sections_display_order
+
+question_banks
+IX_question_banks_sectionIX_question_banks_current_version
+
+questions
+UX_questions_codeIX_questions_typeIX_questions_difficultyIX_questions_current_version
+
+question_bank_questions
+UX_question_bank_questionIX_question_bank_questions_question
+
+PART 2 VALIDATION CHECKLIST
+✓ Technology Hierarchy Defined
+✓ Assessment Lifecycle Defined
+✓ Assessment Versioning Defined
+✓ Section Versioning Defined
+✓ Question Bank Versioning Defined
+✓ Question Versioning Defined
+✓ Difficulty Standardization Defined
+✓ Question Type Standardization Defined
+✓ Content Approval Workflow Defined
+✓ Governance Rules Defined
+✓ Database Standards v1.1 Compliant
+
+END OF DATA DICTIONARY PART 2
+VERSION 1.0

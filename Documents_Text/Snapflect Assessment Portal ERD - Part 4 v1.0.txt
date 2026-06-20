@@ -1,0 +1,498 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+ENTITY RELATIONSHIP DIAGRAM (ERD)
+PART 4 – GOVERNANCE, NOTIFICATIONS, FILES, REPORTING & OPERATIONS
+VERSION 1.0
+
+1. DOMAIN OVERVIEW
+This layer manages:
+Notifications
+Audit Logging
+Activity Tracking
+System Settings
+Files & Attachments
+Import Jobs
+Export Jobs
+Report Jobs
+Report Exports
+System Health Monitoring
+Operational Governance
+
+2. ENTITY RELATIONSHIP DIAGRAM
+notification_templates          |          | 1 : M          |notification_logsusers   |   | 1 : M   |notificationsusers   |   | 1 : M   |activity_logsusers   |   | 1 : M   |audit_logssystem_settingsfile_uploads   |   | 1 : M   |attachmentsreport_jobs   |   | 1 : M   |report_exportsimport_jobsexport_jobssystem_health_logs
+
+3. NOTIFICATION_TEMPLATES
+Purpose
+Stores reusable notification templates.
+
+Table
+notification_templates
+
+Primary Key
+id
+
+Columns
+id
+template_code
+template_name
+template_type
+version_number
+subject_template
+message_template
+description
+status
+created_by
+created_date
+modified_by
+modified_date
+is_active
+is_deleted
+
+Examples
+User Registration
+Password Reset
+Assessment Assigned
+Assessment Submitted
+Assessment Reviewed
+Review Acknowledgement Reminder
+
+Unique Constraints
+template_code
+version_number
+
+4. NOTIFICATION_LOGS
+Purpose
+Stores delivery history and immutable notification snapshots.
+
+Architecture
+Hybrid Notification Architecture
+
+Table
+notification_logs
+
+Primary Key
+id
+
+Foreign Keys
+template_id → notification_templates.id
+user_id → users.id
+
+Columns
+id
+template_id
+template_version
+user_id
+channel
+subject_snapshot
+message_snapshot
+delivery_status
+sent_date
+delivered_date
+read_date
+failure_reason
+created_date
+
+Channels
+Email
+In-App
+Future:
+SMS
+WhatsApp
+Push
+
+Delivery Status
+Pending
+Queued
+Sent
+Delivered
+Read
+Failed
+
+Rules
+Rendered content must be preserved.
+Template changes must not affect history.
+
+5. NOTIFICATIONS
+Purpose
+Stores user-facing in-app notifications.
+
+Table
+notifications
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+notification_log_id → notification_logs.id
+
+Columns
+id
+user_id
+notification_log_id
+title
+message
+notification_type
+is_read
+read_date
+created_date
+
+Relationships
+1 User
+→ Many Notifications
+
+6. AUDIT_LOGS
+Purpose
+Provides enterprise auditability.
+
+Architecture
+Generic Polymorphic Audit Architecture
+
+Table
+audit_logs
+
+Primary Key
+id
+
+Foreign Keys
+performed_by → users.id
+
+Columns
+id
+entity_type
+entity_id
+action_type
+old_value_json
+new_value_json
+performed_by
+performed_date
+ip_address
+user_agent
+audit_reference
+created_date
+
+Example
+Entity Type:
+Assessment
+Entity Id:
+25
+Action:
+Updated
+
+Supported Entity Types
+User
+Technology
+Assessment
+Section
+Question Bank
+Question
+Assignment
+Attempt
+Review
+Settings
+Notification
+
+7. ACTIVITY_LOGS
+Purpose
+Stores user activity history.
+
+Table
+activity_logs
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+
+Columns
+id
+user_id
+activity_type
+activity_details
+reference_entity_type
+reference_entity_id
+activity_date
+created_date
+
+Examples
+Login
+Logout
+Assessment Started
+Assessment Saved
+Assessment Submitted
+Review Viewed
+Profile Updated
+
+8. SYSTEM_SETTINGS
+Purpose
+Stores configurable application settings.
+
+Architecture
+Scoped Configuration Architecture
+
+Table
+system_settings
+
+Primary Key
+id
+
+Columns
+id
+scope_type
+scope_id
+setting_key
+setting_value
+setting_data_type
+description
+created_by
+created_date
+modified_by
+modified_date
+is_active
+
+Scope Types
+Global
+Technology
+Assessment
+Section
+Question Bank
+
+Examples
+Timer Duration
+Passing Percentage
+Auto Save Interval
+File Upload Limit
+
+Resolution Order
+Section
+↓
+Assessment
+↓
+Technology
+↓
+Global
+
+9. FILE_UPLOADS
+Purpose
+Stores uploaded file metadata.
+
+Table
+file_uploads
+
+Primary Key
+id
+
+Foreign Keys
+uploaded_by → users.id
+
+Columns
+id
+file_name
+stored_file_name
+file_path
+file_extension
+mime_type
+file_size
+storage_provider
+checksum
+uploaded_by
+uploaded_date
+status
+created_date
+
+Storage Providers
+Local
+Future:
+Azure Blob
+AWS S3
+
+10. ATTACHMENTS
+Purpose
+Associates uploaded files to business entities.
+
+Architecture
+Generic Attachment Architecture
+
+Table
+attachments
+
+Primary Key
+id
+
+Foreign Keys
+file_upload_id → file_uploads.id
+
+Columns
+id
+file_upload_id
+entity_type
+entity_id
+attachment_type
+display_order
+created_date
+
+Supported Entities
+Technology
+Assessment
+Section
+Question Bank
+Question
+Review
+
+11. REPORT_JOBS
+Purpose
+Tracks report generation requests.
+
+Table
+report_jobs
+
+Primary Key
+id
+
+Foreign Keys
+requested_by → users.id
+
+Columns
+id
+report_type
+parameters_json
+requested_by
+requested_date
+status
+started_date
+completed_date
+failure_reason
+created_date
+
+Statuses
+Pending
+Processing
+Completed
+Failed
+
+12. REPORT_EXPORTS
+Purpose
+Stores generated report metadata.
+
+Architecture
+Metadata in DB
+Files in Storage
+
+Table
+report_exports
+
+Primary Key
+id
+
+Foreign Keys
+report_job_id → report_jobs.id
+file_upload_id → file_uploads.id
+
+Columns
+id
+report_job_id
+file_upload_id
+export_format
+export_date
+expiry_date
+download_count
+created_date
+
+Export Formats
+PDF
+Excel
+CSV
+
+13. IMPORT_JOBS
+Purpose
+Tracks bulk import operations.
+
+Table
+import_jobs
+
+Primary Key
+id
+
+Columns
+id
+entity_type
+source_file_id
+import_status
+total_records
+successful_records
+failed_records
+error_summary
+requested_by
+requested_date
+completed_date
+created_date
+
+14. EXPORT_JOBS
+Purpose
+Tracks bulk export requests.
+
+Table
+export_jobs
+
+Primary Key
+id
+
+Columns
+id
+entity_type
+export_status
+requested_by
+requested_date
+completed_date
+created_date
+
+15. SYSTEM_HEALTH_LOGS
+Purpose
+Stores operational monitoring metrics.
+
+Table
+system_health_logs
+
+Primary Key
+id
+
+Columns
+id
+metric_name
+metric_value
+metric_unit
+captured_date
+created_date
+
+Examples
+Active Users
+API Requests
+Failed Requests
+Storage Usage
+Notification Queue
+
+16. DATA GOVERNANCE RULES
+All settings changes must be auditable.
+All notification deliveries must be traceable.
+All report exports must be auditable.
+All file downloads must be permission controlled.
+All imports must be traceable.
+All exports must be traceable.
+
+17. PART 4 REVIEW CHECKLIST
+✓ Notification Templates
+✓ Hybrid Notification Storage
+✓ In-App Notifications
+✓ Generic Audit Architecture
+✓ Activity Tracking
+✓ Scoped Configuration
+✓ Generic Attachments
+✓ File Storage Metadata
+✓ Report Generation
+✓ Report Export Tracking
+✓ Import Tracking
+✓ Export Tracking
+✓ System Health Monitoring
+✓ Governance Compliance
+
+END OF ERD PART 4VERSION 1.0

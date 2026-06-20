@@ -1,0 +1,200 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+006 CERTIFICATION SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+006 Certification Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Certification
+Depends On
+Evaluation Schema v1.1 FINAL
+Approved For
+Architecture Review
+
+1. PURPOSE
+The Certification module manages the complete credential lifecycle:
+Eligibility    ↓Certificate Generation    ↓Certificate Issuance    ↓Certificate Verification    ↓Certificate Renewal    ↓Certificate Revocation
+The module provides:
+Digital Certificates
+Verification Portal Support
+Public Verification URLs
+QR Code Verification
+Revocation Management
+Certificate Auditability
+Future Blockchain Readiness
+
+2. CERTIFICATION LIFECYCLE
+Evaluation Result        ↓Certification Eligibility        ↓Certificate Issued        ↓Certificate Published        ↓Certificate Verified        ↓Certificate Renewed / Revoked
+
+3. DESIGN PRINCIPLES
+Immutable Certificate Records
+Once issued:
+Certificate
+must never be modified.
+Any correction requires:
+New Certificate Version
+or
+Revocation
+
+Public Verifiability
+Every certificate must support:
+Verification CodeVerification URLQR Verification
+
+Historical Auditability
+Every issuance event must be preserved.
+No destructive updates.
+
+4. TABLES IN SCOPE
+Certificate Definitions
+certificate_templates
+
+Certificate Lifecycle
+certificatescertificate_issuances
+
+Verification
+certificate_verifications
+
+Governance
+certificate_revocations
+
+Security
+certificate_signatures
+
+5. CERTIFICATE_TEMPLATES
+Purpose
+Defines certificate layout and metadata.
+Examples:
+Snapflect Associate ArchitectSnapflect Security PractitionerSnapflect AI Developer
+
+Versioning
+Future-ready:
+Template        ↓Template Version
+if required later.
+Phase 1 may keep templates simple.
+
+Core Attributes
+template_codetemplate_namecertificate_typestatus
+
+6. CERTIFICATES
+Purpose
+Master certificate record.
+Represents an issued credential.
+
+Core Attributes
+certificate_numberverification_codecandidate_user_idevaluation_result_idcertificate_statusissued_dateexpiry_date
+
+Status Values
+IssuedExpiredRevokedSuspended
+
+Requirements
+Certificate number must be globally unique.
+Verification code must be cryptographically random.
+
+7. CERTIFICATE_ISSUANCES
+Purpose
+Tracks issuance operations.
+Supports:
+Initial IssuanceRe-IssuanceRenewalReplacement
+
+Core Attributes
+certificate_idissuance_typeissued_byissued_date
+
+Issuance Types
+InitialRenewalReplacementReIssue
+
+8. CERTIFICATE_VERIFICATIONS
+Purpose
+Stores verification activity.
+Supports:
+Public VerificationEmployer VerificationAudit Verification
+
+Core Attributes
+certificate_idverification_dateverification_sourceverification_result
+
+Verification Sources
+PortalQRAPIAdmin
+
+9. CERTIFICATE_REVOCATIONS
+Purpose
+Stores revocation history.
+Certificates are never deleted.
+
+Revocation Reasons
+FraudPolicyViolationAdministrativeCorrectionCandidateRequest
+
+Core Attributes
+certificate_idrevocation_reasonrevoked_byrevoked_date
+
+10. CERTIFICATE_SIGNATURES
+Purpose
+Stores digital signing metadata.
+Supports:
+Digital SignatureVerification IntegrityFuture Blockchain Integration
+
+Core Attributes
+certificate_idsignature_hashsignature_algorithmsigned_date
+
+11. QR CODE STRATEGY
+Each certificate receives:
+verification_code
+Verification URL format:
+https://verify.snapflect.com/c/{verification_code}
+QR code generation occurs in application services.
+No image storage required.
+
+12. CERTIFICATION ELIGIBILITY
+Source:
+evaluation_results.is_certification_eligible
+Only eligible results may generate certificates.
+
+13. AUDIT INTEGRATION
+All certification events must be captured through:
+audit_logsactivity_logs
+Examples:
+Certificate IssuedCertificate VerifiedCertificate RevokedCertificate Renewed
+
+14. SECURITY INTEGRATION
+Issuance permissions controlled by:
+rolespermissions
+from Security Schema.
+
+15. AI READINESS
+Future support:
+AI Skill AnalysisAI Badge RecommendationsAdaptive Certification Paths
+through metadata_json extensibility.
+
+16. VALIDATION CHECKLIST
+✓ Certificate Lifecycle Defined
+✓ Verification Architecture Defined
+✓ Revocation Architecture Defined
+✓ Signature Architecture Defined
+✓ Public Verification Support Defined
+✓ Audit Integration Defined
+✓ Security Integration Defined
+✓ Enterprise Readiness Defined
+
+APPROVAL STATUS
+Document:
+006 Certification Schema Design
+Version:
+1.0
+Status:
+APPROVED FOR ARCHITECTURE REVIEW
+
+NEXT STEP
+Perform:
+Certification Architecture Review v1.0
+before generating:
+006_CERTIFICATION_SCHEMA.SQL – PART 1
+Review Scope:
+certificate_templatescertificatescertificate_issuances
+These tables form the foundation of the credential lifecycle and should be validated before DDL generation.
+
+END OF DOCUMENT

@@ -1,0 +1,240 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+005 EVALUATION SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+005 Evaluation Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2, Part 3
+Amendment Type
+Enterprise Evaluation Enhancement
+Approval Status
+Approved
+Effective Version
+005 Evaluation Schema v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+Evaluation Schema Master Review v1.0
+The review confirmed that the Evaluation module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise enhancements for:
+Result Version Management
+Publication Auditability
+Review SLA Tracking
+Evaluation Scheduling
+Rule Assignment Governance
+
+2. EVALUATION_RESULTS ENHANCEMENT
+2.1 Current Result Tracking
+New Column
+is_current_version TINYINT(1)NOTNULLDEFAULT1
+
+Purpose
+Identifies the active evaluation result version.
+
+Example
+Result Version 1    ↓ supersededResult Version 2    ↓ supersededResult Version 3
+Only:
+Result Version 3
+contains:
+is_current_version = 1
+
+Benefits
+Supports:
+Fast Result RetrievalAppealsRe-EvaluationCertification Processing
+without recursive traversal.
+
+2.2 Result Version Governance
+When a new result version is created:
+Previous Version
+must be updated:
+is_current_version = 0
+
+Only one current version may exist for:
+assessment_attempt_id
+
+3. RESULT_PUBLICATIONS ENHANCEMENT
+3.1 Publication Actor Tracking
+New Column
+published_by BIGINT UNSIGNED NULL
+
+Purpose
+Stores the actor who published the result.
+
+Supported Scenarios
+Administrator PublicationScheduled Publication ServiceCertification Release Service
+
+Audit Benefits
+Supports:
+Publication Audit TrailCompliance ReportingRelease Governance
+
+3.2 Foreign Key
+ALTERTABLE result_publicationsADDCONSTRAINT fk_result_publications_published_byFOREIGNKEY (published_by)REFERENCES users(id);
+
+4. REVIEW_ASSIGNMENTS ENHANCEMENT
+4.1 Review Start Tracking
+New Column
+review_started_date DATETIME(3) NULL
+
+Purpose
+Tracks when review activity actually begins.
+
+Example
+Assigned    ↓Review Started    ↓Completed
+
+Benefits
+Supports:
+Reviewer SLAWorkload AnalyticsReview Efficiency Metrics
+
+5. EVALUATION_JOBS ENHANCEMENT
+5.1 Scheduled Evaluation Support
+New Column
+scheduled_date DATETIME(3) NULL
+
+Purpose
+Supports delayed evaluation execution.
+
+Example
+Assessment Submitted        ↓Queued        ↓Scheduled For Midnight        ↓Evaluation Executes
+
+Benefits
+Supports:
+Nightly Batch ProcessingResource OptimizationBulk Evaluation
+
+6. ASSESSMENT_EVALUATION_RULES ENHANCEMENT
+6.1 Effective Dating Support
+New Columns
+effective_from DATETIME(3) NULLeffective_to DATETIME(3) NULL
+
+Purpose
+Supports rule assignment lifecycle management.
+
+Example
+Assessment Version        ↓Rule Set A        ↓Valid Until 2027-01-01
+then
+Rule Set B        ↓Effective From 2027-01-01
+
+Benefits
+Supports:
+Compliance ChangesCertification Policy ChangesFuture Rule Rollouts
+
+7. GOVERNANCE RULES
+Current Result Rule
+For a given:
+assessment_attempt_id
+only one evaluation result may have:
+is_current_version = 1
+
+Publication Rule
+When:
+publication_status = Published
+the following should be populated:
+publication_datepublished_by
+
+Review SLA Rule
+When:
+assignment_status = Accepted
+the reviewer should populate:
+review_started_date
+before review completion.
+
+Scheduled Evaluation Rule
+When:
+scheduled_date
+exists:
+evaluation_jobs
+must not begin execution before that timestamp.
+
+Rule Assignment Effective Dating Rule
+Rule assignments are active only when:
+current_timestamp >= effective_from
+and
+current_timestamp < effective_to
+when an end date exists.
+
+8. INDEXING ENHANCEMENTS
+Evaluation Results
+CREATEINDEX ix_evaluation_results_currentON evaluation_results(    assessment_attempt_id,    is_current_version);
+
+Evaluation Jobs
+CREATEINDEX ix_evaluation_jobs_scheduledON evaluation_jobs(    scheduled_date,    job_status);
+
+Rule Assignments
+CREATEINDEX ix_assessment_eval_rules_effectiveON assessment_evaluation_rules(    effective_from,    effective_to);
+
+9. IMPACT ANALYSIS
+Artifact
+Impact
+Evaluation Rules
+Improved
+Evaluation Processing
+Improved
+Re-Evaluation Workflow
+Improved
+Manual Review Workflow
+Improved
+Publication Governance
+Improved
+Certification Readiness
+Improved
+Auditability
+Improved
+
+10. FINAL VALIDATION SUMMARY
+Area
+Result
+Rule Engine Integrity
+PASS
+Evaluation Processing
+PASS
+Result Versioning
+PASS
+Manual Review Workflow
+PASS
+Publication Workflow
+PASS
+Certification Readiness
+PASS
+Auditability
+PASS
+AI Readiness
+PASS
+Enterprise Readiness
+PASS
+
+11. APPROVED EVALUATION BASELINE
+The approved evaluation tables are:
+evaluation_rulesevaluation_rule_versionsassessment_evaluation_rulesevaluation_jobsevaluation_resultsmanual_review_queuereview_assignmentsresult_publications
+with all amendments merged.
+
+APPROVAL STATUS
+Document:
+005 Evaluation Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVED
+MERGED INTO BASELINE
+
+FINAL MODULE STATUS
+005_EVALUATION_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Data Dictionary v1.1 FINAL✓Security Schema v1.0 FINAL✓Governance Foundation Schema v1.0 FINAL✓Assessment Definition Schema v1.1 FINAL✓Assessment Execution Schema v1.2 FINAL✓Evaluation Schema v1.1 FINAL✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+006_CERTIFICATION_SCHEMA
+Core Areas:
+certificatescertificate_templatescertificate_issuancescertificate_verificationscertificate_revocationsdigital_signatures
+This module will implement certificate generation, verification, revocation, and secure credential lifecycle management.
+
+END OF DOCUMENT

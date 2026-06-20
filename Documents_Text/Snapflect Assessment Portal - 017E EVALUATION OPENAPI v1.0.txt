@@ -1,0 +1,322 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017E_EVALUATION_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Evaluation OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Evaluation & Results
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+005_EVALUATION_RESULTS_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+Evaluation QueueAuto EvaluationManual EvaluationRubricsAnswer ScoringScore OverridesResult GenerationResult PublicationResult RecalculationPass/Fail Determination
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Evaluation APIversion:1.0.0description: Evaluation, Scoring and Results APIsservers:-url: /api/v1tags:-name: Evaluations-name: Evaluation Queue-name: Rubrics-name: Results
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Evaluation.ViewEvaluation.ReviewEvaluation.OverrideResult.ViewResult.Publish
+
+4. EVALUATION QUEUE APIS
+List Evaluation Queue
+Endpoint
+GET /api/v1/evaluation-queue
+Permission
+Evaluation.View
+Filters
+assessmentIdevaluatorIdstatusprioritydateFromdateTo
+Response
+{"success":true,"data":[],"pagination":{}}
+
+Get Queue Item
+Endpoint
+GET /api/v1/evaluation-queue/{id}
+Permission
+Evaluation.View
+
+5. EVALUATION APIS
+List Evaluations
+Endpoint
+GET /api/v1/evaluations
+Permission
+Evaluation.View
+Filters
+assessmentIdcandidateIdstatuspublisheddateFromdateTo
+
+Get Evaluation
+Endpoint
+GET /api/v1/evaluations/{id}
+Permission
+Evaluation.View
+
+Start Manual Review
+Endpoint
+POST /api/v1/evaluations/{id}/start-review
+Permission
+Evaluation.Review
+Processing
+Assign EvaluatorLock EvaluationGenerate Audit Event
+Audit Event
+Manual Review Started
+
+Complete Manual Review
+Endpoint
+POST /api/v1/evaluations/{id}/complete-review
+Permission
+Evaluation.Review
+Request DTO
+{"reviewComments":"Evaluation completed."}
+Processing
+Finalize ScoresComplete ReviewQueue Result Generation
+Audit Event
+Manual Review Completed
+
+6. EVALUATION ANSWER APIS
+Get Evaluation Answers
+Endpoint
+GET /api/v1/evaluations/{id}/answers
+Permission
+Evaluation.View
+
+Score Answer
+Endpoint
+POST /api/v1/evaluation-answers/{id}/score
+Permission
+Evaluation.Review
+Request DTO
+{"awardedScore":8,"comments":"Good explanation."}
+Validation
+awardedScore      Requiredcomments          Optional
+Business Rules
+Score Cannot Exceed Maximum ScoreScore Cannot Be Negative
+Audit Event
+Answer Scored
+
+7. AUTO EVALUATION APIS
+Evaluation Status
+Endpoint
+GET /api/v1/evaluations/{id}/status
+Permission
+Evaluation.View
+Response
+{"evaluationId":1001,"autoScoringCompleted":true,"manualReviewRequired":true,"status":"PendingReview"}
+
+Reprocess Auto Evaluation
+Endpoint
+POST /api/v1/evaluations/{id}/reprocess-auto-score
+Permission
+Evaluation.Override
+Audit Event
+Auto Evaluation Reprocessed
+
+8. RUBRIC APIS
+List Rubrics
+Endpoint
+GET /api/v1/rubrics
+Permission
+Evaluation.View
+
+Get Rubric
+Endpoint
+GET /api/v1/rubrics/{id}
+Permission
+Evaluation.View
+
+Create Rubric
+Endpoint
+POST /api/v1/rubrics
+Permission
+Evaluation.Review
+Request DTO
+{"name":"Essay Evaluation Rubric","questionType":"Essay","maxScore":10}
+Audit Event
+Rubric Created
+
+Update Rubric
+Endpoint
+PUT /api/v1/rubrics/{id}
+Permission
+Evaluation.Review
+Audit Event
+Rubric Updated
+
+9. SCORE OVERRIDE APIS
+Override Evaluation Score
+Endpoint
+POST /api/v1/evaluations/{id}/override-score
+Permission
+Evaluation.Override
+Request DTO
+{"newScore":85,"reason":"Approved score correction."}
+Validation
+newScore      Requiredreason        Required
+Processing
+Preserve Original ScoreStore Override ScoreStore Override ReasonGenerate Audit Event
+Audit Event
+Score Overridden
+
+10. RESULT APIS
+List Results
+Endpoint
+GET /api/v1/results
+Permission
+Result.View
+Filters
+assessmentIdcandidateIdpassedpublisheddateFromdateTo
+
+Get Result
+Endpoint
+GET /api/v1/results/{id}
+Permission
+Result.View
+
+Generate Result
+Endpoint
+POST /api/v1/results/generate
+Permission
+Result.Publish
+Request DTO
+{"evaluationId":1001}
+Audit Event
+Result Generated
+
+11. RESULT PUBLICATION APIS
+Publish Result
+Endpoint
+POST /api/v1/results/{id}/publish
+Permission
+Result.Publish
+Processing
+Freeze ResultMark PublishedNotify CandidateTrigger Certification Eligibility Check
+Audit Event
+Result Published
+
+Unpublish Result
+Endpoint
+POST /api/v1/results/{id}/unpublish
+Permission
+Result.Publish
+Audit Event
+Result Unpublished
+
+12. RESULT RECALCULATION APIS
+Recalculate Result
+Endpoint
+POST /api/v1/results/{id}/recalculate
+Permission
+Result.Publish
+Request DTO
+{"reason":"Rubric update applied."}
+Validation
+reason      Required
+Processing
+Preserve Existing ResultCreate Recalculation RecordGenerate New Result VersionGenerate Audit Event
+Audit Event
+Result Recalculated
+
+13. PASS / FAIL RULES
+Pass/Fail Calculation APIs are internal.
+No public endpoint shall directly set:
+PassedFailed
+Rules:
+Assessment Passing PercentageSection Passing PercentageMandatory Section RulesEvaluation Completion Status
+Determination:
+Server Calculated Only
+
+14. EVALUATOR WORKLOAD APIS
+My Evaluation Queue
+Endpoint
+GET /api/v1/my-evaluations
+Permission
+Evaluation.Review
+Response
+{"success":true,"data":[]}
+
+15. MULTI-TENANCY RULES
+Evaluator:
+Assigned Evaluations Only
+
+Organization Administrator:
+Organization Scope Only
+
+Platform Administrator:
+Global Access
+
+Mandatory Enforcement:
+Organization Scope ValidationEvaluator Ownership Validation
+
+16. AUDIT REQUIREMENTS
+Mandatory Audit Events:
+Auto Evaluation CompletedAuto Evaluation ReprocessedManual Review StartedManual Review CompletedAnswer ScoredScore OverriddenRubric CreatedRubric UpdatedResult GeneratedResult PublishedResult UnpublishedResult Recalculated
+
+17. PERFORMANCE REQUIREMENTS
+Auto Scoring:
+Background Queue ProcessingIdempotent Execution
+
+Result Generation:
+TransactionalRetry Safe
+
+Expected Scale:
+100,000+ ResultsConcurrent Evaluation ProcessingHorizontal Scaling Ready
+
+18. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Business Rule Violation
+{"success":false,"code":"BUSINESS_RULE_VIOLATION","message":"Evaluation review is incomplete."}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+19. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate:
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesEvaluation WorkersResult Processors
+
+Do Not Generate:
+Alternative Scoring ModelsAlternative Pass/Fail LogicAlternative Result Calculation RulesDirect Certificate Generation APIs
+
+20. IMPLEMENTATION PACKAGE STATUS
+Aligned With:
+005_EVALUATION_RESULTS_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document:
+017E_EVALUATION_OPENAPI
+Version:
+v1.0
+Status:
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017F_CERTIFICATION_OPENAPI v1.0
+Coverage:
+Certificate GenerationCertificate IssuanceDigital SignaturesCertificate VerificationCertificate RevocationPublic Verification APIsCertification Lifecycle
+This module implements the final outcome of the assessment lifecycle and completes the Assessment → Execution → Evaluation → Certification pipeline.
+
+END OF DOCUMENT

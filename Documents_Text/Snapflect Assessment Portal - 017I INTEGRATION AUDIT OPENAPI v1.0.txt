@@ -1,0 +1,409 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017I_INTEGRATION_AUDIT_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Integration & Audit OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Integration & Audit
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+009_INTEGRATION_AUDIT_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+Integration EventsWebhook ManagementWebhook DeliveriesData ImportsData ExportsAudit EventsAudit SearchCompliance ReportingExternal IntegrationsRetention Management
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Integration & Audit APIversion:1.0.0description: Integration, Audit and Compliance APIsservers:-url: /api/v1tags:-name: Integration Events-name: Webhooks-name: Imports-name: Exports-name: Audit Events-name: Compliance
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Integration.ViewWebhook.ManageImport.CreateImport.ViewExport.CreateExport.ViewAudit.ViewCompliance.ViewCompliance.Generate
+
+4. INTEGRATION EVENT APIS
+Supported Event Types
+AssessmentCreatedAssessmentPublishedAssignmentCreatedAttemptStartedAttemptSubmittedResultGeneratedResultPublishedCertificateIssuedInvoiceGeneratedSubscriptionRenewedUserCreatedOrganizationCreated
+
+List Integration Events
+Endpoint
+GET /api/v1/integration-events
+Permission
+Integration.View
+Filters
+eventTypestatusorganizationIddateFromdateTo
+
+Get Integration Event
+Endpoint
+GET /api/v1/integration-events/{id}
+Permission
+Integration.View
+
+Event Replay
+Endpoint
+POST /api/v1/integration-events/{id}/replay
+Permission
+Integration.View
+Audit Event
+Integration Event Replayed
+
+5. WEBHOOK APIS
+List Webhooks
+Endpoint
+GET /api/v1/webhooks
+Permission
+Webhook.Manage
+
+Get Webhook
+Endpoint
+GET /api/v1/webhooks/{id}
+Permission
+Webhook.Manage
+
+Create Webhook
+Endpoint
+POST /api/v1/webhooks
+Permission
+Webhook.Manage
+Request DTO
+{"name":"HRMS Integration","endpointUrl":"https://example.com/webhook","secretKey":"********","eventTypes":["ResultPublished","CertificateIssued"]}
+Validation
+name RequiredendpointUrl RequiredeventTypes Required
+Audit Event
+Webhook Created
+
+Update Webhook
+Endpoint
+PUT /api/v1/webhooks/{id}
+Permission
+Webhook.Manage
+Audit Event
+Webhook Updated
+
+Delete Webhook
+Endpoint
+DELETE /api/v1/webhooks/{id}
+Permission
+Webhook.Manage
+Behavior
+Soft Delete
+Audit Event
+Webhook Deleted
+
+Rotate Secret
+Endpoint
+POST /api/v1/webhooks/{id}/rotate-secret
+Permission
+Webhook.Manage
+Processing
+Generate New SecretExpire Previous SecretAudit Change
+Audit Event
+Webhook Secret Rotated
+
+Test Webhook
+Endpoint
+POST /api/v1/webhooks/{id}/test
+Permission
+Webhook.Manage
+Audit Event
+Webhook Test Executed
+
+6. WEBHOOK DELIVERY APIS
+Delivery Status Values
+QueuedDeliveredFailedRetriedCancelled
+
+List Deliveries
+Endpoint
+GET /api/v1/webhooks/{id}/deliveries
+Permission
+Webhook.Manage
+
+Get Delivery
+Endpoint
+GET /api/v1/webhook-deliveries/{id}
+Permission
+Webhook.Manage
+
+Retry Delivery
+Endpoint
+POST /api/v1/webhook-deliveries/{id}/retry
+Permission
+Webhook.Manage
+Audit Event
+Webhook Delivery Retried
+
+7. IMPORT APIS
+Supported Import Types
+CandidatesUsersQuestionsAssessmentsOrganizations
+Supported Formats
+CSVExcelJSON
+
+Create Import
+Endpoint
+POST /api/v1/imports
+Permission
+Import.Create
+Request
+multipart/form-data
+Processing
+Validate FileCreate Import JobQueue ProcessingGenerate Audit Event
+Audit Event
+Import Created
+
+List Imports
+Endpoint
+GET /api/v1/imports
+Permission
+Import.View
+
+Get Import
+Endpoint
+GET /api/v1/imports/{id}
+Permission
+Import.View
+
+Import Status
+Endpoint
+GET /api/v1/imports/{id}/status
+Response
+{"status":"Completed","totalRecords":1000,"successfulRecords":990,"failedRecords":10}
+
+8. EXPORT APIS
+Supported Export Types
+AssessmentDataCandidateDataResultDataCertificateDataAuditData
+Supported Formats
+CSVExcelJSONPDF
+
+Create Export
+Endpoint
+POST /api/v1/exports
+Permission
+Export.Create
+Request DTO
+{"exportType":"ResultData","format":"Excel"}
+Processing
+Create Export JobQueue ExportGenerate Download File
+Audit Event
+Export Created
+
+List Exports
+Endpoint
+GET /api/v1/exports
+Permission
+Export.View
+
+Get Export
+Endpoint
+GET /api/v1/exports/{id}
+Permission
+Export.View
+
+Download Export
+Endpoint
+GET /api/v1/exports/{id}/download
+Permission
+Export.View
+Audit Event
+Export Downloaded
+
+9. AUDIT EVENT APIS
+Audit Categories
+AuthenticationAuthorizationAssessmentExecutionEvaluationCertificationBillingAdministrationSystemIntegration
+
+List Audit Events
+Endpoint
+GET /api/v1/audit-events
+Permission
+Audit.View
+Filters
+eventTypeentityTypeuserIdorganizationIddateFromdateTo
+
+Get Audit Event
+Endpoint
+GET /api/v1/audit-events/{id}
+Permission
+Audit.View
+
+10. AUDIT SEARCH APIS
+Advanced Audit Search
+Endpoint
+POST /api/v1/audit-events/search
+Permission
+Audit.View
+Request DTO
+{"userId":1001,"entityType":"Assessment","entityId":500,"eventType":"AssessmentPublished","dateFrom":"2027-01-01","dateTo":"2027-01-31"}
+Audit Event
+Audit Search Executed
+
+Audit Timeline
+Endpoint
+GET /api/v1/audit-events/timeline
+Permission
+Audit.View
+Filters
+entityTypeentityId
+
+11. COMPLIANCE REPORTING APIS
+Supported Reports
+Audit Activity ReportUser Access ReportSecurity Events ReportData Export ReportCompliance Evidence ReportAdministrative Actions Report
+
+List Compliance Reports
+Endpoint
+GET /api/v1/compliance-reports
+Permission
+Compliance.View
+
+Generate Compliance Report
+Endpoint
+POST /api/v1/compliance-reports/generate
+Permission
+Compliance.Generate
+Request DTO
+{"reportType":"AuditActivityReport","dateFrom":"2027-01-01","dateTo":"2027-01-31"}
+Audit Event
+Compliance Report Generated
+
+Download Compliance Report
+Endpoint
+GET /api/v1/compliance-reports/{id}/download
+Permission
+Compliance.View
+
+12. EXTERNAL INTEGRATION APIS
+List Integration Connections
+Endpoint
+GET /api/v1/integration-connections
+Permission
+Integration.View
+
+Get Integration Connection
+Endpoint
+GET /api/v1/integration-connections/{id}
+Permission
+Integration.View
+
+Validate Connection
+Endpoint
+POST /api/v1/integration-connections/{id}/validate
+Permission
+Integration.View
+Audit Event
+Integration Connection Validated
+
+13. RETENTION MANAGEMENT APIS
+Retention Policies
+Endpoint
+GET /api/v1/retention-policies
+Permission
+Compliance.View
+
+Update Retention Policy
+Endpoint
+PUT /api/v1/retention-policies/{id}
+Permission
+Compliance.Generate
+Business Rules
+Audit Retention Minimum 7 YearsCompliance Approval Required
+Audit Event
+Retention Policy Updated
+
+14. MULTI-TENANCY RULES
+Candidate
+No Audit Access
+
+Organization Administrator
+Organization Scope Only
+
+Platform Administrator
+Global Audit Access
+
+Mandatory Enforcement
+Organization Scope ValidationAudit Data IsolationExport Ownership Validation
+
+15. SECURITY REQUIREMENTS
+Webhook Security
+HMAC Signature ValidationTLS RequiredSecret Rotation Supported
+
+Audit Security
+Immutable RecordsNo Update APIsNo Delete APIs
+
+Export Security
+Temporary URLsExpiration SupportAccess Validation
+
+Compliance Security
+Audit Report TrackingDownload AuditingAccess Logging
+
+16. AUDIT REQUIREMENTS
+Mandatory Audit Events
+Webhook CreatedWebhook UpdatedWebhook DeletedWebhook Secret RotatedWebhook DeliveredWebhook FailedImport CreatedImport CompletedImport FailedExport CreatedExport DownloadedAudit Search ExecutedCompliance Report GeneratedRetention Policy UpdatedIntegration Connection Validated
+
+17. PERFORMANCE REQUIREMENTS
+Audit Search
+Indexed SearchesPartitioned Audit TablesDate Range Optimization
+
+Webhook Processing
+Queue BasedRetry CapableIdempotent
+
+Expected Scale
+100M+ Audit Records10M+ Webhook DeliveriesEnterprise Compliance Scale
+
+18. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+Not Found
+{"success":false,"code":"NOT_FOUND","message":"Requested resource not found."}
+
+Compliance Restriction
+{"success":false,"code":"COMPLIANCE_RESTRICTION","message":"Operation violates retention policy."}
+
+19. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesWebhook ServicesAudit ServicesImport ServicesExport ServicesCompliance Services
+
+Do Not Generate
+Alternative Audit ModelsAlternative Webhook ArchitecturesAlternative Retention ModelsMutable Audit Records
+
+20. IMPLEMENTATION PACKAGE STATUS
+Aligned With
+009_INTEGRATION_AUDIT_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document
+017I_INTEGRATION_AUDIT_OPENAPI
+Version
+v1.0
+Status
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017J_PLATFORM_OPERATIONS_OPENAPI v1.0
+Coverage
+Scheduled TasksSystem HealthApplication MonitoringPlatform ConfigurationSystem AnnouncementsBackground JobsOperational ControlsMaintenance Operations
+This module completes the operational management layer and brings the OpenAPI specification suite into alignment with all schemas 001–010.
+
+END OF DOCUMENT

@@ -1,0 +1,228 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+011_AI_PROCTORING_SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+011 AI Proctoring Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2
+Amendment Type
+Enterprise AI Governance & Investigation Enhancement
+Approval Status
+Approved
+Effective Version
+011_AI_PROCTORING_SCHEMA v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+AI Proctoring Schema Master Review v1.0
+The review confirmed that the AI Proctoring module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise-grade enhancements focused on:
+AI Model GovernanceEvidence IntelligenceInvestigation WorkflowFraud OperationsReview Queue ManagementOperational Analytics
+
+2. PROCTORING_SESSIONS ENHANCEMENT
+2.1 Session Termination Tracking
+New Column
+termination_reason VARCHAR(255) NULL
+
+Purpose
+Captures the reason a session ended unexpectedly or was forcefully terminated.
+
+Example Values
+UserExitNetworkFailurePolicyViolationAdministratorActionBrowserCrash
+
+Benefits
+Supports:
+Operational AnalyticsInvestigation ReadinessCompliance AuditsSession Reliability Monitoring
+
+3. PROCTORING_VIOLATIONS ENHANCEMENT
+3.1 Manual Review Queue Indicator
+New Column
+requires_manual_review TINYINT(1)NOTNULLDEFAULT0
+
+Purpose
+Identifies violations requiring human review.
+
+Example
+Low Risk Event    ↓No Manual ReviewCritical Risk Event    ↓Manual Review Required
+
+Benefits
+Supports:
+Reviewer QueuesRisk GovernanceOperational PrioritizationFraud Operations
+
+3.2 Reviewer Queue Optimization
+New Index
+CREATEINDEX ix_proctoring_violations_status_riskON proctoring_violations(    status,    risk_score);
+
+Purpose
+Optimizes investigator work queues and fraud dashboards.
+
+4. AI_DETECTION_RESULTS ENHANCEMENT
+4.1 Model Version Governance
+New Column
+model_version VARCHAR(100) NULL
+
+Purpose
+Tracks the exact AI model version responsible for a detection.
+
+Example Values
+GPT-4o-v1FaceNet-v2VoiceAI-v5ObjectDetector-v3
+
+Benefits
+Supports:
+Model GovernanceRegression AnalysisCompliance AuditsDetection Accuracy Studies
+
+4.2 AI Analytics Optimization
+New Index
+CREATEINDEX ix_ai_detection_results_engine_dateON ai_detection_results(    detection_engine,    detection_date);
+
+Purpose
+Optimizes model performance reporting and AI operational analytics.
+
+5. MEDIA_EVIDENCE ENHANCEMENT
+5.1 Evidence Size Tracking
+New Column
+file_size_bytes BIGINT NULL
+
+Purpose
+Stores physical evidence file size.
+
+Benefits
+Supports:
+Storage AnalyticsRetention PlanningCost ForecastingCapacity Monitoring
+
+5.2 Evidence Source Attribution
+New Column
+evidence_source VARCHAR(100) NULL
+
+Example Values
+WebcamMicrophoneScreenRecorderBrowserExtensionDesktopAgent
+
+Benefits
+Supports:
+Evidence AnalyticsSource ValidationOperational MonitoringForensic Investigations
+
+6. PROCTORING_REVIEWS ENHANCEMENT
+6.1 Review Workflow Status
+New Column
+review_status VARCHAR(50)NOTNULLDEFAULT'Pending'
+
+Purpose
+Tracks lifecycle of review processing.
+
+Allowed Values
+PendingInProgressCompletedEscalated
+
+Benefits
+Supports:
+Reviewer OperationsWork Queue ManagementSLA MonitoringOperational Reporting
+
+7. GOVERNANCE RULES
+Session Governance
+When:
+termination_reason
+is populated, the session should no longer transition to Active.
+
+Violation Governance
+When:
+requires_manual_review = 1
+the violation must enter the reviewer queue.
+
+AI Governance
+Every production AI model deployment should populate:
+model_version
+for traceability.
+
+Evidence Governance
+Evidence records should maintain:
+file_checksum+file_size_bytes+evidence_source
+for forensic defensibility.
+
+Review Governance
+Review workflow transitions:
+Pending    ↓InProgress    ↓CompletedorPending    ↓Escalated
+
+8. IMPACT ANALYSIS
+Artifact
+Impact
+AI Governance
+Improved
+Evidence Governance
+Improved
+Review Operations
+Improved
+Fraud Investigation
+Improved
+Operational Analytics
+Improved
+Enterprise Readiness
+Improved
+
+9. FINAL VALIDATION SUMMARY
+Area
+Result
+Session Governance
+PASS
+Event Collection
+PASS
+Violation Tracking
+PASS
+AI Explainability
+PASS
+Evidence Governance
+PASS
+Human Review Workflow
+PASS
+Fraud Investigation
+PASS
+Appeal Readiness
+PASS
+Compliance Auditability
+PASS
+Enterprise Readiness
+PASS
+
+10. APPROVED AI PROCTORING BASELINE
+The approved AI Proctoring tables are:
+proctoring_sessionsproctoring_eventsproctoring_violationsai_detection_resultsmedia_evidenceproctoring_reviews
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+011 AI Proctoring Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVEDMERGED INTO BASELINE
+
+FINAL MODULE STATUS
+011_AI_PROCTORING_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+001_SECURITY_SCHEMA v1.0 FINAL✓002_GOVERNANCE_FOUNDATION_SCHEMA v1.0 FINAL✓003_ASSESSMENT_DEFINITION_SCHEMA v1.1 FINAL✓004_ASSESSMENT_EXECUTION_SCHEMA v1.2 FINAL✓005_EVALUATION_SCHEMA v1.1 FINAL✓006_CERTIFICATION_SCHEMA v1.1 FINAL✓007_NOTIFICATION_SCHEMA v1.1 FINAL✓008_REPORTING_ANALYTICS_SCHEMA v1.1 FINAL✓009_INTEGRATION_AUDIT_SCHEMA v1.1 FINAL✓010_PLATFORM_OPERATIONS_SCHEMA v1.1 FINAL✓011_AI_PROCTORING_SCHEMA v1.1 FINAL✓
+
+OVERALL PLATFORM STATUS
+Completed Core Domains:
+001 Security✓002 Governance Foundation✓003 Assessment Definition✓004 Assessment Execution✓005 Evaluation✓006 Certification✓007 Notification✓008 Reporting & Analytics✓009 Integration & Audit✓010 Platform Operations✓011 AI Proctoring✓
+
+PLATFORM ARCHITECTURE STATUS
+Security Layer✓Governance Layer✓Assessment Definition Layer✓Assessment Execution Layer✓Evaluation Layer✓Certification Layer✓Notification Layer✓Reporting & Analytics Layer✓Integration & Audit Layer✓Platform Operations Layer✓AI Proctoring Layer✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+012_BILLING_SUBSCRIPTION_SCHEMA
+Core Areas:
+subscription_planscustomer_subscriptionssubscription_usageinvoicesinvoice_itemspaymentspayment_transactions
+This module will establish:
+SaaS MonetizationSubscription ManagementUsage TrackingBilling OperationsInvoice ManagementPayment Reconciliation
+and completes the commercial SaaS foundation of the platform.
+
+END OF DOCUMENT

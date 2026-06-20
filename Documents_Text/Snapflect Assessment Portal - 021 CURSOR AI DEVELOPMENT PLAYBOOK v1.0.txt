@@ -1,0 +1,251 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+021_CURSOR_AI_DEVELOPMENT_PLAYBOOK
+Version 1.0
+Status: APPROVED BASELINE
+Development Operating Manual
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Cursor AI Development Playbook
+Version
+1.0
+Status
+FINAL
+Purpose
+Daily Development Operating Manual
+Development Model
+Cursor AI + ChatGPT
+Technology Stack
+Laravel 12 + Angular 20 + MySQL 8
+Governance Documents
+001–020
+
+1. PURPOSE
+This document defines exactly how Snapflect will be developed using:
+Cursor AIChatGPTDeveloper Oversight
+This is the day-to-day execution framework for all implementation activities.
+
+2. DEVELOPMENT OPERATING MODEL
+Roles
+Cursor AI
+Responsibilities
+Code GenerationScaffoldingRefactoringTest GenerationSwagger GenerationBoilerplate Creation
+
+ChatGPT
+Responsibilities
+Architecture GovernanceSecurity ReviewsPerformance ReviewsDatabase ReviewsAPI ReviewsCode ReviewsSprint Planning
+
+Developer
+Responsibilities
+Final ApprovalBusiness DecisionsIntegrationDeploymentRelease Management
+
+3. MASTER DEVELOPMENT RULE
+Before generating any code:
+Cursor AI must be provided with:
+Schema ReferenceOpenAPI ReferenceCoding StandardsSprint StoryImplementation Plan
+Never generate code from memory.
+
+4. DAILY DEVELOPMENT WORKFLOW
+Step 1
+Select Sprint
+Example
+Sprint 03Assessment Builder
+
+Step 2
+Select User Story
+Example
+Create Assessment API
+
+Step 3
+Ask ChatGPT
+Prompt
+Generate implementation package for:Create Assessment APIUse:003_ASSESSMENT_DEFINITION_SCHEMA017C_ASSESSMENT_DEFINITION_OPENAPI019_CODING_STANDARDSOutput:ModelsRepositoriesDTOsServicesPoliciesControllersTests
+
+Step 4
+Review Architecture Package
+Verify:
+Schema AlignmentAPI AlignmentRBAC Alignment
+
+Step 5
+Send Package To Cursor
+Generate:
+CodeTestsSwagger
+
+Step 6
+Return Generated Code To ChatGPT
+Request:
+Perform Architecture ReviewSecurity ReviewPerformance Review
+
+Step 7
+Fix Findings
+
+Step 8
+Merge
+
+5. CURSOR PROMPT LIBRARY
+Prompt Type 01
+Module Generation
+Template
+Generate complete Laravel module.Module:AssessmentDefinitionUse:Schema:003_ASSESSMENT_DEFINITION_SCHEMAOpenAPI:017C_ASSESSMENT_DEFINITION_OPENAPICoding Standards:019_LARAVEL_FOLDER_STRUCTURE_AND_CODING_STANDARDSGenerate:ModelsRepositoriesDTOsServicesPoliciesControllersResourcesEventsTests
+
+Prompt Type 02
+API Generation
+Template
+Generate Laravel API.Endpoint:POST /api/v1/assessmentsUse OpenAPI Contract Exactly.Generate:RequestDTOServiceControllerPolicyTests
+
+Prompt Type 03
+Repository Generation
+Template
+Generate Repository Layer.Entity:AssessmentUse Repository Pattern.No Business Logic.Use Interface + Implementation.
+
+Prompt Type 04
+DTO Generation
+Template
+Generate Request DTOsGenerate Response DTOsNo Raw Arrays
+
+Prompt Type 05
+Service Generation
+Template
+Generate Assessment Service.Business Rules Only.No Controller Logic.No SQL.
+
+Prompt Type 06
+Policy Generation
+Template
+Generate Policy.Use:016_RBAC_MATRIXFollow Laravel Policy Standards.
+
+Prompt Type 07
+Test Generation
+Template
+Generate:Feature TestsService TestsPolicy TestsRepository Tests
+
+6. REVIEW WORKFLOW
+Every generated feature must be reviewed.
+Checklist
+Schema ComplianceOpenAPI ComplianceCoding Standards ComplianceRBAC ComplianceSecurity CompliancePerformance Compliance
+
+7. CODE REVIEW TEMPLATE
+Use This Prompt
+Perform architecture review.Review:Laravel CodeAgainst:SchemaOpenAPICoding StandardsRBACIdentify:ViolationsSecurity IssuesPerformance IssuesRefactoring Recommendations
+
+8. SECURITY REVIEW TEMPLATE
+Use This Prompt
+Perform security review.Check:AuthenticationAuthorizationInput ValidationOutput EncodingFile Upload SecurityAudit LoggingRate LimitingOWASP Risks
+
+9. PERFORMANCE REVIEW TEMPLATE
+Use This Prompt
+Perform performance review.Check:IndexesPaginationN+1 QueriesCaching OpportunitiesLarge Query RisksMemory Risks
+
+10. BUG FIX WORKFLOW
+Step 1
+Document Bug
+Expected ResultActual ResultReproduction Steps
+
+Step 2
+Root Cause Analysis
+Prompt
+Analyze root cause.Identify:Code IssueDesign IssueData Issue
+
+Step 3
+Generate Fix
+Cursor AI
+
+Step 4
+Review Fix
+ChatGPT
+
+Step 5
+Regression Testing
+
+Step 6
+Merge
+
+11. REFACTORING WORKFLOW
+Allowed
+Readability ImprovementsPerformance ImprovementsCode SimplificationFolder Reorganization
+
+Not Allowed Without Approval
+Business Rule ChangesSchema ChangesAPI Contract ChangesRBAC Changes
+
+12. FEATURE COMPLETION CHECKLIST
+A feature is complete only when:
+Schema ImplementedAPI ImplementedTests PassingSwagger UpdatedRBAC AppliedAudit Logging AppliedArchitecture Review Passed
+
+13. SPRINT EXECUTION WORKFLOW
+For Every Sprint
+Sprint Planning
+Review
+Sprint ScopeDependenciesStories
+
+Development
+Generate
+ModelsRepositoriesDTOsServicesControllersPolicies
+
+Testing
+Run
+Feature TestsService TestsPolicy Tests
+
+Review
+Perform
+Architecture ReviewSecurity ReviewPerformance Review
+
+Sprint Close
+Requirements
+All Stories CompleteTests PassingDocumentation Updated
+
+14. DOCUMENT HIERARCHY
+When conflicts occur:
+Priority Order
+1. PRD2. ERD3. Database Schemas4. Platform Architecture5. API Architecture6. RBAC Matrix7. OpenAPI Specifications8. Implementation Plan9. Coding Standards10. Cursor Playbook
+Lower documents cannot override higher documents.
+
+15. CURSOR AI DO-NOT-VIOLATE RULES
+Never:
+Change Schema StructureChange API ContractsChange RBAC RulesInvent New TablesInvent New Status ValuesInvent New Business Rules
+Without approval.
+
+16. CHATGPT GOVERNANCE RESPONSIBILITIES
+Must Review
+ArchitectureDatabaseSecurityPerformanceAPI DesignRefactoring
+Must Not Auto-Approve
+Schema ChangesRBAC ChangesBusiness Rule Changes
+Without review.
+
+17. DEVELOPMENT ARTIFACT FLOW
+PRD ↓ERD ↓Schemas ↓Architecture ↓OpenAPI ↓Implementation Plan ↓Coding Standards ↓Cursor Playbook ↓Code ↓Testing ↓Release
+
+18. RELEASE WORKFLOW
+Before Release
+Feature CompleteTests PassingSecurity Review CompletePerformance Review CompleteUAT Approved
+
+Deployment
+BackupDeploySmoke TestMonitor
+
+Post Deployment
+Health ChecksAudit ReviewError Monitoring
+
+19. CURSOR SESSION START TEMPLATE
+Use At Start Of Every Session
+Project:Snapflect Assessment PortalTechnology:Laravel 12PHP 8.4MySQL 8Angular 20Governance:PRDERDSchemas 001-012Architecture 013-014RBAC 016OpenAPI 017A-017KImplementation Plan 018Coding Standards 019Sprint Plan 020Generate only compliant code.Do not invent business rules.Do not change contracts.
+
+20. MASTER SUCCESS CRITERIA
+Project Success Means
+All OpenAPI Modules ImplementedAll Schemas ImplementedAll RBAC Rules Implemented80%+ Test CoverageSecurity Review PassedPerformance Review PassedUAT PassedProduction Deployment Successful
+
+APPROVAL STATUS
+Document
+021_CURSOR_AI_DEVELOPMENT_PLAYBOOK
+Version
+v1.0
+Status
+APPROVEDBASELINE FROZENOPERATIONAL PLAYBOOK ACTIVECURSOR READYIMPLEMENTATION READY
+
+NEXT STRATEGIC STEP
+Proceed to:
+022_MVP_EXECUTION_PACKAGE_v1.0
+Coverage
+Sprint 01 Detailed StoriesRepository Creation SequenceAPI Build SequenceAngular Build SequenceDatabase Migration SequenceFirst Cursor Prompt PackageFirst Production Code Package
+This is where planning ends and actual implementation begins.
+
+END OF DOCUMENT

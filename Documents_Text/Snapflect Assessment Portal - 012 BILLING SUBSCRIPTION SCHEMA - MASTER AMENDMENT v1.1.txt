@@ -1,0 +1,238 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+012_BILLING_SUBSCRIPTION_SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+012 Billing & Subscription Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2
+Amendment Type
+Enterprise Billing & Revenue Operations Enhancement
+Approval Status
+Approved
+Effective Version
+012_BILLING_SUBSCRIPTION_SCHEMA v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+Billing & Subscription Schema Master Review v1.0
+The review confirmed that the Billing & Subscription module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise-grade enhancements focused on:
+Subscription Lifecycle TraceabilityRevenue OperationsCollections ManagementPayment InvestigationSettlement ReconciliationAdvanced Tax Governance
+
+2. CUSTOMER_SUBSCRIPTIONS ENHANCEMENT
+2.1 Subscription History Tracking
+New Column
+previous_subscription_id BIGINT UNSIGNED NULL
+
+Purpose
+Creates a linked history chain for subscription evolution.
+
+Example
+Starter Subscription        ↓ UpgradeProfessional Subscription        ↓ UpgradeEnterprise Subscription
+
+Benefits
+Supports:
+Subscription UpgradesSubscription DowngradesRenewal HistoryCommercial Audits
+
+Foreign Key
+ALTERTABLE customer_subscriptionsADDCONSTRAINT fk_customer_subscriptions_previousFOREIGNKEY (previous_subscription_id)REFERENCES customer_subscriptions(id);
+
+2.2 Subscription Operations Optimization
+New Index
+CREATEINDEX ix_customer_subscriptions_org_statusON customer_subscriptions(    organization_id,    status);
+
+Purpose
+Optimizes tenant subscription operations and revenue reporting.
+
+3. SUBSCRIPTION_USAGE ENHANCEMENT
+3.1 Billable Usage Indicator
+New Column
+is_billable TINYINT(1)NOTNULLDEFAULT1
+
+Purpose
+Distinguishes billable usage from informational or promotional usage.
+
+Examples
+Assessment Attempts→ BillableFree Trial Usage→ Non-BillablePromotional Credits→ Non-Billable
+
+Benefits
+Supports:
+Usage-Based BillingPromotional ProgramsRevenue RecognitionCommercial Flexibility
+
+4. INVOICES ENHANCEMENT
+4.1 Due Date Governance
+New Column
+due_date DATETIME(3) NULL
+
+Purpose
+Tracks invoice payment deadlines.
+
+Benefits
+Supports:
+Receivables ManagementCollections OperationsOverdue ReportingCash Flow Forecasting
+
+4.2 Collections Optimization
+New Index
+CREATEINDEX ix_invoices_due_statusON invoices(    due_date,    status);
+
+Purpose
+Optimizes overdue invoice monitoring and collections dashboards.
+
+5. INVOICE_ITEMS ENHANCEMENT
+5.1 Advanced Tax Breakdown
+New Column
+tax_breakdown_json JSON NULL
+
+Purpose
+Supports detailed tax calculations.
+
+Example
+{"cgst":9.00,"sgst":9.00}
+
+Benefits
+Supports:
+GST ComplianceInternational TaxationDetailed InvoicingTax Audits
+
+6. PAYMENTS ENHANCEMENT
+6.1 Payment Reference Tracking
+New Column
+payment_reference VARCHAR(255) NULL
+
+Purpose
+Stores customer-visible payment identifiers.
+
+Examples
+UPI-REF-123456BANK-TXN-987654PAY-2026-001
+
+Benefits
+Supports:
+Customer SupportPayment InvestigationsFinance OperationsDispute Resolution
+
+7. PAYMENT_TRANSACTIONS ENHANCEMENT
+7.1 Settlement Tracking
+New Column
+settlement_date DATETIME(3) NULL
+
+Purpose
+Tracks when provider funds are settled.
+
+Example
+Transaction Captured01-Jan-2027Funds Settled03-Jan-2027
+
+Benefits
+Supports:
+Cash ReconciliationSettlement AnalyticsFinance OperationsTreasury Reporting
+
+8. GOVERNANCE RULES
+Subscription Governance
+When:
+previous_subscription_id
+is populated, the subscription represents a commercial transition from an earlier subscription.
+
+Usage Governance
+When:
+is_billable = 0
+usage must not generate invoice charges.
+
+Invoice Governance
+When:
+due_date
+is exceeded and payment remains incomplete, invoice status may transition to:
+Overdue
+
+Payment Governance
+payment_reference
+must remain immutable once payment status becomes:
+Completed
+
+Settlement Governance
+settlement_date
+must only be populated after provider settlement confirmation.
+
+9. IMPACT ANALYSIS
+Artifact
+Impact
+Subscription Lifecycle
+Improved
+Revenue Operations
+Improved
+Collections Management
+Improved
+Payment Investigations
+Improved
+Tax Compliance
+Improved
+Settlement Reconciliation
+Improved
+Enterprise Readiness
+Improved
+
+10. FINAL VALIDATION SUMMARY
+Area
+Result
+Plan Governance
+PASS
+Subscription Lifecycle
+PASS
+Usage Metering
+PASS
+Invoice Governance
+PASS
+Payment Processing
+PASS
+Transaction Reconciliation
+PASS
+Revenue Auditability
+PASS
+Refund Management
+PASS
+SaaS Monetization
+PASS
+Enterprise Readiness
+PASS
+
+11. APPROVED BILLING BASELINE
+The approved Billing & Subscription tables are:
+subscription_planscustomer_subscriptionssubscription_usageinvoicesinvoice_itemspaymentspayment_transactions
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+012 Billing & Subscription Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVEDMERGED INTO BASELINE
+
+FINAL MODULE STATUS
+012_BILLING_SUBSCRIPTION_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+001_SECURITY_SCHEMA v1.0 FINAL✓002_GOVERNANCE_FOUNDATION_SCHEMA v1.0 FINAL✓003_ASSESSMENT_DEFINITION_SCHEMA v1.1 FINAL✓004_ASSESSMENT_EXECUTION_SCHEMA v1.2 FINAL✓005_EVALUATION_SCHEMA v1.1 FINAL✓006_CERTIFICATION_SCHEMA v1.1 FINAL✓007_NOTIFICATION_SCHEMA v1.1 FINAL✓008_REPORTING_ANALYTICS_SCHEMA v1.1 FINAL✓009_INTEGRATION_AUDIT_SCHEMA v1.1 FINAL✓010_PLATFORM_OPERATIONS_SCHEMA v1.1 FINAL✓011_AI_PROCTORING_SCHEMA v1.1 FINAL✓012_BILLING_SUBSCRIPTION_SCHEMA v1.1 FINAL✓
+
+OVERALL PLATFORM STATUS
+Completed Core Domains:
+001 Security✓002 Governance Foundation✓003 Assessment Definition✓004 Assessment Execution✓005 Evaluation✓006 Certification✓007 Notification✓008 Reporting & Analytics✓009 Integration & Audit✓010 Platform Operations✓011 AI Proctoring✓012 Billing & Subscription✓
+
+PLATFORM ARCHITECTURE STATUS
+Security Layer✓Governance Layer✓Assessment Definition Layer✓Assessment Execution Layer✓Evaluation Layer✓Certification Layer✓Notification Layer✓Reporting & Analytics Layer✓Integration & Audit Layer✓Platform Operations Layer✓AI Proctoring Layer✓Billing & Subscription Layer✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+013_CONTENT_LIBRARY_SCHEMA
+Core Areas:
+content_categoriescontent_tagscontent_assetscontent_versionscontent_reviewscontent_publish_history
+This module will establish:
+Question Bank Asset ManagementLearning Content RepositoryVersion ControlContent GovernancePublishing WorkflowKnowledge Management
+and completes the enterprise content management foundation of the platform.
+
+END OF DOCUMENT

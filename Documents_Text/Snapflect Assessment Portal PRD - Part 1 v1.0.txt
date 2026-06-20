@@ -1,0 +1,403 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Version 1.0
+
+PART 1
+FOUNDATION, PRODUCT VISION, ARCHITECTURE, SECURITY & USER MANAGEMENT
+
+1. EXECUTIVE SUMMARY
+1.1 Product Name
+Snapflect Assessment Portal (SAP)
+
+1.2 Product Overview
+Snapflect Assessment Portal is a modern, enterprise-grade, responsive web application that enables organizations to create, manage, conduct, review, and analyze technology-based assessments.
+The platform provides a complete assessment lifecycle:
+Technology Management
+Assessment Creation
+Section Management
+Question Bank Management
+Question Management
+Assessment Execution
+Assessment Review
+Results Processing
+Reporting & Analytics
+User Management
+Audit & Governance
+The system is designed to support:
+Internal Skill Assessments
+Candidate Evaluations
+Technical Screening
+Employee Assessments
+Certification Programs
+Future AI-Powered Assessments
+
+1.3 Deployment Target
+The initial version shall be optimized for:
+Hosting Platform:Hostinger Shared Hosting
+Technology Stack:
+Backend:
+PHP 8.3+
+REST APIs
+MVC Architecture
+Frontend:
+HTML5
+CSS3
+Bootstrap 5+
+JavaScript
+AJAX
+Database:
+MySQL 8+
+Web Server:
+Apache
+Future deployment should support:
+VPS
+Docker
+AWS
+Azure
+Multi-tenant SaaS Architecture
+without major redesign.
+
+2. PRODUCT VISION
+Create a scalable, secure, extensible, enterprise-grade assessment platform that enables organizations to accurately evaluate skills while providing a seamless experience for both administrators and assessment participants.
+
+3. BUSINESS GOALS
+3.1 Primary Goals
+Provide centralized assessment management.
+Provide technology-specific assessments.
+Support multiple assessment attempts.
+Enable detailed performance analysis.
+Provide enterprise-grade reporting.
+Support future AI-powered assessment capabilities.
+
+3.2 Secondary Goals
+Reduce manual evaluation effort.
+Provide reusable assessment content.
+Improve assessment consistency.
+Support long-term platform growth.
+Enable future SaaS commercialization.
+
+4. PRODUCT SCOPE
+4.1 In Scope
+User Registration
+Authentication
+Role Management
+Technology Management
+Assessment Management
+Section Management
+Question Bank Management
+Question Management
+Assessment Execution
+Save Progress
+Resume Progress
+Assessment Submission
+Result Generation
+Review Workflow
+Reporting
+Notifications
+Audit Logging
+System Configuration
+Responsive UI
+Security Controls
+
+4.2 Out Of Scope (Version 1)
+Payment Gateway
+Online Proctoring
+Video Assessments
+AI Question Generation
+Coding Compiler
+Live Interview Module
+Organization Multi-Tenancy
+SSO Integration
+LDAP Integration
+Mobile Applications
+These may be implemented in future releases.
+
+5. DOMAIN HIERARCHY
+The entire platform shall strictly follow the hierarchy below.
+Technology→ Assessment→ Section→ Question Bank→ Question
+No module shall violate this hierarchy.
+
+5.1 Example
+.NET
+→ .NET Developer Assessment
+→ C# Fundamentals
+→ C# Beginner Question Bank
+→ Questions
+
+Angular
+→ Angular Developer Assessment
+→ Angular Basics
+→ Angular Beginner Bank
+→ Questions
+
+6. ARCHITECTURE PRINCIPLES
+The platform shall be built using:
+6.1 SOLID Principles
+Single Responsibility Principle
+Open Closed Principle
+Liskov Substitution Principle
+Interface Segregation Principle
+Dependency Inversion Principle
+
+6.2 Clean Architecture
+Layers:
+Presentation Layer
+Application Layer
+Domain Layer
+Infrastructure Layer
+Persistence Layer
+
+6.3 Design Principles
+High Cohesion
+Low Coupling
+Separation of Concerns
+Dependency Injection
+Reusable Components
+Configuration Driven Design
+Extensible Architecture
+
+7. SYSTEM ARCHITECTURE
+7.1 High-Level Architecture
+Frontend UI
+↓
+REST API Layer
+↓
+Service Layer
+↓
+Repository Layer
+↓
+MySQL Database
+
+7.2 Application Layers
+Presentation Layer
+Responsible for:
+UI
+Validation
+User Interactions
+Application Layer
+Responsible for:
+Business Logic
+Workflow Orchestration
+Repository Layer
+Responsible for:
+Data Access
+Database Layer
+Responsible for:
+Persistence
+
+8. USER ROLES
+8.1 Super Administrator
+Full access to all platform features.
+Capabilities:
+User Management
+Role Management
+Technology Management
+Assessment Management
+Question Management
+System Settings
+Reports
+Audit Logs
+Notifications
+Platform Administration
+
+8.2 Assessment Administrator
+Capabilities:
+Technology Management
+Assessment Management
+Section Management
+Question Bank Management
+Question Management
+Assessment Review
+Reports
+User Assessment Analysis
+Cannot:
+Manage Super Admins
+Modify Global Settings
+
+8.3 User
+Capabilities:
+Register
+Login
+Manage Profile
+Browse Assessments
+Take Assessments
+Save Assessments
+Resume Assessments
+Submit Assessments
+View Results
+View Assessment History
+
+9. ROLE BASED ACCESS CONTROL (RBAC)
+The platform shall implement Role-Based Access Control.
+Permission structure:
+entity.action
+Examples:
+technology.create
+technology.edit
+technology.delete
+assessment.create
+assessment.edit
+assessment.publish
+question.create
+question.edit
+question.import
+assessment.review
+report.view
+user.manage
+settings.manage
+audit.view
+Every feature must be mapped to a permission.
+
+10. AUTHENTICATION & AUTHORIZATION
+10.1 Authentication Features
+User Registration
+User Login
+Logout
+Forgot Password
+Reset Password
+Change Password
+Email Verification
+JWT Authentication
+Refresh Tokens
+Session Management
+Device Tracking
+Login History
+
+10.2 JWT Requirements
+Access Token
+Refresh Token
+Token Expiration
+Token Revocation
+Secure Storage
+Automatic Refresh
+
+10.3 Password Policies
+Minimum Length: 8
+Require Uppercase
+Require Lowercase
+Require Numeric
+Require Special Character
+Password History
+Password Expiry (Configurable)
+
+11. SECURITY REQUIREMENTS
+11.1 Security Controls
+Password Hashing (bcrypt)
+JWT Authentication
+Role Based Access
+Permission Based Access
+Input Validation
+Output Encoding
+Session Protection
+Secure Cookies
+CSRF Protection
+XSS Protection
+SQL Injection Protection
+File Upload Validation
+Rate Limiting
+Account Lockout
+Brute Force Protection
+
+11.2 API Security
+JWT Validation
+Permission Validation
+Request Validation
+Response Standardization
+API Logging
+Error Handling
+Rate Limiting
+
+11.3 Audit Requirements
+All sensitive operations shall be audited.
+Examples:
+Login
+Logout
+Create
+Update
+Delete
+Review
+Submission
+Settings Changes
+Permission Changes
+
+12. USER ONBOARDING
+12.1 Registration Fields
+First Name
+Last Name
+Email
+Mobile Number
+Password
+Confirm Password
+
+12.2 Profile Fields
+Profile Photo
+Company
+Designation
+Years Of Experience
+Technology Expertise
+Country
+State
+City
+Bio
+
+12.3 Profile Completion
+The platform shall calculate profile completion percentage.
+Examples:
+25%
+50%
+75%
+100%
+
+12.4 Email Verification
+User registration shall require email verification before assessment access is granted.
+
+13. USER PROFILE MANAGEMENT
+Users shall be able to:
+View Profile
+Edit Profile
+Change Password
+Upload Avatar
+Update Personal Information
+Manage Preferences
+View Login History
+View Activity History
+
+14. SYSTEM CONFIGURATION PRINCIPLES
+The platform shall be configuration driven wherever possible.
+Configuration examples:
+Registration Enabled
+Maximum Attempts
+Assessment Timeout
+Password Policies
+Auto Save Interval
+Email Templates
+Notification Settings
+Session Timeout
+Result Visibility Rules
+Configurations shall be stored in database and managed through admin screens.
+
+15. MASTER DATA GOVERNANCE RULES
+All major entities shall contain:
+created_by
+created_date
+modified_by
+modified_date
+is_active
+is_deleted
+deleted_by
+deleted_date
+Physical deletion shall not be allowed.
+Soft delete shall be used throughout the platform.
+
+16. NON-FUNCTIONAL REQUIREMENTS (FOUNDATION)
+Availability Target:99%
+Scalability:10,000+ Users
+Concurrent Users:100+
+Responsive Design:Mobile, Tablet, Desktop
+Browser Support:ChromeEdgeFirefoxSafari
+Accessibility:WCAG Compliance Ready
+Maintainability:High
+Extensibility:High
+Security:Enterprise Grade
+
+END OF PART 1

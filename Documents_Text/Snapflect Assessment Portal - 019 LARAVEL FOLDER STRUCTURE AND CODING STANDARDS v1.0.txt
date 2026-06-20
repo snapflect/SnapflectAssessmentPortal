@@ -1,0 +1,282 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+019_LARAVEL_FOLDER_STRUCTURE_AND_CODING_STANDARDS
+Version 1.0
+Status: APPROVED BASELINE
+Development Governance Standard
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Laravel Folder Structure & Coding Standards
+Version
+1.0
+Status
+FINAL
+Purpose
+Development Governance
+Technology
+Laravel 12
+Language
+PHP 8.4+
+Architecture
+Modular Monolith
+
+1. PURPOSE
+This document defines the mandatory development standards for:
+Folder StructureNamespacesCoding StandardsNaming ConventionsServicesRepositoriesDTOsControllersPoliciesEventsJobsTestingException Handling
+All generated code must comply with this document.
+
+2. ARCHITECTURE PRINCIPLES
+Principle 1
+Single Responsibility
+One ClassOne Responsibility
+
+Principle 2
+Dependency Inversion
+Depend On InterfacesNot Implementations
+
+Principle 3
+Separation Of Concerns
+ControllersServicesRepositoriesPoliciesDTOsMust Remain Separate
+
+Principle 4
+Modular Design
+Each Business DomainOwn Module
+
+3. ROOT FOLDER STRUCTURE
+app/├── Modules/├── Shared/├── Infrastructure/├── Console/├── Exceptions/├── Providers/bootstrap/config/database/docs/public/resources/routes/storage/tests/
+
+4. MODULE STRUCTURE
+Every module must follow:
+Modules/ModuleName/├── Controllers/├── Requests/├── DTOs/├── Services/├── Repositories/├── Interfaces/├── Policies/├── Resources/├── Events/├── Listeners/├── Jobs/├── Enums/├── Validators/├── Traits/├── Models/├── Tests/
+
+5. APPROVED MODULES
+SecurityGovernanceAssessmentDefinitionAssessmentExecutionEvaluationCertificationNotificationsAnalyticsIntegrationsOperationsAIProctoringBilling
+
+6. NAMESPACE STANDARDS
+Correct
+App\Modules\Security\ControllersApp\Modules\Security\ServicesApp\Modules\Security\RepositoriesApp\Modules\Security\DTOs
+
+Incorrect
+App\ServicesApp\HelpersApp\RandomClasses
+
+7. NAMING CONVENTIONS
+Controllers
+UserControllerAssessmentControllerCertificateController
+
+Services
+UserServiceAssessmentServiceCertificateService
+
+Repositories
+UserRepositoryAssessmentRepositoryCertificateRepository
+
+Interfaces
+UserRepositoryInterfaceAssessmentRepositoryInterface
+
+Policies
+AssessmentPolicyResultPolicyCertificatePolicy
+
+DTOs
+CreateAssessmentDTOSubmitAttemptDTOIssueCertificateDTO
+
+Jobs
+NotificationDeliveryJobCertificateGenerationJobWebhookDeliveryJob
+
+Events
+AssessmentAssignedAssessmentSubmittedResultPublishedCertificateIssued
+
+8. CONTROLLER STANDARDS
+Controllers must:
+Accept RequestsCall ServicesReturn Resources
+
+Controllers must NOT:
+Contain Business LogicContain SQLContain TransactionsContain Complex Validation
+
+Maximum Controller Size
+300 Lines
+
+9. REQUEST STANDARDS
+All write APIs must use:
+FormRequest
+
+Examples
+CreateAssessmentRequestUpdateAssessmentRequestSubmitAttemptRequest
+
+Validation Ownership
+Request Layer
+
+10. DTO STANDARDS
+Mandatory DTO Types
+Request DTOsResponse DTOs
+
+Example
+CreateAssessmentDTOUpdateQuestionDTOPublishResultDTO
+
+Rule
+No Raw Arrays Between Layers
+
+11. SERVICE STANDARDS
+Services own:
+Business RulesTransactionsWorkflow LogicOrchestration
+
+Example
+AssessmentServiceEvaluationServiceCertificationServiceNotificationService
+
+Maximum Service Size
+1000 Lines
+
+Large Services Must Be Split
+
+12. REPOSITORY STANDARDS
+Repositories own:
+Database QueriesPersistenceOptimized Retrieval
+
+Controllers cannot call:
+Model::where()DB::table()DB::select()
+
+Directly
+
+13. MODEL STANDARDS
+Models represent:
+Database Entities
+
+Models must NOT contain:
+Business LogicWorkflow Logic
+
+Allowed
+RelationshipsScopesCastsAccessors
+
+14. RESOURCE STANDARDS
+Every API response uses:
+JsonResource
+
+Examples
+AssessmentResourceResultResourceCertificateResource
+
+15. POLICY STANDARDS
+Authorization source:
+016_RBAC_MATRIX
+
+Policy Examples
+AssessmentPolicyAttemptPolicyResultPolicy
+
+Controllers must use:
+$this->authorize(...)
+
+16. EVENT STANDARDS
+Domain Events
+AssessmentAssignedAssessmentStartedAssessmentSubmittedResultPublishedCertificateIssuedInvoiceGeneratedViolationDetected
+
+Events must remain immutable.
+
+17. LISTENER STANDARDS
+Listeners consume events.
+Examples
+SendAssessmentAssignedNotificationGenerateAuditEntryCreateAnalyticsSnapshotDispatchWebhook
+
+18. QUEUE STANDARDS
+Queue Driver
+Database
+
+Approved Jobs
+NotificationDeliveryJobCertificateGenerationJobReportGenerationJobWebhookDeliveryJobEvidenceProcessingJob
+
+Retry Policy
+3 AttemptsExponential Backoff
+
+19. ENUM STANDARDS
+No Magic Strings Allowed
+
+Examples
+AssessmentStatusAttemptStatusResultStatusCertificateStatusNotificationStatus
+
+20. TRAIT STANDARDS
+Allowed Traits
+HasAuditFieldsHasOrganizationScopeHasSoftDeletes
+
+Business Logic Traits
+Not Allowed
+
+21. EXCEPTION STANDARDS
+Location
+App\Exceptions
+
+Required Exceptions
+BusinessRuleExceptionEntityNotFoundExceptionAuthorizationExceptionValidationExceptionIntegrationException
+
+22. DATABASE STANDARDS
+All schema changes via:
+Laravel Migrations
+
+No Manual Production Changes
+
+All tables must include:
+created_atupdated_at
+
+Where Applicable
+created_byupdated_byorganization_id
+
+23. API RESPONSE STANDARD
+Success
+{"success":true,"data":{}}
+
+Failure
+{"success":false,"code":"ERROR_CODE","message":"Error message"}
+
+24. LOGGING STANDARDS
+Channels
+ApplicationSecurityAuditIntegration
+
+Never Log
+PasswordsTokensPIIEvidence URLs
+
+25. TESTING STANDARDS
+Mandatory Tests
+Feature TestsService TestsRepository TestsPolicy Tests
+
+Coverage
+80% Minimum
+
+26. SECURITY STANDARDS
+Mandatory
+JWT AuthenticationRBACAudit LoggingInput ValidationRate LimitingFile ValidationXSS ProtectionSQL Injection Protection
+
+27. CODE REVIEW CHECKLIST
+Before Merge
+Architecture CompliantTests PassingNo Business Logic In ControllersDTO Usage VerifiedPolicy Coverage VerifiedAudit Coverage VerifiedOpenAPI Compliance Verified
+
+28. CURSOR AI GENERATION RULES
+Generate
+ModelsRepositoriesInterfacesDTOsServicesPoliciesControllersResourcesEventsListenersJobsTests
+
+Do Not Generate
+Alternative ArchitecturesDirect SQL In ControllersBusiness Logic In ModelsPermission Logic In Controllers
+
+29. CHATGPT GOVERNANCE RESPONSIBILITIES
+ChatGPT Reviews
+ArchitectureSecurityPerformanceRefactoringDatabase DesignAPI Compliance
+
+Cursor Generates
+Implementation Code
+
+30. MASTER COMPLIANCE RULE
+Every generated file must comply with:
+PRDERDSchemas 001–012Architecture 013–014Screen Inventory 015RBAC Matrix 016OpenAPI Specifications 017A–017KImplementation Plan 018Coding Standards 019
+
+APPROVAL STATUS
+Document
+019_LARAVEL_FOLDER_STRUCTURE_AND_CODING_STANDARDS
+Version
+v1.0
+Status
+APPROVEDBASELINE FROZENDEVELOPMENT GOVERNANCE ACTIVECURSOR READYIMPLEMENTATION READY
+
+NEXT STRATEGIC STEP
+Proceed to:
+020_DEVELOPMENT_SPRINT_MASTER_PLAN v1.0
+Coverage
+Sprint BreakdownEpic MappingStory MappingDependency MatrixDevelopment SequenceQA StrategyUAT StrategyGo-Live Roadmap
+This becomes the final project execution roadmap before actual code generation starts.
+
+END OF DOCUMENT

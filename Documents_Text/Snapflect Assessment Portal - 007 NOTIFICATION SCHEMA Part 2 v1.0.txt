@@ -1,0 +1,158 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+007_NOTIFICATION_SCHEMA.SQL
+PART 2 – PROCESSING, DELIVERY & PREFERENCES
+Version 1.0
+
+MODULE
+Notification
+
+TABLES
+notification_queuenotification_delivery_logsnotification_preferencesnotification_subscriptions
+
+DEPENDS ON
+007_NOTIFICATION_SCHEMA.SQL – PART 1notification_templatesnotification_template_versionsnotification_channels001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes the operational notification engine.
+It provides:
+Notification Queue ProcessingDelivery TrackingRetry ManagementUser PreferencesSubscription ManagementNotification AnalyticsAuditabilityIdempotency Protection
+
+NOTIFICATION_QUEUE
+Purpose
+Stores notification messages awaiting delivery.
+Notifications are created from immutable template versions and store content snapshots to guarantee historical reproducibility.
+
+Processing Lifecycle
+Business Event        ↓Notification Queue        ↓Delivery Worker        ↓Provider        ↓Delivery Result
+
+CREATETABLE notification_queue(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    notification_template_version_id BIGINT UNSIGNED NOTNULL,    notification_channel_id BIGINT UNSIGNED NOTNULL,    recipient_user_id BIGINT UNSIGNED NULL,    recipient_address VARCHAR(500) NOTNULL,    subject_snapshot TEXT NULL,    body_snapshot LONGTEXT NOTNULL,    priority VARCHAR(50)NOTNULLDEFAULT'Normal',    correlation_id CHAR(36) NULL,    idempotency_key VARCHAR(255) NOTNULL,    retry_count INTNOTNULLDEFAULT0,    max_retry_count INTNOTNULLDEFAULT3,    scheduled_date DATETIME(3) NULL,    processed_date DATETIME(3) NULL,    status VARCHAR(50)NOTNULLDEFAULT'Pending',    metadata_json JSON NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_notification_queue_uuidUNIQUE (uuid),CONSTRAINT ux_notification_queue_idempotencyUNIQUE (idempotency_key))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+NOTIFICATION_QUEUE FOREIGN KEYS
+ALTERTABLE notification_queueADDCONSTRAINT fk_notification_queue_template_versionFOREIGNKEY (notification_template_version_id)REFERENCES notification_template_versions(id);ALTERTABLE notification_queueADDCONSTRAINT fk_notification_queue_channelFOREIGNKEY (notification_channel_id)REFERENCES notification_channels(id);ALTERTABLE notification_queueADDCONSTRAINT fk_notification_queue_userFOREIGNKEY (recipient_user_id)REFERENCES users(id);
+
+NOTIFICATION_QUEUE INDEXES
+CREATEINDEX ix_notification_queue_statusON notification_queue(status);CREATEINDEX ix_notification_queue_priorityON notification_queue(priority);CREATEINDEX ix_notification_queue_scheduledON notification_queue(scheduled_date);CREATEINDEX ix_notification_queue_correlationON notification_queue(correlation_id);CREATEINDEX ix_notification_queue_userON notification_queue(recipient_user_id);CREATEINDEX ix_notification_queue_channelON notification_queue(notification_channel_id);CREATEINDEX ix_notification_queue_processedON notification_queue(processed_date);
+
+QUEUE STATUS VALUES
+Application validation shall enforce:
+PendingQueuedProcessingDeferredSentFailedCancelled
+
+PRIORITY VALUES
+Application validation shall enforce:
+LowNormalHighCritical
+
+CONTENT SNAPSHOT GOVERNANCE
+The following fields preserve message content at queue creation time:
+subject_snapshotbody_snapshot
+Template modifications must never affect previously queued notifications.
+
+IDEMPOTENCY GOVERNANCE
+idempotency_key
+must be unique per logical notification event.
+Prevents duplicate message creation.
+
+NOTIFICATION_DELIVERY_LOGS
+Purpose
+Stores individual delivery attempts.
+Each retry generates a new log entry.
+
+Example
+Attempt 1    ↓FailedAttempt 2    ↓FailedAttempt 3    ↓Delivered
+
+CREATETABLE notification_delivery_logs(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    notification_queue_id BIGINT UNSIGNED NOTNULL,    attempt_number INTNOTNULL,    delivery_status VARCHAR(50) NOTNULL,    provider_reference VARCHAR(255) NULL,    provider_response TEXT NULL,    delivery_duration_ms BIGINT NULL,    delivery_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_notification_delivery_logs_uuidUNIQUE (uuid),CONSTRAINT ux_notification_delivery_attemptUNIQUE        (            notification_queue_id,            attempt_number        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+NOTIFICATION_DELIVERY_LOGS FOREIGN KEYS
+ALTERTABLE notification_delivery_logsADDCONSTRAINT fk_notification_delivery_logs_queueFOREIGNKEY (notification_queue_id)REFERENCES notification_queue(id);
+
+NOTIFICATION_DELIVERY_LOGS INDEXES
+CREATEINDEX ix_notification_delivery_logs_statusON notification_delivery_logs(delivery_status);CREATEINDEX ix_notification_delivery_logs_dateON notification_delivery_logs(delivery_date);CREATEINDEX ix_notification_delivery_logs_provider_referenceON notification_delivery_logs(provider_reference);CREATEINDEX ix_notification_delivery_logs_durationON notification_delivery_logs(delivery_duration_ms);
+
+DELIVERY STATUS VALUES
+Application validation shall enforce:
+DeliveredFailedRejectedExpired
+
+DELIVERY ANALYTICS STRATEGY
+Field:
+delivery_duration_ms
+supports:
+Provider MonitoringSLA ReportingPerformance Analytics
+
+NOTIFICATION_PREFERENCES
+Purpose
+Stores user-level notification preferences.
+Controls how notifications are delivered.
+
+Examples
+Assessment Emails EnabledMarketing Emails DisabledSMS DisabledPush Enabled
+
+CREATETABLE notification_preferences(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    notification_channel_id BIGINT UNSIGNED NOTNULL,    notification_type VARCHAR(50) NOTNULL,    is_enabled TINYINT(1)NOTNULLDEFAULT1,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_notification_preferences_uuidUNIQUE (uuid),CONSTRAINT ux_notification_preferences_uniqueUNIQUE        (            user_id,            notification_channel_id,            notification_type        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+NOTIFICATION_PREFERENCES FOREIGN KEYS
+ALTERTABLE notification_preferencesADDCONSTRAINT fk_notification_preferences_userFOREIGNKEY (user_id)REFERENCES users(id);ALTERTABLE notification_preferencesADDCONSTRAINT fk_notification_preferences_channelFOREIGNKEY (notification_channel_id)REFERENCES notification_channels(id);
+
+NOTIFICATION_PREFERENCES INDEXES
+CREATEINDEX ix_notification_preferences_typeON notification_preferences(notification_type);CREATEINDEX ix_notification_preferences_enabledON notification_preferences(is_enabled);
+
+NOTIFICATION_SUBSCRIPTIONS
+Purpose
+Stores event subscription preferences.
+Controls which events a user receives.
+
+Difference
+Preferences        ↓How notifications are receivedSubscriptions        ↓Which events are received
+
+CREATETABLE notification_subscriptions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    event_code VARCHAR(100) NOTNULL,    subscription_scope VARCHAR(50)NOTNULL,    is_subscribed TINYINT(1)NOTNULLDEFAULT1,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_notification_subscriptions_uuidUNIQUE (uuid),CONSTRAINT ux_notification_subscriptions_uniqueUNIQUE        (            user_id,            event_code        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+NOTIFICATION_SUBSCRIPTIONS FOREIGN KEYS
+ALTERTABLE notification_subscriptionsADDCONSTRAINT fk_notification_subscriptions_userFOREIGNKEY (user_id)REFERENCES users(id);
+
+NOTIFICATION_SUBSCRIPTIONS INDEXES
+CREATEINDEX ix_notification_subscriptions_scopeON notification_subscriptions(subscription_scope);CREATEINDEX ix_notification_subscriptions_subscribedON notification_subscriptions(is_subscribed);CREATEINDEX ix_notification_subscriptions_eventON notification_subscriptions(event_code);
+
+SUBSCRIPTION SCOPES
+Application validation shall enforce:
+SystemAssessmentCertificationAdministration
+
+METADATA STRATEGY
+Field:
+metadata_json
+supports:
+AI PersonalizationCampaign TrackingProvider ExtensionsA/B TestingFuture Analytics
+without schema redesign.
+
+VALIDATION CHECKLIST
+✓ Queue Processing Applied
+✓ Content Snapshotting Applied
+✓ Idempotency Protection Applied
+✓ Retry Management Applied
+✓ Delivery Tracking Applied
+✓ User Preferences Applied
+✓ Subscription Management Applied
+✓ Analytics Readiness Applied
+✓ Auditability Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+007_NOTIFICATION_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+notification_templatesnotification_template_versionsnotification_channelsnotification_queuenotification_delivery_logsnotification_preferencesnotification_subscriptions
+Notification Module Completion:
+100%
+
+NEXT STEP
+Perform:
+Notification Schema Master Review v1.0
+Review Scope:
+Part 1Part 2
+Validation Areas:
+Template GovernanceLocalizationProvider AbstractionQueue ProcessingRetry ManagementDelivery TrackingPreference ManagementSubscription ManagementPerformance & Index Strategy
+After successful review:
+Freeze:007_NOTIFICATION_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

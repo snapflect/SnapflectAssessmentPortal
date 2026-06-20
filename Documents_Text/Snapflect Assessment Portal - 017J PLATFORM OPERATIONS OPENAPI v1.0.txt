@@ -1,0 +1,421 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017J_PLATFORM_OPERATIONS_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Platform Operations OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Platform Operations
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+010_PLATFORM_OPERATIONS_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+Scheduled TasksBackground JobsApplication HealthSystem MonitoringSystem AnnouncementsPlatform ConfigurationMaintenance OperationsOperational ControlsSystem DiagnosticsRuntime Management
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Platform Operations APIversion:1.0.0description: Platform Operations and Administration APIsservers:-url: /api/v1tags:-name: Scheduled Tasks-name: Background Jobs-name: Application Health-name: Monitoring-name: Announcements-name: Platform Configuration-name: Maintenance
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Operations.ViewOperations.ManagePlatform.Admin
+
+4. SCHEDULED TASK APIS
+Supported Task Types
+AnalyticsSnapshotNotificationProcessingCertificateGenerationReportSchedulingDataCleanupRetentionEnforcementHealthMonitoringBillingProcessingSubscriptionRenewal
+
+List Scheduled Tasks
+Endpoint
+GET /api/v1/scheduled-tasks
+Permission
+Operations.View
+Filters
+taskTypestatusenablednextRunDatepagepageSize
+
+Get Scheduled Task
+Endpoint
+GET /api/v1/scheduled-tasks/{id}
+Permission
+Operations.View
+
+Create Scheduled Task
+Endpoint
+POST /api/v1/scheduled-tasks
+Permission
+Operations.Manage
+Request DTO
+{"taskName":"Daily Analytics Snapshot","taskType":"AnalyticsSnapshot","cronExpression":"0 1 * * *","enabled":true}
+Audit Event
+Scheduled Task Created
+
+Update Scheduled Task
+Endpoint
+PUT /api/v1/scheduled-tasks/{id}
+Permission
+Operations.Manage
+Audit Event
+Scheduled Task Updated
+
+Execute Task Immediately
+Endpoint
+POST /api/v1/scheduled-tasks/{id}/run
+Permission
+Operations.Manage
+Audit Event
+Scheduled Task Executed
+
+Enable Task
+Endpoint
+POST /api/v1/scheduled-tasks/{id}/enable
+Permission
+Operations.Manage
+Audit Event
+Scheduled Task Enabled
+
+Disable Task
+Endpoint
+POST /api/v1/scheduled-tasks/{id}/disable
+Permission
+Operations.Manage
+Audit Event
+Scheduled Task Disabled
+
+5. BACKGROUND JOB APIS
+Supported Job Status
+PendingQueuedProcessingCompletedFailedCancelled
+
+List Background Jobs
+Endpoint
+GET /api/v1/background-jobs
+Permission
+Operations.View
+Filters
+jobTypestatuscreatedDateexecutedDate
+
+Get Background Job
+Endpoint
+GET /api/v1/background-jobs/{id}
+Permission
+Operations.View
+
+Retry Background Job
+Endpoint
+POST /api/v1/background-jobs/{id}/retry
+Permission
+Operations.Manage
+Audit Event
+Background Job Retried
+
+Cancel Background Job
+Endpoint
+POST /api/v1/background-jobs/{id}/cancel
+Permission
+Operations.Manage
+Audit Event
+Background Job Cancelled
+
+6. APPLICATION HEALTH APIS
+Current Platform Health
+Endpoint
+GET /api/v1/application-health
+Permission
+Operations.View
+Response
+{"overallStatus":"Healthy","healthScore":99.7,"lastCheckedAt":"2027-01-01T10:00:00Z"}
+
+Health History
+Endpoint
+GET /api/v1/application-health/history
+Permission
+Operations.View
+
+Health Components
+Endpoint
+GET /api/v1/application-health/components
+Permission
+Operations.View
+Components
+DatabaseStorageNotificationServiceSchedulerQueueWorkersAPICacheSearch
+
+7. SYSTEM MONITORING APIS
+Real-Time Metrics
+Endpoint
+GET /api/v1/system-metrics/realtime
+Permission
+Operations.View
+
+Historical Metrics
+Endpoint
+GET /api/v1/system-metrics/history
+Permission
+Operations.View
+Filters
+metricdateFromdateTo
+
+Current Metrics
+Endpoint
+GET /api/v1/system-metrics
+Response Metrics
+CPU UsageMemory UsageDisk UsageQueue DepthJob ThroughputAPI Response TimeError RateConcurrent Users
+
+8. SYSTEM ANNOUNCEMENT APIS
+Supported Announcement Types
+MaintenanceSecurityFeatureReleaseGeneralInformationEmergencyNotice
+
+List Announcements
+Endpoint
+GET /api/v1/system-announcements
+Permission
+Operations.View
+
+Get Announcement
+Endpoint
+GET /api/v1/system-announcements/{id}
+Permission
+Operations.View
+
+Create Announcement
+Endpoint
+POST /api/v1/system-announcements
+Permission
+Operations.Manage
+Request DTO
+{"title":"Maintenance Window","announcementType":"Maintenance","message":"Scheduled maintenance notification","publishAt":"2027-01-01T00:00:00Z"}
+Audit Event
+Announcement Created
+
+Update Announcement
+Endpoint
+PUT /api/v1/system-announcements/{id}
+Permission
+Operations.Manage
+Audit Event
+Announcement Updated
+
+Publish Announcement
+Endpoint
+POST /api/v1/system-announcements/{id}/publish
+Permission
+Operations.Manage
+Audit Event
+Announcement Published
+
+Expire Announcement
+Endpoint
+POST /api/v1/system-announcements/{id}/expire
+Permission
+Operations.Manage
+Audit Event
+Announcement Expired
+
+9. PLATFORM CONFIGURATION APIS
+List Configurations
+Endpoint
+GET /api/v1/platform-configurations
+Permission
+Platform.Admin
+
+Get Configuration
+Endpoint
+GET /api/v1/platform-configurations/{id}
+Permission
+Platform.Admin
+
+Update Configuration
+Endpoint
+PUT /api/v1/platform-configurations/{id}
+Permission
+Platform.Admin
+Request DTO
+{"configKey":"ASSESSMENT_MAX_DURATION","configValue":"180"}
+Audit Event
+Platform Configuration Updated
+
+Configuration History
+Endpoint
+GET /api/v1/platform-configurations/{id}/history
+Permission
+Platform.Admin
+
+10. MAINTENANCE MODE APIS
+Maintenance Status
+Endpoint
+GET /api/v1/maintenance-mode
+Permission
+Operations.View
+
+Enable Maintenance Mode
+Endpoint
+POST /api/v1/maintenance-mode/enable
+Permission
+Platform.Admin
+Request DTO
+{"message":"Scheduled maintenance","expectedEndTime":"2027-01-01T04:00:00Z"}
+Processing
+Notify UsersPause Non-Critical OperationsEnable Maintenance BannerGenerate Audit Event
+Audit Event
+Maintenance Mode Enabled
+
+Disable Maintenance Mode
+Endpoint
+POST /api/v1/maintenance-mode/disable
+Permission
+Platform.Admin
+Audit Event
+Maintenance Mode Disabled
+
+11. SYSTEM DIAGNOSTICS APIS
+Runtime Diagnostics
+Endpoint
+GET /api/v1/system-diagnostics
+Permission
+Platform.Admin
+
+Queue Diagnostics
+Endpoint
+GET /api/v1/system-diagnostics/queues
+Permission
+Platform.Admin
+
+Scheduler Diagnostics
+Endpoint
+GET /api/v1/system-diagnostics/scheduler
+Permission
+Platform.Admin
+
+12. OPERATIONAL DASHBOARD APIS
+Operations Dashboard
+Endpoint
+GET /api/v1/operations-dashboard
+Permission
+Operations.View
+Response Metrics
+Running JobsFailed JobsTask Success RatePlatform Health ScoreSystem AlertsQueue Backlog
+
+Active Alerts
+Endpoint
+GET /api/v1/operations-dashboard/alerts
+Permission
+Operations.View
+
+13. SYSTEM ALERT APIS
+List Alerts
+Endpoint
+GET /api/v1/system-alerts
+Permission
+Operations.View
+
+Acknowledge Alert
+Endpoint
+POST /api/v1/system-alerts/{id}/acknowledge
+Permission
+Operations.Manage
+Audit Event
+System Alert Acknowledged
+
+Resolve Alert
+Endpoint
+POST /api/v1/system-alerts/{id}/resolve
+Permission
+Operations.Manage
+Audit Event
+System Alert Resolved
+
+14. MULTI-TENANCY RULES
+Candidate
+No Access
+
+Organization Administrator
+Operational Visibility OnlyNo Administrative Actions
+
+Platform Administrator
+Full Operational Control
+
+Mandatory Enforcement
+Operational Permission ValidationAdministrative Action AuthorizationAudit Enforcement
+
+15. SECURITY REQUIREMENTS
+Operational APIs
+Require Elevated PermissionsAudit All Administrative ActionsProtect Sensitive Configuration
+
+Maintenance Operations
+Platform Admin OnlyMandatory Audit LoggingNotification Support
+
+Configuration Management
+Version ControlledRollback CapableChange Tracking Required
+
+16. AUDIT REQUIREMENTS
+Mandatory Audit Events
+Scheduled Task CreatedScheduled Task UpdatedScheduled Task ExecutedScheduled Task EnabledScheduled Task DisabledBackground Job RetriedBackground Job CancelledAnnouncement CreatedAnnouncement UpdatedAnnouncement PublishedAnnouncement ExpiredPlatform Configuration UpdatedMaintenance Mode EnabledMaintenance Mode DisabledSystem Alert AcknowledgedSystem Alert Resolved
+
+17. PERFORMANCE REQUIREMENTS
+Monitoring APIs
+Cached ReadsTime-Series OptimizedSub-Second Responses
+
+Health APIs
+Lightweight ChecksMinimal Resource Consumption
+
+Expected Scale
+10M+ Background Jobs100K+ Scheduled Tasks24x7 Continuous MonitoringEnterprise Operations Scale
+
+18. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+Maintenance Active
+{"success":false,"code":"MAINTENANCE_ACTIVE","message":"Platform is currently under maintenance."}
+
+Operation Not Allowed
+{"success":false,"code":"OPERATION_NOT_ALLOWED","message":"Requested operation is restricted."}
+
+19. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesScheduler ServicesMonitoring ServicesHealth ServicesMaintenance ServicesConfiguration Services
+
+Do Not Generate
+Alternative Scheduling EnginesAlternative Monitoring ArchitecturesAlternative Health ModelsUntracked Configuration Changes
+
+20. IMPLEMENTATION PACKAGE STATUS
+Aligned With
+010_PLATFORM_OPERATIONS_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document
+017J_PLATFORM_OPERATIONS_OPENAPI
+Version
+v1.0
+Status
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017K_AI_PROCTORING_OPENAPI v1.0
+Coverage
+Proctoring SessionsAI Detection ResultsMedia EvidenceReview WorkbenchViolation ManagementRisk ScoringEvidence ReviewProctoring Analytics
+This module completes the final remaining major business domain from Schema 011 and brings the OpenAPI suite into alignment with Schemas 001–011.
+
+END OF DOCUMENT

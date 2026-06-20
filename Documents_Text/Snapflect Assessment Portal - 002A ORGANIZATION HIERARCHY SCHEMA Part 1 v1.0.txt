@@ -1,0 +1,28 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+002A_ORGANIZATION_HIERARCHY_SCHEMA.SQL
+Version 1.0
+PART 1
+organizations
+business_units
+Status: APPROVED
+MySQL 8 Compatible
+
+/* ============================================================   SNAPFLECT ASSESSMENT PORTAL   002A_ORGANIZATION_HIERARCHY_SCHEMA.SQL   PART 1   TABLES   -------   organizations   business_units   PURPOSE   -------   Multi-Tenancy Foundation   DEPENDENCIES   ------------   001_SECURITY_SCHEMA   002_GOVERNANCE_SCHEMA   MYSQL VERSION   -------------   MySQL 8+============================================================ *//* ============================================================   TABLE: organizations============================================================ */CREATETABLE organizations(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    organization_code VARCHAR(50) NOTNULL,    organization_name VARCHAR(255) NOTNULL,    legal_name VARCHAR(255) NULL,    tax_registration_number VARCHAR(100) NULL,    industry_type VARCHAR(100) NULL,    organization_size VARCHAR(50) NULL,    website_url VARCHAR(500) NULL,    contact_email VARCHAR(255) NULL,    contact_phone VARCHAR(50) NULL,    primary_address TEXT NULL,    city VARCHAR(100) NULL,    state VARCHAR(100) NULL,    country VARCHAR(100) NULL,    postal_code VARCHAR(20) NULL,    timezone VARCHAR(100) NOTNULLDEFAULT'UTC',    logo_file_id BIGINT UNSIGNED NULL,    subscription_status VARCHAR(50) NOTNULLDEFAULT'TRIAL',    subscription_plan_id BIGINT UNSIGNED NULL,    is_active TINYINT(1) NOTNULLDEFAULT1,    is_deleted TINYINT(1) NOTNULLDEFAULT0,    created_by BIGINT UNSIGNED NULL,    modified_by BIGINT UNSIGNED NULL,    deleted_by BIGINT UNSIGNED NULL,    created_date DATETIME NOTNULLDEFAULTCURRENT_TIMESTAMP,    modified_date DATETIME NOTNULLDEFAULTCURRENT_TIMESTAMPONUPDATECURRENT_TIMESTAMP,    deleted_date DATETIME NULL,PRIMARYKEY (id),CONSTRAINT uq_organizations_uuidUNIQUE (uuid),CONSTRAINT uq_organizations_codeUNIQUE (organization_code),CONSTRAINT uq_organizations_nameUNIQUE (organization_name)) ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;/* ============================================================   INDEXES============================================================ */CREATEINDEX ix_organizations_activeON organizations(is_active);CREATEINDEX ix_organizations_countryON organizations(country);CREATEINDEX ix_organizations_subscription_statusON organizations(subscription_status);CREATEINDEX ix_organizations_created_dateON organizations(created_date);/* ============================================================   TABLE: business_units============================================================ */CREATETABLE business_units(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    organization_id BIGINT UNSIGNED NOTNULL,    business_unit_code VARCHAR(50) NOTNULL,    business_unit_name VARCHAR(255) NOTNULL,    description TEXT NULL,    head_user_id BIGINT UNSIGNED NULL,    display_order INTNOTNULLDEFAULT0,    is_active TINYINT(1) NOTNULLDEFAULT1,    is_deleted TINYINT(1) NOTNULLDEFAULT0,    created_by BIGINT UNSIGNED NULL,    modified_by BIGINT UNSIGNED NULL,    deleted_by BIGINT UNSIGNED NULL,    created_date DATETIME NOTNULLDEFAULTCURRENT_TIMESTAMP,    modified_date DATETIME NOTNULLDEFAULTCURRENT_TIMESTAMPONUPDATECURRENT_TIMESTAMP,    deleted_date DATETIME NULL,PRIMARYKEY (id),CONSTRAINT uq_business_units_uuidUNIQUE (uuid),CONSTRAINT uq_business_unit_codeUNIQUE (            organization_id,            business_unit_code        ),CONSTRAINT fk_business_units_organizationFOREIGNKEY (organization_id)REFERENCES organizations(id)ONDELETERESTRICTONUPDATERESTRICT) ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;/* ============================================================   INDEXES============================================================ */CREATEINDEX ix_business_units_orgON business_units(organization_id);CREATEINDEX ix_business_units_activeON business_units(is_active);CREATEINDEX ix_business_units_head_userON business_units(head_user_id);CREATEINDEX ix_business_units_created_dateON business_units(created_date);/* ============================================================   SEED DATA============================================================ */INSERTINTO organizations(    uuid,    organization_code,    organization_name,    legal_name,    timezone,    subscription_status,    is_active)VALUES(    UUID(),'DEFAULT','Default Organization','Default Organization','Asia/Kolkata','TRIAL',1);INSERTINTO business_units(    uuid,    organization_id,    business_unit_code,    business_unit_name,    display_order,    is_active)VALUES(    UUID(),1,'DEFAULT','Default Business Unit',1,1);/* ============================================================   VALIDATION QUERIES============================================================ */SELECT*FROM organizations;SELECT*FROM business_units;/* ============================================================   PART 1 COMPLETE============================================================ */
+
+PART 1 STATUS
+organizations✓business_units✓
+
+ARCHITECTURE VALIDATION
+Verified:
+Multi-Tenant Foundation✓Organization Ownership✓Billing Alignment✓Reporting Alignment✓RBAC Scope Alignment✓MySQL 8 Compatibility✓Hostinger Compatibility✓
+
+NEXT STEP
+Generate:
+002A_ORGANIZATION_HIERARCHY_SCHEMA.SQLPART 2
+Tables:
+departmentslocations
+Plus:
+users table amendment
+Adding:
+organization_idbusiness_unit_iddepartment_idlocation_id
+to fully establish tenant hierarchy and resolve the Sprint 01 governance dependency.

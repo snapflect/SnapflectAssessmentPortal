@@ -1,0 +1,162 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+006_CERTIFICATION_SCHEMA.SQL
+PART 1 – CERTIFICATE FOUNDATION
+Version 1.0
+
+MODULE
+Certification
+
+TABLES
+```text id=“cfp1_001”certificate_templates
+certificate_template_versions
+certificates
+certificate_issuances
+---# DEPENDS ON```text id="cfp1_002"005_EVALUATION_SCHEMA.SQLevaluation_resultsassessment_attempts001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes the certification foundation.
+It provides:
+```text id=“cfp1_003”Certificate Templates
+Template Versioning
+Certificate Lifecycle
+Certificate Re-Issue Support
+Certificate Issuance Tracking
+Historical Reproducibility
+---# CERTIFICATE_TEMPLATES## PurposeRepresents logical certificate definitions.Templates are versioned through:```text id="cfp1_004"certificate_template_versions
+Template content is never stored in the master table.
+
+```sql id=“cfp1_005”CREATE TABLE certificate_templates(id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+uuid CHAR(36) NOT NULL,template_code VARCHAR(100) NOT NULL,template_name VARCHAR(255) NOT NULL,status VARCHAR(50)    NOT NULL DEFAULT 'Draft',created_by BIGINT UNSIGNED NOT NULL,created_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),modified_by BIGINT UNSIGNED NULL,modified_date DATETIME(3) NULL,PRIMARY KEY (id),CONSTRAINT ux_certificate_templates_uuid    UNIQUE (uuid),CONSTRAINT ux_certificate_templates_code    UNIQUE (template_code)
+)ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+---# CERTIFICATE_TEMPLATES FOREIGN KEYS```sql id="cfp1_006"ALTER TABLE certificate_templatesADD CONSTRAINT fk_certificate_templates_created_byFOREIGN KEY (created_by)REFERENCES users(id);ALTER TABLE certificate_templatesADD CONSTRAINT fk_certificate_templates_modified_byFOREIGN KEY (modified_by)REFERENCES users(id);
+
+CERTIFICATE_TEMPLATES INDEXES
+sql id="cfp1_007" CREATE INDEX ix_certificate_templates_status ON certificate_templates(status);
+
+TEMPLATE STATUS VALUES
+Application validation shall enforce:
+```text id=“cfp1_008”Draft
+Published
+Archived
+---# CERTIFICATE_TEMPLATE_VERSIONS## PurposeStores immutable certificate template versions.Supports:```text id="cfp1_009"Template EvolutionHistorical ReproducibilityBranding UpdatesCertificate Program Changes
+
+```sql id=“cfp1_010”CREATE TABLE certificate_template_versions(id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+uuid CHAR(36) NOT NULL,certificate_template_id BIGINT UNSIGNED NOT NULL,version_number INT NOT NULL,certificate_type VARCHAR(100) NOT NULL,version_status VARCHAR(50)    NOT NULL DEFAULT 'Draft',template_name VARCHAR(255) NOT NULL,template_definition_json JSON NOT NULL,metadata_json JSON NULL,created_by BIGINT UNSIGNED NOT NULL,created_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),PRIMARY KEY (id),CONSTRAINT ux_certificate_template_versions_uuid    UNIQUE (uuid),CONSTRAINT ux_certificate_template_versions_version    UNIQUE    (        certificate_template_id,        version_number    )
+)ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+---# CERTIFICATE_TEMPLATE_VERSIONS FOREIGN KEYS```sql id="cfp1_011"ALTER TABLE certificate_template_versionsADD CONSTRAINT fk_certificate_template_versions_templateFOREIGN KEY (certificate_template_id)REFERENCES certificate_templates(id);ALTER TABLE certificate_template_versionsADD CONSTRAINT fk_certificate_template_versions_created_byFOREIGN KEY (created_by)REFERENCES users(id);
+
+CERTIFICATE_TEMPLATE_VERSIONS INDEXES
+```sql id=“cfp1_012”CREATE INDEX ix_certificate_template_versions_typeON certificate_template_versions(certificate_type);
+CREATE INDEX ix_certificate_template_versions_statusON certificate_template_versions(version_status);
+---# TEMPLATE VERSION STATUS VALUESApplication validation shall enforce:```text id="cfp1_013"DraftPublishedArchived
+
+CERTIFICATES
+Purpose
+Represents an issued credential.
+Certificates are immutable records.
+Corrections require:
+```text id=“cfp1_014”Re-Issue
+Replacement
+Supersession
+---```sql id="cfp1_015"CREATE TABLE certificates(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    certificate_number VARCHAR(100) NOT NULL,    verification_code CHAR(36) NOT NULL,    certificate_template_version_id BIGINT UNSIGNED NOT NULL,    candidate_user_id BIGINT UNSIGNED NOT NULL,    evaluation_result_id BIGINT UNSIGNED NOT NULL,    assessment_attempt_id BIGINT UNSIGNED NULL,    certificate_version INT        NOT NULL DEFAULT 1,    certificate_status VARCHAR(50)        NOT NULL DEFAULT 'Pending',    issued_date DATETIME(3) NULL,    expiry_date DATETIME(3) NULL,    metadata_json JSON NULL,    superseded_by_certificate_id BIGINT UNSIGNED NULL,    created_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    PRIMARY KEY (id),    CONSTRAINT ux_certificates_uuid        UNIQUE (uuid),    CONSTRAINT ux_certificates_number        UNIQUE (certificate_number),    CONSTRAINT ux_certificates_verification_code        UNIQUE (verification_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+CERTIFICATES FOREIGN KEYS
+```sql id=“cfp1_016”ALTER TABLE certificatesADD CONSTRAINT fk_certificates_template_versionFOREIGN KEY (certificate_template_version_id)REFERENCES certificate_template_versions(id);
+ALTER TABLE certificatesADD CONSTRAINT fk_certificates_candidateFOREIGN KEY (candidate_user_id)REFERENCES users(id);
+ALTER TABLE certificatesADD CONSTRAINT fk_certificates_evaluation_resultFOREIGN KEY (evaluation_result_id)REFERENCES evaluation_results(id);
+ALTER TABLE certificatesADD CONSTRAINT fk_certificates_attemptFOREIGN KEY (assessment_attempt_id)REFERENCES assessment_attempts(id);
+ALTER TABLE certificatesADD CONSTRAINT fk_certificates_supersededFOREIGN KEY (superseded_by_certificate_id)REFERENCES certificates(id);
+---# CERTIFICATES INDEXES```sql id="cfp1_017"CREATE INDEX ix_certificates_candidateON certificates(candidate_user_id);CREATE INDEX ix_certificates_statusON certificates(certificate_status);CREATE INDEX ix_certificates_resultON certificates(evaluation_result_id);CREATE INDEX ix_certificates_attemptON certificates(assessment_attempt_id);CREATE INDEX ix_certificates_expiryON certificates(expiry_date);
+
+CERTIFICATE STATUS VALUES
+Application validation shall enforce:
+```text id=“cfp1_018”Pending
+Issued
+Expired
+Revoked
+Suspended
+---# CERTIFICATE NUMBER GOVERNANCECertificate numbers must:```text id="cfp1_019"Be Globally UniqueBe ImmutableNever Be Reused
+
+Example Formats
+```text id=“cfp1_020”SNP-2026-00000001
+SNP-AI-2026-000001
+---# VERIFICATION CODE GOVERNANCEField:```text id="cfp1_021"verification_code
+must be:
+```text id=“cfp1_022”Cryptographically Random
+Globally Unique
+Externally Safe
+Internal IDs must never be exposed publicly.---# CERTIFICATE VERSIONINGSupports:```text id="cfp1_023"Name CorrectionReplacementRe-IssueCertificate Renewal
+through:
+```text id=“cfp1_024”certificate_version
+superseded_by_certificate_id
+---# CERTIFICATE_ISSUANCES## PurposeTracks certificate issuance events.Supports:```text id="cfp1_025"Initial IssuanceRenewalReplacementReIssue
+
+```sql id=“cfp1_026”CREATE TABLE certificate_issuances(id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+uuid CHAR(36) NOT NULL,certificate_id BIGINT UNSIGNED NOT NULL,issuance_type VARCHAR(50)    NOT NULL,issuance_source VARCHAR(50)    NOT NULL,issued_by BIGINT UNSIGNED NULL,issued_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),issuance_notes TEXT NULL,created_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),PRIMARY KEY (id),CONSTRAINT ux_certificate_issuances_uuid    UNIQUE (uuid)
+)ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+---# CERTIFICATE_ISSUANCES FOREIGN KEYS```sql id="cfp1_027"ALTER TABLE certificate_issuancesADD CONSTRAINT fk_certificate_issuances_certificateFOREIGN KEY (certificate_id)REFERENCES certificates(id);ALTER TABLE certificate_issuancesADD CONSTRAINT fk_certificate_issuances_issued_byFOREIGN KEY (issued_by)REFERENCES users(id);
+
+CERTIFICATE_ISSUANCES INDEXES
+```sql id=“cfp1_028”CREATE INDEX ix_certificate_issuances_certificateON certificate_issuances(certificate_id);
+CREATE INDEX ix_certificate_issuances_typeON certificate_issuances(issuance_type);
+CREATE INDEX ix_certificate_issuances_sourceON certificate_issuances(issuance_source);
+CREATE INDEX ix_certificate_issuances_dateON certificate_issuances(issued_date);
+---# ISSUANCE TYPESApplication validation shall enforce:```text id="cfp1_029"InitialRenewalReplacementReIssue
+
+ISSUANCE SOURCES
+Application validation shall enforce:
+```text id=“cfp1_030”Manual
+Automatic
+BulkImport
+API
+---# TEMPLATE SNAPSHOT GOVERNANCECertificates always reference:```text id="cfp1_031"certificate_template_version_id
+never:
+text id="cfp1_032" certificate_templates.id
+This guarantees historical certificate reproducibility.
+
+CERTIFICATION ELIGIBILITY RULE
+Only:
+text id="cfp1_033" evaluation_results.is_certification_eligible = 1
+may generate certificates.
+Enforced by application services.
+
+VALIDATION CHECKLIST
+✓ Template Versioning Applied
+✓ Certificate Versioning Applied
+✓ Verification Code Strategy Applied
+✓ Re-Issue Support Applied
+✓ Historical Reproducibility Applied
+✓ Certificate Lifecycle Applied
+✓ Issuance Tracking Applied
+✓ Audit Compatibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+006_CERTIFICATION_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+```text id=“cfp1_034”certificate_templates
+certificate_template_versions
+certificates
+certificate_issuances
+Certification Module Completion:```text id="cfp1_035"50%
+
+NEXT STEP
+Perform architecture review for:
+```text id=“cfp1_036”certificate_verifications
+certificate_revocations
+certificate_signatures
+before generating:```text id="cfp1_037"006_CERTIFICATION_SCHEMA.SQL – PART 2
+This phase will establish:
+```text id=“cfp1_038”Verification Engine
+Revocation Management
+Digital Signature Infrastructure
+Public Credential Validation```
+and complete the Certification module.
+
+END OF DOCUMENT

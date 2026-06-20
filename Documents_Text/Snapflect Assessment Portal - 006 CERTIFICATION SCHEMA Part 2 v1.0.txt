@@ -1,0 +1,161 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+006_CERTIFICATION_SCHEMA.SQL
+PART 2 – VERIFICATION, REVOCATION & DIGITAL TRUST
+Version 1.0
+
+MODULE
+Certification
+
+TABLES
+```text id=“cert2_001”certificate_verifications
+certificate_revocations
+certificate_signatures
+---# DEPENDS ON```text id="cert2_002"006_CERTIFICATION_SCHEMA.SQL – PART 1certificatescertificate_issuances001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes the trust layer of the Certification domain.
+It provides:
+```text id=“cert2_003”Certificate Verification
+Revocation Management
+Digital Signature Infrastructure
+Public Trust Validation
+Credential Integrity
+Future Blockchain Readiness
+---# CERTIFICATE_VERIFICATIONS## PurposeStores certificate verification events.Supports:```text id="cert2_004"Public VerificationEmployer VerificationAudit VerificationAPI VerificationQR Verification
+
+Design Principle
+Verification is event-based.
+A certificate may be verified many times.
+Every verification event is preserved.
+
+```sql id=“cert2_005”CREATE TABLE certificate_verifications(id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+uuid CHAR(36) NOT NULL,certificate_id BIGINT UNSIGNED NOT NULL,verification_source VARCHAR(50)    NOT NULL,verification_result VARCHAR(50)    NOT NULL,verified_by_user_id BIGINT UNSIGNED NULL,verification_metadata_json JSON NULL,verification_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),PRIMARY KEY (id),CONSTRAINT ux_certificate_verifications_uuid    UNIQUE (uuid)
+)ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+---# CERTIFICATE_VERIFICATIONS FOREIGN KEYS```sql id="cert2_006"ALTER TABLE certificate_verificationsADD CONSTRAINT fk_certificate_verifications_certificateFOREIGN KEY (certificate_id)REFERENCES certificates(id);ALTER TABLE certificate_verificationsADD CONSTRAINT fk_certificate_verifications_verified_byFOREIGN KEY (verified_by_user_id)REFERENCES users(id);
+
+CERTIFICATE_VERIFICATIONS INDEXES
+```sql id=“cert2_007”CREATE INDEX ix_certificate_verifications_certificateON certificate_verifications(certificate_id);
+CREATE INDEX ix_certificate_verifications_sourceON certificate_verifications(verification_source);
+CREATE INDEX ix_certificate_verifications_resultON certificate_verifications(verification_result);
+CREATE INDEX ix_certificate_verifications_dateON certificate_verifications(verification_date);
+CREATE INDEX ix_certificate_verifications_certificate_dateON certificate_verifications(certificate_id,verification_date);
+---# VERIFICATION SOURCESApplication validation shall enforce:```text id="cert2_008"PortalQRAPIAdmin
+
+VERIFICATION RESULTS
+Application validation shall enforce:
+```text id=“cert2_009”Valid
+Invalid
+Expired
+Revoked
+Suspended
+---# VERIFICATION METADATA STRATEGYField:```text id="cert2_010"verification_metadata_json
+supports:
+```text id=“cert2_011”Employer Reference
+Verification Token
+Browser Metadata
+Verification Context
+Fraud Analysis Signals
+without schema changes.---# CERTIFICATE_REVOCATIONS## PurposeStores certificate revocation records.Certificates are never deleted.Revocation creates an immutable audit trail.---```sql id="cert2_012"CREATE TABLE certificate_revocations(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    certificate_id BIGINT UNSIGNED NOT NULL,    revocation_reason VARCHAR(100)        NOT NULL,    revocation_notes TEXT NULL,    revoked_by BIGINT UNSIGNED NOT NULL,    revoked_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    PRIMARY KEY (id),    CONSTRAINT ux_certificate_revocations_uuid        UNIQUE (uuid),    CONSTRAINT ux_certificate_revocations_certificate        UNIQUE (certificate_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+CERTIFICATE_REVOCATIONS FOREIGN KEYS
+```sql id=“cert2_013”ALTER TABLE certificate_revocationsADD CONSTRAINT fk_certificate_revocations_certificateFOREIGN KEY (certificate_id)REFERENCES certificates(id);
+ALTER TABLE certificate_revocationsADD CONSTRAINT fk_certificate_revocations_revoked_byFOREIGN KEY (revoked_by)REFERENCES users(id);
+---# CERTIFICATE_REVOCATIONS INDEXES```sql id="cert2_014"CREATE INDEX ix_certificate_revocations_reasonON certificate_revocations(revocation_reason);CREATE INDEX ix_certificate_revocations_dateON certificate_revocations(revoked_date);
+
+REVOCATION REASONS
+Application validation shall enforce:
+```text id=“cert2_015”Fraud
+PolicyViolation
+AdministrativeCorrection
+CandidateRequest
+CertificationExpired
+LegalRequirement
+---# REVOCATION GOVERNANCEWhen a revocation record is created:```text id="cert2_016"certificate_status
+must become:
+text id="cert2_017" Revoked
+
+Enforcement
+Application Services Layer
+No trigger required.
+
+CERTIFICATE_SIGNATURES
+Purpose
+Stores digital signature metadata.
+Supports:
+```text id=“cert2_018”Digital Trust
+Signature Validation
+Key Rotation
+Certificate Authority Migration
+Blockchain Anchoring
+---## Design PrincipleOnly signature metadata is stored.The platform does not store entire signed PDF documents in this table.---```sql id="cert2_019"CREATE TABLE certificate_signatures(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    certificate_id BIGINT UNSIGNED NOT NULL,    signature_version INT        NOT NULL DEFAULT 1,    signature_hash VARCHAR(512)        NOT NULL,    signature_algorithm VARCHAR(100)        NOT NULL,    public_key_identifier VARCHAR(255)        NOT NULL,    blockchain_reference VARCHAR(255) NULL,    signature_status VARCHAR(50)        NOT NULL DEFAULT 'Active',    signed_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    PRIMARY KEY (id),    CONSTRAINT ux_certificate_signatures_uuid        UNIQUE (uuid),    CONSTRAINT ux_certificate_signature_version        UNIQUE        (            certificate_id,            signature_version        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+CERTIFICATE_SIGNATURES FOREIGN KEYS
+sql id="cert2_020" ALTER TABLE certificate_signatures ADD CONSTRAINT fk_certificate_signatures_certificate FOREIGN KEY (certificate_id) REFERENCES certificates(id);
+
+CERTIFICATE_SIGNATURES INDEXES
+```sql id=“cert2_021”CREATE INDEX ix_certificate_signatures_statusON certificate_signatures(signature_status);
+CREATE INDEX ix_certificate_signatures_algorithmON certificate_signatures(signature_algorithm);
+CREATE INDEX ix_certificate_signatures_key_identifierON certificate_signatures(public_key_identifier);
+CREATE INDEX ix_certificate_signatures_signed_dateON certificate_signatures(signed_date);
+---# SIGNATURE STATUS VALUESApplication validation shall enforce:```text id="cert2_022"ActiveExpiredRevoked
+
+PUBLIC KEY GOVERNANCE
+Field:
+text id="cert2_023" public_key_identifier
+supports:
+```text id=“cert2_024”Key Rotation
+Multiple Certificate Authorities
+Signature Validation
+Trust Chain Management
+---# BLOCKCHAIN READINESSField:```text id="cert2_025"blockchain_reference
+supports future:
+```text id=“cert2_026”Blockchain Anchoring
+Decentralized Verification
+External Trust Networks
+without schema changes.---# DIGITAL TRUST MODEL```text id="cert2_027"Certificate        ↓Signature        ↓Public Key        ↓Verification
+This chain establishes credential integrity.
+
+PUBLIC VERIFICATION MODEL
+text id="cert2_028" Verification URL         ↓ Verification Code         ↓ Certificate         ↓ Signature Validation         ↓ Verification Result
+
+VALIDATION CHECKLIST
+✓ Verification Event Model Applied
+✓ Verification Analytics Applied
+✓ Revocation Governance Applied
+✓ Digital Signature Infrastructure Applied
+✓ Key Rotation Readiness Applied
+✓ Public Trust Architecture Applied
+✓ Blockchain Readiness Applied
+✓ Audit Compatibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+006_CERTIFICATION_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+```text id=“cert2_029”certificate_templates
+certificate_template_versions
+certificates
+certificate_issuances
+certificate_verifications
+certificate_revocations
+certificate_signatures
+Certification Module Completion:```text id="cert2_030"100%
+
+NEXT STEP
+Perform:
+text id="cert2_031" Certification Schema Master Review v1.0
+Review Scope:
+```text id=“cert2_032”Part 1
+Part 2
+Validation Areas:```text id="cert2_033"Credential IntegrityVerification ArchitectureRevocation GovernanceDigital Trust ModelCertificate LifecyclePerformance & Index StrategyAuditabilityBlockchain Readiness
+After successful review:
+```text id=“cert2_034”Freeze:
+006_CERTIFICATION_SCHEMA v1.0 FINAL```
+
+END OF DOCUMENT

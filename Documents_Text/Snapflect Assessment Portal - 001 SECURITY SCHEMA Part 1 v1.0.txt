@@ -1,0 +1,64 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+001_SECURITY_SCHEMA.SQL
+PART 1 – USERS & USER_PROFILES
+VERSION 1.0
+Module
+Security & User Management
+Tables
+usersuser_profiles
+Target Platform
+MySQL 8+Hostinger Shared Hosting Compatible
+
+USERS
+CREATETABLE users(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    email VARCHAR(255) NOTNULL,    mobile_number VARCHAR(20) NULL,    password_hash VARCHAR(255) NOTNULL,    first_name VARCHAR(100) NOTNULL,    last_name VARCHAR(100) NULL,    status VARCHAR(50) NOTNULLDEFAULT'Pending Verification',    email_verified TINYINT(1) NOTNULLDEFAULT0,    last_login_date DATETIME(3) NULL,    last_login_ip VARCHAR(50) NULL,    failed_login_count INTNOTNULLDEFAULT0,    account_locked_until DATETIME(3) NULL,    created_by BIGINT UNSIGNED NULL,    created_date DATETIME(3) NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1) NOTNULLDEFAULT1,    is_deleted TINYINT(1) NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_users_uuidUNIQUE (uuid),CONSTRAINT ux_users_emailUNIQUE (email),CONSTRAINT ux_users_mobile_numberUNIQUE (mobile_number))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+USERS INDEXES
+CREATEINDEX ix_users_statusON users(status);CREATEINDEX ix_users_is_activeON users(is_active);CREATEINDEX ix_users_created_dateON users(created_date);CREATEINDEX ix_users_email_verifiedON users(email_verified);
+
+USERS SELF-REFERENCING AUDIT FOREIGN KEYS
+Added after table creation to avoid circular creation issues.
+ALTERTABLE usersADDCONSTRAINT fk_users_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE usersADDCONSTRAINT fk_users_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE usersADDCONSTRAINT fk_users_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+USER_PROFILES
+CREATETABLE user_profiles(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    profile_photo_url VARCHAR(500) NULL,    company VARCHAR(255) NULL,    designation VARCHAR(255) NULL,    years_of_experience DECIMAL(5,2) NULL,    technology_expertise TEXT NULL,    country VARCHAR(100) NULL,    state VARCHAR(100) NULL,    city VARCHAR(100) NULL,    bio TEXT NULL,    profile_completion_percentage DECIMAL(5,2)NOTNULLDEFAULT0,    created_by BIGINT UNSIGNED NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_user_profiles_uuidUNIQUE (uuid),CONSTRAINT ux_user_profiles_userUNIQUE (user_id),CONSTRAINT fk_user_profiles_userFOREIGNKEY (user_id)REFERENCES users(id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+USER_PROFILES INDEXES
+CREATEINDEX ix_user_profiles_countryON user_profiles(country);CREATEINDEX ix_user_profiles_stateON user_profiles(state);CREATEINDEX ix_user_profiles_cityON user_profiles(city);CREATEINDEX ix_user_profiles_is_activeON user_profiles(is_active);
+
+USER_PROFILES AUDIT FOREIGN KEYS
+ALTERTABLE user_profilesADDCONSTRAINT fk_user_profiles_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE user_profilesADDCONSTRAINT fk_user_profiles_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE user_profilesADDCONSTRAINT fk_user_profiles_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+RECOMMENDED ENUM VALUES
+USER STATUS
+Application layer validation should enforce:
+ActivePending VerificationLockedSuspendedDeleted
+
+BUSINESS RULES
+USERS
+Email must be unique.
+Mobile number must be unique when provided.
+Passwords must be stored using BCrypt.
+Soft delete only.
+Deleted users are never physically removed.
+Email verification required for self-registration.
+Five failed login attempts trigger account lock.
+Lock duration: 30 minutes.
+
+USER_PROFILES
+One profile per user.
+Profile created during onboarding.
+User may update profile anytime.
+Profile deletion follows parent user lifecycle.
+
+VALIDATION CHECKLIST
+✓ MySQL 8 Compatible
+✓ InnoDB Engine
+✓ UTF8MB4 Compatible
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ FK Strategy Applied
+✓ Index Strategy Applied
+✓ Hostinger Compatible
+
+END OF 001_SECURITY_SCHEMA.SQL – PART 1

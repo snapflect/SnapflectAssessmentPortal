@@ -1,0 +1,405 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017H_REPORTING_ANALYTICS_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Reporting & Analytics OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Reporting & Analytics
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+008_REPORTING_ANALYTICS_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+DashboardsDashboard WidgetsReportsReport SchedulingReport ExportsKPIsAnalytics SnapshotsExecutive AnalyticsOperational AnalyticsTrend AnalyticsPerformance Metrics
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Reporting & Analytics APIversion:1.0.0description: Reporting, Dashboard and Analytics APIsservers:-url: /api/v1tags:-name: Dashboards-name: Dashboard Widgets-name: KPIs-name: Reports-name: Analytics
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Dashboard.ViewDashboard.ManageAnalytics.ViewAnalytics.ManageReport.ViewReport.GenerateReport.ScheduleReport.Export
+
+4. DASHBOARD APIS
+Supported Dashboard Types
+PlatformOrganizationExecutiveOperationalPersonal
+
+List Dashboards
+Endpoint
+GET /api/v1/dashboards
+Permission
+Dashboard.View
+Filters
+dashboardTypestatussearchpagepageSize
+
+Get Dashboard
+Endpoint
+GET /api/v1/dashboards/{id}
+Permission
+Dashboard.View
+
+Create Dashboard
+Endpoint
+POST /api/v1/dashboards
+Permission
+Dashboard.Manage
+Request DTO
+{"dashboardName":"Executive Dashboard","dashboardType":"Executive","description":"Executive reporting dashboard"}
+Audit Event
+Dashboard Created
+
+Update Dashboard
+Endpoint
+PUT /api/v1/dashboards/{id}
+Permission
+Dashboard.Manage
+Audit Event
+Dashboard Updated
+
+Delete Dashboard
+Endpoint
+DELETE /api/v1/dashboards/{id}
+Permission
+Dashboard.Manage
+Behavior
+Soft Delete
+
+5. DASHBOARD WIDGET APIS
+Supported Widget Types
+MetricChartTableTrendGaugeLeaderboard
+
+List Widgets
+Endpoint
+GET /api/v1/dashboard-widgets
+Permission
+Dashboard.View
+
+Get Widget
+Endpoint
+GET /api/v1/dashboard-widgets/{id}
+Permission
+Dashboard.View
+
+Create Widget
+Endpoint
+POST /api/v1/dashboard-widgets
+Permission
+Dashboard.Manage
+Request DTO
+{"dashboardId":1,"widgetName":"Pass Rate","widgetType":"Gauge","dataSource":"kpi_pass_rate"}
+Audit Event
+Widget Created
+
+Update Widget
+Endpoint
+PUT /api/v1/dashboard-widgets/{id}
+Permission
+Dashboard.Manage
+Audit Event
+Widget Updated
+
+Delete Widget
+Endpoint
+DELETE /api/v1/dashboard-widgets/{id}
+Permission
+Dashboard.Manage
+
+6. KPI APIS
+List KPIs
+Endpoint
+GET /api/v1/kpis
+Permission
+Analytics.View
+
+Get KPI
+Endpoint
+GET /api/v1/kpis/{id}
+Permission
+Analytics.View
+
+Create KPI
+Endpoint
+POST /api/v1/kpis
+Permission
+Analytics.Manage
+Request DTO
+{"kpiCode":"PASS_RATE","kpiName":"Assessment Pass Rate","calculationMethod":"Percentage"}
+Audit Event
+KPI Created
+
+Update KPI
+Endpoint
+PUT /api/v1/kpis/{id}
+Permission
+Analytics.Manage
+Audit Event
+KPI Updated
+
+7. KPI SNAPSHOT APIS
+KPI Trends
+Endpoint
+GET /api/v1/kpis/{id}/trends
+Permission
+Analytics.View
+Query Parameters
+periodstartDateendDate
+
+KPI Comparison
+Endpoint
+GET /api/v1/kpis/{id}/comparison
+Permission
+Analytics.View
+Response
+{"currentPeriod":82,"previousPeriod":76,"changePercentage":7.89}
+
+8. ANALYTICS SNAPSHOT APIS
+List Snapshots
+Endpoint
+GET /api/v1/analytics-snapshots
+Permission
+Analytics.View
+Filters
+snapshotTypesnapshotDateorganizationId
+
+Get Snapshot
+Endpoint
+GET /api/v1/analytics-snapshots/{id}
+Permission
+Analytics.View
+
+Rules
+Read OnlySystem GeneratedImmutable
+
+9. REPORT APIS
+Supported Report Types
+AssessmentCandidateEvaluationCertificationBillingAuditPlatform
+
+List Reports
+Endpoint
+GET /api/v1/reports
+Permission
+Report.View
+
+Get Report
+Endpoint
+GET /api/v1/reports/{id}
+Permission
+Report.View
+
+Generate Report
+Endpoint
+POST /api/v1/reports/generate
+Permission
+Report.Generate
+Request DTO
+{"reportType":"Assessment","dateFrom":"2027-01-01","dateTo":"2027-01-31","format":"PDF"}
+Processing
+Queue Report GenerationCreate Export RecordNotify User When Complete
+Audit Event
+Report Generated
+
+10. REPORT SCHEDULING APIS
+Schedule Report
+Endpoint
+POST /api/v1/reports/{id}/schedule
+Permission
+Report.Schedule
+Request DTO
+{"frequency":"Weekly","emailRecipients":["admin@snapflect.com"]}
+Audit Event
+Report Scheduled
+
+List Scheduled Reports
+Endpoint
+GET /api/v1/report-schedules
+Permission
+Report.Schedule
+
+Cancel Scheduled Report
+Endpoint
+POST /api/v1/report-schedules/{id}/cancel
+Permission
+Report.Schedule
+
+11. REPORT EXPORT APIS
+Supported Export Formats
+PDFExcelCSV
+
+Export Report
+Endpoint
+GET /api/v1/reports/{id}/export
+Permission
+Report.Export
+Query Parameters
+format
+Audit Event
+Report Exported
+
+Download Export
+Endpoint
+GET /api/v1/report-exports/{id}/download
+Permission
+Report.Export
+
+12. EXECUTIVE ANALYTICS APIS
+Executive Dashboard
+Endpoint
+GET /api/v1/executive-dashboard
+Permission
+Analytics.View
+Response Metrics
+RevenueAssessment VolumePass RateCertificate IssuanceOrganization GrowthMonthly Trends
+
+Executive Summary
+Endpoint
+GET /api/v1/executive-summary
+Permission
+Analytics.View
+
+13. OPERATIONAL ANALYTICS APIS
+Operational Dashboard
+Endpoint
+GET /api/v1/operational-dashboard
+Permission
+Analytics.View
+Response Metrics
+Active AssessmentsRunning AttemptsPending EvaluationsNotification FailuresSystem HealthQueue Backlogs
+
+Operational Metrics
+Endpoint
+GET /api/v1/operational-metrics
+Permission
+Analytics.View
+
+14. TREND ANALYTICS APIS
+Assessment Trends
+Endpoint
+GET /api/v1/analytics/trends/assessments
+Permission
+Analytics.View
+
+Candidate Trends
+Endpoint
+GET /api/v1/analytics/trends/candidates
+Permission
+Analytics.View
+
+Revenue Trends
+Endpoint
+GET /api/v1/analytics/trends/revenue
+Permission
+Analytics.View
+
+Certification Trends
+Endpoint
+GET /api/v1/analytics/trends/certifications
+Permission
+Analytics.View
+
+15. PERSONAL ANALYTICS APIS
+My Dashboard
+Endpoint
+GET /api/v1/my-dashboard
+Permission
+Authenticated User
+
+My Statistics
+Endpoint
+GET /api/v1/my-statistics
+Permission
+Authenticated User
+Response Metrics
+Assessments CompletedAverage ScoreCertificates EarnedPass Rate
+
+16. MULTI-TENANCY RULES
+Candidate
+Personal Analytics Only
+
+Organization Administrator
+Organization Analytics Only
+
+Platform Administrator
+Global Analytics Access
+
+Mandatory Enforcement
+Organization Scope ValidationData Isolation Enforcement
+
+17. AUDIT REQUIREMENTS
+Mandatory Audit Events
+Dashboard CreatedDashboard UpdatedWidget CreatedWidget UpdatedKPI CreatedKPI UpdatedReport GeneratedReport ScheduledReport ExportedAnalytics Viewed
+
+18. PERFORMANCE REQUIREMENTS
+Analytics Queries
+Snapshot Tables OnlyNo Direct Transaction Table Scans
+
+Dashboard Loading
+Cached KPI ReadsPrecomputed AggregationsSub-Second Target
+
+Expected Scale
+10M+ Assessments10M+ Attempts1M+ ReportsEnterprise Scale Analytics
+
+19. SECURITY REQUIREMENTS
+Analytics APIs Must
+Honor Organization BoundariesMask Sensitive DataProtect Financial MetricsAudit Export Activity
+
+Exports
+Temporary Secure URLsAccess Controlled DownloadsExpiration Support
+
+20. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+Report Not Ready
+{"success":false,"code":"REPORT_NOT_READY","message":"Report generation still in progress."}
+
+21. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesAnalytics ServicesDashboard ServicesReport ServicesExport ServicesKPI Processors
+
+Do Not Generate
+Alternative KPI EnginesAlternative Dashboard ModelsAlternative Snapshot ArchitectureDirect Transaction Analytics
+
+22. IMPLEMENTATION PACKAGE STATUS
+Aligned With
+008_REPORTING_ANALYTICS_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document
+017H_REPORTING_ANALYTICS_OPENAPI
+Version
+v1.0
+Status
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017I_INTEGRATION_AUDIT_OPENAPI v1.0
+Coverage
+Integration EventsWebhook ManagementImport APIsExport APIsAudit EventsAudit SearchCompliance ReportingExternal System Integrations
+This module completes the governance, traceability, and enterprise integration layer of the Snapflect platform.
+
+END OF DOCUMENT

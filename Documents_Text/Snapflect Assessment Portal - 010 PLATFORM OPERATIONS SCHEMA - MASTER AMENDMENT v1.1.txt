@@ -1,0 +1,201 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+010_PLATFORM_OPERATIONS_SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+010 Platform Operations Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2
+Amendment Type
+Enterprise Operations Enhancement
+Approval Status
+Approved
+Effective Version
+010_PLATFORM_OPERATIONS_SCHEMA v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+Platform Operations Schema Master Review v1.0
+The review confirmed that the Platform Operations module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise-grade operational enhancements focused on:
+Scheduler ReliabilityExecution Outcome TrackingHealth Monitoring DiagnosticsAnnouncement PrioritizationOperational Performance Optimization
+
+2. JOB_EXECUTIONS ENHANCEMENT
+2.1 Final Execution Outcome Tracking
+New Column
+final_execution_status VARCHAR(50) NULL
+
+Purpose
+Tracks the final resolved outcome of a job execution after retries.
+
+Example
+Attempt 1 = FailedAttempt 2 = FailedAttempt 3 = Completedexecution_status = Retryingfinal_execution_status = Completed
+
+Allowed Values
+CompletedFailedCancelled
+
+Benefits
+Supports:
+Operational ReportingRetry AnalyticsFailure Recovery TrackingSLA Monitoring
+
+3. SCHEDULED_TASKS ENHANCEMENT
+3.1 Scheduler Drift Detection
+New Column
+last_expected_execution_date DATETIME(3) NULL
+
+Purpose
+Stores the scheduler-calculated expected execution time.
+
+Example
+Expected:02:00 AMActual:02:17 AMDrift:17 Minutes
+
+Benefits
+Supports:
+Missed Execution DetectionScheduler Health MonitoringOperational DiagnosticsReliability Reporting
+
+3.2 Scheduler Polling Optimization
+New Index
+CREATEINDEX ix_scheduled_tasks_next_enabledON scheduled_tasks(    is_enabled,    next_execution_date);
+
+Purpose
+Optimizes scheduler polling queries.
+
+Example Query
+SELECT*FROM scheduled_tasksWHERE is_enabled =1AND next_execution_date <= NOW();
+
+4. APPLICATION_HEALTH ENHANCEMENT
+4.1 Health Source Attribution
+New Column
+health_source VARCHAR(100) NULL
+
+Purpose
+Identifies how the health record was generated.
+
+Example Values
+HeartbeatProbeSchedulerManualExternalMonitor
+
+Benefits
+Supports:
+Monitoring DiagnosticsSource ValidationHealth InvestigationObservability
+
+5. SYSTEM_ANNOUNCEMENTS ENHANCEMENT
+5.1 Announcement Prioritization
+New Column
+priority INTNULL
+
+Purpose
+Controls display ordering of announcements.
+
+Priority Scale
+1 = Critical2 = High3 = Normal4 = Low
+
+Example
+Security Breach NoticePriority = 1Feature Release NoticePriority = 3
+
+Benefits
+Supports:
+Critical MessagingEmergency CommunicationsOperational VisibilityUser Experience
+
+6. GOVERNANCE RULES
+Execution Governance
+When:
+final_execution_status
+is populated, it becomes the authoritative execution outcome.
+
+Scheduler Governance
+When:
+last_expected_execution_date
+differs significantly from actual execution time, scheduler drift alerts should be generated.
+
+Health Governance
+Every automated health record should populate:
+health_source
+whenever available.
+
+Announcement Governance
+Announcements should be displayed using:
+priority ASC,effective_from DESC
+ordering.
+
+7. IMPACT ANALYSIS
+Artifact
+Impact
+Scheduler Reliability
+Improved
+Job Monitoring
+Improved
+Health Diagnostics
+Improved
+Communications Management
+Improved
+Operational Visibility
+Improved
+Enterprise Readiness
+Improved
+
+8. FINAL VALIDATION SUMMARY
+Area
+Result
+Configuration Governance
+PASS
+Feature Management
+PASS
+Background Processing
+PASS
+Scheduler Framework
+PASS
+Health Monitoring
+PASS
+System Communications
+PASS
+Operational Visibility
+PASS
+SaaS Readiness
+PASS
+Enterprise Readiness
+PASS
+
+9. APPROVED PLATFORM OPERATIONS BASELINE
+The approved platform operations tables are:
+system_settingsfeature_flagsbackground_jobsjob_executionsscheduled_tasksapplication_healthsystem_announcements
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+010 Platform Operations Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVEDMERGED INTO BASELINE
+
+FINAL MODULE STATUS
+010_PLATFORM_OPERATIONS_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Data Dictionary v1.1 FINAL✓Security Schema v1.0 FINAL✓Governance Foundation Schema v1.0 FINAL✓Assessment Definition Schema v1.1 FINAL✓Assessment Execution Schema v1.2 FINAL✓Evaluation Schema v1.1 FINAL✓Certification Schema v1.1 FINAL✓Notification Schema v1.1 FINAL✓Reporting & Analytics Schema v1.1 FINAL✓Integration & Audit Schema v1.1 FINAL✓Platform Operations Schema v1.1 FINAL✓
+
+OVERALL PLATFORM STATUS
+Completed Core Domains:
+001 Security✓002 Governance Foundation✓003 Assessment Definition✓004 Assessment Execution✓005 Evaluation✓006 Certification✓007 Notification✓008 Reporting & Analytics✓009 Integration & Audit✓010 Platform Operations✓
+
+PLATFORM ARCHITECTURE STATUS
+Security Layer✓Governance Layer✓Assessment Definition Layer✓Assessment Execution Layer✓Evaluation Layer✓Certification Layer✓Notification Layer✓Reporting & Analytics Layer✓Integration & Audit Layer✓Platform Operations Layer✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+011_AI_PROCTORING_SCHEMA
+Core Areas:
+proctoring_sessionsproctoring_eventsproctoring_violationsai_detection_resultsmedia_evidenceproctoring_reviews
+This module will establish:
+AI Proctoring FoundationFraud DetectionBehavior MonitoringEvidence ManagementHuman Review WorkflowCompliance Auditability
+and completes the assessment integrity and examination monitoring architecture.
+
+END OF DOCUMENT

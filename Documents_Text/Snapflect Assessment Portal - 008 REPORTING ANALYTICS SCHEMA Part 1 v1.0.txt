@@ -1,0 +1,166 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+008_REPORTING_ANALYTICS_SCHEMA.SQL
+PART 1 – REPORTING FOUNDATION
+Version 1.0
+
+MODULE
+Reporting & Analytics
+
+TABLES
+report_definitionsreport_versionsreport_executionsreport_exports
+
+DEPENDS ON
+001_SECURITY_SCHEMA.SQLusers007_NOTIFICATION_SCHEMA.SQLnotification_subscriptionsnotification_preferences
+
+PURPOSE
+This module establishes the reporting foundation.
+It provides:
+Report DefinitionsReport VersioningParameter GovernanceReport Execution TrackingExport Lifecycle ManagementScheduling ReadinessMulti-Tenant ReadinessAnalytics Extensibility
+
+REPORT_DEFINITIONS
+Purpose
+Represents logical report definitions.
+Report content is stored in version records.
+
+CREATETABLE report_definitions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    report_code VARCHAR(100) NOTNULL,    report_name VARCHAR(255) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'System',    report_category VARCHAR(50)NOTNULL,    is_system_report TINYINT(1)NOTNULLDEFAULT0,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_report_definitions_uuidUNIQUE (uuid),CONSTRAINT ux_report_definitions_codeUNIQUE (report_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+REPORT_DEFINITIONS FOREIGN KEYS
+ALTERTABLE report_definitionsADDCONSTRAINT fk_report_definitions_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE report_definitionsADDCONSTRAINT fk_report_definitions_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+REPORT_DEFINITIONS INDEXES
+CREATEINDEX ix_report_definitions_categoryON report_definitions(report_category);CREATEINDEX ix_report_definitions_statusON report_definitions(status);CREATEINDEX ix_report_definitions_ownershipON report_definitions(ownership_type);CREATEINDEX ix_report_definitions_systemON report_definitions(is_system_report);
+
+OWNERSHIP TYPES
+Application validation shall enforce:
+SystemOrganizationCustom
+
+REPORT CATEGORIES
+Application validation shall enforce:
+AssessmentEvaluationCertificationNotificationSecurityGovernanceExecutiveOperational
+
+REPORT STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+REPORT_VERSIONS
+Purpose
+Stores immutable report definitions.
+Supports:
+Report FiltersColumnsSortingParametersVisualization DefinitionsAnalytics Configuration
+
+CREATETABLE report_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    report_definition_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    report_definition_json JSON NOTNULL,    parameters_schema_json JSON NULL,    effective_from DATETIME(3) NULL,    effective_to DATETIME(3) NULL,    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_report_versions_uuidUNIQUE (uuid),CONSTRAINT ux_report_versions_versionUNIQUE        (            report_definition_id,            version_number        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+REPORT_VERSIONS FOREIGN KEYS
+ALTERTABLE report_versionsADDCONSTRAINT fk_report_versions_definitionFOREIGNKEY (report_definition_id)REFERENCES report_definitions(id);ALTERTABLE report_versionsADDCONSTRAINT fk_report_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+REPORT_VERSIONS INDEXES
+CREATEINDEX ix_report_versions_statusON report_versions(version_status);CREATEINDEX ix_report_versions_effective_fromON report_versions(effective_from);CREATEINDEX ix_report_versions_effective_toON report_versions(effective_to);
+
+VERSION STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+PARAMETER GOVERNANCE
+Example:
+{"required":["startDate","endDate"]}
+Stored in:
+parameters_schema_json
+
+EFFECTIVE DATING GOVERNANCE
+Report versions become active when:
+current_timestamp >= effective_from
+and
+current_timestamp < effective_to
+when effective_to exists.
+
+REPORT_EXECUTIONS
+Purpose
+Tracks report execution history.
+Supports:
+Manual ReportsScheduled ReportsAPI ReportsSystem Reports
+
+CREATETABLE report_executions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    report_version_id BIGINT UNSIGNED NOTNULL,    execution_type VARCHAR(50)NOTNULL,    schedule_reference VARCHAR(255) NULL,    executed_by BIGINT UNSIGNED NULL,    execution_status VARCHAR(50)NOTNULLDEFAULT'Pending',    started_date DATETIME(3) NULL,    completed_date DATETIME(3) NULL,    result_metadata_json JSON NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_report_executions_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+REPORT_EXECUTIONS FOREIGN KEYS
+ALTERTABLE report_executionsADDCONSTRAINT fk_report_executions_versionFOREIGNKEY (report_version_id)REFERENCES report_versions(id);ALTERTABLE report_executionsADDCONSTRAINT fk_report_executions_executed_byFOREIGNKEY (executed_by)REFERENCES users(id);
+
+REPORT_EXECUTIONS INDEXES
+CREATEINDEX ix_report_executions_statusON report_executions(execution_status);CREATEINDEX ix_report_executions_typeON report_executions(execution_type);CREATEINDEX ix_report_executions_startedON report_executions(started_date);CREATEINDEX ix_report_executions_completedON report_executions(completed_date);
+
+EXECUTION TYPES
+Application validation shall enforce:
+ManualScheduledAPISystem
+
+EXECUTION STATUS VALUES
+Application validation shall enforce:
+PendingRunningCompletedFailedCancelled
+
+REPORT_EXPORTS
+Purpose
+Tracks generated report exports.
+Supports:
+PDFExcelCSVJSON
+
+CREATETABLE report_exports(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    report_execution_id BIGINT UNSIGNED NOTNULL,    export_format VARCHAR(50)NOTNULL,    file_reference VARCHAR(1000) NOTNULL,    export_status VARCHAR(50)NOTNULLDEFAULT'Pending',    expiry_date DATETIME(3) NULL,    generated_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_report_exports_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+REPORT_EXPORTS FOREIGN KEYS
+ALTERTABLE report_exportsADDCONSTRAINT fk_report_exports_executionFOREIGNKEY (report_execution_id)REFERENCES report_executions(id);
+
+REPORT_EXPORTS INDEXES
+CREATEINDEX ix_report_exports_formatON report_exports(export_format);CREATEINDEX ix_report_exports_statusON report_exports(export_status);CREATEINDEX ix_report_exports_expiryON report_exports(expiry_date);CREATEINDEX ix_report_exports_generatedON report_exports(generated_date);
+
+EXPORT FORMATS
+Application validation shall enforce:
+PDFExcelCSVJSON
+
+EXPORT STATUS VALUES
+Application validation shall enforce:
+PendingGeneratedFailedExpired
+
+FILE STORAGE GOVERNANCE
+Field:
+file_reference
+must remain provider-agnostic.
+Supported storage targets:
+Local StorageAzure Blob StorageAWS S3CDNObject Storage
+
+RESULT METADATA STRATEGY
+Example:
+{"rowCount":1500,"executionTimeMs":220,"exportCount":2}
+Stored in:
+result_metadata_json
+
+VALIDATION CHECKLIST
+✓ Report Versioning Applied
+✓ Parameter Governance Applied
+✓ Effective Dating Applied
+✓ Execution Tracking Applied
+✓ Export Lifecycle Applied
+✓ Scheduling Readiness Applied
+✓ Multi-Tenant Readiness Applied
+✓ Analytics Extensibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+008_REPORTING_ANALYTICS_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+report_definitionsreport_versionsreport_executionsreport_exports
+Reporting & Analytics Completion:
+50%
+
+NEXT STEP
+Perform architecture review for:
+dashboard_definitionsdashboard_widgetsanalytics_snapshotskpi_definitionskpi_snapshots
+before generating:
+008_REPORTING_ANALYTICS_SCHEMA.SQL – PART 2
+This phase will establish:
+Executive DashboardsOperational DashboardsHistorical AnalyticsKPI TrackingTrend AnalysisExecutive ReportingAI Analytics Readiness
+and complete the Reporting & Analytics module.
+
+END OF DOCUMENT

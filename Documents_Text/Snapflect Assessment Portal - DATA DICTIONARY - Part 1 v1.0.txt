@@ -1,0 +1,661 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+DATA DICTIONARY
+PART 1 – SECURITY & USER MANAGEMENT
+VERSION 1.0
+Status: Draft for Review
+Based On:
+Master PRD v1.2 FINAL
+ERD v1.1 FINAL
+Database Standards & Conventions v1.1 FINAL
+
+1. USERS
+Purpose
+Stores user authentication and account information.
+
+Table Name
+users
+
+Columns
+Column
+Data Type
+Nullable
+Default
+PK
+FK
+Unique
+Description
+id
+BIGINT UNSIGNED
+No
+Auto Increment
+Yes
+No
+Yes
+Internal primary key
+uuid
+CHAR(36)
+No
+-
+No
+No
+Yes
+Public unique identifier
+email
+VARCHAR(255)
+No
+-
+No
+No
+Yes
+User login email
+mobile_number
+VARCHAR(20)
+Yes
+NULL
+No
+No
+Yes
+Mobile number
+password_hash
+VARCHAR(255)
+No
+-
+No
+No
+No
+BCrypt password hash
+first_name
+VARCHAR(100)
+No
+-
+No
+No
+No
+User first name
+last_name
+VARCHAR(100)
+Yes
+NULL
+No
+No
+No
+User last name
+status
+VARCHAR(50)
+No
+Active
+No
+No
+No
+Account status
+email_verified
+TINYINT(1)
+No
+0
+No
+No
+No
+Email verification flag
+last_login_date
+DATETIME(3)
+Yes
+NULL
+No
+No
+No
+Last login timestamp
+last_login_ip
+VARCHAR(50)
+Yes
+NULL
+No
+No
+No
+Last login IP
+failed_login_count
+INT
+No
+0
+No
+No
+No
+Failed login attempts
+account_locked_until
+DATETIME(3)
+Yes
+NULL
+No
+No
+No
+Lock expiry time
+created_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Audit field
+created_date
+DATETIME(3)
+No
+CURRENT_TIMESTAMP(3)
+No
+No
+No
+Creation timestamp
+modified_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Audit field
+modified_date
+DATETIME(3)
+Yes
+NULL
+No
+No
+No
+Last modification
+is_active
+TINYINT(1)
+No
+1
+No
+No
+No
+Active flag
+is_deleted
+TINYINT(1)
+No
+0
+No
+No
+No
+Soft delete flag
+deleted_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Deleted by
+deleted_date
+DATETIME(3)
+Yes
+NULL
+No
+No
+No
+Deleted date
+
+Business Rules
+Email must be unique.
+UUID must be unique.
+Passwords must never be stored in plain text.
+BCrypt hashing is mandatory.
+Soft delete required.
+Account lockout supported.
+
+2. USER_PROFILES
+Purpose
+Stores onboarding and profile information.
+
+Table Name
+user_profiles
+
+Columns
+Column
+Data Type
+Nullable
+Default
+PK
+FK
+Unique
+Description
+id
+BIGINT UNSIGNED
+No
+Auto Increment
+Yes
+No
+Yes
+Primary key
+uuid
+CHAR(36)
+No
+-
+No
+No
+Yes
+Public identifier
+user_id
+BIGINT UNSIGNED
+No
+-
+No
+Yes
+Yes
+User reference
+profile_photo_url
+VARCHAR(500)
+Yes
+NULL
+No
+No
+No
+Profile image
+company
+VARCHAR(255)
+Yes
+NULL
+No
+No
+No
+Company
+designation
+VARCHAR(255)
+Yes
+NULL
+No
+No
+No
+Job title
+years_of_experience
+DECIMAL(5,2)
+Yes
+NULL
+No
+No
+No
+Experience
+technology_expertise
+TEXT
+Yes
+NULL
+No
+No
+No
+Skills summary
+country
+VARCHAR(100)
+Yes
+NULL
+No
+No
+No
+Country
+state
+VARCHAR(100)
+Yes
+NULL
+No
+No
+No
+State
+city
+VARCHAR(100)
+Yes
+NULL
+No
+No
+No
+City
+bio
+TEXT
+Yes
+NULL
+No
+No
+No
+User bio
+profile_completion_percentage
+DECIMAL(5,2)
+No
+0
+No
+No
+No
+Completion score
+created_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Audit
+created_date
+DATETIME(3)
+No
+CURRENT_TIMESTAMP(3)
+No
+No
+No
+Created
+modified_by
+BIGINT UNSIGNED
+Yes
+NULL
+No
+No
+No
+Modified by
+modified_date
+DATETIME(3)
+Yes
+NULL
+No
+No
+No
+Modified date
+is_active
+TINYINT(1)
+No
+1
+No
+No
+No
+Active
+is_deleted
+TINYINT(1)
+No
+0
+No
+No
+No
+Deleted
+
+Business Rules
+One profile per user.
+User onboarding updates profile information.
+User can update profile anytime.
+
+3. ROLES
+Purpose
+Stores system roles.
+
+Table Name
+roles
+
+Core Roles
+SUPER_ADMINASSESSMENT_ADMINUSER
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+role_name
+VARCHAR(100)
+role_code
+VARCHAR(100)
+description
+TEXT
+display_order
+INT
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+is_active
+TINYINT(1)
+is_deleted
+TINYINT(1)
+deleted_by
+BIGINT UNSIGNED
+deleted_date
+DATETIME(3)
+
+Unique Constraints
+role_namerole_code
+
+4. PERMISSIONS
+Purpose
+Stores permission catalog.
+
+Table Name
+permissions
+
+Examples
+technology.createtechnology.editassessment.createassessment.publishassessment.reviewreport.view
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+permission_name
+VARCHAR(150)
+permission_code
+VARCHAR(150)
+module_name
+VARCHAR(100)
+description
+TEXT
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+is_active
+TINYINT(1)
+is_deleted
+TINYINT(1)
+
+Unique Constraints
+permission_code
+
+5. USER_ROLES
+Purpose
+Maps users to roles.
+
+Table Name
+user_roles
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+user_id
+BIGINT UNSIGNED
+role_id
+BIGINT UNSIGNED
+assigned_date
+DATETIME(3)
+assigned_by
+BIGINT UNSIGNED
+effective_from
+DATETIME(3)
+effective_to
+DATETIME(3)
+is_active
+TINYINT(1)
+created_date
+DATETIME(3)
+
+Unique Constraint
+(user_id, role_id)
+
+6. ROLE_PERMISSIONS
+Purpose
+Maps permissions to roles.
+
+Table Name
+role_permissions
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+role_id
+BIGINT UNSIGNED
+permission_id
+BIGINT UNSIGNED
+assigned_date
+DATETIME(3)
+assigned_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+is_active
+TINYINT(1)
+
+Unique Constraint
+(role_id, permission_id)
+
+7. USER_SESSIONS
+Purpose
+Tracks login sessions.
+
+Table Name
+user_sessions
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+user_id
+BIGINT UNSIGNED
+jwt_token_id
+VARCHAR(255)
+refresh_token_id
+VARCHAR(255)
+device_name
+VARCHAR(255)
+device_type
+VARCHAR(100)
+browser
+VARCHAR(255)
+operating_system
+VARCHAR(255)
+ip_address
+VARCHAR(50)
+location
+VARCHAR(255)
+login_date
+DATETIME(3)
+last_activity_date
+DATETIME(3)
+logout_date
+DATETIME(3)
+session_status
+VARCHAR(50)
+created_date
+DATETIME(3)
+
+Session Status
+ActiveExpiredRevokedLogged Out
+
+8. PASSWORD_RESETS
+Purpose
+Stores password reset requests.
+
+Table Name
+password_resets
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+user_id
+BIGINT UNSIGNED
+reset_token
+VARCHAR(255)
+requested_date
+DATETIME(3)
+expiry_date
+DATETIME(3)
+used_date
+DATETIME(3)
+status
+VARCHAR(50)
+ip_address
+VARCHAR(50)
+created_date
+DATETIME(3)
+
+9. EMAIL_VERIFICATIONS
+Purpose
+Stores email verification requests.
+
+Table Name
+email_verifications
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+user_id
+BIGINT UNSIGNED
+verification_token
+VARCHAR(255)
+requested_date
+DATETIME(3)
+expiry_date
+DATETIME(3)
+verified_date
+DATETIME(3)
+status
+VARCHAR(50)
+created_date
+DATETIME(3)
+
+INDEX STRATEGY
+users
+UX_users_uuidUX_users_emailUX_users_mobile_numberIX_users_statusIX_users_is_active
+
+user_roles
+UX_user_roles_user_role
+
+role_permissions
+UX_role_permissions_role_permission
+
+user_sessions
+IX_user_sessions_userIX_user_sessions_statusIX_user_sessions_last_activity
+
+PART 1 VALIDATION CHECKLIST
+✓ Authentication Model Defined
+✓ User Profile Model Defined
+✓ RBAC Model Defined
+✓ Session Management Defined
+✓ Password Reset Defined
+✓ Email Verification Defined
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ Index Strategy Defined
+✓ Database Standards v1.1 Compliant
+
+END OF DATA DICTIONARY PART 1
+VERSION 1.0

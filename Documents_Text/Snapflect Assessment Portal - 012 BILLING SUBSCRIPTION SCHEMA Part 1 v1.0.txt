@@ -1,0 +1,146 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+012_BILLING_SUBSCRIPTION_SCHEMA.SQL
+PART 1 – PLANS, SUBSCRIPTIONS & USAGE TRACKING
+Version 1.0
+
+MODULE
+Billing & Subscription
+
+TABLES
+subscription_planscustomer_subscriptionssubscription_usage
+
+DEPENDS ON
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQLorganizations001_SECURITY_SCHEMA.SQLusers009_INTEGRATION_AUDIT_SCHEMA.SQLaudit_events
+
+PURPOSE
+This module establishes:
+Commercial Plan ManagementSubscription Lifecycle ManagementUsage MeteringFeature EntitlementsRevenue ReadinessSaaS Monetization Foundation
+
+SUBSCRIPTION_PLANS
+Purpose
+Defines commercial subscription offerings.
+Examples:
+FreeStarterProfessionalEnterprise
+
+Governance
+Plans are immutable commercial definitions.
+Pricing changes should create a new plan version.
+
+CREATETABLE subscription_plans(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    plan_code VARCHAR(100) NOTNULL,    plan_name VARCHAR(255) NOTNULL,    plan_version INTNOTNULLDEFAULT1,    billing_frequency VARCHAR(50)NOTNULL,    base_price DECIMAL(18,2)NOTNULLDEFAULT0.00,    currency_code CHAR(3)NOTNULLDEFAULT'INR',    entitlements_json JSON NULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_subscription_plans_uuidUNIQUE (uuid),CONSTRAINT ux_subscription_plans_code_versionUNIQUE        (            plan_code,            plan_version        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SUBSCRIPTION_PLANS FOREIGN KEYS
+ALTERTABLE subscription_plansADDCONSTRAINT fk_subscription_plans_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE subscription_plansADDCONSTRAINT fk_subscription_plans_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+SUBSCRIPTION_PLANS INDEXES
+CREATEINDEX ix_subscription_plans_statusON subscription_plans(status);CREATEINDEX ix_subscription_plans_frequencyON subscription_plans(billing_frequency);CREATEINDEX ix_subscription_plans_priceON subscription_plans(base_price);
+
+BILLING FREQUENCY VALUES
+Application validation shall enforce:
+MonthlyQuarterlyHalfYearlyYearlyCustom
+
+PLAN STATUS VALUES
+Application validation shall enforce:
+DraftActiveRetired
+
+ENTITLEMENTS EXAMPLE
+{"assessments":100,"users":50,"certificates":1000,"aiProctoring":true}
+
+CUSTOMER_SUBSCRIPTIONS
+Purpose
+Tracks customer enrollment into commercial plans.
+
+Governance
+A subscription preserves the purchased commercial plan through a snapshot.
+Historical subscriptions remain unchanged even if plans evolve.
+
+CREATETABLE customer_subscriptions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    correlation_id CHAR(36) NULL,    organization_id BIGINT UNSIGNED NOTNULL,    subscription_plan_id BIGINT UNSIGNED NOTNULL,    auto_renew TINYINT(1)NOTNULLDEFAULT1,    plan_snapshot_json JSON NOTNULL,    start_date DATETIME(3) NOTNULL,    end_date DATETIME(3) NULL,    status VARCHAR(50)NOTNULLDEFAULT'Pending',    metadata_json JSON NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_customer_subscriptions_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+CUSTOMER_SUBSCRIPTIONS FOREIGN KEYS
+ALTERTABLE customer_subscriptionsADDCONSTRAINT fk_customer_subscriptions_organizationFOREIGNKEY (organization_id)REFERENCES organizations(id);ALTERTABLE customer_subscriptionsADDCONSTRAINT fk_customer_subscriptions_planFOREIGNKEY (subscription_plan_id)REFERENCES subscription_plans(id);
+
+CUSTOMER_SUBSCRIPTIONS INDEXES
+CREATEINDEX ix_customer_subscriptions_orgON customer_subscriptions(organization_id);CREATEINDEX ix_customer_subscriptions_planON customer_subscriptions(subscription_plan_id);CREATEINDEX ix_customer_subscriptions_statusON customer_subscriptions(status);CREATEINDEX ix_customer_subscriptions_startON customer_subscriptions(start_date);CREATEINDEX ix_customer_subscriptions_endON customer_subscriptions(end_date);CREATEINDEX ix_customer_subscriptions_correlationON customer_subscriptions(correlation_id);
+
+SUBSCRIPTION STATUS VALUES
+Application validation shall enforce:
+PendingActiveSuspendedExpiredCancelled
+
+AUTO RENEW GOVERNANCE
+1 = Automatic Renewal Enabled0 = Manual Renewal Required
+
+PLAN SNAPSHOT GOVERNANCE
+Field:
+plan_snapshot_json
+must preserve:
+Plan NameVersionPriceFrequencyEntitlements
+at the time of purchase.
+
+SUBSCRIPTION_USAGE
+Purpose
+Tracks billable platform consumption.
+
+Governance
+Usage records are immutable.
+Corrections should be recorded as separate adjustment entries.
+
+CREATETABLE subscription_usage(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    correlation_id CHAR(36) NULL,    customer_subscription_id BIGINT UNSIGNED NOTNULL,    usage_type VARCHAR(100) NOTNULL,    usage_source VARCHAR(100) NOTNULL,    usage_quantity DECIMAL(18,4)NOTNULL,    billing_period_start DATETIME(3) NOTNULL,    billing_period_end DATETIME(3) NOTNULL,    is_overage TINYINT(1)NOTNULLDEFAULT0,    metadata_json JSON NULL,    usage_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_subscription_usage_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SUBSCRIPTION_USAGE FOREIGN KEYS
+ALTERTABLE subscription_usageADDCONSTRAINT fk_subscription_usage_subscriptionFOREIGNKEY (customer_subscription_id)REFERENCES customer_subscriptions(id);
+
+SUBSCRIPTION_USAGE INDEXES
+CREATEINDEX ix_subscription_usage_subscriptionON subscription_usage(customer_subscription_id);CREATEINDEX ix_subscription_usage_typeON subscription_usage(usage_type);CREATEINDEX ix_subscription_usage_sourceON subscription_usage(usage_source);CREATEINDEX ix_subscription_usage_dateON subscription_usage(usage_date);CREATEINDEX ix_subscription_usage_correlationON subscription_usage(correlation_id);CREATEINDEX ix_subscription_usage_type_periodON subscription_usage(    usage_type,    billing_period_start);
+
+USAGE TYPES
+Application validation examples:
+AssessmentAttemptsCandidateRegistrationsCertificatesIssuedAIProctoringMinutesStorageGBNotificationMessages
+
+USAGE SOURCES
+Application validation examples:
+AssessmentEngineCertificateEngineAIProctoringStorageServiceNotificationService
+
+OVERAGE GOVERNANCE
+is_overage = 1
+indicates consumption beyond included plan entitlements and may generate additional charges.
+
+CORRELATION GOVERNANCE
+Field:
+correlation_id
+supports traceability across:
+Subscription      ↓Usage      ↓Invoice      ↓Payment
+
+VALIDATION CHECKLIST
+✓ Plan Versioning Applied
+✓ Entitlement Management Applied
+✓ Subscription Lifecycle Applied
+✓ Plan Snapshot Preservation Applied
+✓ Usage Metering Applied
+✓ Billing Period Attribution Applied
+✓ Overage Readiness Applied
+✓ Correlation Tracking Applied
+✓ Revenue Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+012_BILLING_SUBSCRIPTION_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+subscription_planscustomer_subscriptionssubscription_usage
+Billing & Subscription Completion:
+50%
+
+NEXT STEP
+Perform architecture review for:
+invoicesinvoice_itemspaymentspayment_transactions
+before generating:
+012_BILLING_SUBSCRIPTION_SCHEMA.SQL – PART 2
+This phase will establish:
+Invoice ManagementPayment ProcessingTransaction ReconciliationRevenue CollectionFinancial AuditabilityCommercial Operations
+and complete the Billing & Subscription module.
+
+END OF DOCUMENT

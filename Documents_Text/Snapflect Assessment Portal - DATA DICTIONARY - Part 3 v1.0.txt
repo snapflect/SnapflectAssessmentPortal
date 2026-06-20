@@ -1,0 +1,537 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+DATA DICTIONARY
+PART 3 – RUNTIME & REVIEW LAYER
+VERSION 1.0
+Status: Draft for Review
+Based On:
+Master PRD v1.2 FINAL
+ERD v1.1 FINAL
+Database Standards & Conventions v1.1 FINAL
+Data Dictionary Part 1 v1.0
+Data Dictionary Part 2 v1.0
+
+1. DOMAIN OVERVIEW
+This layer manages:
+Assessment Assignment
+Assessment Execution
+Draft Save & Resume
+Assessment Attempts
+Snapshot Preservation
+Question Responses
+Scoring
+Evaluation
+Reviews
+Ratings
+Acknowledgements
+Result Publication
+
+2. ASSESSMENT_ASSIGNMENTS
+Purpose
+Supports administrator-driven assessment assignment to users.
+
+Table Name
+assessment_assignments
+
+Columns
+Column
+Data Type
+Nullable
+Description
+id
+BIGINT UNSIGNED
+No
+Primary Key
+uuid
+CHAR(36)
+No
+Public Identifier
+user_id
+BIGINT UNSIGNED
+No
+Assigned User
+assessment_id
+BIGINT UNSIGNED
+No
+Assigned Assessment
+assigned_by
+BIGINT UNSIGNED
+No
+Assigning User
+assignment_type
+VARCHAR(50)
+No
+Assignment Type
+priority
+VARCHAR(50)
+No
+Priority
+instructions
+TEXT
+Yes
+Assignment Notes
+assigned_date
+DATETIME(3)
+No
+Assignment Date
+due_date
+DATETIME(3)
+Yes
+Due Date
+accepted_date
+DATETIME(3)
+Yes
+Accepted Date
+completed_date
+DATETIME(3)
+Yes
+Completion Date
+status
+VARCHAR(50)
+No
+Assignment Status
+created_by
+BIGINT UNSIGNED
+Yes
+Audit
+created_date
+DATETIME(3)
+No
+Audit
+modified_by
+BIGINT UNSIGNED
+Yes
+Audit
+modified_date
+DATETIME(3)
+Yes
+Audit
+is_active
+TINYINT(1)
+No
+Active Flag
+is_deleted
+TINYINT(1)
+No
+Soft Delete
+
+Assignment Status Values
+AssignedAcceptedStartedCompletedExpiredCancelled
+
+Business Rules
+One assignment may generate multiple attempts.
+Assignment expiration must be enforced.
+Assignment history is immutable.
+
+3. ASSESSMENT_ATTEMPTS
+Purpose
+Represents a user attempt for an assessment.
+
+Table Name
+assessment_attempts
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+user_id
+BIGINT UNSIGNED
+assessment_id
+BIGINT UNSIGNED
+assignment_id
+BIGINT UNSIGNED NULL
+attempt_number
+INT
+status
+VARCHAR(50)
+started_date
+DATETIME(3)
+last_saved_date
+DATETIME(3)
+submitted_date
+DATETIME(3)
+completed_date
+DATETIME(3)
+duration_seconds
+INT
+progress_percentage
+DECIMAL(5,2)
+randomization_seed
+VARCHAR(255)
+failure_reason
+VARCHAR(500)
+snapshot_version
+INT
+created_by
+BIGINT UNSIGNED
+created_date
+DATETIME(3)
+modified_by
+BIGINT UNSIGNED
+modified_date
+DATETIME(3)
+
+Attempt Status Values
+DraftIn ProgressSubmittedAuto SubmittedTimed OutScoredPublished
+
+Unique Constraint
+(user_id, assessment_id, attempt_number)
+
+Business Rules
+Users may take the same assessment multiple times.
+Attempt number must increment sequentially.
+Drafts must support save and resume.
+Submitted attempts become read-only.
+Timed-out attempts become read-only.
+Auto-submitted attempts become read-only.
+
+4. ATTEMPT_SNAPSHOTS
+Purpose
+Stores immutable assessment snapshots.
+
+Approved Architecture
+Hybrid Snapshot Architecture
+
+Table Name
+attempt_snapshots
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+attempt_id
+BIGINT UNSIGNED
+snapshot_version
+INT
+assessment_version
+INT
+randomization_seed
+VARCHAR(255)
+snapshot_json
+LONGTEXT
+created_date
+DATETIME(3)
+
+Snapshot Contents
+Stores:
+Technology
+Assessment
+Sections
+Question Banks
+Questions
+Options
+Answers
+Instructions
+Rules
+Scoring Definitions
+Version Information
+
+Business Rules
+Snapshots are immutable.
+Historical attempts must never be modified.
+Snapshots are the source of truth for historical scoring.
+
+5. ATTEMPT_QUESTIONS
+Purpose
+Stores questions selected for an attempt.
+
+Table Name
+attempt_questions
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+attempt_id
+BIGINT UNSIGNED
+question_id
+BIGINT UNSIGNED
+section_id
+BIGINT UNSIGNED
+display_order
+INT
+marks
+DECIMAL(8,2)
+negative_marks
+DECIMAL(8,2)
+question_status
+VARCHAR(50)
+time_spent_seconds
+INT
+created_date
+DATETIME(3)
+
+Question Status Values
+Not StartedAnsweredSkippedBookmarkedFinalized
+
+Business Rules
+Selected questions remain fixed after attempt creation.
+Display order must remain consistent.
+Marks are copied from the snapshot definition.
+
+6. ATTEMPT_ANSWERS
+Purpose
+Stores user responses.
+
+Table Name
+attempt_answers
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+attempt_question_id
+BIGINT UNSIGNED
+answer_value
+TEXT
+answer_json
+JSON
+is_correct
+TINYINT(1)
+marks_awarded
+DECIMAL(8,2)
+answered_date
+DATETIME(3)
+created_date
+DATETIME(3)
+
+Supported Response Types
+Single Choice
+Multiple Choice
+True False
+Fill In Blank
+Descriptive
+Code Snippet
+Scenario Based
+Case Study
+
+Business Rules
+Answers are stored per attempt.
+Evaluation must never overwrite original responses.
+Supports future AI evaluation.
+
+7. ASSESSMENT_RESULTS
+Purpose
+Stores assessment scoring outcomes.
+
+Table Name
+assessment_results
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+attempt_id
+BIGINT UNSIGNED
+total_questions
+INT
+answered_questions
+INT
+skipped_questions
+INT
+correct_answers
+INT
+incorrect_answers
+INT
+score
+DECIMAL(10,2)
+percentage
+DECIMAL(5,2)
+section_pass_status
+VARCHAR(50)
+overall_pass_status
+VARCHAR(50)
+performance_level
+VARCHAR(50)
+evaluation_status
+VARCHAR(50)
+result_status
+VARCHAR(50)
+published_date
+DATETIME(3)
+acknowledgement_status
+VARCHAR(50)
+failure_reason
+VARCHAR(500)
+generated_date
+DATETIME(3)
+
+Evaluation Status Values
+PendingAuto EvaluatedPartially EvaluatedFully Evaluated
+
+Result Status Values
+PendingReadyPublishedArchived
+
+Performance Levels
+BeginnerIntermediateAdvancedExpert
+
+Business Rules
+Results must be generated from snapshots.
+Historical results must never be recalculated from current definitions.
+Results can be published after review.
+
+8. ASSESSMENT_REVIEWS
+Purpose
+Stores assessment review records.
+
+Table Name
+assessment_reviews
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+attempt_id
+BIGINT UNSIGNED
+reviewed_by
+BIGINT UNSIGNED
+review_status
+VARCHAR(50)
+review_date
+DATETIME(3)
+review_comments
+TEXT
+created_date
+DATETIME(3)
+
+Review Status Values
+Pending ReviewReviewedApprovedRejected
+
+9. ASSESSMENT_REVIEW_COMMENTS
+Purpose
+Stores structured reviewer comments.
+
+Table Name
+assessment_review_comments
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+review_id
+BIGINT UNSIGNED
+comment_type
+VARCHAR(50)
+comment_text
+TEXT
+visibility
+VARCHAR(50)
+created_date
+DATETIME(3)
+
+Visibility Values
+User VisibleInternal Only
+
+10. ASSESSMENT_RATINGS
+Purpose
+Stores reviewer ratings.
+
+Table Name
+assessment_ratings
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+review_id
+BIGINT UNSIGNED
+rating
+DECIMAL(3,2)
+rating_notes
+TEXT
+created_date
+DATETIME(3)
+
+Rating Scale
+1 – 5
+
+11. REVIEW_ACKNOWLEDGEMENTS
+Purpose
+Tracks acknowledgement of review feedback.
+
+Table Name
+review_acknowledgements
+
+Columns
+Column
+Data Type
+id
+BIGINT UNSIGNED
+uuid
+CHAR(36)
+review_id
+BIGINT UNSIGNED
+user_id
+BIGINT UNSIGNED
+status
+VARCHAR(50)
+acknowledgement_notes
+TEXT
+acknowledged_date
+DATETIME(3)
+created_date
+DATETIME(3)
+
+Status Values
+PendingAcknowledgedExpired
+
+RETAKE ANALYTICS SUPPORT
+The platform shall support reporting for:
+First Attempt ScoreLatest Attempt ScoreBest Attempt ScoreAverage Attempt ScoreAttempt Progression
+
+INDEX STRATEGY
+assessment_attempts
+UX_attempts_user_assessment_attemptIX_attempts_userIX_attempts_assessmentIX_attempts_status
+
+attempt_questions
+IX_attempt_questions_attemptIX_attempt_questions_question
+
+attempt_answers
+IX_attempt_answers_attempt_question
+
+assessment_results
+UX_results_attemptIX_results_statusIX_results_evaluation_status
+
+assessment_reviews
+IX_reviews_attemptIX_reviews_status
+
+PART 3 VALIDATION CHECKLIST
+✓ Assessment Assignment Defined
+✓ Assessment Attempt Lifecycle Defined
+✓ Save & Resume Strategy Defined
+✓ Hybrid Snapshot Architecture Applied
+✓ Attempt Question Tracking Defined
+✓ Answer Storage Defined
+✓ Auto & Manual Evaluation Supported
+✓ Result Publication Workflow Defined
+✓ Review Workflow Defined
+✓ Rating Workflow Defined
+✓ Acknowledgement Workflow Defined
+✓ Retake Analytics Supported
+✓ Database Standards v1.1 Compliant
+
+END OF DATA DICTIONARY PART 3
+VERSION 1.0

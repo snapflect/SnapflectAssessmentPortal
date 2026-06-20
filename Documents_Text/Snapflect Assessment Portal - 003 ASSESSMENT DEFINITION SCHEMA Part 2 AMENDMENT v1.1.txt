@@ -1,0 +1,143 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003 ASSESSMENT DEFINITION SCHEMA
+PART 2 AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+003 Assessment Definition Schema – Part 2 Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Document
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – Part 2
+Amendment Type
+Version Integrity Enhancement
+Impact Level
+Architectural Improvement
+Approval Status
+Approved
+
+1. PURPOSE OF AMENDMENT
+This amendment introduces a critical version-integrity enhancement to the Assessment Definition architecture.
+The original Part 2 design stored:
+section_question_banks    ↓question_bank_id
+This approach does not guarantee historical reconstruction of published assessment content when Question Banks evolve over time.
+The amendment updates the architecture to reference:
+question_bank_version_id
+instead of:
+question_bank_id
+thereby preserving complete content version integrity.
+
+2. PROBLEM IDENTIFIED
+Original Architecture
+Assessment Version        ↓Section Version        ↓Section Question Banks        ↓Question Bank
+
+Example Scenario
+Assessment v1        ↓Section v1        ↓Question Bank v1
+Later:
+Question Bank v2Question Bank v3
+are created.
+Because the mapping references only:
+question_bank_id
+the platform cannot reliably determine which Question Bank version belonged to the published Assessment Version.
+
+Impact
+Potential issues:
+Historical Reconstruction FailureAssessment Replay InaccuracyReview InconsistenciesReporting InaccuraciesAudit Traceability Gaps
+
+3. APPROVED SOLUTION
+New Architecture
+Assessment Version        ↓Section Version        ↓Section Question Banks        ↓Question Bank Version
+
+Final Content Version Hierarchy
+Technology Version        ↓Assessment Version        ↓Section Version        ↓Question Bank Version        ↓Question Version
+This architecture aligns with the approved Full Snapshot Versioning strategy.
+
+4. SCHEMA CHANGE
+Existing Column
+question_bank_id BIGINT UNSIGNED NOTNULL
+
+Replacement Column
+question_bank_version_id BIGINT UNSIGNED NOTNULL
+
+5. UPDATED TABLE DEFINITION
+section_question_banks
+CREATETABLE section_question_banks(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    section_version_id BIGINT UNSIGNED NOTNULL,    question_bank_version_id BIGINT UNSIGNED NOTNULL,    display_order INTNOTNULLDEFAULT0,    is_mandatory TINYINT(1)NOTNULLDEFAULT1,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_section_question_banks_uuidUNIQUE (uuid),CONSTRAINT ux_section_question_bank_mappingUNIQUE        (            section_version_id,            question_bank_version_id        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+6. FOREIGN KEY STRATEGY
+Existing Foreign Key
+ALTERTABLE section_question_banksADDCONSTRAINT fk_section_question_banks_section_versionFOREIGNKEY (section_version_id)REFERENCES section_versions(id);
+
+New Foreign Key
+To be created in:
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 3
+ALTERTABLE section_question_banksADDCONSTRAINT fk_section_question_banks_question_bank_versionFOREIGNKEY (question_bank_version_id)REFERENCES question_bank_versions(id);
+
+7. INDEX STRATEGY UPDATE
+Existing Unique Constraint
+UNIQUE(    section_version_id,    question_bank_version_id)
+remains the approved strategy.
+
+Existing Indexes
+Remain unchanged.
+CREATEINDEX ix_section_question_banks_sectionON section_question_banks(section_version_id);CREATEINDEX ix_section_question_banks_orderON section_question_banks(display_order);CREATEINDEX ix_section_question_banks_mandatoryON section_question_banks(is_mandatory);
+
+8. VERSIONING GOVERNANCE IMPACT
+Previous Model
+Section Version        ↓Question Bank
+Version integrity not guaranteed.
+
+New Model
+Section Version        ↓Question Bank Version
+Version integrity guaranteed.
+
+Benefits
+Published Content PreservationAssessment Replay AccuracyReview AccuracyReporting AccuracyHistorical ReconstructionAudit TraceabilityFuture Runtime Snapshot Support
+
+9. ARCHITECTURAL ALIGNMENT REVIEW
+This amendment aligns with:
+PRD v1.2 FINALERD v1.1 FINALDatabase Standards v1.1 FINALData Dictionary v1.1 FINALSecurity Schema v1.0 FINALGovernance Foundation Schema v1.0 FINALAssessment Definition Schema Design v1.0
+
+10. IMPACT ANALYSIS
+Artifact
+Impact
+Assessment Definition Part 2
+Updated
+Assessment Definition Part 3
+Must Use New Design
+Runtime Schema
+Improved
+Review Schema
+Improved
+Reporting Schema
+Improved
+Analytics Schema
+Improved
+Existing Frozen Artifacts
+No Change
+
+11. APPROVED BASELINE AFTER AMENDMENT
+The approved hierarchy is now:
+Technology Version        ↓Assessment Version        ↓Section Version        ↓Question Bank Version        ↓Question Version
+This becomes the official baseline for all subsequent schema modules.
+
+APPROVAL STATUS
+Document:
+003 Assessment Definition SchemaPart 2 Amendment
+Version:
+v1.1
+Status:
+APPROVEDMERGED INTO BASELINE
+
+NEXT STEP
+Generate:
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 3
+Tables:
+question_banksquestion_bank_versions
+using the newly approved version-safe architecture.
+
+END OF DOCUMENT

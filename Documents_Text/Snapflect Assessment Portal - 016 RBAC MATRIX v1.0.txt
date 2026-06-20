@@ -1,0 +1,336 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+016_RBAC_MATRIX
+Version 1.0
+Status: APPROVED BASELINE
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+RBAC Matrix
+Version
+1.0
+Status
+FINAL
+Based On
+PRD v1.2 FINAL
+Based On
+001_SECURITY_SCHEMA
+Based On
+013_PLATFORM_SOLUTION_ARCHITECTURE
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+015_SCREEN_INVENTORY_AND_NAVIGATION
+Applies To
+UI Security
+Applies To
+API Security
+Applies To
+Laravel Policies
+Applies To
+Middleware
+Applies To
+Cursor AI Development
+
+1. PURPOSE
+This document defines:
+RolesPermissionsScreen AccessAPI AccessModule AccessAction Authorization
+This document is the single source of truth for authorization across the entire platform.
+
+2. AUTHORIZATION MODEL
+Approved Model:
+RBAC(Role Based Access Control)
+
+Authorization Flow:
+User   ↓Role   ↓Permission   ↓Screen Access   ↓API Access   ↓Business Action
+
+3. PLATFORM ROLES
+R01
+Platform Administrator
+Purpose:
+Platform Ownership
+Scope:
+Global
+
+R02
+Organization Administrator
+Purpose:
+Organization Management
+Scope:
+Organization
+
+R03
+Assessment Manager
+Purpose:
+Assessment Lifecycle Management
+
+R04
+Question Author
+Purpose:
+Question Creation
+
+R05
+Question Reviewer
+Purpose:
+Question Approval
+
+R06
+Evaluator
+Purpose:
+Manual Evaluation
+
+R07
+Candidate
+Purpose:
+Assessment Participation
+
+R08
+Billing Administrator
+Purpose:
+Commercial Operations
+
+R09
+Support Administrator
+Purpose:
+Support Operations
+
+R10
+Auditor
+Purpose:
+Audit & Compliance
+
+4. PERMISSION NAMING STANDARD
+Format:
+Module.Action
+Examples:
+Assessment.CreateAssessment.EditAssessment.PublishQuestion.CreateQuestion.ApproveCertificate.RevokeInvoice.View
+
+5. STANDARD ACTIONS
+ViewCreateEditDeleteApprovePublishAssignReviewExportManage
+
+6. SECURITY MODULE PERMISSIONS
+User.ViewUser.CreateUser.EditUser.DeleteRole.ViewRole.CreateRole.EditRole.DeletePermission.ViewPermission.Manage
+
+7. GOVERNANCE MODULE PERMISSIONS
+Settings.ViewSettings.EditTemplate.ViewTemplate.CreateTemplate.EditWorkflow.ViewWorkflow.Manage
+
+8. TECHNOLOGY MODULE PERMISSIONS
+Technology.ViewTechnology.CreateTechnology.EditTechnology.DeleteTechnology.Manage
+
+9. ASSESSMENT MODULE PERMISSIONS
+Assessment.ViewAssessment.CreateAssessment.EditAssessment.DeleteAssessment.PublishAssessment.CloneAssessment.AssignAssessment.Export
+
+10. SECTION MODULE PERMISSIONS
+Section.ViewSection.CreateSection.EditSection.DeleteSection.Publish
+
+11. QUESTION BANK PERMISSIONS
+QuestionBank.ViewQuestionBank.CreateQuestionBank.EditQuestionBank.DeleteQuestionBank.ApproveQuestionBank.Export
+
+12. QUESTION PERMISSIONS
+Question.ViewQuestion.CreateQuestion.EditQuestion.DeleteQuestion.ApproveQuestion.ImportQuestion.Export
+
+13. ASSIGNMENT PERMISSIONS
+Assignment.ViewAssignment.CreateAssignment.EditAssignment.AssignAssignment.Export
+
+14. ATTEMPT PERMISSIONS
+Attempt.ViewAttempt.ReviewAttempt.Override
+
+15. EVALUATION PERMISSIONS
+Evaluation.ViewEvaluation.CreateEvaluation.ReviewEvaluation.PublishEvaluation.Override
+
+16. RESULT PERMISSIONS
+Result.ViewResult.PublishResult.Export
+
+17. CERTIFICATION PERMISSIONS
+Certificate.ViewCertificate.IssueCertificate.VerifyCertificate.RevokeCertificate.Export
+
+18. NOTIFICATION PERMISSIONS
+Notification.ViewNotification.CreateNotification.ManageNotification.Send
+
+19. REPORTING PERMISSIONS
+Report.ViewReport.ExportDashboard.ViewKPI.View
+
+20. AUDIT PERMISSIONS
+Audit.ViewAudit.Export
+
+21. OPERATIONS PERMISSIONS
+Operations.ViewOperations.ManageHealth.ViewTask.Manage
+
+22. AI PROCTORING PERMISSIONS
+Proctoring.ViewProctoring.ReviewProctoring.OverrideEvidence.View
+
+23. BILLING PERMISSIONS
+Billing.ViewSubscription.ViewSubscription.ManageInvoice.ViewInvoice.ManagePayment.ViewPayment.Manage
+
+24. ROLE MATRIX
+Platform Administrator
+Access:
+ALL PERMISSIONS
+Scope:
+Global
+
+Organization Administrator
+Access:
+User.*Technology.*Assessment.*Section.*QuestionBank.*Question.*Assignment.*Attempt.ViewEvaluation.ViewResult.*Certificate.*Notification.*Report.*Dashboard.View
+Scope:
+Organization Only
+
+Assessment Manager
+Access:
+Technology.ViewAssessment.*Section.*QuestionBank.ViewQuestion.ViewAssignment.*Attempt.ViewEvaluation.ViewResult.ViewCertificate.ViewReport.View
+
+Question Author
+Access:
+Question.ViewQuestion.CreateQuestion.EditQuestion.ImportQuestionBank.View
+
+Question Reviewer
+Access:
+Question.ViewQuestion.ApproveQuestionBank.Approve
+
+Evaluator
+Access:
+Attempt.ViewEvaluation.*Result.ViewCertificate.View
+
+Candidate
+Access:
+Own ProfileOwn AssignmentsOwn AttemptsOwn ResultsOwn Certificates
+No Administrative Permissions.
+
+Billing Administrator
+Access:
+Billing.*Subscription.*Invoice.*Payment.*Report.View
+
+Support Administrator
+Access:
+User.ViewAssessment.ViewAssignment.ViewAttempt.ViewNotification.ViewCertificate.Verify
+
+Auditor
+Access:
+Audit.*Report.ViewDashboard.ViewCertificate.Verify
+Read Only.
+
+25. SEPARATION OF DUTIES
+Rule 01
+Question Author:
+Cannot Approve Own Questions
+
+Rule 02
+Question Reviewer:
+Cannot Edit Approved Questions
+
+Rule 03
+Evaluator:
+Cannot Issue Certificates
+
+Rule 04
+Billing Administrator:
+Cannot Manage Users
+
+Rule 05
+Auditor:
+Cannot Modify Data
+
+26. SCREEN AUTHORIZATION
+Examples:
+Screen
+Permission
+UserList
+User.View
+UserCreate
+User.Create
+AssessmentCreate
+Assessment.Create
+AssessmentPublish
+Assessment.Publish
+QuestionApproval
+Question.Approve
+EvaluationQueue
+Evaluation.View
+CertificateRevocation
+Certificate.Revoke
+InvoiceList
+Invoice.View
+
+27. API AUTHORIZATION
+Examples:
+API
+Permission
+POST /api/v1/users
+User.Create
+PUT /api/v1/users/{id}
+User.Edit
+POST /api/v1/assessments
+Assessment.Create
+POST /api/v1/assessments/{id}/publish
+Assessment.Publish
+POST /api/v1/questions/{id}/approve
+Question.Approve
+POST /api/v1/certificates
+Certificate.Issue
+POST /api/v1/invoices
+Invoice.Manage
+
+28. MENU AUTHORIZATION
+Menu visibility shall be permission-driven.
+Example:
+Billing Menu
+Visible only if:
+Billing.View
+or higher exists.
+
+29. MULTI-TENANT SECURITY
+Organization Administrators:
+Can AccessOwn Organization
+
+Cannot Access:
+Other Organizations
+
+Platform Administrators:
+Can AccessAll Organizations
+
+30. CURSOR AI GOVERNANCE
+Cursor SHALL Generate:
+Role SeedsPermission SeedsPoliciesMiddlewareAuthorization Tests
+
+Cursor SHALL NOT:
+Create New RolesCreate New PermissionsModify Authorization Rules
+without architecture approval.
+
+31. ESTIMATED AUTHORIZATION SIZE
+Roles:
+10
+
+Permissions:
+150–250
+
+Role-Permission Mappings:
+1000+
+
+32. IMPLEMENTATION STRATEGY
+Recommended Laravel Package:
+spatie/laravel-permission
+
+Architecture:
+roles      ↓permissions      ↓role_permissions      ↓user_roles
+
+33. PLATFORM SECURITY STATUS
+Aligned With:
+PRD v1.2 FINAL✓001_SECURITY_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓015_SCREEN_INVENTORY_AND_NAVIGATION✓
+
+APPROVAL STATUS
+Document:
+016_RBAC_MATRIX
+Version:
+v1.0
+Status:
+APPROVEDFROZEN
+
+NEXT STEP
+Proceed to:
+017_OPENAPI_MASTER_SPECIFICATION v1.0
+This document will become the master API contract for:
+SwaggerCursor AIBackend DevelopmentFrontend DevelopmentIntegration DevelopmentQA Automation
+and serves as the final architecture artifact before implementation begins.
+
+END OF DOCUMENT

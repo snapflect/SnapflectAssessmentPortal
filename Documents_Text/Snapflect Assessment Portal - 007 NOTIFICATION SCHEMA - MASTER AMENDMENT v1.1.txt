@@ -1,0 +1,218 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+007_NOTIFICATION_SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+007 Notification Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2
+Amendment Type
+Enterprise Messaging Enhancement
+Approval Status
+Approved
+Effective Version
+007_NOTIFICATION_SCHEMA v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+text id="nam_001" Notification Schema Master Review v1.0
+The review confirmed that the Notification module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise-grade enhancements focused on:
+```text id=“nam_002”Notification Expiry Management
+Source Event Traceability
+Worker Diagnostics
+Provider Rate Limiting
+Queue Processing Optimization
+---# 2. NOTIFICATION_QUEUE ENHANCEMENTS## 2.1 Notification Expiry Support### New Column```sql id="nam_003"expiry_date DATETIME(3) NULL
+
+Purpose
+Allows notifications to become invalid after a specified time.
+
+Example Scenarios
+```text id=“nam_004”Password Reset Links
+OTP Notifications
+Assessment Reminders
+Temporary Access Invitations
+---### GovernanceWhen:```text id="nam_005"current_timestamp > expiry_date
+notification processing should not continue.
+Notification status should transition to:
+text id="nam_006" Expired
+through application services.
+
+2.2 Event Traceability
+New Column
+sql id="nam_007" event_code VARCHAR(100) NULL
+
+Purpose
+Tracks the originating business event.
+
+Examples
+```text id=“nam_008”PASSWORD_RESET
+ASSESSMENT_ASSIGNED
+ASSESSMENT_REMINDER
+CERTIFICATE_ISSUED
+CERTIFICATE_REVOKED
+USER_INVITED
+---### BenefitsSupports:```text id="nam_009"Operational TroubleshootingAnalyticsNotification ReportingBusiness Event Correlation
+
+3. NOTIFICATION_DELIVERY_LOGS ENHANCEMENT
+3.1 Worker Diagnostics
+New Column
+sql id="nam_010" processed_by_worker VARCHAR(100) NULL
+
+Purpose
+Tracks the worker instance that processed the delivery attempt.
+
+Example Values
+```text id=“nam_011”email-worker-01
+sms-worker-03
+push-worker-02
+notification-batch-01
+---### BenefitsSupports:```text id="nam_012"Distributed Processing DiagnosticsFailure InvestigationPerformance MonitoringWorker Health Analysis
+
+4. NOTIFICATION_CHANNELS ENHANCEMENT
+4.1 Provider Rate Limiting
+New Column
+sql id="nam_013" rate_limit_per_minute INT NULL
+
+Purpose
+Stores channel-specific throughput limits.
+
+Example
+```text id=“nam_014”Email = 1000/min
+SMS = 100/min
+Push = 5000/min
+---### BenefitsSupports:```text id="nam_015"Provider ProtectionTraffic ShapingQueue ThrottlingBurst Prevention
+
+5. INDEXING ENHANCEMENTS
+Queue Processing Optimization
+New Composite Index
+sql id="nam_016" CREATE INDEX ix_notification_queue_processing ON notification_queue (     status,     scheduled_date,     priority );
+
+Purpose
+Optimizes worker polling queries.
+
+Example Query
+sql id="nam_017" SELECT * FROM notification_queue WHERE status = 'Pending' AND scheduled_date <= NOW() ORDER BY priority DESC;
+
+Benefits
+Supports:
+```text id=“nam_018”High Volume Notification Processing
+Worker Efficiency
+Queue Throughput
+Reduced Database Load
+---# 6. GOVERNANCE RULES## Notification Expiry RuleWhen:```text id="nam_019"expiry_date
+exists and has passed:
+text id="nam_020" Notification Delivery
+must not proceed.
+
+Event Traceability Rule
+All platform-generated notifications should populate:
+text id="nam_021" event_code
+where a business event exists.
+
+Worker Attribution Rule
+Each delivery attempt should populate:
+text id="nam_022" processed_by_worker
+when processed through background workers.
+
+Rate Limiting Rule
+When:
+text id="nam_023" rate_limit_per_minute
+exists:
+notification workers must throttle processing accordingly.
+
+7. IMPACT ANALYSIS
+Artifact
+Impact
+Queue Processing
+Improved
+Delivery Diagnostics
+Improved
+Provider Protection
+Improved
+Event Traceability
+Improved
+Analytics
+Improved
+Enterprise Readiness
+Improved
+
+8. FINAL VALIDATION SUMMARY
+Area
+Result
+Template Governance
+PASS
+Localization
+PASS
+Provider Abstraction
+PASS
+Queue Processing
+PASS
+Retry Management
+PASS
+Delivery Tracking
+PASS
+User Preferences
+PASS
+Subscription Management
+PASS
+Event Traceability
+PASS
+Enterprise Readiness
+PASS
+
+9. APPROVED NOTIFICATION BASELINE
+The approved notification tables are:
+```text id=“nam_024”notification_templates
+notification_template_versions
+notification_channels
+notification_queue
+notification_delivery_logs
+notification_preferences
+notification_subscriptions
+with all approved amendments merged.---# APPROVAL STATUSDocument:```text id="nam_025"007 Notification Schema Master Amendment
+Version:
+text id="nam_026" v1.1
+Status:
+```text id=“nam_027”APPROVED
+MERGED INTO BASELINE
+---# FINAL MODULE STATUS```text id="nam_028"007_NOTIFICATION_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+```text id=“nam_029”PRD v1.2 FINAL✓
+ERD v1.1 FINAL✓
+Database Standards v1.1 FINAL✓
+Data Dictionary v1.1 FINAL✓
+Security Schema v1.0 FINAL✓
+Governance Foundation Schema v1.0 FINAL✓
+Assessment Definition Schema v1.1 FINAL✓
+Assessment Execution Schema v1.2 FINAL✓
+Evaluation Schema v1.1 FINAL✓
+Certification Schema v1.1 FINAL✓
+Notification Schema v1.1 FINAL✓
+---# OVERALL PLATFORM STATUSCompleted Core Domains:```text id="nam_030"001 Security✓002 Governance Foundation✓003 Assessment Definition✓004 Assessment Execution✓005 Evaluation✓006 Certification✓007 Notification✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+text id="nam_031" 008_REPORTING_ANALYTICS_SCHEMA
+Core Areas:
+```text id=“nam_032”report_definitions
+report_executions
+report_exports
+dashboard_definitions
+dashboard_widgets
+analytics_snapshots
+kpi_definitions
+This module will establish:```text id="nam_033"Operational ReportingAssessment AnalyticsEvaluation AnalyticsCertification AnalyticsExecutive DashboardsKPI TrackingHistorical Analytics
+and becomes the primary business intelligence layer of the Snapflect Assessment Portal.
+
+END OF DOCUMENT

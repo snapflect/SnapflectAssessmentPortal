@@ -1,0 +1,194 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+004 ASSESSMENT EXECUTION SCHEMA
+MASTER AMENDMENT v1.2
+Version 1.2
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+004 Assessment Execution Schema Master Amendment
+Amendment Version
+1.2
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2, Part 3
+Amendment Type
+Enterprise Runtime Enhancement
+Approval Status
+Approved
+Effective Version
+004 Assessment Execution Schema v1.2 FINAL
+
+1. PURPOSE
+This amendment incorporates all findings identified during:
+Assessment Execution Schema Master Review v1.0
+The review confirmed that the Execution module is production-ready with no critical, high, or medium severity issues.
+This amendment introduces several low-risk, high-value enhancements focused on:
+Evaluation Analytics
+Device & Client Telemetry
+Future AI Evaluation
+Runtime Query Performance
+Operational Reporting
+
+2. ASSESSMENT_ATTEMPTS ENHANCEMENTS
+2.1 Evaluation Completion Tracking
+New Column
+evaluated_date DATETIME(3) NULL
+Purpose
+Stores the timestamp when evaluation is completed.
+Benefits
+Supports:
+Evaluation SLA ReportingManual Review MetricsAI Evaluation MetricsOperational Dashboards
+
+2.2 Client Metadata Support
+New Column
+client_metadata_json JSON NULL
+Purpose
+Stores client environment information.
+Example Payload
+{"browser":"Chrome","browserVersion":"138","os":"Windows 11","deviceType":"Desktop","appVersion":"1.0.0"}
+Benefits
+Supports:
+Device AnalyticsBrowser AnalyticsTroubleshootingFuture Mobile Insights
+
+3. QUESTION_RESPONSES ENHANCEMENTS
+3.1 Response Metadata Support
+New Column
+response_metadata_json JSON NULL
+Purpose
+Stores additional response-related metadata.
+Example Use Cases
+Essay Questions
+{"wordCount":325}
+Coding Questions
+{"language":"csharp","compilerVersion":"net9","executionTimeMs":120}
+File Upload Questions
+{"fileReference":"attachment_123","fileSize":204800}
+
+Benefits
+Supports:
+Essay EvaluationCoding EvaluationFile Upload AssessmentsAI EvaluationFuture Question Types
+without schema changes.
+
+4. INDEXING ENHANCEMENTS
+4.1 Assessment Attempt Sections
+New Composite Index
+CREATEINDEX ix_attempt_sections_attempt_statusON assessment_attempt_sections(    attempt_id,    section_status);
+Purpose
+Optimizes:
+Get Active SectionsResume AssessmentNavigation Workflows
+
+4.2 Assessment Attempt Questions
+New Composite Index
+CREATEINDEX ix_attempt_questions_bank_statusON assessment_attempt_questions(    attempt_question_bank_id,    question_status);
+Purpose
+Optimizes:
+Get Unanswered QuestionsReview ScreenNavigation WorkflowsProgress Tracking
+
+5. EVALUATION GOVERNANCE ENHANCEMENT
+Evaluation Completion Rule
+When:
+evaluation_status = Completed
+Then:
+evaluated_date
+must be populated.
+
+Failed Evaluation Rule
+When:
+evaluation_status = Failed
+Then:
+result_status
+must remain:
+Pending
+until reprocessing succeeds.
+
+6. CLIENT METADATA GOVERNANCE
+Client metadata is informational only.
+The platform must never:
+Authorize AccessGrant PermissionsDetermine Security Roles
+based solely on values stored in:
+client_metadata_json
+
+7. RESPONSE METADATA GOVERNANCE
+Response metadata must never be treated as the authoritative answer.
+Authoritative answer remains:
+response_value
+Metadata exists only to support:
+EvaluationAnalyticsQuestion-Type ExtensionsAI Services
+
+8. IMPACT ANALYSIS
+Artifact
+Impact
+PRD v1.2 FINAL
+No Change
+ERD v1.1 FINAL
+Clarification Only
+Database Standards v1.1 FINAL
+No Change
+Assessment Definition Schema v1.1 FINAL
+No Change
+Assessment Execution Schema Part 1
+Updated
+Assessment Execution Schema Part 2
+Updated
+Assessment Execution Schema Part 3
+Updated
+Evaluation Module
+Improved
+Analytics Module
+Improved
+Reporting Module
+Improved
+
+9. FINAL VALIDATION SUMMARY
+Area
+Result
+Runtime Snapshot Integrity
+PASS
+Resume Architecture
+PASS
+Evaluation Architecture
+PASS
+Draft Recovery
+PASS
+Analytics Readiness
+PASS
+Reporting Readiness
+PASS
+AI Readiness
+PASS
+Performance Optimization
+PASS
+Enterprise Readiness
+PASS
+
+10. APPROVED EXECUTION BASELINE
+The approved runtime tables are:
+assessment_attemptsattempt_timersassessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questionsquestion_responsesdraft_saves
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+004 Assessment Execution Schema Master Amendment
+Version:
+v1.2
+Status:
+APPROVED
+MERGED INTO BASELINE
+
+FINAL MODULE STATUS
+004_ASSESSMENT_EXECUTION_SCHEMAVERSION 1.2FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Data Dictionary v1.1 FINAL✓Security Schema v1.0 FINAL✓Governance Foundation Schema v1.0 FINAL✓Assessment Definition Schema v1.1 FINAL✓Assessment Execution Schema v1.2 FINAL✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+005_EVALUATION_SCHEMA
+Core Areas:
+evaluation_rulesevaluation_rule_versionsevaluation_jobsmanual_review_queuereview_assignmentsevaluation_resultsresult_publications
+This module will implement the complete scoring, review, AI evaluation, and result publication lifecycle.
+
+END OF DOCUMENT

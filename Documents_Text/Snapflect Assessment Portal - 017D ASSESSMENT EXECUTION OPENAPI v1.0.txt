@@ -1,0 +1,354 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017D_ASSESSMENT_EXECUTION_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Assessment Execution OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Assessment Execution
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+004_ASSESSMENT_EXECUTION_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+Based On
+013_PLATFORM_SOLUTION_ARCHITECTURE
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+AssignmentsAssignment PublishingAssessment AttemptsAttempt LifecycleAttempt QuestionsAttempt AnswersDraft SavesAssessment SubmissionAttempt SnapshotsExecution MonitoringRuntime Status
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Assessment Execution APIversion:1.0.0description: Assessment Runtime and Candidate Execution APIsservers:-url: /api/v1tags:-name: Assignments-name: Attempts-name: Attempt Questions-name: Attempt Answers-name: Draft Saves-name: Snapshots
+
+3. SECURITY REQUIREMENTS
+Global Security:
+security:-BearerAuth:[]
+Permissions:
+Assignment.ViewAssignment.CreateAssignment.EditAssignment.AssignAttempt.ViewAttempt.ReviewCandidate.OwnAttemptCandidate.OwnAssignment
+
+4. ASSIGNMENT APIS
+List Assignments
+Endpoint
+GET /api/v1/assignments
+Permission
+Assignment.View
+Filters
+assessmentIdcandidateIdstatusdateFromdateTosearch
+
+Get Assignment
+Endpoint
+GET /api/v1/assignments/{id}
+Permission
+Assignment.View
+
+Create Assignment
+Endpoint
+POST /api/v1/assignments
+Permission
+Assignment.Create
+Request DTO
+{"assessmentId":1,"candidateIds":[101,102,103],"startDate":"2027-01-01T09:00:00Z","endDate":"2027-01-10T18:00:00Z","attemptLimit":1}
+Validation
+assessmentId      RequiredcandidateIds      RequiredstartDate         RequiredendDate           RequiredattemptLimit      > 0
+Audit Event
+Assignment Created
+
+Update Assignment
+Endpoint
+PUT /api/v1/assignments/{id}
+Permission
+Assignment.Edit
+
+Cancel Assignment
+Endpoint
+POST /api/v1/assignments/{id}/cancel
+Permission
+Assignment.Edit
+Audit Event
+Assignment Cancelled
+
+Publish Assignment
+Endpoint
+POST /api/v1/assignments/{id}/publish
+Permission
+Assignment.Assign
+Audit Event
+Assignment Published
+
+5. ATTEMPT APIS
+List Attempts
+Endpoint
+GET /api/v1/attempts
+Permission
+Attempt.View
+Filters
+assignmentIdcandidateIdstatussubmitteddateFromdateTo
+
+Get Attempt
+Endpoint
+GET /api/v1/attempts/{id}
+Permission
+Attempt.ViewORAttempt Owner
+
+Create Attempt
+Endpoint
+POST /api/v1/attempts
+Permission
+Candidate.OwnAssignment
+Request DTO
+{"assignmentId":1001}
+Business Rules
+Assignment Must Be ActiveCandidate Must Be AssignedAttempt Limit Not ExceededAssessment Must Be Published
+Processing
+Create AttemptGenerate Question SnapshotGenerate Attempt Questions
+Audit Event
+Attempt Created
+
+6. ATTEMPT LIFECYCLE APIS
+Start Attempt
+Endpoint
+POST /api/v1/attempts/{id}/start
+Permission
+Attempt Owner
+Processing
+Start TimerLock Assessment VersionLock Question Versions
+Audit Event
+Attempt Started
+
+Pause Attempt
+Endpoint
+POST /api/v1/attempts/{id}/pause
+Permission
+Attempt Owner
+Audit Event
+Attempt Paused
+
+Resume Attempt
+Endpoint
+POST /api/v1/attempts/{id}/resume
+Permission
+Attempt Owner
+Audit Event
+Attempt Resumed
+
+Attempt Runtime Status
+Endpoint
+GET /api/v1/attempts/{id}/status
+Response
+{"attemptId":1001,"status":"InProgress","remainingTimeSeconds":3600,"questionCount":50,"answeredCount":12}
+Rule
+Timer Calculated On ServerClient Timer Not Trusted
+
+7. ATTEMPT QUESTION APIS
+List Attempt Questions
+Endpoint
+GET /api/v1/attempts/{id}/questions
+Permission
+Attempt Owner
+Response
+{"success":true,"data":[]}
+Data Source
+attempt_questions
+Rules
+Served From SnapshotImmutableVersion Locked
+
+Get Attempt Question
+Endpoint
+GET /api/v1/attempt-questions/{id}
+Permission
+Attempt Owner
+
+8. ATTEMPT ANSWER APIS
+Supported Answer Types:
+SingleChoiceMultipleChoiceTrueFalseFillInBlankEssayCodingFileUpload
+
+Save Answer
+Endpoint
+POST /api/v1/attempt-answers
+Permission
+Attempt Owner
+Request DTO
+{"attemptQuestionId":5001,"answerValue":"A"}
+Validation
+attemptQuestionId      RequiredanswerValue            Required
+Processing
+Create Or Update AnswerUpdate Last Activity Time
+
+Update Answer
+Endpoint
+PUT /api/v1/attempt-answers/{id}
+Permission
+Attempt Owner
+Rule
+Allowed Before Submission Only
+
+Get Answer
+Endpoint
+GET /api/v1/attempt-answers/{id}
+Permission
+Attempt Owner
+
+9. FILE UPLOAD ANSWER APIS
+Upload Answer File
+Endpoint
+POST /api/v1/attempt-answers/upload
+Permission
+Attempt Owner
+Request
+multipart/form-data
+Supported Types
+PDFDOCXZIPSource Code FilesImages
+Response
+{"fileId":12345,"fileName":"solution.zip"}
+
+10. DRAFT SAVE APIS
+Save Draft
+Endpoint
+POST /api/v1/attempts/{id}/save-draft
+Permission
+Attempt Owner
+Request DTO
+{"lastVisitedQuestionId":100}
+Audit Event
+Draft Saved
+
+Get Draft
+Endpoint
+GET /api/v1/attempts/{id}/draft
+Permission
+Attempt Owner
+Response
+{"lastVisitedQuestionId":100,"savedAt":"2027-01-01T10:30:00Z"}
+
+11. SUBMISSION APIS
+Submit Attempt
+Endpoint
+POST /api/v1/attempts/{id}/submit
+Permission
+Attempt Owner
+Request DTO
+{"confirmSubmission":true}
+Validation
+confirmSubmission = true
+
+Processing Pipeline
+Validate AttemptLock AnswersFreeze AttemptGenerate SnapshotGenerate Audit EventQueue EvaluationQueue Result Processing
+
+Transaction Rule
+Single Database Transaction
+
+Audit Event
+Attempt Submitted
+
+12. SNAPSHOT APIS
+Get Attempt Snapshot
+Endpoint
+GET /api/v1/attempts/{id}/snapshot
+Permission
+Attempt.ViewORAttempt Owner
+Data Source
+attempt_snapshots
+
+Rules
+Read OnlyImmutableHistorical Record
+
+Preserved Data
+Assessment VersionSection VersionsQuestion VersionsAnswersSubmission MetadataEvaluation State
+
+13. EXECUTION MONITORING APIS
+Candidate Progress
+Endpoint
+GET /api/v1/attempts/{id}/progress
+Permission
+Attempt OwnerAttempt.View
+Response
+{"totalQuestions":50,"answeredQuestions":25,"remainingQuestions":25,"completionPercentage":50}
+
+Attempt Activity Log
+Endpoint
+GET /api/v1/attempts/{id}/activity
+Permission
+Attempt.View
+
+14. MULTI-TENANCY RULES
+Candidate:
+Own Assignments OnlyOwn Attempts OnlyOwn Answers Only
+
+Organization Administrator:
+Organization Scope Only
+
+Platform Administrator:
+Global Access
+
+Mandatory Enforcement:
+Organization Scope ValidationAttempt Ownership Validation
+
+15. AUDIT REQUIREMENTS
+Mandatory Audit Events:
+Assignment CreatedAssignment PublishedAssignment CancelledAttempt CreatedAttempt StartedAttempt PausedAttempt ResumedDraft SavedAnswer SavedAttempt SubmittedSnapshot Generated
+
+16. PERFORMANCE REQUIREMENTS
+Question Retrieval:
+Must Use Snapshot RecordsNo Live Question Resolution
+
+Answer Saves:
+High Frequency OptimizedAutosave Friendly
+
+Submission:
+Single Transaction BoundaryRollback On Failure
+
+Expected Scale:
+100,000+ CandidatesConcurrent AssessmentsHorizontal Growth Ready
+
+17. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Business Rule Violation
+{"success":false,"code":"BUSINESS_RULE_VIOLATION","message":"Attempt already submitted."}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"You do not own this attempt."}
+
+18. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate:
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesTransaction Handlers
+
+Do Not Generate:
+Alternative Snapshot ModelsAlternative Attempt LifecycleClient-Side Timer LogicDirect Result Creation APIs
+
+19. IMPLEMENTATION PACKAGE STATUS
+Aligned With:
+004_ASSESSMENT_EXECUTION_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document:
+017D_ASSESSMENT_EXECUTION_OPENAPI
+Version:
+v1.0
+Status:
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017E_EVALUATION_OPENAPI v1.0
+Coverage:
+Evaluation WorkflowsAuto ScoringManual EvaluationRubricsScore CalculationResult ProcessingResult PublicationPass/Fail Determination
+This module implements the scoring engine and connects Assessment Execution with Certification.
+
+END OF DOCUMENT

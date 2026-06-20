@@ -1,0 +1,545 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Version 1.0
+
+PART 2
+ASSESSMENT DEFINITION MANAGEMENT
+This section defines all master data required to build, organize, maintain, and evolve assessments.
+The assessment-definition side of the platform consists of:
+Technology→ Assessment→ Section→ Question Bank→ Question
+All assessment runtime activities will consume these definitions but shall never directly modify them.
+
+17. ASSESSMENT DEFINITION ARCHITECTURE
+The platform shall separate:
+Assessment Definition
+Used to create and manage assessment content.
+Includes:
+Technology
+Assessment
+Section
+Question Bank
+Question
+Question Options
+Question Answers
+Assessment Rules
+
+Assessment Execution
+Used when users take assessments.
+Includes:
+Assessment Attempts
+Attempt Sections
+Attempt Questions
+Attempt Answers
+Assessment Results
+Assessment Reviews
+Assessment Snapshots
+
+18. TECHNOLOGY MANAGEMENT
+Purpose
+Technology represents the highest-level classification of assessments.
+Examples:
+.NET
+Angular
+React
+Java
+PHP
+Python
+Azure
+AWS
+DevOps
+AI/ML
+Cyber Security
+Data Engineering
+SQL Server
+Oracle
+
+Features
+Create Technology
+Edit Technology
+View Technology
+Activate Technology
+Deactivate Technology
+Archive Technology
+Search Technology
+Filter Technology
+Technology Analytics
+
+Technology Properties
+Technology Name
+Technology Code
+Display Name
+Description
+Short Description
+Icon
+Banner Image
+Display Order
+Status
+Created By
+Created Date
+Modified By
+Modified Date
+
+Business Rules
+Technology names must be unique.
+Technology code must be unique.
+Inactive technologies shall not be available for new assessments.
+Existing assessments remain accessible even if technology becomes inactive.
+Soft delete only.
+
+19. ASSESSMENT MANAGEMENT
+Purpose
+Assessment represents a complete evaluation package belonging to a technology.
+Examples:
+.NET Developer Assessment
+.NET Architect Assessment
+Angular Developer Assessment
+React Senior Developer Assessment
+Azure Administrator Assessment
+AWS Solutions Architect Assessment
+
+Features
+Create Assessment
+Edit Assessment
+Clone Assessment
+Publish Assessment
+Archive Assessment
+Activate Assessment
+Deactivate Assessment
+View Assessment
+Search Assessment
+Assessment Analytics
+
+Assessment Properties
+Assessment Name
+Assessment Code
+Technology
+Description
+Short Description
+Instructions
+Duration
+Maximum Score
+Passing Score
+Passing Percentage
+Maximum Attempts
+Randomize Questions
+Randomize Options
+Allow Resume
+Allow Save Draft
+Show Result Immediately
+Show Correct Answers
+Display Order
+Version
+Status
+
+Assessment Statuses
+Draft
+Published
+Archived
+Inactive
+
+Business Rules
+Assessment must belong to exactly one Technology.
+Assessment cannot be Published without at least one Section.
+Assessment Code must be unique.
+Published assessments become available to users.
+Archived assessments cannot accept new attempts.
+
+20. SECTION MANAGEMENT
+Purpose
+Sections divide assessments into logical categories.
+Examples:
+.NET Developer Assessment
+Section 1:C# Fundamentals
+Section 2:ASP.NET Core
+Section 3:Entity Framework
+Section 4:SQL Server
+
+Features
+Create Section
+Edit Section
+Delete Section
+Clone Section
+Reorder Section
+Configure Rules
+Assign Question Banks
+View Analytics
+
+Section Properties
+Section Name
+Section Code
+Description
+Instructions
+Display Order
+Duration
+Passing Marks
+Weightage
+Question Count
+Randomization Enabled
+Status
+Version
+
+Business Rules
+Section belongs to exactly one Assessment.
+Assessment must contain at least one Section.
+Display Order determines assessment flow.
+Weightage contributes to overall assessment score.
+
+21. QUESTION BANK MANAGEMENT
+Purpose
+Question Banks provide reusable collections of questions.
+Question Banks are reusable across multiple Sections and Assessments.
+
+Examples
+C# Beginner Questions
+C# Advanced Questions
+ASP.NET Core Fundamentals
+ASP.NET Core Advanced
+SQL Server Basics
+SQL Performance Tuning
+Angular Basics
+Angular Advanced
+
+Features
+Create Bank
+Edit Bank
+Clone Bank
+Archive Bank
+Activate Bank
+Deactivate Bank
+Assign Questions
+Import Questions
+Export Questions
+Preview Questions
+Version Management
+Analytics
+
+Question Bank Properties
+Question Bank Name
+Question Bank Code
+Description
+Difficulty Level
+Technology
+Version
+Status
+Question Count
+Created By
+Created Date
+Modified Date
+
+Business Rules
+Question Bank names must be unique within Technology.
+Question Banks may be reused.
+Question Banks must support versioning.
+Soft delete only.
+
+22. QUESTION MANAGEMENT
+Purpose
+Questions are the fundamental assessment unit.
+Questions should be reusable and maintainable.
+
+22.1 Supported Question Types
+Single Choice
+Multiple Choice
+True/False
+Fill In The Blank
+Descriptive
+Code Snippet
+Scenario Based
+Case Study
+
+Future Question Types
+Drag and Drop
+Match The Following
+Code Challenge
+Video Question
+Interactive Simulation
+
+22.2 Question Properties
+Question Text
+Question Description
+Question Type
+Difficulty Level
+Marks
+Negative Marks
+Explanation
+Reference Links
+Tags
+Technology
+Status
+Version
+Estimated Time
+Display Order
+
+22.3 Difficulty Levels
+Beginner
+Intermediate
+Advanced
+Expert
+
+22.4 Question Statuses
+Draft
+Published
+Archived
+Inactive
+
+22.5 Question Metadata
+Created By
+Created Date
+Modified By
+Modified Date
+Approved By
+Approved Date
+
+23. QUESTION OPTIONS MANAGEMENT
+Applicable for:
+Single Choice
+Multiple Choice
+True/False
+
+Option Properties
+Option Text
+Display Order
+Is Correct
+Explanation
+Status
+
+Rules
+Minimum two options.
+Maximum configurable options.
+At least one correct option required.
+Multiple-choice may contain multiple correct answers.
+
+24. ANSWER KEY MANAGEMENT
+The platform shall maintain answer keys separately.
+Purpose:
+Scoring
+Validation
+Analytics
+Review
+Audit
+
+Answer Properties
+Question
+Correct Answer
+Scoring Rules
+Explanation
+Version
+Status
+
+Security Requirements
+Users shall never access answer keys directly.
+Answer keys shall remain protected behind server-side validation.
+
+25. QUESTION REUSABILITY ARCHITECTURE
+Questions must be reusable.
+The system shall not duplicate questions unnecessarily.
+
+Relationship Model
+Question
+↕
+Question Bank Mapping
+↕
+Question Bank
+
+Benefits
+Avoid Duplication
+Centralized Maintenance
+Better Analytics
+Version Control
+Future AI Integration
+
+26. VERSIONING STRATEGY
+Versioning shall be supported for:
+Assessment
+Section
+Question Bank
+Question
+Answer Key
+
+Version Format
+Major.Minor
+Examples:
+1.0
+1.1
+2.0
+2.1
+
+Rules
+Major Version
+Breaking changes.
+Minor Version
+Content updates.
+Published versions remain immutable.
+New versions create new records.
+
+27. CONTENT APPROVAL WORKFLOW
+The platform shall support controlled content publishing.
+
+Workflow
+Draft
+↓
+Review
+↓
+Approved
+↓
+Published
+↓
+Archived
+
+Approvers
+Assessment Administrator
+Super Administrator
+
+Approval Actions
+Approve
+Reject
+Request Changes
+Archive
+Republish
+
+28. QUESTION IMPORT FRAMEWORK
+Administrators shall be able to bulk-import questions.
+
+Supported Formats
+Excel (.xlsx)
+CSV
+
+Supported Data
+Questions
+Options
+Correct Answers
+Difficulty
+Explanation
+Tags
+Marks
+
+Features
+Bulk Upload
+Bulk Validation
+Error Reporting
+Import Summary
+Preview Before Import
+Rollback Failed Import
+Duplicate Detection
+
+Validation Rules
+Required Fields Validation
+Question Type Validation
+Option Validation
+Answer Validation
+Duplicate Detection
+Technology Validation
+Question Bank Validation
+
+29. QUESTION EXPORT FRAMEWORK
+Administrators shall be able to export questions.
+
+Formats
+Excel
+CSV
+PDF
+
+Export Filters
+Technology
+Assessment
+Section
+Question Bank
+Difficulty
+Status
+Created Date
+
+30. SEARCH & FILTER FRAMEWORK
+The platform shall provide advanced search.
+
+Search Targets
+Technology
+Assessment
+Section
+Question Bank
+Question
+User
+Assessment Attempt
+
+Filter Examples
+Technology
+Assessment
+Section
+Question Bank
+Difficulty
+Status
+Date Range
+Created By
+Version
+
+31. MASTER DATA VALIDATION RULES
+Technology Names Unique
+Assessment Codes Unique
+Section Codes Unique
+Question Bank Codes Unique
+Question Codes Unique
+No Circular References
+No Orphan Records
+Published Content Cannot Be Deleted
+Version Integrity Must Be Maintained
+
+32. MASTER DATA AUDIT REQUIREMENTS
+Audit all:
+Technology Changes
+Assessment Changes
+Section Changes
+Question Bank Changes
+Question Changes
+Answer Key Changes
+Import Operations
+Export Operations
+Approval Actions
+
+33. DATABASE ENTITIES INTRODUCED IN PART 2
+technologies
+assessments
+assessment_sections
+question_banks
+questions
+question_options
+question_answers
+question_bank_questions
+content_approvals
+import_jobs
+export_jobs
+
+34. API DOMAINS INTRODUCED IN PART 2
+/api/technologies
+/api/assessments
+/api/assessment-sections
+/api/question-banks
+/api/questions
+/api/question-options
+/api/question-answers
+/api/import
+/api/export
+/api/content-approval
+
+35. RBAC PERMISSIONS INTRODUCED IN PART 2
+technology.create
+technology.edit
+technology.delete
+technology.view
+assessment.create
+assessment.edit
+assessment.publish
+assessment.archive
+section.create
+section.edit
+section.delete
+questionbank.create
+questionbank.edit
+questionbank.import
+questionbank.export
+question.create
+question.edit
+question.publish
+question.archive
+content.approve
+content.reject
+
+END OF PART 2

@@ -1,0 +1,201 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+008_REPORTING_ANALYTICS_SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+008 Reporting & Analytics Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2
+Amendment Type
+Enterprise BI Enhancement
+Approval Status
+Approved
+Effective Version
+008_REPORTING_ANALYTICS_SCHEMA v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+Reporting & Analytics Schema Master Review v1.0
+The review confirmed that the Reporting & Analytics module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise-grade enhancements focused on:
+Report Performance MonitoringDashboard Cache OptimizationAnalytics Lineage TrackingKPI Health ClassificationTrend Analytics Optimization
+
+2. REPORT_EXECUTIONS ENHANCEMENT
+2.1 Execution Performance Metrics
+New Column
+execution_duration_ms BIGINT NULL
+
+Purpose
+Tracks total report execution duration.
+
+Example
+Report Started    09:00:00.000Report Completed    09:00:02.350execution_duration_ms = 2350
+
+Benefits
+Supports:
+Slow Report DetectionPerformance MonitoringCapacity PlanningReport Optimization
+
+3. DASHBOARD_VERSIONS ENHANCEMENT
+3.1 Dashboard Cache Configuration
+New Column
+cache_duration_seconds INTNULL
+
+Purpose
+Supports dashboard-level caching strategies.
+
+Example Values
+603009003600
+
+Benefits
+Supports:
+Dashboard PerformanceReduced Database LoadLarge Scale BI DeploymentsReal-Time vs Cached Dashboards
+
+4. ANALYTICS_SNAPSHOTS ENHANCEMENT
+4.1 Snapshot Source Tracking
+New Column
+snapshot_source VARCHAR(100) NULL
+
+Purpose
+Tracks how analytics snapshots were generated.
+
+Example Values
+SchedulerManualETLSystemDataMigration
+
+Benefits
+Supports:
+Analytics LineageAuditabilityOperational DiagnosticsData Governance
+
+5. KPI_SNAPSHOTS ENHANCEMENT
+5.1 KPI Health Classification
+New Column
+kpi_status VARCHAR(50) NULL
+
+Purpose
+Classifies KPI health at snapshot time.
+
+Allowed Values
+HealthyWarningCritical
+
+Example
+Pass Rate = 92%Target = 90%Status = Healthy
+
+Pass Rate = 71%Target = 90%Status = Critical
+
+Benefits
+Supports:
+Executive DashboardsAlertingOperational MonitoringTrend Visualization
+
+6. INDEXING ENHANCEMENTS
+KPI Trend Analytics Optimization
+New Composite Index
+CREATEINDEX ix_kpi_snapshots_trendingON kpi_snapshots(    kpi_definition_id,    snapshot_date);
+
+Purpose
+Optimizes:
+Trend AnalysisHistorical KPI ReportingExecutive DashboardsTime-Series Queries
+
+Example Query
+SELECT*FROM kpi_snapshotsWHERE kpi_definition_id = ?ORDERBY snapshot_date DESC;
+
+7. GOVERNANCE RULES
+Report Performance Governance
+When:
+execution_duration_ms
+exceeds platform thresholds:
+report optimization review should be triggered.
+
+Dashboard Cache Governance
+When:
+cache_duration_seconds
+is configured:
+dashboard rendering engines should use cached data whenever possible.
+
+Analytics Lineage Governance
+Every automated analytics snapshot should populate:
+snapshot_source
+to preserve traceability.
+
+KPI Status Governance
+KPI status should be derived from:
+actual_valuetarget_valuewarning_thresholdcritical_threshold
+using application-level rules.
+
+8. IMPACT ANALYSIS
+Artifact
+Impact
+Report Performance Monitoring
+Improved
+Dashboard Scalability
+Improved
+Analytics Governance
+Improved
+KPI Monitoring
+Improved
+Trend Analytics
+Improved
+Enterprise Readiness
+Improved
+
+9. FINAL VALIDATION SUMMARY
+Area
+Result
+Report Governance
+PASS
+Dashboard Governance
+PASS
+Analytics Snapshots
+PASS
+KPI Framework
+PASS
+Trend Analysis
+PASS
+Executive Dashboards
+PASS
+Performance Monitoring
+PASS
+AI Readiness
+PASS
+Enterprise Readiness
+PASS
+
+10. APPROVED REPORTING & ANALYTICS BASELINE
+The approved reporting and analytics tables are:
+report_definitionsreport_versionsreport_executionsreport_exportsdashboard_definitionsdashboard_versionsdashboard_widgetsanalytics_snapshotskpi_definitionskpi_snapshots
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+008 Reporting & Analytics Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVEDMERGED INTO BASELINE
+
+FINAL MODULE STATUS
+008_REPORTING_ANALYTICS_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Data Dictionary v1.1 FINAL✓Security Schema v1.0 FINAL✓Governance Foundation Schema v1.0 FINAL✓Assessment Definition Schema v1.1 FINAL✓Assessment Execution Schema v1.2 FINAL✓Evaluation Schema v1.1 FINAL✓Certification Schema v1.1 FINAL✓Notification Schema v1.1 FINAL✓Reporting & Analytics Schema v1.1 FINAL✓
+
+OVERALL PLATFORM STATUS
+Completed Core Domains:
+001 Security✓002 Governance Foundation✓003 Assessment Definition✓004 Assessment Execution✓005 Evaluation✓006 Certification✓007 Notification✓008 Reporting & Analytics✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+009_INTEGRATION_AUDIT_SCHEMA
+Core Areas:
+api_clientsapi_keyswebhookswebhook_deliveriesintegration_eventsaudit_eventsdata_exportsdata_imports
+This module will establish:
+External IntegrationsAPI SecurityWebhook ProcessingSystem-to-System CommunicationEnterprise Audit TrailImport / Export FrameworkCompliance Logging
+and will complete the enterprise integration and audit foundation of the Snapflect Assessment Portal.
+
+END OF DOCUMENT

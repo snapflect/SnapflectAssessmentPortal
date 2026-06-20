@@ -1,0 +1,306 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+SCHEMA ASSUMPTIONS & SEED DATA STRATEGY
+VERSION 1.0
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Schema Assumptions & Seed Data Strategy
+Version
+1.0
+Status
+FINAL
+Applies To
+All Schema Scripts
+Related Documents
+PRD v1.2, ERD v1.1, Database Standards v1.1, Data Dictionary v1.1
+
+1. PURPOSE
+This document establishes the implementation assumptions and seed data strategy required before generating MySQL schema scripts.
+Objectives:
+Eliminate ambiguity during schema creation
+Standardize authentication and authorization design
+Define initial system data
+Establish migration sequencing
+Define environment initialization requirements
+
+2. AUTHENTICATION STRATEGY
+Login Method
+Primary Login Identifier:
+Email Address
+
+User Registration
+Supported:
+Self Registration
+and
+Admin User Creation
+
+Authentication Mechanism
+JWT Access TokenJWT Refresh Token
+
+Token Storage
+Application Layer Responsibility
+Database stores:
+Session MetadataToken Reference IDs
+Database shall NOT store:
+Plain JWT Tokens
+
+Password Storage
+Algorithm:
+BCrypt
+Minimum Cost Factor:
+12
+
+Prohibited
+MD5SHA1Plain Text Passwords
+
+3. ACCOUNT STATUS MODEL
+Supported Status Values
+ActivePending VerificationLockedSuspendedDeleted
+
+Business Rules
+Active
+Can login and access application.
+
+Pending Verification
+Email verification required.
+
+Locked
+Temporary lock due to security events.
+
+Suspended
+Administrative action.
+
+Deleted
+Soft deleted account.
+Cannot login.
+
+4. PASSWORD POLICY
+Minimum Requirements
+Password Length:
+Minimum 8 Characters
+
+Required:
+1 Uppercase Letter1 Lowercase Letter1 Numeric Character1 Special Character
+
+Password Expiration
+Version 1:
+Disabled
+Future configurable.
+
+Password Reuse Prevention
+Version 1:
+Not Enforced
+Future enhancement.
+
+5. ACCOUNT LOCKOUT POLICY
+Failed Login Threshold
+5 Failed Attempts
+
+Lockout Duration
+30 Minutes
+
+Reset Conditions
+Any successful login resets:
+failed_login_count
+to zero.
+
+6. EMAIL VERIFICATION POLICY
+Verification Required
+Yes
+for self-registration.
+
+Verification Token Expiry
+24 Hours
+
+Resend Verification
+Supported.
+
+7. SESSION MANAGEMENT STRATEGY
+Concurrent Sessions
+Version 1:
+Allowed
+
+Session Tracking
+Tracked per:
+UserBrowserDeviceIP Address
+
+Session Status Values
+ActiveExpiredRevokedLogged Out
+
+Session Expiration
+Access Token:
+15 Minutes
+Refresh Token:
+7 Days
+Application configurable.
+
+8. ROLE-BASED ACCESS CONTROL (RBAC)
+Authorization Model
+Role Based Access Control
+using:
+RolesPermissionsRole-Permission Mapping
+
+Permission Format
+module.action
+
+Examples
+technology.createtechnology.edittechnology.publishassessment.createassessment.editassessment.publishquestion.createquestion.editassignment.createreview.submitreport.view
+
+9. INITIAL ROLE SEED DATA
+SUPER_ADMIN
+Description:
+Full system access.
+
+ASSESSMENT_ADMIN
+Description:
+Assessment and content management.
+
+USER
+Description:
+Assessment participant.
+
+Role Codes
+SUPER_ADMINASSESSMENT_ADMINUSER
+
+10. INITIAL PERMISSION SEED DATA
+Technology Management
+technology.createtechnology.edittechnology.deletetechnology.publishtechnology.view
+
+Assessment Management
+assessment.createassessment.editassessment.deleteassessment.publishassessment.view
+
+Section Management
+section.createsection.editsection.deletesection.publishsection.view
+
+Question Bank Management
+questionbank.createquestionbank.editquestionbank.deletequestionbank.publishquestionbank.view
+
+Question Management
+question.createquestion.editquestion.deletequestion.publishquestion.view
+
+Assignment Management
+assignment.createassignment.editassignment.viewassignment.cancel
+
+Review Management
+review.viewreview.submitreview.approvereview.reject
+
+User Management
+user.createuser.edituser.disableuser.view
+
+Reports
+report.viewreport.export
+
+System Administration
+system.settings.manageaudit.viewnotification.manage
+
+11. DEFAULT ROLE-PERMISSION MAPPING
+SUPER_ADMIN
+Permissions:
+ALL
+
+ASSESSMENT_ADMIN
+Permissions:
+Technology ManagementAssessment ManagementSection ManagementQuestion Bank ManagementQuestion ManagementAssignment ManagementReview ManagementReport View
+
+USER
+Permissions:
+Assessment ParticipationProfile ManagementView Own ResultsView Own Reviews
+
+12. DEFAULT SUPER ADMIN STRATEGY
+Seed User
+Version 1:
+Optional Seed
+
+Recommended Approach
+Deployment script creates:
+Temporary Super Admin
+and forces password change on first login.
+
+Environment Variables
+SUPER_ADMIN_EMAILSUPER_ADMIN_PASSWORD
+recommended.
+
+13. DATABASE MIGRATION STRATEGY
+Migration Naming
+001_security_schema.sql002_governance_foundation_schema.sql003_assessment_definition_schema.sql004_runtime_execution_schema.sql005_review_workflow_schema.sql006_notification_schema.sql007_operations_schema.sql
+
+Execution Order
+Strictly sequential.
+
+Rollback Strategy
+Production:
+Forward Fix
+preferred.
+
+14. SEED DATA EXECUTION STRATEGY
+Phase 1
+Roles
+
+Phase 2
+Permissions
+
+Phase 3
+Role-Permission Mapping
+
+Phase 4
+Default Settings
+
+Phase 5
+Optional Super Admin
+
+15. ENVIRONMENT INITIALIZATION
+Required
+Create database.
+Run migrations.
+Run seed scripts.
+Create administrator.
+Configure SMTP.
+Configure storage path.
+
+Optional
+Azure Blob Storage
+AWS S3
+External Notification Providers
+
+16. SECURITY PRINCIPLES
+Passwords:
+Never Stored Plain Text
+
+Tokens:
+Never Stored Plain Text
+
+Audit Logs:
+Immutable
+
+Soft Deletes:
+Mandatory Where Applicable
+
+Versioned Content:
+Read Only After Publication
+
+17. VALIDATION CHECKLIST
+✓ Authentication Strategy Defined
+✓ Session Strategy Defined
+✓ Password Policy Defined
+✓ Lockout Policy Defined
+✓ Verification Policy Defined
+✓ RBAC Strategy Defined
+✓ Initial Roles Defined
+✓ Initial Permissions Defined
+✓ Role Mapping Defined
+✓ Seed Strategy Defined
+✓ Migration Strategy Defined
+✓ Environment Initialization Defined
+
+VERSION
+Schema Assumptions & Seed Data Strategy v1.0
+Status: FINAL
+Approved For:
+Schema Generation
+Seed Script Generation
+API Development
+Authentication Development
+Cursor AI Development
+
+END OF SCHEMA ASSUMPTIONS & SEED DATA STRATEGY v1.0

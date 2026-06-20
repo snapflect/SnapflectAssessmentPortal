@@ -1,0 +1,410 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017K_AI_PROCTORING_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+AI Proctoring OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+AI Proctoring
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+011_AI_PROCTORING_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+Proctoring SessionsAI Detection ResultsMedia EvidenceRisk ScoringViolation ManagementReview WorkbenchReviewer DecisionsEvidence ReviewProctoring AnalyticsCompliance Controls
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect AI Proctoring APIversion:1.0.0description: AI Proctoring and Assessment Integrity APIsservers:-url: /api/v1tags:-name: Proctoring Sessions-name: AI Detections-name: Media Evidence-name: Reviews-name: Violations-name: Analytics
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Proctoring.ViewProctoring.ManageProctoring.ReviewProctoring.Analytics
+
+4. PROCTORING SESSION APIS
+Session Status Values
+CreatedActivePausedCompletedCancelled
+
+List Proctoring Sessions
+Endpoint
+GET /api/v1/proctoring-sessions
+Permission
+Proctoring.View
+Filters
+assessmentIdcandidateIdstatusriskLeveldateFromdateTo
+
+Get Proctoring Session
+Endpoint
+GET /api/v1/proctoring-sessions/{id}
+Permission
+Proctoring.View
+
+Start Proctoring Session
+Endpoint
+POST /api/v1/proctoring-sessions/{id}/start
+Permission
+Proctoring.Manage
+Audit Event
+Proctoring Session Started
+
+Pause Proctoring Session
+Endpoint
+POST /api/v1/proctoring-sessions/{id}/pause
+Permission
+Proctoring.Manage
+Audit Event
+Proctoring Session Paused
+
+Resume Proctoring Session
+Endpoint
+POST /api/v1/proctoring-sessions/{id}/resume
+Permission
+Proctoring.Manage
+Audit Event
+Proctoring Session Resumed
+
+End Proctoring Session
+Endpoint
+POST /api/v1/proctoring-sessions/{id}/end
+Permission
+Proctoring.Manage
+Audit Event
+Proctoring Session Ended
+
+5. AI DETECTION APIS
+Detection Categories
+FaceMissingMultipleFacesIdentityMismatchVoiceDetectedPhoneDetectedBrowserMinimizedTabSwitchingWindowFocusLostScreenAnomalySuspiciousMovementLightingAnomalyCameraBlocked
+
+Risk Levels
+LowMediumHighCritical
+
+List AI Detections
+Endpoint
+GET /api/v1/ai-detections
+Permission
+Proctoring.View
+Filters
+sessionIdcandidateIddetectionTyperiskLevelreviewStatusdateFromdateTo
+
+Get AI Detection
+Endpoint
+GET /api/v1/ai-detections/{id}
+Permission
+Proctoring.View
+
+Detection Timeline
+Endpoint
+GET /api/v1/proctoring-sessions/{id}/detections
+Permission
+Proctoring.View
+
+6. MEDIA EVIDENCE APIS
+Evidence Types
+ScreenshotWebcamImageWebcamVideoAudioClipScreenRecordingSystemEvent
+
+List Evidence
+Endpoint
+GET /api/v1/media-evidence
+Permission
+Proctoring.View
+Filters
+sessionIdevidenceTyperiskLevelreviewStatusdateFromdateTo
+
+Get Evidence
+Endpoint
+GET /api/v1/media-evidence/{id}
+Permission
+Proctoring.View
+
+Download Evidence
+Endpoint
+GET /api/v1/media-evidence/{id}/download
+Permission
+Proctoring.View
+Security Rules
+Signed URL RequiredAccess LoggedDownload Audited
+Audit Event
+Evidence Downloaded
+
+Evidence Timeline
+Endpoint
+GET /api/v1/proctoring-sessions/{id}/evidence
+Permission
+Proctoring.View
+
+7. RISK SCORE APIS
+Risk Score Range
+0 - 100
+
+Risk Bands
+0-25     Low26-50    Medium51-75    High76-100   Critical
+
+Get Session Risk Score
+Endpoint
+GET /api/v1/proctoring-sessions/{id}/risk-score
+Permission
+Proctoring.View
+Response
+{"riskScore":74,"riskLevel":"High","calculatedAt":"2027-01-01T10:00:00Z"}
+
+Risk Score History
+Endpoint
+GET /api/v1/proctoring-sessions/{id}/risk-history
+Permission
+Proctoring.View
+
+Business Rules
+System CalculatedRead OnlyNo Manual Modification
+
+8. REVIEW WORKBENCH APIS
+Review Status Values
+PendingAssignedInReviewCompletedEscalated
+
+List Reviews
+Endpoint
+GET /api/v1/proctoring-reviews
+Permission
+Proctoring.Review
+
+Get Review
+Endpoint
+GET /api/v1/proctoring-reviews/{id}
+Permission
+Proctoring.Review
+
+Assign Review
+Endpoint
+POST /api/v1/proctoring-reviews/{id}/assign
+Permission
+Proctoring.Review
+Request DTO
+{"reviewerId":5001}
+Audit Event
+Review Assigned
+
+Complete Review
+Endpoint
+POST /api/v1/proctoring-reviews/{id}/complete
+Permission
+Proctoring.Review
+Audit Event
+Review Completed
+
+9. VIOLATION MANAGEMENT APIS
+Violation Types
+ConfirmedViolationSuspiciousActivityFalsePositiveNoViolation
+
+Record Violation
+Endpoint
+POST /api/v1/proctoring-reviews/{id}/violation
+Permission
+Proctoring.Review
+Request DTO
+{"violationType":"ConfirmedViolation","comments":"Multiple faces detected repeatedly."}
+Audit Event
+Violation Confirmed
+
+Dismiss Violation
+Endpoint
+POST /api/v1/proctoring-reviews/{id}/dismiss
+Permission
+Proctoring.Review
+Request DTO
+{"reason":"False positive due to camera reflection."}
+Audit Event
+Violation Dismissed
+
+10. REVIEW DECISION APIS
+Decision Values
+ApprovedSuspiciousConfirmedViolationEscalated
+
+Submit Review Decision
+Endpoint
+POST /api/v1/proctoring-reviews/{id}/decision
+Permission
+Proctoring.Review
+Request DTO
+{"decision":"ConfirmedViolation","comments":"Evidence supports violation."}
+Processing
+Update ReviewGenerate Audit EventNotify Assessment Module
+Audit Event
+Review Decision Submitted
+
+11. EVIDENCE SEARCH APIS
+Search Evidence
+Endpoint
+GET /api/v1/media-evidence/search
+Permission
+Proctoring.View
+Filters
+assessmentIdcandidateIdriskLevelevidenceTypedateFromdateTo
+
+Search Detections
+Endpoint
+GET /api/v1/ai-detections/search
+Permission
+Proctoring.View
+
+12. PROCTORING ANALYTICS APIS
+Proctoring Dashboard
+Endpoint
+GET /api/v1/proctoring-analytics
+Permission
+Proctoring.Analytics
+Metrics
+Total SessionsTotal DetectionsViolation RateReview VolumeAverage Risk ScoreCritical Incidents
+
+Detection Trends
+Endpoint
+GET /api/v1/proctoring-analytics/trends
+Permission
+Proctoring.Analytics
+
+Reviewer Performance
+Endpoint
+GET /api/v1/proctoring-analytics/reviewers
+Permission
+Proctoring.Analytics
+
+False Positive Analytics
+Endpoint
+GET /api/v1/proctoring-analytics/false-positives
+Permission
+Proctoring.Analytics
+
+13. CANDIDATE PROCTORING APIS
+My Proctoring Sessions
+Endpoint
+GET /api/v1/my-proctoring-sessions
+Permission
+Authenticated Candidate
+
+My Session Details
+Endpoint
+GET /api/v1/my-proctoring-sessions/{id}
+Permission
+Session Owner
+
+Restrictions
+No Internal Risk Model VisibilityNo Reviewer Notes VisibilityNo Detection Algorithm Visibility
+
+14. PRIVACY & COMPLIANCE APIS
+Evidence Retention Policy
+Endpoint
+GET /api/v1/proctoring/retention-policy
+Permission
+Platform.Admin
+
+Evidence Retention Summary
+Endpoint
+GET /api/v1/proctoring/retention-summary
+Permission
+Platform.Admin
+
+Rules
+Compliance ControlledPolicy DrivenAuditable
+
+15. MULTI-TENANCY RULES
+Candidate
+Own Sessions Only
+
+Organization Administrator
+Organization Scope Only
+
+Platform Administrator
+Global Access
+
+Mandatory Enforcement
+Organization IsolationEvidence Access ValidationReviewer Scope Validation
+
+16. SECURITY REQUIREMENTS
+Evidence Security
+Encrypted At RestEncrypted In TransitSigned DownloadsAccess Auditing
+
+Reviewer Actions
+Audit MandatoryImmutable Decision Trail
+
+Risk Scoring
+Server ControlledNon-ModifiableVersioned Algorithms
+
+PII Protection
+Masked ExportsControlled DownloadsRestricted Access
+
+17. AUDIT REQUIREMENTS
+Mandatory Audit Events
+Proctoring Session StartedProctoring Session PausedProctoring Session ResumedProctoring Session EndedAI Detection CreatedEvidence AccessedEvidence DownloadedReview AssignedReview CompletedViolation ConfirmedViolation DismissedReview Decision Submitted
+
+18. PERFORMANCE REQUIREMENTS
+Evidence Retrieval
+CDN CompatibleStreaming EnabledRange Requests Supported
+
+Detection Queries
+Indexed SearchesSnapshot Optimized
+
+Expected Scale
+100M+ Detection Records50M+ Evidence FilesEnterprise Assessment Scale
+
+19. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+Evidence Restricted
+{"success":false,"code":"EVIDENCE_ACCESS_DENIED","message":"Evidence access restricted."}
+
+Review Already Completed
+{"success":false,"code":"REVIEW_COMPLETED","message":"Review has already been completed."}
+
+20. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesEvidence ServicesReview ServicesDetection ServicesRisk Scoring ServicesAnalytics Services
+
+Do Not Generate
+Alternative Risk ModelsAlternative Evidence StructuresAlternative Review LifecyclesClient-Side Risk Scoring
+
+21. IMPLEMENTATION PACKAGE STATUS
+Aligned With
+011_AI_PROCTORING_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document
+017K_AI_PROCTORING_OPENAPI
+Version
+v1.0
+Status
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+OPENAPI SUITE COMPLETION STATUS
+Completed OpenAPI Specifications
+017A_SECURITY_OPENAPI✓017B_GOVERNANCE_OPENAPI✓017C_ASSESSMENT_DEFINITION_OPENAPI✓017D_ASSESSMENT_EXECUTION_OPENAPI✓017E_EVALUATION_OPENAPI✓017F_CERTIFICATION_OPENAPI✓017G_NOTIFICATION_OPENAPI✓017H_REPORTING_ANALYTICS_OPENAPI✓017I_INTEGRATION_AUDIT_OPENAPI✓017J_PLATFORM_OPERATIONS_OPENAPI✓017K_AI_PROCTORING_OPENAPI✓
+
+NEXT STRATEGIC STEP
+Proceed to:
+018_API_IMPLEMENTATION_MASTER_PLAN v1.0
+Coverage
+Laravel Folder ArchitectureModule BreakdownController InventoryService Layer DesignRepository PatternDTO StandardsValidation StandardsMiddleware StrategyQueue ArchitectureEvent ArchitectureCursor AI Development WorkflowSprint-Based Build Plan
+This becomes the bridge between architecture and actual implementation and is the document Cursor AI will use most heavily during development.
+
+END OF DOCUMENT

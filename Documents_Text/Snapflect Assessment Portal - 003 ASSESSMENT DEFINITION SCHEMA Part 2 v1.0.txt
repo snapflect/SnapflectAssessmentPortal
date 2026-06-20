@@ -1,0 +1,152 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL
+PART 2 – SECTION FOUNDATION
+VERSION 1.0
+Module
+Assessment Definition
+Tables
+sectionssection_versionssection_question_banks
+Depends On
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 1assessmentsassessment_versions001_SECURITY_SCHEMA.SQL v1.0 FINALusers
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+SECTIONS
+Purpose
+Represents logical assessment groupings.
+Examples:
+BasicsIntermediate ConceptsAdvanced TopicsArchitecturePerformance
+A Section belongs to exactly one Assessment.
+
+CREATETABLE sections(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    assessment_id BIGINT UNSIGNED NOTNULL,    section_code VARCHAR(100) NOTNULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_sections_uuidUNIQUE (uuid),CONSTRAINT ux_sections_codeUNIQUE (section_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SECTIONS FOREIGN KEYS
+ALTERTABLE sectionsADDCONSTRAINT fk_sections_assessmentFOREIGNKEY (assessment_id)REFERENCES assessments(id);ALTERTABLE sectionsADDCONSTRAINT fk_sections_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE sectionsADDCONSTRAINT fk_sections_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE sectionsADDCONSTRAINT fk_sections_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+SECTIONS INDEXES
+CREATEINDEX ix_sections_assessmentON sections(assessment_id);CREATEINDEX ix_sections_statusON sections(status);CREATEINDEX ix_sections_is_activeON sections(is_active);
+
+SECTION STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+SECTION_VERSIONS
+Purpose
+Stores complete historical snapshots of Section definitions.
+Uses Full Snapshot Versioning Architecture.
+
+CREATETABLE section_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    section_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    section_name VARCHAR(255) NOTNULL,    display_order INTNOTNULLDEFAULT0,    section_type VARCHAR(50)NOTNULLDEFAULT'Mandatory',    instructions TEXT NULL,    estimated_duration_minutes INTNULL,    passing_percentage DECIMAL(5,2) NULL,    navigation_mode VARCHAR(50)NOTNULLDEFAULT'Sequential',    is_visible TINYINT(1)NOTNULLDEFAULT1,    max_attempts INTNULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_section_versions_uuidUNIQUE (uuid),CONSTRAINT ux_section_versions_versionUNIQUE (section_id, version_number))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SECTION_VERSIONS FOREIGN KEYS
+ALTERTABLE section_versionsADDCONSTRAINT fk_section_versions_sectionFOREIGNKEY (section_id)REFERENCES sections(id);ALTERTABLE section_versionsADDCONSTRAINT fk_section_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+SECTION_VERSIONS INDEXES
+CREATEINDEX ix_section_versions_statusON section_versions(version_status);CREATEINDEX ix_section_versions_orderON section_versions(display_order);CREATEINDEX ix_section_versions_typeON section_versions(section_type);CREATEINDEX ix_section_versions_visibleON section_versions(is_visible);CREATEINDEX ix_section_versions_navigationON section_versions(navigation_mode);
+
+SUPPORTED SECTION TYPES
+Application validation shall enforce:
+MandatoryOptionalBonus
+
+SUPPORTED NAVIGATION MODES
+Application validation shall enforce:
+SequentialFreeNavigation
+Future:
+Adaptive
+without schema change.
+
+SECTION GOVERNANCE RULES
+Display Order
+Section ordering is version specific.
+Changes require creation of a new version.
+
+Visibility
+Hidden sections:
+is_visible = 0
+are not displayed to users.
+
+Passing Percentage
+If populated:
+passing_percentage
+must be independently satisfied.
+If NULL:
+Assessment-level rule applies.
+
+Instructions
+Section-specific instructions are stored inside:
+instructions
+and rendered at runtime.
+
+SECTION_QUESTION_BANKS
+Purpose
+Maps Question Banks to a specific Section Version.
+This preserves historical version integrity.
+
+Architecture
+Section Version        ↓Section Question Banks        ↓Question Bank
+
+CREATETABLE section_question_banks(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    section_version_id BIGINT UNSIGNED NOTNULL,    question_bank_id BIGINT UNSIGNED NOTNULL,    display_order INTNOTNULLDEFAULT0,    is_mandatory TINYINT(1)NOTNULLDEFAULT1,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_section_question_banks_uuidUNIQUE (uuid),CONSTRAINT ux_section_question_bank_mappingUNIQUE (            section_version_id,            question_bank_id        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+NOTE
+The following FK is intentionally deferred to Part 3 because:
+question_banks
+table will be created in Part 3.
+
+SECTION_QUESTION_BANKS FOREIGN KEYS
+ALTERTABLE section_question_banksADDCONSTRAINT fk_section_question_banks_section_versionFOREIGNKEY (section_version_id)REFERENCES section_versions(id);
+
+SECTION_QUESTION_BANKS INDEXES
+CREATEINDEX ix_section_question_banks_sectionON section_question_banks(section_version_id);CREATEINDEX ix_section_question_banks_orderON section_question_banks(display_order);CREATEINDEX ix_section_question_banks_mandatoryON section_question_banks(is_mandatory);
+
+VERSION INTEGRITY RULE
+Question Banks must be mapped to:
+section_version_id
+NOT:
+section_id
+This preserves:
+Published Version IntegrityHistorical ReconstructionAttempt Replay Accuracy
+
+PUBLICATION GOVERNANCE
+Published Section Versions:
+Read Only
+Changes require:
+New Draft Version
+
+CODE IMMUTABILITY RULE
+The following code is immutable after creation:
+section_code
+Changes require creation of a new Section entity.
+
+VALIDATION CHECKLIST
+✓ Section Hierarchy Supported
+✓ Full Snapshot Versioning Applied
+✓ Version-Safe Question Bank Mapping Applied
+✓ Navigation Modes Supported
+✓ Visibility Rules Supported
+✓ Section-Level Pass Criteria Supported
+✓ Section Instructions Supported
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+technologiestechnology_versionsassessmentsassessment_versionssectionssection_versionssection_question_banks
+Assessment Definition Completion:
+50%
+
+NEXT STEP
+Perform a focused review of:
+question_banksquestion_bank_versions
+before generating:
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 3
+This is where reusable content architecture and future content governance are finalized.
+
+END OF DOCUMENT

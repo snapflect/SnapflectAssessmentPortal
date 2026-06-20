@@ -1,0 +1,116 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+001_SECURITY_SCHEMA.SQL
+PART 3 – AUTHENTICATION RUNTIME
+VERSION 1.0
+Module
+Security & User Management
+Tables
+user_sessionspassword_resetsemail_verifications
+Depends On
+001_SECURITY_SCHEMA.SQL – PART 1(users, user_profiles)
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+USER_SESSIONS
+CREATETABLE user_sessions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    jwt_token_id VARCHAR(255) NOTNULL,    refresh_token_id VARCHAR(255) NOTNULL,    refresh_token_hash VARCHAR(255) NOTNULL,    device_name VARCHAR(255) NULL,    device_type VARCHAR(100) NULL,    browser VARCHAR(255) NULL,    operating_system VARCHAR(255) NULL,    device_fingerprint VARCHAR(255) NULL,    ip_address VARCHAR(50) NULL,    location VARCHAR(255) NULL,    is_trusted_device TINYINT(1)NOTNULLDEFAULT0,    login_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    last_activity_date DATETIME(3) NULL,    logout_date DATETIME(3) NULL,    session_status VARCHAR(50)NOTNULLDEFAULT'Active',    revocation_reason VARCHAR(255) NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_user_sessions_uuidUNIQUE (uuid),CONSTRAINT ux_user_sessions_jwt_token_idUNIQUE (jwt_token_id),CONSTRAINT ux_user_sessions_refresh_token_idUNIQUE (refresh_token_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+USER_SESSIONS FOREIGN KEYS
+ALTERTABLE user_sessionsADDCONSTRAINT fk_user_sessions_userFOREIGNKEY (user_id)REFERENCES users(id);
+
+USER_SESSIONS INDEXES
+CREATEINDEX ix_user_sessions_userON user_sessions(user_id);CREATEINDEX ix_user_sessions_statusON user_sessions(session_status);CREATEINDEX ix_user_sessions_last_activityON user_sessions(last_activity_date);CREATEINDEX ix_user_sessions_trusted_deviceON user_sessions(is_trusted_device);CREATEINDEX ix_user_sessions_device_fingerprintON user_sessions(device_fingerprint);CREATEINDEX ix_user_sessions_login_dateON user_sessions(login_date);
+
+SUPPORTED SESSION STATUS VALUES
+Application validation shall enforce:
+ActiveExpiredRevokedLogged Out
+
+PASSWORD_RESETS
+CREATETABLE password_resets(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    reset_token_hash VARCHAR(255) NOTNULL,    request_ip_address VARCHAR(50) NULL,    requested_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    expiry_date DATETIME(3) NOTNULL,    used_date DATETIME(3) NULL,    status VARCHAR(50)NOTNULLDEFAULT'Pending',    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_password_resets_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+PASSWORD_RESETS FOREIGN KEYS
+ALTERTABLE password_resetsADDCONSTRAINT fk_password_resets_userFOREIGNKEY (user_id)REFERENCES users(id);
+
+PASSWORD_RESETS INDEXES
+CREATEINDEX ix_password_resets_userON password_resets(user_id);CREATEINDEX ix_password_resets_statusON password_resets(status);CREATEINDEX ix_password_resets_expiryON password_resets(expiry_date);CREATEINDEX ix_password_resets_requested_dateON password_resets(requested_date);
+
+SUPPORTED PASSWORD RESET STATUS VALUES
+Application validation shall enforce:
+PendingUsedExpired
+
+EMAIL_VERIFICATIONS
+CREATETABLE email_verifications(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    verification_token_hash VARCHAR(255) NOTNULL,    request_ip_address VARCHAR(50) NULL,    requested_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    expiry_date DATETIME(3) NOTNULL,    verified_date DATETIME(3) NULL,    status VARCHAR(50)NOTNULLDEFAULT'Pending',    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_email_verifications_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+EMAIL_VERIFICATIONS FOREIGN KEYS
+ALTERTABLE email_verificationsADDCONSTRAINT fk_email_verifications_userFOREIGNKEY (user_id)REFERENCES users(id);
+
+EMAIL_VERIFICATIONS INDEXES
+CREATEINDEX ix_email_verifications_userON email_verifications(user_id);CREATEINDEX ix_email_verifications_statusON email_verifications(status);CREATEINDEX ix_email_verifications_expiryON email_verifications(expiry_date);CREATEINDEX ix_email_verifications_requested_dateON email_verifications(requested_date);
+
+SUPPORTED EMAIL VERIFICATION STATUS VALUES
+Application validation shall enforce:
+PendingVerifiedExpired
+
+SECURITY GOVERNANCE RULES
+Refresh Tokens
+Never store raw refresh tokens.
+Store:
+refresh_token_idrefresh_token_hash
+only.
+
+Password Reset Tokens
+Never store raw reset tokens.
+Store:
+reset_token_hash
+only.
+
+Email Verification Tokens
+Never store raw verification tokens.
+Store:
+verification_token_hash
+only.
+
+Trusted Devices
+Version 1 supports:
+Remember DeviceTrusted Device TrackingActive Device Listing
+
+Session Revocation
+Revoked sessions must capture:
+revocation_reason
+Examples:
+Manual LogoutPassword ChangeAdmin RevokedSecurity Lock
+
+Password Change Rule
+When password changes:
+All active sessions→ Revoked
+except current session if configured by application settings.
+
+Session Retention Recommendation
+Active Sessions:UnlimitedExpired Sessions:180 DaysLogged Out Sessions:180 DaysRevoked Sessions:180 Days
+Archival handled by application maintenance jobs.
+
+VALIDATION CHECKLIST
+✓ UUID Strategy Applied
+✓ FK Strategy Applied
+✓ Refresh Token Hashing Applied
+✓ Password Reset Hashing Applied
+✓ Verification Token Hashing Applied
+✓ Trusted Device Support Added
+✓ Device Fingerprinting Added
+✓ Session Revocation Support Added
+✓ Security Governance Defined
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+001_SECURITY_SCHEMA.SQL – PART 3
+Version 1.0
+Status:
+APPROVED
+
+SECURITY MODULE STATUS
+Completed Tables:
+usersuser_profilesrolespermissionsuser_rolesrole_permissionsuser_sessionspassword_resetsemail_verifications
+Security Schema Completion:
+100%
+
+END OF 001_SECURITY_SCHEMA.SQL – PART 3

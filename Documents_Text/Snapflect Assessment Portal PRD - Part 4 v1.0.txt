@@ -1,0 +1,557 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Version 1.0
+
+PART 4
+DASHBOARDS, REPORTING, NOTIFICATIONS, AUDIT, FILE MANAGEMENT & OPERATIONAL GOVERNANCE
+This section defines all operational, administrative, reporting, notification, governance, audit, and monitoring capabilities of the platform.
+The purpose of these modules is to provide visibility, control, analytics, compliance, and maintainability for both users and administrators.
+
+66. USER DASHBOARD
+Purpose
+Provide a personalized workspace for assessment participants.
+Users should immediately understand:
+Available Assessments
+Assessment Progress
+Completed Assessments
+Performance Metrics
+Recent Activity
+
+Dashboard Widgets
+My Assessments
+Display:
+Available Assessments
+Draft Assessments
+Submitted Assessments
+Reviewed Assessments
+Completed Assessments
+
+Recent Activity
+Display:
+Recently Started Assessments
+Recently Submitted Assessments
+Recently Reviewed Assessments
+Latest Scores
+
+Performance Summary
+Display:
+Total Assessments Taken
+Average Score
+Best Score
+Highest Technology Score
+Lowest Technology Score
+Success Rate
+
+Assessment Statistics
+Display:
+Draft Count
+Completed Count
+Pending Review Count
+Failed Count
+Passed Count
+
+Technology Performance
+Display:
+Technology
+Attempts
+Average Score
+Best Score
+Pass Rate
+
+User Actions
+Start Assessment
+Resume Assessment
+View Results
+View Reviews
+View History
+Manage Profile
+
+67. USER ASSESSMENT HISTORY
+Users shall have access to complete assessment history.
+
+History Information
+Technology
+Assessment
+Attempt Number
+Started Date
+Completed Date
+Duration
+Score
+Percentage
+Status
+Review Status
+
+Filters
+Technology
+Assessment
+Date Range
+Status
+Result
+
+Export Options
+PDF
+Excel
+CSV
+
+68. ADMIN DASHBOARD
+Purpose
+Provide complete operational visibility.
+
+Dashboard Widgets
+Platform Statistics
+Total Users
+Active Users
+Inactive Users
+Total Technologies
+Total Assessments
+Total Sections
+Total Question Banks
+Total Questions
+
+Assessment Statistics
+Total Attempts
+Submitted Attempts
+Reviewed Attempts
+Draft Attempts
+Pass Rate
+Fail Rate
+
+Content Statistics
+Published Assessments
+Draft Assessments
+Archived Assessments
+Pending Approvals
+
+Review Statistics
+Pending Reviews
+Completed Reviews
+Average Rating
+Reviewer Activity
+
+System Statistics
+API Requests
+Failed Requests
+Storage Usage
+Notification Queue
+Audit Events
+
+69. REPORTING & ANALYTICS
+Purpose
+Provide meaningful insights.
+
+Report Categories
+User Reports
+Technology Reports
+Assessment Reports
+Section Reports
+Question Bank Reports
+Question Reports
+Result Reports
+Review Reports
+Audit Reports
+Notification Reports
+
+70. USER REPORTS
+Display:
+Users
+Profile Completion
+Assessment Count
+Average Score
+Pass Rate
+Activity Summary
+
+71. TECHNOLOGY REPORTS
+Display:
+Technology
+Assessment Count
+Attempt Count
+Average Score
+Pass Rate
+Popularity
+
+72. ASSESSMENT REPORTS
+Display:
+Assessment
+Attempt Count
+Completion Rate
+Pass Rate
+Fail Rate
+Average Score
+Average Duration
+
+73. SECTION REPORTS
+Display:
+Section
+Average Score
+Completion Rate
+Most Missed Questions
+Most Answered Questions
+Difficulty Analysis
+
+74. QUESTION ANALYTICS
+Display:
+Question
+Correct Percentage
+Incorrect Percentage
+Skip Percentage
+Difficulty Score
+Usage Count
+Performance Trend
+
+Purpose
+Identify weak questions.
+Identify invalid questions.
+Improve question quality.
+
+75. PERFORMANCE REPORTS
+Display:
+Top Performers
+Lowest Performers
+Technology Rankings
+Assessment Rankings
+Improvement Trends
+
+76. DRILL-DOWN ANALYTICS
+The platform shall support hierarchical drill-down reporting.
+
+Hierarchy
+Technology
+↓
+Assessment
+↓
+Section
+↓
+Question Bank
+↓
+Question
+
+Example
+.NET
+↓
+.NET Developer Assessment
+↓
+ASP.NET Core Section
+↓
+ASP.NET Fundamentals Bank
+↓
+Question Analytics
+
+77. REPORT EXPORT FRAMEWORK
+All reports shall support export.
+
+Formats
+PDF
+Excel
+CSV
+
+Export Rules
+Permission Based
+Auditable
+Filtered Data Only
+Background Processing Supported
+
+78. NOTIFICATION ENGINE
+Purpose
+Deliver user and administrator notifications.
+
+Notification Types
+Email
+In-App Notifications
+Future:
+SMS
+WhatsApp
+Push Notifications
+
+79. USER NOTIFICATIONS
+Registration Successful
+Email Verification
+Password Reset
+Assessment Assigned
+Assessment Started
+Assessment Submitted
+Assessment Reviewed
+Assessment Completed
+Profile Updated
+
+80. ADMIN NOTIFICATIONS
+User Registration
+Assessment Submission
+Review Required
+Import Completed
+Export Completed
+System Alerts
+Security Alerts
+
+81. NOTIFICATION TEMPLATES
+Templates shall be configurable.
+
+Template Components
+Subject
+Title
+Message
+Footer
+Variables
+
+Example Variables
+User Name
+Assessment Name
+Technology Name
+Score
+Percentage
+
+82. NOTIFICATION DELIVERY STATUS
+Pending
+Queued
+Sent
+Failed
+Delivered
+Read
+
+83. AUDIT LOGGING
+Purpose
+Provide complete traceability.
+
+Audit Categories
+Authentication
+Authorization
+Master Data
+Assessment Activities
+Review Activities
+System Settings
+Imports
+Exports
+Notifications
+Security Events
+
+84. AUDIT LOG STRUCTURE
+Event Id
+User
+Action
+Entity
+Entity Id
+Old Value
+New Value
+Timestamp
+IP Address
+User Agent
+Result
+
+85. AUDIT EVENTS
+Login
+Logout
+Registration
+Password Change
+Profile Update
+Technology Create
+Technology Update
+Assessment Publish
+Question Create
+Question Update
+Assessment Start
+Assessment Submit
+Review Complete
+Settings Update
+Import
+Export
+
+86. ACTIVITY TRACKING
+The platform shall maintain activity history.
+
+User Activities
+Login
+Logout
+Assessment Start
+Assessment Save
+Assessment Resume
+Assessment Submit
+Review View
+Profile Update
+
+Administrator Activities
+Create
+Edit
+Publish
+Archive
+Review
+Import
+Export
+Settings Changes
+
+87. FILE & ATTACHMENT MANAGEMENT
+Purpose
+Store and manage platform files.
+
+Supported File Types
+Images
+PDF
+Excel
+CSV
+Documents
+
+Supported Usage
+Technology Icons
+Technology Banners
+Question Attachments
+Assessment Documents
+Import Files
+Export Files
+User Avatars
+
+88. FILE VALIDATION
+Allowed File Types
+Maximum File Size
+Virus Scan Ready
+Duplicate Detection
+Secure Storage
+File Versioning
+
+89. FILE STORAGE STRATEGY
+Files shall be stored outside publicly accessible directories where possible.
+Access shall be permission controlled.
+Downloads shall be audited.
+
+90. SYSTEM SETTINGS MANAGEMENT
+Purpose
+Allow administrators to control platform behavior without code changes.
+
+Categories
+General Settings
+Security Settings
+Assessment Settings
+Notification Settings
+File Settings
+UI Settings
+System Settings
+
+91. GENERAL SETTINGS
+Application Name
+Application Logo
+Support Email
+Support Phone
+Timezone
+Date Format
+Language
+
+92. SECURITY SETTINGS
+Password Policy
+Session Timeout
+Login Attempts
+Account Lockout
+JWT Expiration
+Refresh Token Expiration
+Rate Limiting
+
+93. ASSESSMENT SETTINGS
+Default Duration
+Default Passing Percentage
+Maximum Attempts
+Auto Save Interval
+Result Visibility
+Review Requirements
+
+94. NOTIFICATION SETTINGS
+Email Enabled
+SMTP Settings
+Notification Templates
+Reminder Rules
+Delivery Rules
+
+95. FILE SETTINGS
+Maximum File Size
+Allowed File Types
+Storage Location
+Retention Policy
+
+96. SYSTEM HEALTH MONITORING
+Purpose
+Provide operational visibility.
+
+Metrics
+Active Users
+API Requests
+Error Rates
+Storage Usage
+Notification Queue
+Import Jobs
+Export Jobs
+Audit Volume
+
+97. DATA RETENTION POLICIES
+Purpose
+Define long-term data management.
+
+Retention Categories
+Audit Logs
+Assessment Attempts
+Notifications
+Import Jobs
+Export Jobs
+Activity Logs
+
+Rules
+Configurable
+Compliance Friendly
+Auditable
+
+98. OPERATIONAL GOVERNANCE
+All critical actions shall be:
+Authenticated
+Authorized
+Audited
+Traceable
+Recoverable
+
+Governance Areas
+Assessment Governance
+Content Governance
+Review Governance
+Security Governance
+Operational Governance
+
+99. PART 4 DATABASE ENTITIES
+notifications
+notification_templates
+notification_logs
+audit_logs
+activity_logs
+attachments
+file_uploads
+system_settings
+system_health_logs
+report_exports
+report_jobs
+
+100. PART 4 API DOMAINS
+/api/dashboard
+/api/reports
+/api/report-exports
+/api/notifications
+/api/audit-logs
+/api/activity-logs
+/api/files
+/api/system-settings
+/api/system-health
+
+101. PART 4 RBAC PERMISSIONS
+dashboard.view
+report.view
+report.export
+notification.view
+notification.manage
+audit.view
+activity.view
+file.upload
+file.download
+settings.view
+settings.manage
+system.monitor
+
+102. OPERATIONAL INTEGRITY REQUIREMENTS
+All exports must be auditable.
+All notifications must be traceable.
+All settings changes must be logged.
+All file downloads must be permission controlled.
+All reports must respect RBAC permissions.
+No user shall access unauthorized data.
+
+END OF PART 4

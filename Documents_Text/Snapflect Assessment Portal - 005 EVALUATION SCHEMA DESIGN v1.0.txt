@@ -1,0 +1,253 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+005 EVALUATION SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+005 Evaluation Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Evaluation
+Depends On
+Assessment Definition Schema v1.1 FINAL, Assessment Execution Schema v1.2 FINAL
+Approved For
+DDL Generation
+
+1. PURPOSE
+The Evaluation module is responsible for converting candidate responses into scored, reviewed, approved, and published assessment results.
+This module provides:
+Automated Evaluation
+Rule-Based Scoring
+Manual Review Workflow
+AI-Assisted Evaluation
+Result Publication
+Evaluation Auditability
+Historical Reproducibility
+
+2. EVALUATION ARCHITECTURE
+Approved Evaluation Lifecycle
+Assessment Submitted        ↓Evaluation Job Created        ↓Auto Evaluation        ↓Manual Review (If Required)        ↓AI Evaluation (Future)        ↓Evaluation Result Generated        ↓Result Published
+
+3. DESIGN PRINCIPLES
+Version-Safe Evaluation
+All evaluations must be reproducible.
+Evaluation logic must be versioned.
+Evaluation Rule        ↓Evaluation Rule Version
+Historical attempts must continue using the rule version active at evaluation time.
+
+Separation of Concerns
+Assessment content:
+Assessment Definition Schema
+Runtime execution:
+Assessment Execution Schema
+Scoring logic:
+Evaluation Schema
+These modules remain independently versioned.
+
+4. TABLES IN SCOPE
+Evaluation Rules
+evaluation_rulesevaluation_rule_versions
+
+Evaluation Processing
+evaluation_jobsevaluation_results
+
+Review Workflow
+manual_review_queuereview_assignments
+
+Result Publication
+result_publications
+
+5. EVALUATION_RULES
+Purpose
+Master entity for scoring rules.
+Represents logical evaluation definitions.
+
+Examples
+Pass Percentage RuleNegative Marking RuleWeighted Scoring RuleSection Weighting RuleCertification Rule
+
+Ownership
+Rules are reusable across:
+TechnologiesAssessmentsCertification Programs
+
+Core Attributes
+rule_coderule_typestatus
+
+Rule Status Values
+DraftPublishedArchived
+
+6. EVALUATION_RULE_VERSIONS
+Purpose
+Stores immutable versions of evaluation rules.
+Supports historical reproducibility.
+
+Example
+Version 1:
+Pass Percentage = 60%
+Version 2:
+Pass Percentage = 70%
+Historical evaluations continue using the original version.
+
+Core Attributes
+evaluation_rule_idversion_numberversion_statusrule_namerule_definition_jsonmetadata_json
+
+Rule Definition Strategy
+Rules are stored as structured JSON.
+Example:
+{"passPercentage":70,"negativeMarking":0.25}
+
+Benefits
+Supports:
+Rule FlexibilityFuture Rule TypesAI Scoring Extensions
+without schema changes.
+
+7. EVALUATION_JOBS
+Purpose
+Tracks execution of evaluation processing.
+Supports synchronous and asynchronous evaluation.
+
+Examples
+Immediate EvaluationBackground EvaluationManual Re-EvaluationAI Re-Evaluation
+
+Core Attributes
+assessment_attempt_idevaluation_rule_version_idjob_statusstarted_datecompleted_datefailure_reason
+
+Job Status Values
+PendingQueuedRunningCompletedFailedCancelled
+
+8. EVALUATION_RESULTS
+Purpose
+Stores evaluation outcome snapshots.
+Acts as the authoritative evaluation record.
+
+Relationships
+Assessment Attempt        ↓Evaluation Result
+
+Core Attributes
+assessment_attempt_idevaluation_job_idevaluation_rule_version_idtotal_scoremax_scorepercentageresult_statusresult_summarymetadata_json
+
+Result Status Values
+PassFailPendingManualReviewRequired
+
+Benefit
+Supports:
+AppealsHistorical ReviewAuditRe-Evaluation Comparison
+
+9. MANUAL_REVIEW_QUEUE
+Purpose
+Tracks items requiring human review.
+
+Examples
+Essay QuestionsCoding QuestionsAI EscalationsAppealed Results
+
+Core Attributes
+assessment_attempt_idattempt_question_idreview_typequeue_statusprioritycreated_date
+
+Queue Status Values
+PendingAssignedInReviewCompletedRejected
+
+Priority Values
+LowMediumHighCritical
+
+10. REVIEW_ASSIGNMENTS
+Purpose
+Tracks reviewer assignments.
+Supports multi-reviewer workflows.
+
+Core Attributes
+manual_review_queue_idreviewer_user_idassignment_statusassigned_datecompleted_datereview_notes
+
+Assignment Status Values
+AssignedAcceptedCompletedDeclined
+
+11. RESULT_PUBLICATIONS
+Purpose
+Controls result visibility.
+Separates:
+Evaluation Completed
+from:
+Result Visible To Candidate
+
+Supported Scenarios
+Immediate PublicationScheduled PublicationBulk PublicationCertification Release Window
+
+Core Attributes
+evaluation_result_idpublication_statuspublication_datepublished_bypublication_notes
+
+Publication Status Values
+DraftScheduledPublishedUnpublished
+
+12. AI READINESS
+The Evaluation module must support future:
+AI Essay ScoringAI Coding EvaluationSkill Gap AnalysisFeedback GenerationAdaptive Certification
+
+Strategy
+Use:
+metadata_json
+on evaluation entities where extensibility is required.
+
+13. AUDIT INTEGRATION
+All evaluation activities are auditable through:
+audit_logsactivity_logs
+
+Examples
+Evaluation StartedEvaluation CompletedManual Review AssignedManual Review CompletedResult Published
+
+14. SECURITY INTEGRATION
+Evaluation actions must respect:
+RolesPermissionsReviewer Assignment Controls
+from:
+001_SECURITY_SCHEMA
+
+15. INDEX STRATEGY
+evaluation_jobs
+assessment_attempt_idjob_statusstarted_date
+
+evaluation_results
+assessment_attempt_idresult_status
+
+manual_review_queue
+queue_statusprioritycreated_date
+
+review_assignments
+reviewer_user_idassignment_status
+
+result_publications
+publication_statuspublication_date
+
+16. VALIDATION CHECKLIST
+✓ Versioned Evaluation Rules Applied
+✓ Historical Reproducibility Applied
+✓ Evaluation Job Processing Applied
+✓ Evaluation Result Snapshots Applied
+✓ Manual Review Workflow Applied
+✓ Reviewer Assignment Workflow Applied
+✓ Result Publication Workflow Applied
+✓ Audit Compatibility Applied
+✓ Security Compatibility Applied
+✓ AI Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+APPROVAL STATUS
+Document:
+005 Evaluation Schema Design
+Version:
+1.0
+Status:
+FINALAPPROVED FOR DDL GENERATION
+
+NEXT STEP
+Perform:
+Evaluation Architecture Review v1.0
+before generating:
+005_EVALUATION_SCHEMA.SQL – PART 1
+Tables:
+evaluation_rulesevaluation_rule_versions
+These tables define the scoring engine foundation and should be validated before DDL generation.
+
+END OF DOCUMENT

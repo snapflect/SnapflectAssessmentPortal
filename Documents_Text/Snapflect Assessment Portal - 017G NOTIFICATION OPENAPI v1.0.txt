@@ -1,0 +1,370 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017G_NOTIFICATION_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Notification OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Notifications
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+007_NOTIFICATION_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+Notification TemplatesEmail NotificationsSMS NotificationsIn-App NotificationsNotification QueueDelivery TrackingNotification PreferencesSubscriptionsNotification HistoryBulk NotificationsEvent-Driven Notifications
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Notification APIversion:1.0.0description: Notification Management APIsservers:-url: /api/v1tags:-name: Notification Templates-name: Notifications-name: Notification Queue-name: Deliveries-name: Preferences-name: Subscriptions
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Notification.ViewNotification.SendNotification.Manage
+
+4. NOTIFICATION TEMPLATE APIS
+Supported Template Types
+EmailSMSInAppSystem
+
+List Templates
+Endpoint
+GET /api/v1/notification-templates
+Permission
+Notification.View
+Filters
+templateTypestatussearchpagepageSize
+
+Get Template
+Endpoint
+GET /api/v1/notification-templates/{id}
+Permission
+Notification.View
+
+Create Template
+Endpoint
+POST /api/v1/notification-templates
+Permission
+Notification.Manage
+Request DTO
+{"templateCode":"ASSESSMENT_ASSIGNED","templateName":"Assessment Assigned","templateType":"Email","subject":"Assessment Assigned","body":"<html>...</html>"}
+Validation
+templateCode      Required                  UniquetemplateName      RequiredtemplateType      Requiredbody              Required
+Audit Event
+Notification Template Created
+
+Update Template
+Endpoint
+PUT /api/v1/notification-templates/{id}
+Permission
+Notification.Manage
+Audit Event
+Notification Template Updated
+
+Activate Template
+Endpoint
+POST /api/v1/notification-templates/{id}/activate
+Permission
+Notification.Manage
+Audit Event
+Notification Template Activated
+
+Template Versions
+Endpoint
+GET /api/v1/notification-templates/{id}/versions
+Permission
+Notification.View
+
+5. NOTIFICATION APIS
+List Notifications
+Endpoint
+GET /api/v1/notifications
+Permission
+Notification.View
+Filters
+recipientIdchannelstatustemplateCodedateFromdateTo
+
+Get Notification
+Endpoint
+GET /api/v1/notifications/{id}
+Permission
+Notification.View
+
+Send Notification
+Endpoint
+POST /api/v1/notifications/send
+Permission
+Notification.Send
+Request DTO
+{"recipientId":1001,"templateCode":"ASSESSMENT_ASSIGNED","channel":"Email","parameters":{"candidateName":"John Smith","assessmentName":".NET Assessment"}}
+Processing
+Resolve TemplateMerge ParametersCreate Queue RecordCreate Delivery RecordQueue Background Processing
+Audit Event
+Notification Queued
+
+6. BULK NOTIFICATION APIS
+Send Bulk Notifications
+Endpoint
+POST /api/v1/notifications/send-bulk
+Permission
+Notification.Send
+Request DTO
+{"recipientIds":[1,2,3],"templateCode":"RESULT_PUBLISHED","channel":"Email","parameters":{}}
+Processing
+Create Notification BatchCreate Queue RecordsBackground Processing
+Audit Event
+Bulk Notification Queued
+
+7. NOTIFICATION QUEUE APIS
+Queue Status Values
+PendingProcessingDeliveredFailedCancelled
+
+List Queue Records
+Endpoint
+GET /api/v1/notification-queue
+Permission
+Notification.Manage
+Filters
+statuschannelprioritydateFromdateTo
+
+Get Queue Record
+Endpoint
+GET /api/v1/notification-queue/{id}
+Permission
+Notification.Manage
+
+Retry Queue Item
+Endpoint
+POST /api/v1/notification-queue/{id}/retry
+Permission
+Notification.Manage
+Audit Event
+Notification Retry Requested
+
+Cancel Queue Item
+Endpoint
+POST /api/v1/notification-queue/{id}/cancel
+Permission
+Notification.Manage
+Audit Event
+Notification Cancelled
+
+8. DELIVERY TRACKING APIS
+Delivery Status Values
+QueuedSentDeliveredOpenedClickedFailed
+
+List Deliveries
+Endpoint
+GET /api/v1/notification-deliveries
+Permission
+Notification.View
+
+Get Delivery
+Endpoint
+GET /api/v1/notification-deliveries/{id}
+Permission
+Notification.View
+
+Delivery Statistics
+Endpoint
+GET /api/v1/notification-deliveries/statistics
+Permission
+Notification.View
+Response
+{"queued":1000,"sent":980,"delivered":960,"opened":700,"failed":20}
+
+9. USER PREFERENCE APIS
+Get My Preferences
+Endpoint
+GET /api/v1/notification-preferences
+Permission
+Authenticated User
+Response
+{"emailEnabled":true,"smsEnabled":false,"inAppEnabled":true,"marketingEnabled":false}
+
+Update My Preferences
+Endpoint
+PUT /api/v1/notification-preferences
+Permission
+Authenticated User
+Request DTO
+{"emailEnabled":true,"smsEnabled":false,"inAppEnabled":true,"marketingEnabled":false}
+Audit Event
+Notification Preferences Updated
+
+10. SUBSCRIPTION APIS
+Supported Subscription Types
+AssessmentUpdatesResultNotificationsCertificateNotificationsBillingNotificationsSystemAnnouncements
+
+List Subscriptions
+Endpoint
+GET /api/v1/notification-subscriptions
+Permission
+Authenticated User
+
+Create Subscription
+Endpoint
+POST /api/v1/notification-subscriptions
+Permission
+Authenticated User
+Request DTO
+{"subscriptionType":"CertificateNotifications"}
+Audit Event
+Subscription Created
+
+Remove Subscription
+Endpoint
+DELETE /api/v1/notification-subscriptions/{id}
+Permission
+Authenticated User
+Audit Event
+Subscription Removed
+
+11. CANDIDATE NOTIFICATION APIS
+My Notifications
+Endpoint
+GET /api/v1/my-notifications
+Permission
+Authenticated User
+Filters
+readchanneldateFromdateTo
+
+My Notification Details
+Endpoint
+GET /api/v1/my-notifications/{id}
+Permission
+Notification Owner
+
+Mark Notification Read
+Endpoint
+POST /api/v1/my-notifications/{id}/mark-read
+Permission
+Notification Owner
+Audit Event
+Notification Read
+
+Mark All Read
+Endpoint
+POST /api/v1/my-notifications/mark-all-read
+Permission
+Authenticated User
+
+12. EVENT-DRIVEN NOTIFICATION APIS
+Event Notification Status
+Endpoint
+GET /api/v1/notifications/events/{eventCode}
+Permission
+Notification.View
+
+Supported Event Codes
+ASSESSMENT_ASSIGNEDASSESSMENT_STARTEDASSESSMENT_SUBMITTEDRESULT_PUBLISHEDCERTIFICATE_ISSUEDINVOICE_GENERATEDSUBSCRIPTION_EXPIRINGSYSTEM_ANNOUNCEMENT
+
+13. SYSTEM ANNOUNCEMENT APIS
+Create Announcement
+Endpoint
+POST /api/v1/system-announcements
+Permission
+Notification.Manage
+Request DTO
+{"title":"Maintenance Window","message":"System maintenance scheduled.","startDate":"2027-01-01T00:00:00Z","endDate":"2027-01-01T04:00:00Z"}
+Audit Event
+System Announcement Created
+
+List Announcements
+Endpoint
+GET /api/v1/system-announcements
+Permission
+Authenticated User
+
+14. MULTI-TENANCY RULES
+Candidate
+Own Notifications Only
+
+Organization Administrator
+Organization Scope Only
+
+Platform Administrator
+Global Access
+
+Mandatory Enforcement
+Organization Scope ValidationNotification Ownership Validation
+
+15. AUDIT REQUIREMENTS
+Mandatory Audit Events
+Notification Template CreatedNotification Template UpdatedNotification Template ActivatedNotification QueuedNotification SentNotification DeliveredNotification FailedNotification ReadPreference UpdatedSubscription CreatedSubscription RemovedSystem Announcement Created
+
+16. PERFORMANCE REQUIREMENTS
+Notification Processing
+Queue BasedBackground WorkersRetry SupportIdempotent Delivery
+
+Delivery Tracking
+High Volume OptimizedIndexed LookupsBatch Processing
+
+Expected Scale
+10M+ NotificationsMulti-Channel DeliveryConcurrent Processing
+
+17. SECURITY REQUIREMENTS
+Notification Processing
+Honor User PreferencesHonor Subscription SettingsRespect Opt-Out Rules
+
+Sensitive Data
+Mask Personal InformationAvoid Sensitive Payload Logging
+
+Delivery Auditing
+All Delivery Attempts LoggedAll Failures Audited
+
+18. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Business Rule Violation
+{"success":false,"code":"BUSINESS_RULE_VIOLATION","message":"User has opted out of this notification."}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+19. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesQueue WorkersEmail ServicesSMS ServicesInApp ServicesDelivery Processors
+
+Do Not Generate
+Alternative Notification ChannelsAlternative Queue ModelsAlternative Subscription ModelsDirect Business Module Coupling
+
+20. IMPLEMENTATION PACKAGE STATUS
+Aligned With
+007_NOTIFICATION_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document
+017G_NOTIFICATION_OPENAPI
+Version
+v1.0
+Status
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017H_REPORTING_ANALYTICS_OPENAPI v1.0
+Coverage
+DashboardsReportsKPIsAnalytics SnapshotsReport ExportsDashboard WidgetsExecutive ReportingOperational Reporting
+This module implements the platform intelligence layer and completes the reporting and analytics architecture.
+
+END OF DOCUMENT

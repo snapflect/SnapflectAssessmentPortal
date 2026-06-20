@@ -1,0 +1,155 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL
+PART 2 – RUNTIME SNAPSHOT HIERARCHY
+Version 1.0
+
+MODULE
+Assessment Execution
+
+TABLES
+assessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questions
+
+DEPENDS ON
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 1assessment_attemptsassessment_versions003_ASSESSMENT_DEFINITION_SCHEMA.SQLsection_versionsquestion_bank_versionsquestion_versions
+
+TARGET PLATFORM
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+PURPOSE
+This module creates the runtime snapshot hierarchy used during assessment execution.
+The approved runtime structure is:
+Assessment Version        ↓Assessment Attempt        ↓Attempt Section        ↓Attempt Question Bank        ↓Attempt Question
+This hierarchy guarantees:
+Historical Replay
+Resume Accuracy
+Evaluation Accuracy
+Auditability
+Reporting Consistency
+Future AI Readiness
+
+ASSESSMENT_ATTEMPT_SECTIONS
+Purpose
+Represents the exact Section Versions assigned to a candidate during an assessment attempt.
+
+CREATETABLE assessment_attempt_sections(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    attempt_id BIGINT UNSIGNED NOTNULL,    section_version_id BIGINT UNSIGNED NOTNULL,    display_order INTNOTNULL,    section_status VARCHAR(50)NOTNULLDEFAULT'Locked',    questions_answered_count INTNOTNULLDEFAULT0,    started_date DATETIME(3) NULL,    completed_date DATETIME(3) NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_attempt_sections_uuidUNIQUE (uuid),CONSTRAINT ux_attempt_sections_mappingUNIQUE        (            attempt_id,            section_version_id        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ASSESSMENT_ATTEMPT_SECTIONS FOREIGN KEYS
+ALTERTABLE assessment_attempt_sectionsADDCONSTRAINT fk_attempt_sections_attemptFOREIGNKEY (attempt_id)REFERENCES assessment_attempts(id);ALTERTABLE assessment_attempt_sectionsADDCONSTRAINT fk_attempt_sections_section_versionFOREIGNKEY (section_version_id)REFERENCES section_versions(id);
+
+ASSESSMENT_ATTEMPT_SECTIONS INDEXES
+CREATEINDEX ix_attempt_sections_attemptON assessment_attempt_sections(attempt_id);CREATEINDEX ix_attempt_sections_section_versionON assessment_attempt_sections(section_version_id);CREATEINDEX ix_attempt_sections_statusON assessment_attempt_sections(section_status);CREATEINDEX ix_attempt_sections_display_orderON assessment_attempt_sections(display_order);
+
+SECTION STATUS VALUES
+Application validation shall enforce:
+LockedNotStartedInProgressCompletedSkipped
+
+ASSESSMENT_ATTEMPT_QUESTION_BANKS
+Purpose
+Represents the exact Question Bank Versions assigned within a Section during an assessment attempt.
+Supports:
+All QuestionsRandom SelectionFuture Adaptive Selection
+
+CREATETABLE assessment_attempt_question_banks(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    attempt_section_id BIGINT UNSIGNED NOTNULL,    question_bank_version_id BIGINT UNSIGNED NOTNULL,    display_order INTNOTNULL,    selection_strategy VARCHAR(50)NOTNULL,    selected_question_count INTNOTNULLDEFAULT0,    questions_presented_count INTNOTNULLDEFAULT0,    questions_answered_count INTNOTNULLDEFAULT0,    started_date DATETIME(3) NULL,    completed_date DATETIME(3) NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_attempt_question_banks_uuidUNIQUE (uuid),CONSTRAINT ux_attempt_question_banks_mappingUNIQUE        (            attempt_section_id,            question_bank_version_id        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ASSESSMENT_ATTEMPT_QUESTION_BANKS FOREIGN KEYS
+ALTERTABLE assessment_attempt_question_banksADDCONSTRAINT fk_attempt_question_banks_sectionFOREIGNKEY (attempt_section_id)REFERENCES assessment_attempt_sections(id);ALTERTABLE assessment_attempt_question_banksADDCONSTRAINT fk_attempt_question_banks_question_bank_versionFOREIGNKEY (question_bank_version_id)REFERENCES question_bank_versions(id);
+
+ASSESSMENT_ATTEMPT_QUESTION_BANKS INDEXES
+CREATEINDEX ix_attempt_question_banks_sectionON assessment_attempt_question_banks(attempt_section_id);CREATEINDEX ix_attempt_question_banks_question_bankON assessment_attempt_question_banks(question_bank_version_id);CREATEINDEX ix_attempt_question_banks_display_orderON assessment_attempt_question_banks(display_order);
+
+SELECTION STRATEGY VALUES
+Application validation shall enforce:
+AllQuestionsRandomSelection
+
+ASSESSMENT_ATTEMPT_QUESTIONS
+Purpose
+Represents the exact Question Versions delivered to a candidate.
+This table is the core runtime entity used for:
+Navigation
+Resume
+Evaluation
+Analytics
+Reporting
+
+CREATETABLE assessment_attempt_questions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    attempt_question_guid CHAR(36) NOTNULL,    attempt_question_bank_id BIGINT UNSIGNED NOTNULL,    question_version_id BIGINT UNSIGNED NOTNULL,    display_order INTNOTNULL,    question_status VARCHAR(50)NOTNULLDEFAULT'NotVisited',    is_answered TINYINT(1)NOTNULLDEFAULT0,    response_count INTNOTNULLDEFAULT0,    evaluation_status VARCHAR(50)NOTNULLDEFAULT'Pending',    awarded_marks DECIMAL(10,2) NULL,    is_correct TINYINT(1) NULL,    first_viewed_date DATETIME(3) NULL,    last_viewed_date DATETIME(3) NULL,    answered_date DATETIME(3) NULL,    runtime_metadata_json JSON NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_attempt_questions_uuidUNIQUE (uuid),CONSTRAINT ux_attempt_questions_guidUNIQUE (attempt_question_guid),CONSTRAINT ux_attempt_questions_mappingUNIQUE        (            attempt_question_bank_id,            question_version_id        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ASSESSMENT_ATTEMPT_QUESTIONS FOREIGN KEYS
+ALTERTABLE assessment_attempt_questionsADDCONSTRAINT fk_attempt_questions_question_bankFOREIGNKEY (attempt_question_bank_id)REFERENCES assessment_attempt_question_banks(id);ALTERTABLE assessment_attempt_questionsADDCONSTRAINT fk_attempt_questions_question_versionFOREIGNKEY (question_version_id)REFERENCES question_versions(id);
+
+COMPLETE DEFERRED FOREIGN KEY FROM PART 1
+ALTERTABLE assessment_attemptsADDCONSTRAINT fk_assessment_attempts_current_questionFOREIGNKEY (current_attempt_question_id)REFERENCES assessment_attempt_questions(id);
+
+ASSESSMENT_ATTEMPT_QUESTIONS INDEXES
+CREATEINDEX ix_attempt_questions_question_bankON assessment_attempt_questions(attempt_question_bank_id);CREATEINDEX ix_attempt_questions_question_versionON assessment_attempt_questions(question_version_id);CREATEINDEX ix_attempt_questions_statusON assessment_attempt_questions(question_status);CREATEINDEX ix_attempt_questions_evaluation_statusON assessment_attempt_questions(evaluation_status);CREATEINDEX ix_attempt_questions_answeredON assessment_attempt_questions(is_answered);CREATEINDEX ix_attempt_questions_display_orderON assessment_attempt_questions(display_order);
+
+QUESTION STATUS VALUES
+Application validation shall enforce:
+NotVisitedVisitedAnsweredSkippedMarkedForReviewAutoSubmitted
+
+EVALUATION STATUS VALUES
+Application validation shall enforce:
+PendingEvaluatedManualReviewRequired
+
+RUNTIME SNAPSHOT RULES
+Section Snapshot
+Each attempt stores exact:
+section_version_id
+used during execution.
+
+Question Bank Snapshot
+Each attempt stores exact:
+question_bank_version_id
+used during execution.
+
+Question Snapshot
+Each attempt stores exact:
+question_version_id
+presented to the candidate.
+
+RUNTIME METADATA SUPPORT
+Field:
+runtime_metadata_json
+supports future:
+Adaptive DifficultyAI Question SelectionDynamic RoutingSkill-Based NavigationPersonalized Assessments
+without schema changes.
+
+REPLAY GUARANTEE
+The following hierarchy guarantees complete historical replay:
+Assessment Version        ↓Assessment Attempt        ↓Attempt Section        ↓Attempt Question Bank        ↓Attempt Question
+No runtime reconstruction from live content is required.
+
+VALIDATION CHECKLIST
+✓ Section Snapshot Integrity Applied
+✓ Question Bank Snapshot Integrity Applied
+✓ Question Snapshot Integrity Applied
+✓ Runtime Resume Support Applied
+✓ Evaluation Tracking Applied
+✓ Awarded Marks Tracking Applied
+✓ Correctness Tracking Applied
+✓ Adaptive Assessment Readiness Applied
+✓ Replay Accuracy Applied
+✓ Analytics Readiness Applied
+✓ Reporting Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+assessment_attemptsattempt_timersassessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questions
+Execution Module Completion:
+66%
+
+NEXT STEP
+Perform architecture review for:
+question_responsesdraft_saves
+before generating:
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 3
+These tables complete candidate interaction, answer capture, draft recovery, resume functionality, and submission readiness.
+
+END OF DOCUMENT

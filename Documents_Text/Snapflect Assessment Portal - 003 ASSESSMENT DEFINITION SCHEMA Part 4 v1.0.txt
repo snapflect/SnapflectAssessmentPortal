@@ -1,0 +1,167 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL
+PART 4 – QUESTION FOUNDATION
+VERSION 1.0
+Module
+Assessment Definition
+Tables
+questionsquestion_versionsquestion_optionsquestion_answers
+Depends On
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 3question_banksquestion_bank_versions001_SECURITY_SCHEMA.SQL v1.0 FINALusers
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+QUESTIONS
+Purpose
+Represents reusable question master entities.
+Questions are versioned through:
+question_versions
+Question content must never be stored directly in the master table.
+
+CREATETABLE questions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    question_code VARCHAR(100) NOTNULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_questions_uuidUNIQUE (uuid),CONSTRAINT ux_questions_codeUNIQUE (question_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTIONS FOREIGN KEYS
+ALTERTABLE questionsADDCONSTRAINT fk_questions_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE questionsADDCONSTRAINT fk_questions_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE questionsADDCONSTRAINT fk_questions_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+QUESTIONS INDEXES
+CREATEINDEX ix_questions_statusON questions(status);CREATEINDEX ix_questions_is_activeON questions(is_active);
+
+QUESTION_VERSIONS
+Purpose
+Stores complete historical snapshots of question definitions.
+Uses Full Snapshot Versioning Architecture.
+
+CREATETABLE question_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    question_id BIGINT UNSIGNED NOTNULL,    question_bank_version_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    question_text LONGTEXT NOTNULL,    question_type VARCHAR(50) NOTNULL,    difficulty_level VARCHAR(50)NOTNULLDEFAULT'Medium',    marks DECIMAL(10,2)NOTNULLDEFAULT1.00,    negative_marks DECIMAL(10,2)NOTNULLDEFAULT0.00,    instructions TEXT NULL,    estimated_duration_minutes INTNULL,    display_order INTNOTNULLDEFAULT0,    is_randomizable TINYINT(1)NOTNULLDEFAULT1,    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_question_versions_uuidUNIQUE (uuid),CONSTRAINT ux_question_versions_versionUNIQUE (question_id, version_number))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTION_VERSIONS FOREIGN KEYS
+ALTERTABLE question_versionsADDCONSTRAINT fk_question_versions_questionFOREIGNKEY (question_id)REFERENCES questions(id);ALTERTABLE question_versionsADDCONSTRAINT fk_question_versions_question_bank_versionFOREIGNKEY (question_bank_version_id)REFERENCES question_bank_versions(id);ALTERTABLE question_versionsADDCONSTRAINT fk_question_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+QUESTION_VERSIONS INDEXES
+CREATEINDEX ix_question_versions_statusON question_versions(version_status);CREATEINDEX ix_question_versions_question_bankON question_versions(question_bank_version_id);CREATEINDEX ix_question_versions_typeON question_versions(question_type);CREATEINDEX ix_question_versions_difficultyON question_versions(difficulty_level);CREATEINDEX ix_question_versions_randomizableON question_versions(is_randomizable);CREATEINDEX ix_question_versions_display_orderON question_versions(display_order);
+
+SUPPORTED QUESTION TYPES
+Application validation shall enforce:
+SingleChoiceMultipleChoiceTrueFalseTextNumber
+Future supported types:
+EssayCodingFileUpload
+No schema changes required.
+
+SUPPORTED DIFFICULTY LEVELS
+Application validation shall enforce:
+EasyMediumHardExpert
+
+QUESTION_OPTIONS
+Purpose
+Stores selectable answer options.
+Options belong to a Question Version.
+This preserves historical version integrity.
+
+CREATETABLE question_options(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    question_version_id BIGINT UNSIGNED NOTNULL,    option_code VARCHAR(20) NOTNULL,    option_text LONGTEXT NOTNULL,    display_order INTNOTNULLDEFAULT0,    is_active TINYINT(1)NOTNULLDEFAULT1,PRIMARYKEY (id),CONSTRAINT ux_question_options_uuidUNIQUE (uuid),CONSTRAINT ux_question_option_codeUNIQUE (question_version_id, option_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTION_OPTIONS FOREIGN KEYS
+ALTERTABLE question_optionsADDCONSTRAINT fk_question_options_question_versionFOREIGNKEY (question_version_id)REFERENCES question_versions(id);
+
+QUESTION_OPTIONS INDEXES
+CREATEINDEX ix_question_options_question_versionON question_options(question_version_id);CREATEINDEX ix_question_options_display_orderON question_options(display_order);CREATEINDEX ix_question_options_activeON question_options(is_active);
+
+QUESTION_ANSWERS
+Purpose
+Stores normalized answer definitions.
+Supports:
+Single ChoiceMultiple ChoiceTrue FalseTextNumber
+and future question types.
+
+CREATETABLE question_answers(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    question_version_id BIGINT UNSIGNED NOTNULL,    answer_sequence INTNOTNULLDEFAULT1,    answer_value TEXT NOTNULL,    answer_explanation TEXT NULL,    is_correct TINYINT(1)NOTNULLDEFAULT1,PRIMARYKEY (id),CONSTRAINT ux_question_answers_uuidUNIQUE (uuid),CONSTRAINT ux_question_answer_sequenceUNIQUE        (            question_version_id,            answer_sequence        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+QUESTION_ANSWERS FOREIGN KEYS
+ALTERTABLE question_answersADDCONSTRAINT fk_question_answers_question_versionFOREIGNKEY (question_version_id)REFERENCES question_versions(id);
+
+QUESTION_ANSWERS INDEXES
+CREATEINDEX ix_question_answers_question_versionON question_answers(question_version_id);CREATEINDEX ix_question_answers_correctON question_answers(is_correct);
+
+ANSWER STORAGE STRATEGY
+Examples:
+Single Choice
+A
+Stored as:
+answer_value = A
+
+Multiple Choice
+ACD
+Stored as:
+answer_sequence = 1answer_value = Aanswer_sequence = 2answer_value = Canswer_sequence = 3answer_value = D
+
+Text Question
+Dependency Injection
+Stored as:
+answer_value = Dependency Injection
+
+Number Question
+42
+Stored as:
+answer_value = 42
+
+VERSION INTEGRITY GOVERNANCE
+The approved version-safe hierarchy is:
+Technology Version        ↓Assessment Version        ↓Section Version        ↓Question Bank Version        ↓Question Version        ↓Question Options        ↓Question Answers
+Historical reconstruction must always be possible.
+
+AI READINESS
+Supported through:
+metadata_json
+Potential future metadata:
+Bloom TaxonomySkill MappingDifficulty MetricsAI TagsTopic Classification
+
+PUBLICATION GOVERNANCE
+Published Question Versions:
+Read Only
+Changes require:
+New Draft Version
+Historical versions remain available for:
+Assessment ReplayReviewAuditReporting
+
+CODE IMMUTABILITY RULE
+The following value is immutable after creation:
+question_code
+Changes require creation of a new Question entity.
+
+VALIDATION CHECKLIST
+✓ Full Snapshot Versioning Applied
+✓ Version-Safe Question Bank Mapping Applied
+✓ Version-Safe Option Mapping Applied
+✓ Version-Safe Answer Mapping Applied
+✓ Question Type Architecture Applied
+✓ Difficulty Levels Supported
+✓ Marking Strategy Supported
+✓ Negative Marking Supported
+✓ Randomization Strategy Supported
+✓ AI Metadata Support Added
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 4
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+technologiestechnology_versionsassessmentsassessment_versionssectionssection_versionssection_question_banksquestion_banksquestion_bank_versionsquestionsquestion_versionsquestion_optionsquestion_answers
+Assessment Definition Completion:
+100%
+
+NEXT STEP
+Perform:
+Assessment Definition Schema Master Review v1.0
+Review Scope:
+Part 1Part 2Part 2 Amendment v1.1Part 3Part 4
+Validation Areas:
+Version IntegrityForeign KeysNormalizationPublication WorkflowQuestion HierarchyRuntime CompatibilityReview CompatibilityReporting CompatibilityFuture AI Readiness
+After successful review:
+Freeze:003_ASSESSMENT_DEFINITION_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

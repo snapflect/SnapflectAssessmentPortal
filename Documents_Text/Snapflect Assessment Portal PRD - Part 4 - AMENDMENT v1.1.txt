@@ -1,0 +1,363 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRD
+PART 4 AMENDMENT v1.1
+DASHBOARDS, REPORTING, NOTIFICATIONS & GOVERNANCE ENHANCEMENTS
+This amendment updates Part 4 of the PRD and becomes part of the authoritative document.
+The purpose of this amendment is to expose the newly introduced runtime capabilities from Part 2 Amendment v1.1 and Part 3 Amendment v1.1 through dashboards, reporting, analytics, notifications, audit monitoring, and operational governance.
+This amendment updates:
+Assessment Assignments
+Availability Monitoring
+Progress Analytics
+Section Pass Analytics
+Review Acknowledgement Monitoring
+Assignment Reporting
+Governance Reporting
+
+A4.1 USER DASHBOARD ENHANCEMENTS
+New Dashboard Widget
+Assigned Assessments
+Display:
+Assigned Assessments
+Mandatory Assessments
+Due Soon Assessments
+Overdue Assessments
+Completed Assignments
+Expired Assignments
+
+Display Information
+Assessment Name
+Technology
+Assigned Date
+Due Date
+Assignment Status
+Progress Percentage
+Assessment Status
+
+User Actions
+Accept Assignment
+Start Assessment
+Resume Assessment
+View Results
+View Review
+Acknowledge Feedback
+
+A4.2 USER PROGRESS MONITORING
+Purpose
+Provide visibility into assessment completion progress.
+
+Progress Display
+Assessment Progress %
+Questions Answered
+Questions Remaining
+Current Section
+Bookmarks Count
+Last Saved Date
+
+Progress Formula
+Progress %
+=
+Answered Questions
+÷
+Total Questions
+×
+100
+
+Business Rules
+Progress updates in real time.
+Progress survives Save Draft.
+Progress survives Resume.
+Progress displayed consistently across all modules.
+
+A4.3 USER REVIEW ACKNOWLEDGEMENT CENTER
+Purpose
+Provide visibility into pending review acknowledgements.
+
+Dashboard Widget
+Pending Acknowledgements
+Acknowledged Reviews
+Expired Acknowledgements
+
+Display Information
+Assessment
+Review Date
+Reviewer
+Rating
+Acknowledgement Status
+Acknowledgement Due Date
+
+User Actions
+View Feedback
+Acknowledge Review
+Add Acknowledgement Notes
+
+A4.4 ADMIN DASHBOARD ENHANCEMENTS
+New Assignment Metrics
+Assigned Assessments
+Completed Assignments
+Expired Assignments
+Overdue Assignments
+Acceptance Rate
+Completion Rate
+
+New Progress Metrics
+In Progress Assessments
+Average Progress %
+Average Completion Time
+Draft Assessments
+Resume Rate
+
+New Review Metrics
+Pending Review Acknowledgements
+Acknowledged Reviews
+Acknowledgement Rate
+Average Acknowledgement Time
+
+A4.5 ASSIGNMENT REPORTING
+Purpose
+Track assignment effectiveness.
+
+Assignment Reports
+Assigned Assessments
+Pending Assignments
+Accepted Assignments
+Completed Assignments
+Expired Assignments
+Overdue Assignments
+
+Report Filters
+Technology
+Assessment
+Assigned User
+Assigned By
+Status
+Date Range
+
+Export Formats
+PDF
+Excel
+CSV
+
+A4.6 PROGRESS ANALYTICS
+Purpose
+Monitor assessment engagement.
+
+Metrics
+Average Progress %
+Completion Rate
+Drop-off Rate
+Save Draft Frequency
+Resume Frequency
+Average Questions Answered
+Average Time Per Question
+
+Drill Down
+Technology
+↓
+Assessment
+↓
+Section
+↓
+User
+
+A4.7 SECTION PERFORMANCE ANALYTICS
+Purpose
+Analyze section-level competency.
+
+Metrics
+Section Pass Rate
+Section Fail Rate
+Average Section Score
+Average Section Percentage
+Most Failed Sections
+Most Passed Sections
+
+Drill Down
+Technology
+↓
+Assessment
+↓
+Section
+
+A4.8 SECTION FAILURE ANALYSIS
+Purpose
+Identify weak skill areas.
+
+Analytics
+Most Failed Sections
+Most Failed Technologies
+Most Difficult Sections
+Lowest Performing Sections
+
+Example
+Technology:
+.NET
+Assessment:
+.NET Developer Assessment
+Section:
+ASP.NET Core
+Pass Rate:
+42%
+Failure Rate:
+58%
+
+A4.9 RANDOMIZATION ANALYTICS
+Purpose
+Provide audit visibility into random question selection.
+
+Metrics
+Randomized Assessments
+Question Pool Size
+Selected Question Count
+Randomization Strategy
+Randomization Success Rate
+
+Administrative View
+Question Selection Details
+Selection Timestamp
+Snapshot Reference
+Randomization Seed Reference
+
+A4.10 REVIEW ACKNOWLEDGEMENT REPORTING
+Purpose
+Track review consumption.
+
+Metrics
+Pending Acknowledgements
+Acknowledged Reviews
+Expired Acknowledgements
+Average Acknowledgement Time
+Acknowledgement Rate
+
+Filters
+Technology
+Assessment
+User
+Reviewer
+Status
+Date Range
+
+A4.11 AVAILABILITY WINDOW MONITORING
+Purpose
+Monitor upcoming assessment availability changes.
+
+Dashboard Widgets
+Upcoming Assessments
+Expiring Assessments
+Expired Assessments
+
+Metrics
+Available Today
+Expiring Soon
+Expired
+Future Assessments
+
+Administrative Actions
+Extend Window
+Deactivate Assessment
+Archive Assessment
+
+A4.12 NOTIFICATION ENHANCEMENTS
+New User Notifications
+Assessment Assigned
+Assignment Accepted
+Assignment Due Soon
+Assignment Overdue
+Review Feedback Available
+Review Acknowledgement Reminder
+Assessment Availability Open
+Assessment Availability Closing Soon
+
+New Administrator Notifications
+Assignment Completed
+Assignment Expired
+Availability Window Expiring
+Review Acknowledgement Pending
+Review Acknowledgement Expired
+
+A4.13 AUDIT LOG ENHANCEMENTS
+Additional Audit Events
+Assignment Created
+Assignment Accepted
+Assignment Expired
+Availability Window Updated
+Publish Validation Failed
+Randomization Executed
+Review Acknowledged
+Review Acknowledgement Expired
+
+A4.14 GOVERNANCE REPORTING
+Purpose
+Provide compliance visibility.
+
+Governance Reports
+Assignment Compliance
+Assessment Availability Compliance
+Review Compliance
+Review Acknowledgement Compliance
+Audit Compliance
+
+Compliance Metrics
+Completion Rate
+Review Completion Rate
+Acknowledgement Rate
+Audit Coverage
+
+A4.15 UPDATED DASHBOARD FILTERS
+All dashboards shall additionally support:
+Assignment Status
+Acknowledgement Status
+Availability Status
+Progress Status
+Section Pass Status
+
+A4.16 UPDATED DATABASE ENTITIES
+The following entities require additional reporting support:
+assessment_assignments
+review_acknowledgements
+assignment_activity_logs
+randomization_audit_logs
+assessment_results
+
+A4.17 NEW REPORTING ENTITIES
+assignment_reports
+progress_analytics
+section_failure_analytics
+acknowledgement_analytics
+availability_monitoring
+
+A4.18 NEW API DOMAINS
+/api/assignments/reports
+/api/progress/analytics
+/api/section-performance
+/api/section-failure-analysis
+/api/review-acknowledgements
+/api/availability-monitoring
+
+A4.19 NEW RBAC PERMISSIONS
+assignment.report.view
+progress.analytics.view
+section.analytics.view
+section.failure.view
+acknowledgement.view
+acknowledgement.report.view
+availability.monitor.view
+
+A4.20 DATA GOVERNANCE REQUIREMENTS
+Assignment reporting must be auditable.
+Progress calculations must be consistent across reports.
+Section pass analytics must use snapshot-based results.
+Review acknowledgement records must be retained.
+Randomization analytics must be traceable.
+Availability monitoring must reflect current assessment versions.
+
+A4.21 ACCEPTANCE CRITERIA
+Assigned assessments must be visible to users.
+Assignment reports must be accurate.
+Progress metrics must match runtime calculations.
+Section failure analytics must be reproducible.
+Review acknowledgement reporting must function correctly.
+Availability monitoring must identify upcoming expirations.
+Notification workflows must operate correctly.
+Governance reports must remain auditable.
+
+END OF PART 4 AMENDMENT v1.1

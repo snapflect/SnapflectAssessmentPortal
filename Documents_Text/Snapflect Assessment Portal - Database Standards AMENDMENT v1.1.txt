@@ -1,0 +1,204 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+DATABASE STANDARDS & CONVENTIONS
+AMENDMENT v1.1
+FINAL DATABASE ENGINEERING UPDATE
+Document Information
+Field
+Value
+Document Name
+Database Standards & Conventions
+Base Version
+v1.0
+Amendment Version
+v1.1
+Status
+FINAL
+Effective Date
+Immediate
+Applies To
+All Database Schemas, Migrations, APIs, and Cursor AI Generated Database Artifacts
+
+1. PURPOSE
+This amendment enhances the Database Standards & Conventions v1.0 document by introducing additional database engineering standards identified during the final architecture and database review.
+These updates improve:
+Performance
+Maintainability
+Scalability
+Auditability
+Migration Governance
+MySQL 8 Compatibility
+This amendment shall be read together with Database Standards & Conventions v1.0.
+
+DB-A1: DATETIME PRECISION STANDARD
+Previous Standard
+DATETIME
+Updated Standard
+DATETIME(3)
+Applies To
+All date and time columns including:
+created_date
+modified_date
+deleted_date
+submitted_date
+reviewed_date
+acknowledged_date
+assigned_date
+completed_date
+Benefits
+Millisecond precision
+Better audit traceability
+Accurate event sequencing
+Improved concurrency tracking
+
+DB-A2: FOREIGN KEY INDEX STANDARD
+Rule
+Every foreign key column must have a supporting index.
+Example
+assessment_id BIGINT UNSIGNED NOTNULL
+Must include:
+INDEX idx_assessment_attempts_assessment_id(    assessment_id)
+Purpose
+Faster joins
+Better reporting performance
+Better query execution plans
+
+DB-A3: COMPOSITE INDEX NAMING STANDARD
+Naming Convention
+idx_<table_name>_<column_names>
+Examples
+idx_assessments_technology_statusidx_assessment_attempts_user_assessmentidx_assessment_reviews_attempt_status
+Rules
+Must be descriptive
+Must be unique
+Must clearly identify indexed columns
+
+DB-A4: COLLATION UPGRADE STANDARD
+Previous Standard
+utf8mb4_unicode_ci
+Updated Standard
+utf8mb4_0900_ai_ci
+Database Default
+CHARACTERSET utf8mb4COLLATE utf8mb4_0900_ai_ci
+Benefits
+Improved Unicode support
+Improved sorting behavior
+Native MySQL 8 optimization
+Better multilingual support
+
+DB-A5: JSON DATA TYPE STANDARD
+Approved Standard
+Use native MySQL JSON datatype where querying is expected.
+Examples
+old_value_json JSONnew_value_json JSONparameters_json JSONanswer_json JSON
+Exception
+The following remains approved as LONGTEXT:
+snapshot_json LONGTEXT
+Reason
+Snapshot archives prioritize:
+Historical preservation
+Large payload support
+Simpler storage model
+over queryability.
+
+DB-A6: FILE CHECKSUM STANDARD
+Purpose
+Support file integrity validation.
+Standard Column
+checksum VARCHAR(64)
+Algorithm
+SHA-256
+Benefits
+Integrity verification
+Duplicate detection
+Corruption detection
+
+DB-A7: DATABASE MIGRATION STANDARD
+Migration Principles
+All schema changes must be:
+Versioned
+Auditable
+Repeatable
+Forward-Only
+Migration Naming Convention
+001_security_schema.sql002_assessment_definition.sql003_runtime_schema.sql004_governance_schema.sql
+Migration Header Example
+-- Migration: 001_security_schema-- Version: 1.0-- Purpose: Create security and RBAC tables-- Author: Snapflect Assessment Portal
+Rollback Policy
+Production environments shall prefer:
+Forward Fixes
+instead of rollback scripts.
+
+DB-A8: UUID STORAGE OPTIMIZATION NOTE
+Current Standard
+uuid CHAR(36)
+remains approved.
+Reason
+Easier debugging
+Easier exports
+Simpler administration
+Easier Cursor AI generation
+Future Optimization
+Future large-scale deployments may adopt:
+uuid BINARY(16)
+without changing application architecture.
+
+DB-A9: QUERY PERFORMANCE GUIDELINES
+Recommended
+Indexed lookups
+Pagination
+Optimized joins
+Derived analytics services
+Avoid
+Full table scans
+Unindexed filters
+Repeated nested subqueries
+Redundant joins
+Reporting Rule
+Reporting must consume:
+assessment_results
+attempt_questions
+attempt_answers
+instead of snapshot archives.
+
+DB-A10: FINAL DATABASE VALIDATION CHECKLIST
+Before approving any schema section:
+✓ Naming Standards
+✓ Primary Key Standards
+✓ UUID Standards
+✓ Foreign Key Standards
+✓ Foreign Key Index Standards
+✓ Composite Index Standards
+✓ DATETIME(3) Compliance
+✓ JSON Standards
+✓ Soft Delete Standards
+✓ Audit Standards
+✓ Versioning Standards
+✓ Snapshot Standards
+✓ Notification Standards
+✓ Approval Standards
+✓ Attachment Standards
+✓ Migration Standards
+✓ Referential Integrity
+✓ No Circular Dependencies
+✓ No Redundant Tables
+✓ No Duplicate Answer Definitions
+
+VERSION UPDATE
+Previous Version
+Database Standards & Conventions v1.0
+Updated Version
+Database Standards & Conventions v1.1
+Status
+FINAL
+
+APPROVAL STATUS
+This amendment is approved for:
+MySQL Schema Design
+Database Migration Design
+API Development
+Cursor AI Development
+Production Deployment
+Future Cloud Migration
+
+END OF DATABASE STANDARDS & CONVENTIONS AMENDMENT v1.1
+END OF DATABASE STANDARDS & CONVENTIONS v1.1 FINAL

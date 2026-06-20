@@ -1,0 +1,539 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Version 1.0
+
+PART 3
+ASSESSMENT EXECUTION, ATTEMPTS, SNAPSHOTTING, SCORING & REVIEW
+This section defines the complete runtime architecture responsible for assessment execution, attempt management, answer collection, scoring, evaluation, review, and result generation.
+This is the most critical subsystem of the platform because it governs the integrity of all assessment data.
+
+36. ASSESSMENT EXECUTION ARCHITECTURE
+The platform shall maintain strict separation between:
+Assessment Definition Layer
+Technology
+Assessment
+Section
+Question Bank
+Question
+Question Options
+Answer Keys
+
+Assessment Runtime Layer
+Assessment Attempt
+Attempt Snapshot
+Attempt Sections
+Attempt Questions
+Attempt Answers
+Assessment Results
+Assessment Reviews
+Assessment Comments
+
+Architecture Principle
+Runtime data shall never directly reference mutable master data for scoring purposes.
+All scoring and result generation shall use assessment snapshots.
+This ensures historical integrity.
+
+37. ASSESSMENT LIFECYCLE
+Lifecycle Flow
+Available
+↓
+Started
+↓
+In Progress
+↓
+Saved Draft
+↓
+Resumed
+↓
+Submitted
+↓
+Scored
+↓
+Reviewed
+↓
+Completed
+
+Expiration Flow
+Available
+↓
+Started
+↓
+Timed Out
+↓
+Auto Submitted
+↓
+Scored
+
+38. ASSESSMENT DISCOVERY
+Users shall be able to browse available assessments.
+
+Browse By
+Technology
+Assessment Name
+Difficulty
+Duration
+Status
+
+Display Information
+Technology Name
+Assessment Name
+Description
+Duration
+Passing Percentage
+Question Count
+Section Count
+Maximum Attempts
+Assessment Status
+
+Actions
+Start Assessment
+Continue Draft
+View History
+View Previous Results
+
+39. ASSESSMENT START PROCESS
+When a user starts an assessment:
+System shall:
+Validate User Access
+Validate Assessment Availability
+Validate Attempt Limits
+Validate Assessment Status
+Create Assessment Attempt
+Generate Snapshot
+Initialize Sections
+Initialize Questions
+Start Timer
+Begin Auto Save Service
+
+40. ASSESSMENT SNAPSHOT ARCHITECTURE
+Purpose
+Protect historical assessment integrity.
+
+Problem Statement
+Question definitions may change over time.
+Example:
+Question 1
+Correct Answer = A
+User completes assessment.
+Administrator later changes answer.
+Correct Answer = B
+Without snapshotting:
+Historical results become invalid.
+
+Mandatory Requirement
+At assessment start:
+Create immutable snapshot of:
+Technology
+Assessment
+Sections
+Question Banks
+Questions
+Options
+Correct Answers
+Scoring Rules
+Passing Rules
+Assessment Rules
+
+Snapshot Storage
+Snapshot shall remain unchanged forever.
+Even if:
+Question Changes
+Answer Changes
+Question Bank Changes
+Assessment Changes
+Technology Changes
+
+Snapshot Usage
+Result Calculation
+Review
+Reporting
+Audit
+Historical Analysis
+Re-Evaluation
+
+41. ASSESSMENT ATTEMPT MANAGEMENT
+Purpose
+Track every assessment execution.
+
+Attempt Rules
+A user may:
+Take Multiple Assessments
+Take Same Assessment Multiple Times
+Save Drafts
+Resume Drafts
+Submit Attempts
+Review Past Attempts
+
+Attempt Properties
+Attempt Number
+User
+Technology
+Assessment
+Status
+Started Date
+Submitted Date
+Completed Date
+Duration
+Score
+Percentage
+Result Status
+Snapshot Version
+
+42. ATTEMPT STATUSES
+Draft
+In Progress
+Submitted
+Auto Submitted
+Timed Out
+Scored
+Reviewed
+Completed
+Archived
+
+43. SECTION EXECUTION
+Assessment execution shall occur section-wise.
+
+Section Information
+Section Name
+Instructions
+Duration
+Question Count
+Weightage
+Passing Criteria
+
+Section Rules
+Questions may be randomized.
+Questions may be fixed order.
+Sections may have timers.
+Sections may share assessment timer.
+Configuration driven.
+
+44. QUESTION PRESENTATION ENGINE
+The platform shall dynamically render questions.
+
+Supported Types
+Single Choice
+Multiple Choice
+True/False
+Fill In Blank
+Descriptive
+Code Snippet
+Scenario Based
+Case Study
+
+Display Features
+Question Number
+Question Text
+Question Description
+Attachments
+Options
+Bookmark Flag
+Time Indicator
+Navigation Controls
+
+45. QUESTION NAVIGATION ENGINE
+Users shall be able to:
+Next Question
+Previous Question
+Jump To Question
+Jump To Section
+Review Marked Questions
+Review Unanswered Questions
+Review Answered Questions
+
+Navigation Modes
+Free Navigation
+Sequential Navigation
+Configured per Assessment.
+
+46. BOOKMARK & REVIEW FEATURE
+Users may mark questions for later review.
+
+Bookmark Features
+Mark For Review
+Remove Bookmark
+View Bookmarked Questions
+Review Before Submit
+
+47. AUTO SAVE FRAMEWORK
+Purpose:
+Prevent data loss.
+
+Auto Save Rules
+Auto Save Interval:
+Configurable
+Default:
+30 Seconds
+
+Auto Save Triggers
+Question Change
+Section Change
+Periodic Save
+Browser Refresh
+Network Reconnect
+
+48. MANUAL SAVE DRAFT
+Users may save progress manually.
+
+Save Draft Stores
+Current Section
+Current Question
+Selected Answers
+Elapsed Time
+Remaining Time
+Bookmarks
+Progress Percentage
+
+Draft Rules
+Drafts may be resumed.
+Drafts remain editable until submission.
+Submitted attempts cannot be edited.
+
+49. TIMER MANAGEMENT
+Assessment timer management shall be configurable.
+
+Timer Types
+Assessment Timer
+Section Timer
+Question Timer (Future)
+
+Timer Actions
+Warning Notifications
+Auto Submit
+Auto Save
+Timeout Handling
+
+50. ASSESSMENT SUBMISSION
+Submission may occur through:
+Manual Submit
+Auto Submit
+Timeout Submit
+Administrator Closure
+
+Submission Validation
+All answers persisted.
+Timer validation.
+Snapshot validation.
+Status validation.
+
+51. ANSWER CAPTURE ENGINE
+All responses shall be captured separately.
+
+Captured Data
+Question
+Selected Answer
+Text Answer
+Answer Timestamp
+Section
+Attempt
+Time Spent
+Answer Status
+
+Answer Statuses
+Answered
+Skipped
+Bookmarked
+Changed
+Finalized
+
+52. SCORING ENGINE
+Purpose:
+Calculate assessment outcome.
+
+Supported Scoring Models
+Positive Marks
+Negative Marks
+No Negative Marks
+Weighted Sections
+Custom Rules
+
+Score Calculation
+Correct Answers
+Incorrect Answers
+Skipped Questions
+Section Score
+Total Score
+Percentage
+Pass/Fail
+
+53. RESULT ENGINE
+Result generation shall occur immediately after scoring.
+
+Result Data
+Assessment Name
+Technology
+Attempt Number
+Questions Answered
+Questions Skipped
+Correct Answers
+Incorrect Answers
+Total Score
+Percentage
+Pass Status
+Submission Date
+Completion Time
+
+54. PERFORMANCE CLASSIFICATION
+The platform shall classify performance.
+
+Levels
+Beginner
+Intermediate
+Advanced
+Expert
+
+Example
+0 - 40%
+Beginner
+41 - 60%
+Intermediate
+61 - 80%
+Advanced
+81 - 100%
+Expert
+
+55. REVIEW WORKFLOW
+Administrators may review completed assessments.
+
+Review Features
+View Attempt
+View Answers
+View Snapshot
+View Correct Answers
+View Score
+Add Comments
+Add Rating
+Approve
+Reject
+Mark Reviewed
+
+56. REVIEW COMMENTS
+Administrators may add:
+General Comments
+Question Comments
+Section Comments
+Overall Feedback
+
+Visibility
+Visible To User
+Internal Only
+Configurable
+
+57. REVIEW RATINGS
+Administrators may provide ratings.
+
+Rating Scale
+1 Star
+2 Stars
+3 Stars
+4 Stars
+5 Stars
+
+Purpose
+Manual Evaluation
+Performance Tracking
+Candidate Assessment
+
+58. RESULT VISIBILITY RULES
+Result visibility shall be configurable.
+
+Options
+Show Immediately
+Show After Review
+Hide Correct Answers
+Show Correct Answers
+Hide Score
+Show Score
+
+59. ATTEMPT HISTORY
+Users shall have access to complete history.
+
+History Information
+Assessment
+Technology
+Attempt Number
+Started Date
+Completed Date
+Status
+Score
+Percentage
+Result
+
+Filters
+Technology
+Assessment
+Status
+Date Range
+
+60. RETAKE MANAGEMENT
+Assessment retakes shall be configurable.
+
+Rules
+Unlimited Attempts
+Fixed Attempts
+Attempts Per Month
+Attempts Per Year
+Administrator Controlled
+
+Validation
+Maximum attempts must be enforced.
+
+61. ATTEMPT AUDIT TRAIL
+Every attempt action shall be auditable.
+
+Audit Events
+Started
+Paused
+Saved
+Resumed
+Question Answered
+Question Changed
+Submitted
+Timed Out
+Reviewed
+
+62. RUNTIME DATABASE ENTITIES
+assessment_attempts
+attempt_snapshots
+attempt_sections
+attempt_questions
+attempt_answers
+assessment_results
+assessment_reviews
+assessment_review_comments
+assessment_ratings
+assessment_timers
+
+63. RUNTIME API DOMAINS
+/api/assessment-attempts
+/api/attempts/start
+/api/attempts/save
+/api/attempts/resume
+/api/attempts/submit
+/api/attempts/history
+/api/results
+/api/reviews
+/api/ratings
+
+64. RUNTIME RBAC PERMISSIONS
+assessment.start
+assessment.resume
+assessment.submit
+assessment.history.view
+result.view
+review.create
+review.edit
+review.approve
+review.reject
+rating.create
+rating.view
+
+65. DATA INTEGRITY REQUIREMENTS
+No scoring against mutable master data.
+Scoring must use snapshots.
+Submitted attempts are immutable.
+Reviews are auditable.
+Results are reproducible.
+Historical reports must remain accurate.
+
+END OF PART 3

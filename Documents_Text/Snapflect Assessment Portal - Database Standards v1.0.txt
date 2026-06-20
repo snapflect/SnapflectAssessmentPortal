@@ -1,0 +1,359 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+DATABASE STANDARDS & CONVENTIONS
+VERSION 1.0
+Status: Approved
+Applies To:
+Master PRD v1.2 FINAL
+ERD v1.1 FINAL
+All Database Schemas
+All Future Database Migrations
+
+1. PURPOSE
+This document defines the database architecture standards, naming conventions, normalization rules, indexing strategy, audit strategy, versioning strategy, and implementation rules for the Snapflect Assessment Portal.
+All database objects must comply with this standard.
+
+2. DATABASE PLATFORM
+Database Engine:
+MySQL 8+
+Storage Engine:
+InnoDB
+Character Set:
+utf8mb4
+Collation:
+utf8mb4_unicode_ci
+Timezone:
+UTC
+
+3. DATABASE DESIGN PRINCIPLES
+The database shall follow:
+Third Normal Form (3NF)
+Referential Integrity
+Soft Delete Strategy
+Auditability
+Versioning
+Snapshot Isolation
+Extensibility
+Performance Optimization
+
+4. PRIMARY KEY STANDARD
+All business entities shall use:
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARYKEY
+
+Reason
+Supports:
+Large datasets
+Fast joins
+Future scalability
+Cursor AI consistency
+
+5. UUID STANDARD
+All major business entities shall additionally contain:
+uuid CHAR(36) NOTNULL
+
+Unique Constraint
+UNIQUE(uuid)
+
+Purpose
+External API references
+Public URLs
+Import/Export Safety
+Future Distributed Systems
+
+6. FOREIGN KEY STANDARD
+Foreign keys shall use:
+BIGINT UNSIGNED
+
+Example
+user_id BIGINT UNSIGNED NOTNULL
+
+Naming Convention
+<entity>_id
+Examples:
+user_idassessment_idtechnology_idquestion_id
+
+7. TABLE NAMING STANDARD
+All tables shall use:
+snake_case
+plural names
+
+Examples
+usersrolespermissionsassessment_attemptsquestion_bank_questions
+
+Prohibited
+UsertblUsersAssessmentAttempt
+
+8. COLUMN NAMING STANDARD
+All columns shall use:
+snake_case
+
+Examples
+created_datemodified_dateattempt_numberassessment_name
+
+9. BOOLEAN STANDARD
+Use:
+TINYINT(1)
+
+Examples
+is_activeis_deletedis_current_versionis_correct
+
+Do Not Use
+BIT
+
+10. ENUM STRATEGY
+Do not use MySQL ENUM.
+Use:
+VARCHAR(50)
+
+Examples
+statusreview_statusapproval_statusassignment_type
+
+Benefits
+Easier upgrades
+No schema changes for new values
+Better maintainability
+
+11. DATE & TIME STANDARD
+Use:
+DATETIME
+for business events.
+
+Examples
+created_datesubmitted_datereviewed_date
+
+Store All Dates
+UTC
+
+12. AUDIT FIELD STANDARD
+Applicable to all business entities.
+
+Standard Columns
+created_by BIGINT UNSIGNED NULLcreated_date DATETIME NOTNULLmodified_by BIGINT UNSIGNED NULLmodified_date DATETIME NULL
+
+Purpose
+Traceability
+Compliance
+Auditability
+
+13. SOFT DELETE STANDARD
+Applicable to designated entities.
+
+Standard Columns
+is_deleted TINYINT(1) NOTNULLDEFAULT0deleted_by BIGINT UNSIGNED NULLdeleted_date DATETIME NULL
+
+Rule
+Physical deletes are prohibited.
+
+14. ACTIVE STATUS STANDARD
+Entities supporting activation shall contain:
+is_active TINYINT(1) NOTNULLDEFAULT1
+
+Purpose
+Enable/Disable without deletion.
+
+15. VERSIONING STANDARD
+Applicable to:
+Assessments
+Sections
+Question Banks
+Questions
+Attachments (Optional)
+
+Standard Columns
+version_number INTNOTNULLDEFAULT1parent_<entity>_id BIGINT UNSIGNED NULLis_current_version TINYINT(1) NOTNULLDEFAULT1
+
+Example
+parent_question_id
+
+16. SNAPSHOT ARCHITECTURE STANDARD
+Approved Architecture:
+Hybrid Snapshot Architecture
+
+Snapshot Storage
+attempt_snapshots
+stores:
+snapshot_json LONGTEXT
+
+Runtime Tables
+attempt_questionsattempt_answersassessment_results
+
+Rule
+Reporting uses runtime tables.
+Auditing uses snapshots.
+
+17. ATTACHMENT ARCHITECTURE STANDARD
+Approved Architecture:
+Generic Attachment Architecture
+
+Attachment Pattern
+entity_type VARCHAR(50)entity_id BIGINT UNSIGNED
+
+Purpose
+Reuse across all modules.
+
+18. APPROVAL ARCHITECTURE STANDARD
+Approved Architecture:
+Generic Approval Architecture
+
+Approval Pattern
+entity_typeentity_id
+
+Supports
+Assessment
+Section
+Question Bank
+Question
+Future Entities
+
+19. AUDIT LOG ARCHITECTURE STANDARD
+Approved Architecture:
+Generic Polymorphic Audit
+
+Pattern
+entity_typeentity_id
+
+Example
+entity_type ='Question'entity_id =125
+
+20. SETTINGS ARCHITECTURE STANDARD
+Approved Architecture:
+Scoped Configuration
+
+Pattern
+scope_typescope_idsetting_keysetting_value
+
+Resolution Order
+Section
+↓
+Assessment
+↓
+Technology
+↓
+Global
+
+21. NOTIFICATION ARCHITECTURE STANDARD
+Approved Architecture:
+Hybrid Notification Storage
+
+Persist
+template_idtemplate_versionsubject_snapshotmessage_snapshot
+
+Purpose
+Template evolution
+Historical accuracy
+Auditability
+
+22. FILE STORAGE STANDARD
+Database stores:
+Metadata only
+
+File Storage
+Physical file system
+
+Future
+Azure Blob Storage
+AWS S3
+
+23. INDEXING STANDARD
+Every table shall include:
+Primary Key
+Foreign Key Indexes
+Unique Constraints
+Business Indexes
+
+Example
+INDEX idx_assessment_status( technology_id, status)
+
+24. UNIQUE CONSTRAINT STANDARD
+Examples:
+users(email)users(uuid)roles(role_code)permissions(permission_code)
+
+Composite Examples
+user_roles( user_id, role_id)
+
+assessment_attempts( user_id, assessment_id, attempt_number)
+
+25. CASCADE RULES
+Default:
+RESTRICT
+
+Avoid
+ONDELETECASCADE
+for business entities.
+
+Reason
+Protect historical data.
+
+26. LARGE TEXT STANDARD
+Use:
+TEXT
+for:
+Descriptions
+Comments
+Instructions
+
+Use:
+LONGTEXT
+for:
+Snapshots
+Large JSON payloads
+
+27. JSON STORAGE STANDARD
+MySQL JSON may be used where appropriate.
+Preferred:
+JSON
+when querying is expected.
+Use:
+LONGTEXT
+for immutable snapshot archives.
+
+28. PERFORMANCE GUIDELINES
+Avoid:
+Excessive joins
+Repeated subqueries
+Redundant tables
+Duplicate data
+
+Prefer:
+Indexes
+Caching
+Derived Services
+Pagination
+
+29. PROHIBITED DATABASE PRACTICES
+Do NOT:
+Use MySQL ENUM
+Use physical deletes
+Store passwords in plain text
+Store JWT tokens in plain text
+Create redundant analytics tables
+Duplicate answer definitions
+Create circular relationships
+Bypass snapshot architecture
+
+30. DATABASE REVIEW CHECKLIST
+Before approving any schema:
+✓ Naming Standards
+✓ PK Standards
+✓ FK Standards
+✓ Audit Fields
+✓ Soft Delete Rules
+✓ Versioning Rules
+✓ Index Strategy
+✓ Snapshot Architecture
+✓ Approval Architecture
+✓ Notification Architecture
+✓ File Architecture
+✓ No Circular Dependencies
+✓ Referential Integrity
+
+VERSION
+Database Standards & Conventions v1.0
+Status: FINAL
+Approved For:
+Schema Design
+Migration Design
+API Development
+Cursor AI Development
+Production Implementation
+
+END OF DATABASE STANDARDS & CONVENTIONS v1.0

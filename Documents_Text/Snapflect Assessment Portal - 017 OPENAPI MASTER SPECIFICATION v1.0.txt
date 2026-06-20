@@ -1,0 +1,313 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017_OPENAPI_MASTER_SPECIFICATION
+Version 1.0
+Status: APPROVED BASELINE
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+OpenAPI Master Specification
+Version
+1.0
+Status
+FINAL
+OpenAPI Standard
+OpenAPI 3.1
+Based On
+PRD v1.2 FINAL
+Based On
+ERD v1.1 FINAL
+Based On
+Platform Architecture Baseline v1.0
+Based On
+013_PLATFORM_SOLUTION_ARCHITECTURE
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Applies To
+Backend Development
+Applies To
+Frontend Development
+Applies To
+QA Automation
+Applies To
+Cursor AI Development
+
+1. PURPOSE
+This document establishes the master OpenAPI governance framework for Snapflect.
+It defines:
+API StandardsOpenAPI StandardsContract StandardsDTO StandardsResponse StandardsError StandardsSecurity StandardsDocumentation Standards
+This document is the authoritative source for all API contracts.
+
+2. OPENAPI VERSION
+Approved Standard:
+openapi:3.1.0
+All future API specifications shall comply with OpenAPI 3.1.
+
+3. API VERSIONING STRATEGY
+Current Version:
+v1
+Base URL:
+/api/v1
+Examples:
+/api/v1/auth/login/api/v1/users/api/v1/assessments/api/v1/questions
+
+Breaking Changes
+Breaking changes require:
+New API Version
+Example:
+v1 → v2
+
+Non-Breaking Changes
+Allowed:
+Optional FieldsAdditional PropertiesNew Endpoints
+
+4. OPENAPI DOCUMENT STRUCTURE
+Every OpenAPI document shall contain:
+openapiinfoserverstagscomponentspathssecurity
+
+5. API METADATA STANDARD
+Required Metadata:
+info:title:version:description:contact:license:
+Example:
+info:title: Snapflect Assessment Portal APIversion:1.0.0description: Enterprise Assessment Platform API
+
+6. SERVER DEFINITIONS
+Development
+https://localhost/api/v1
+
+UAT
+https://uat.snapflect.com/api/v1
+
+Production
+https://app.snapflect.com/api/v1
+
+7. SECURITY SCHEME
+Approved Authentication:
+Laravel Sanctum
+
+OpenAPI Security Definition:
+BearerAuth:type: httpscheme: bearer
+
+Global Security
+security:-BearerAuth:[]
+
+8. API TAG STANDARD
+Every endpoint shall belong to a tag.
+Approved Tags:
+AuthenticationUsersRolesPermissionsTechnologiesAssessmentsSectionsQuestion BanksQuestionsAssignmentsAttemptsEvaluationsResultsCertificatesNotificationsReportsDashboardsAuditOperationsProctoringBilling
+
+9. RESPONSE STANDARD
+All APIs shall return standardized responses.
+
+Success Response
+{"success":true,"message":"Operation completed successfully","data":{}}
+
+Collection Response
+{"success":true,"data":[],"pagination":{}}
+
+Error Response
+{"success":false,"message":"Operation failed","errors":[]}
+
+10. STANDARD RESPONSE SCHEMAS
+Reusable Components:
+SuccessResponseErrorResponsePagedResponseValidationErrorResponse
+
+11. PAGINATION STANDARD
+Request:
+GET /api/v1/questions?page=1&pageSize=25
+
+Response Schema:
+{"page":1,"pageSize":25,"totalRecords":500,"totalPages":20}
+
+12. FILTERING STANDARD
+Example:
+GET /api/v1/questions?technologyId=1&status=Published
+Rules:
+OptionalIndexed Where PossibleConsistent Across Modules
+
+13. SORTING STANDARD
+Example:
+GET /api/v1/questions?sortBy=createdDate&sortOrder=desc
+Allowed:
+ascdesc
+
+14. SEARCH STANDARD
+Example:
+GET /api/v1/questions?search=inheritance
+Search Requirements:
+Case InsensitivePartial MatchIndexed Columns First
+
+15. STANDARD HTTP STATUS CODES
+Success
+200 OK201 Created204 No Content
+
+Client Errors
+400 Bad Request401 Unauthorized403 Forbidden404 Not Found409 Conflict422 Validation Error
+
+Server Errors
+500 Internal Server Error
+
+16. STANDARD ERROR CODES
+VALIDATION_ERRORUNAUTHORIZEDFORBIDDENNOT_FOUNDCONFLICTBUSINESS_RULE_VIOLATIONINTERNAL_SERVER_ERROR
+
+17. REQUEST DTO STANDARD
+Every write endpoint must define:
+Request DTOValidation RulesRequired FieldsOptional FieldsExamples
+
+18. RESPONSE DTO STANDARD
+Every endpoint must define:
+Response DTOProperty TypesExamplesNullable Rules
+
+19. ENUM STANDARD
+Enumerations shall be explicitly documented.
+Example:
+status:type: stringenum:- Draft- Published- Archived
+
+20. DATE/TIME STANDARD
+All timestamps:
+UTC
+Format:
+format: date-time
+Example:
+2027-01-15T12:30:00Z
+
+21. FILE UPLOAD STANDARD
+Upload Endpoint Pattern:
+POST /api/v1/files/upload
+Supported:
+ImagesDocumentsCertificatesEvidence Files
+
+Response:
+{"fileId":123,"fileName":"resume.pdf"}
+
+22. SOFT DELETE STANDARD
+Delete Operations:
+DELETE /api/v1/{resource}/{id}
+Perform:
+Soft Delete
+
+Physical Deletes:
+Not Exposed Via API
+
+23. AUDIT REQUIREMENT
+Critical Operations must generate:
+audit_events
+Examples:
+Assessment PublishQuestion ApprovalCertificate IssueInvoice CreationRole Assignment
+
+24. RBAC REQUIREMENT
+Every endpoint must define:
+Required PermissionAllowed RolesAuthorization Rule
+Example:
+permission:  Assessment.Create
+
+25. DOCUMENTATION REQUIREMENT
+Every endpoint must contain:
+SummaryDescriptionPermission RequirementRequest DTOResponse DTOExamplesError Responses
+
+26. MODULE SPECIFICATION STRATEGY
+The OpenAPI ecosystem shall be split into module specifications.
+
+017A
+SECURITY_OPENAPI
+Coverage:
+AuthenticationUsersRolesPermissions
+
+017B
+GOVERNANCE_OPENAPI
+Coverage:
+SettingsTemplatesWorkflows
+
+017C
+ASSESSMENT_DEFINITION_OPENAPI
+Coverage:
+TechnologiesAssessmentsSectionsQuestion BanksQuestions
+
+017D
+ASSESSMENT_EXECUTION_OPENAPI
+Coverage:
+AssignmentsAttemptsAnswersSnapshots
+
+017E
+EVALUATION_OPENAPI
+Coverage:
+EvaluationsResults
+
+017F
+CERTIFICATION_OPENAPI
+Coverage:
+CertificatesVerificationRevocation
+
+017G
+NOTIFICATION_OPENAPI
+Coverage:
+NotificationsTemplatesSubscriptions
+
+017H
+REPORTING_ANALYTICS_OPENAPI
+Coverage:
+ReportsDashboardsKPIs
+
+017I
+INTEGRATION_AUDIT_OPENAPI
+Coverage:
+AuditImportsExportsIntegration Events
+
+017J
+PLATFORM_OPERATIONS_OPENAPI
+Coverage:
+TasksHealthAnnouncements
+
+017K
+AI_PROCTORING_OPENAPI
+Coverage:
+SessionsViolationsEvidenceReviews
+
+017L
+BILLING_SUBSCRIPTION_OPENAPI
+Coverage:
+PlansSubscriptionsInvoicesPayments
+
+27. QA AUTOMATION REQUIREMENT
+OpenAPI shall support:
+Postman CollectionsContract TestingIntegration TestingRegression TestingAutomated Validation
+
+28. CURSOR AI GOVERNANCE
+Cursor SHALL:
+Generate ControllersGenerate DTOsGenerate Form RequestsGenerate ServicesGenerate Tests
+from approved OpenAPI specifications.
+
+Cursor SHALL NOT:
+Invent EndpointsInvent DTOsInvent Business RulesInvent Security Rules
+
+29. CHANGE MANAGEMENT
+Changes require:
+Architecture ReviewApprovalVersion Increment
+before implementation.
+
+30. PLATFORM OPENAPI STATUS
+Aligned With:
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Platform Architecture Baseline✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓
+
+APPROVAL STATUS
+Document:
+017_OPENAPI_MASTER_SPECIFICATION
+Version:
+v1.0
+Status:
+APPROVEDFROZEN
+
+ARCHITECTURE PHASE STATUS
+013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓015_SCREEN_INVENTORY_AND_NAVIGATION✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+017A_SECURITY_OPENAPI v1.0
+This becomes the first implementation-grade API contract and will define:
+Authentication APIsUser APIsRole APIsPermission APIsRequest DTOsResponse DTOsValidation RulesRBAC Enforcement
+It will also be the first document that Cursor can directly use to generate production-ready Laravel code.
+
+END OF DOCUMENT

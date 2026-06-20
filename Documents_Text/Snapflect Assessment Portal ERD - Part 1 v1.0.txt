@@ -1,0 +1,415 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+ENTITY RELATIONSHIP DIAGRAM (ERD)
+PART 1 – SECURITY & USER MANAGEMENT
+VERSION 1.0
+
+1. DOMAIN OVERVIEW
+This module manages:
+Authentication
+Authorization
+User Accounts
+User Profiles
+Role-Based Access Control (RBAC)
+Sessions
+Password Recovery
+Email Verification
+
+2. ENTITY RELATIONSHIP DIAGRAM
+users  |  | 1 : 1  |user_profilesusers  |  | 1 : M  |user_roles  |  | M : 1  |rolesroles  |  | 1 : M  |role_permissions  |  | M : 1  |permissionsusers  |  | 1 : M  |user_sessionsusers  |  | 1 : M  |password_resetsusers  |  | 1 : M  |email_verifications
+
+3. USERS
+Purpose
+Stores authentication and account information.
+
+Table
+users
+
+Primary Key
+id
+
+Columns
+id
+uuid
+email
+mobile_number
+password_hash
+first_name
+last_name
+status
+email_verified
+last_login_date
+last_login_ip
+failed_login_count
+account_locked_until
+created_date
+modified_date
+created_by
+modified_by
+is_active
+is_deleted
+deleted_date
+deleted_by
+
+Unique Constraints
+uuid
+email
+mobile_number
+
+Indexes
+email
+mobile_number
+status
+is_active
+
+Relationships
+1 User
+→ 1 User Profile
+1 User
+→ Many User Roles
+1 User
+→ Many Sessions
+1 User
+→ Many Password Resets
+1 User
+→ Many Email Verifications
+
+4. USER_PROFILES
+Purpose
+Stores profile and onboarding information.
+
+Table
+user_profiles
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+
+Columns
+id
+user_id
+profile_photo_url
+company
+designation
+years_of_experience
+technology_expertise
+country
+state
+city
+bio
+profile_completion_percentage
+created_date
+modified_date
+created_by
+modified_by
+is_active
+is_deleted
+deleted_date
+deleted_by
+
+Unique Constraints
+user_id
+
+Relationships
+1 Profile
+belongs to
+1 User
+
+5. ROLES
+Purpose
+Defines user roles.
+
+Examples
+Super Administrator
+Assessment Administrator
+User
+
+Table
+roles
+
+Primary Key
+id
+
+Columns
+id
+role_name
+role_code
+description
+display_order
+created_date
+modified_date
+created_by
+modified_by
+is_active
+is_deleted
+deleted_date
+deleted_by
+
+Unique Constraints
+role_name
+role_code
+
+Relationships
+1 Role
+→ Many User Roles
+1 Role
+→ Many Role Permissions
+
+6. PERMISSIONS
+Purpose
+Defines system permissions.
+
+Examples
+technology.create
+assessment.create
+assessment.review
+report.view
+settings.manage
+
+Table
+permissions
+
+Primary Key
+id
+
+Columns
+id
+permission_name
+permission_code
+module_name
+description
+created_date
+modified_date
+created_by
+modified_by
+is_active
+is_deleted
+deleted_date
+deleted_by
+
+Unique Constraints
+permission_code
+
+Relationships
+1 Permission
+→ Many Role Permissions
+
+7. USER_ROLES
+Purpose
+Maps users to roles.
+Supports multiple roles per user.
+
+Table
+user_roles
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+role_id → roles.id
+
+Columns
+id
+user_id
+role_id
+assigned_date
+assigned_by
+effective_from
+effective_to
+created_date
+modified_date
+is_active
+is_deleted
+
+Unique Constraints
+user_id + role_id
+
+Relationships
+Many Users
+↔ Many Roles
+
+8. ROLE_PERMISSIONS
+Purpose
+Maps permissions to roles.
+
+Table
+role_permissions
+
+Primary Key
+id
+
+Foreign Keys
+role_id → roles.id
+permission_id → permissions.id
+
+Columns
+id
+role_id
+permission_id
+assigned_date
+assigned_by
+created_date
+modified_date
+is_active
+is_deleted
+
+Unique Constraints
+role_id + permission_id
+
+Relationships
+Many Roles
+↔ Many Permissions
+
+9. USER_SESSIONS
+Purpose
+Tracks active and historical login sessions.
+
+Table
+user_sessions
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+
+Columns
+id
+user_id
+jwt_token_id
+refresh_token_id
+device_name
+device_type
+browser
+operating_system
+ip_address
+location
+login_date
+last_activity_date
+logout_date
+session_status
+created_date
+modified_date
+
+Session Status
+Active
+Expired
+Revoked
+Logged Out
+
+Relationships
+Many Sessions
+belong to
+1 User
+
+10. PASSWORD_RESETS
+Purpose
+Stores password reset requests.
+
+Table
+password_resets
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+
+Columns
+id
+user_id
+reset_token
+requested_date
+expiry_date
+used_date
+status
+ip_address
+created_date
+
+Status
+Pending
+Used
+Expired
+Cancelled
+
+11. EMAIL_VERIFICATIONS
+Purpose
+Stores email verification requests.
+
+Table
+email_verifications
+
+Primary Key
+id
+
+Foreign Keys
+user_id → users.id
+
+Columns
+id
+user_id
+verification_token
+requested_date
+expiry_date
+verified_date
+status
+created_date
+
+Status
+Pending
+Verified
+Expired
+Cancelled
+
+12. SECURITY RULES
+Passwords shall never be stored in plain text.
+Passwords shall be stored using bcrypt.
+JWT tokens shall never be stored in plain text.
+Sensitive tokens should be hashed before persistence.
+Email verification tokens shall expire.
+Password reset tokens shall expire.
+Soft delete shall be enforced.
+
+13. AUDITABILITY REQUIREMENTS
+All entities must support:
+created_by
+created_date
+modified_by
+modified_date
+
+Audited Events
+Registration
+Login
+Logout
+Password Reset
+Email Verification
+Role Assignment
+Permission Assignment
+Account Lockout
+Session Revocation
+
+14. FUTURE EXTENSIBILITY
+The model shall support future additions:
+SSO
+Google Login
+Microsoft Entra ID
+LinkedIn Login
+Multi-Factor Authentication
+Organization-Based RBAC
+Multi-Tenant Architecture
+without structural redesign.
+
+15. ERD PART 1 REVIEW CHECKLIST
+✓ User Authentication Supported
+✓ User Profile Management Supported
+✓ RBAC Supported
+✓ Session Management Supported
+✓ Password Reset Supported
+✓ Email Verification Supported
+✓ Auditability Supported
+✓ Soft Delete Supported
+✓ Future Extensibility Supported
+
+END OF ERD PART 1VERSION 1.0

@@ -1,0 +1,478 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Version 1.0
+
+PART 5
+DATABASE ARCHITECTURE, API STANDARDS, UI/UX STANDARDS, SECURITY, PERFORMANCE, DEPLOYMENT, DEVELOPMENT ROADMAP & ACCEPTANCE CRITERIA
+This section completes the Master Enterprise PRD and defines the technical standards, implementation standards, quality standards, and acceptance criteria required to build a production-ready assessment platform.
+
+103. DATABASE ARCHITECTURE
+103.1 Database Principles
+The database architecture shall follow:
+Third Normal Form (3NF)
+Referential Integrity
+Soft Delete Strategy
+Auditability
+Versioning Support
+Snapshot Support
+Extensibility
+
+103.2 Database Categories
+Master Data
+usersrolespermissionsuser_rolesrole_permissionstechnologiesassessmentsassessment_sectionsquestion_banksquestionsquestion_optionsquestion_answerscontent_approvals
+Runtime Data
+assessment_attemptsattempt_snapshotsattempt_sectionsattempt_questionsattempt_answersassessment_resultsassessment_reviewsassessment_review_commentsassessment_ratingsassessment_timers
+Governance Data
+notificationsnotification_templatesnotification_logsaudit_logsactivity_logsattachmentsfile_uploadssystem_settingsreport_jobsreport_exportsimport_jobsexport_jobssystem_health_logs
+
+104. ENTITY RELATIONSHIP MODEL
+Master Hierarchy
+Technology    |    +---- Assessment              |              +---- Section                        |                        +---- Question Bank                                  |                                  +---- Question
+
+Runtime Hierarchy
+User   |   +---- Assessment Attempt               |               +---- Snapshot               |               +---- Attempt Sections               |               +---- Attempt Questions               |               +---- Attempt Answers               |               +---- Result               |               +---- Review
+
+Question Reuse Model
+Question    |    +---- QuestionBankQuestions    |Question Bank
+Many-to-Many relationship.
+
+105. DATABASE CONVENTIONS
+Naming Standards
+Tables:
+snake_case
+Examples:
+assessment_attempts
+question_bank_questions
+
+Primary Keys
+id BIGINT AUTO_INCREMENT
+
+Foreign Keys
+technology_idassessment_idsection_idquestion_bank_idquestion_id
+
+Standard Audit Fields
+created_bycreated_datemodified_bymodified_dateis_activeis_deleteddeleted_bydeleted_date
+Mandatory on all major entities.
+
+106. API ARCHITECTURE
+Architectural Style
+REST API
+JSON Based
+Stateless
+JWT Secured
+Versioned
+
+API Versioning
+/api/v1/
+Examples:
+/api/v1/auth/login/api/v1/assessments/api/v1/questions
+
+API Categories
+Authentication
+User Management
+Technology Management
+Assessment Management
+Question Management
+Assessment Runtime
+Results
+Reports
+Notifications
+Settings
+Audit
+
+107. API RESPONSE STANDARD
+Success Response
+{"success":true,"message":"Operation completed successfully","data":{}}
+
+Error Response
+{"success":false,"message":"Validation failed","errors":[]}
+
+108. HTTP STATUS STANDARDS
+200 OK201 Created400 Bad Request401 Unauthorized403 Forbidden404 Not Found409 Conflict422 Validation Error500 Internal Server Error
+
+109. API SECURITY STANDARDS
+Every API must validate:
+JWT Token
+User Status
+Permissions
+Input Data
+Business Rules
+Rate Limits
+
+API Logging
+Request Logging
+Error Logging
+Audit Logging
+Performance Logging
+
+110. ERROR HANDLING STANDARDS
+The platform shall provide consistent error handling.
+
+Categories
+Validation Errors
+Authentication Errors
+Authorization Errors
+Business Errors
+System Errors
+Network Errors
+
+Requirements
+User-Friendly Messages
+Detailed Server Logs
+Traceable Error IDs
+No Sensitive Data Exposure
+
+111. UI/UX DESIGN SYSTEM
+Design Principles
+Modern
+Professional
+Enterprise Grade
+Minimalistic
+Responsive
+Accessible
+Scalable
+
+Visual Style
+Clean Layout
+Rounded Corners
+Soft Shadows
+Glassmorphism Elements
+Micro Animations
+Consistent Spacing
+Modern Typography
+
+112. RESPONSIVE DESIGN STANDARDS
+Supported Devices
+Mobile
+Tablet
+Desktop
+Large Screens
+
+Breakpoints
+Bootstrap Standards
+
+Mobile First
+The platform shall be designed mobile-first.
+
+113. USER EXPERIENCE STANDARDS
+Users should be able to:
+Understand navigation quickly
+Complete assessments easily
+Access information intuitively
+Receive meaningful feedback
+Recover from errors easily
+
+UX Features
+Breadcrumbs
+Search
+Filters
+Pagination
+Loading Indicators
+Empty States
+Confirmation Dialogs
+Success Messages
+Error Messages
+
+114. ACCESSIBILITY REQUIREMENTS
+The platform shall aim for WCAG compliance.
+
+Requirements
+Keyboard Navigation
+Screen Reader Support
+Accessible Labels
+Color Contrast Compliance
+Focus Indicators
+Responsive Text
+
+115. UI COMPONENT LIBRARY
+Reusable components shall be used.
+
+Components
+Buttons
+Inputs
+Dropdowns
+Cards
+Tables
+Modals
+Tabs
+Accordions
+Notifications
+Charts
+Pagination
+File Upload
+
+116. SECURITY STANDARDS
+Authentication Security
+JWT
+Refresh Tokens
+Password Policies
+Email Verification
+Session Management
+
+Data Security
+Input Validation
+Output Encoding
+Parameterized Queries
+File Validation
+Encryption Ready
+
+Web Security
+CSRF Protection
+XSS Protection
+SQL Injection Protection
+Clickjacking Protection
+Rate Limiting
+Brute Force Protection
+
+117. PERFORMANCE REQUIREMENTS
+Performance Targets
+Page Load Time
+< 2 Seconds
+
+API Response Time
+< 500 ms (Average)
+
+Search Response
+< 2 Seconds
+
+Report Generation
+< 30 Seconds
+
+118. SCALABILITY REQUIREMENTS
+Support:
+10,000+ Users
+100+ Concurrent Users
+100,000+ Assessments
+1,000,000+ Attempts
+
+Optimization Techniques
+Pagination
+Lazy Loading
+Caching
+Indexing
+Query Optimization
+Asset Compression
+
+119. LOGGING STANDARDS
+Log Categories
+Application Logs
+Audit Logs
+Error Logs
+Performance Logs
+Security Logs
+
+Requirements
+Structured Logging
+Timestamped Entries
+Traceability
+Retention Policies
+
+120. TESTING STRATEGY
+Testing Levels
+Unit Testing
+Integration Testing
+API Testing
+UI Testing
+Security Testing
+Performance Testing
+User Acceptance Testing
+
+Test Coverage Goals
+Business Logic
+80%+
+Critical APIs
+90%+
+
+121. DEPLOYMENT ARCHITECTURE
+Initial Deployment
+Hostinger Shared Hosting
+PHP 8.3+
+MySQL 8+
+Apache
+SSL Enabled
+
+Environment Types
+Development
+QA
+Staging
+Production
+
+122. CONFIGURATION MANAGEMENT
+Environment-based configuration.
+
+Examples
+Database Connections
+JWT Keys
+SMTP Settings
+File Paths
+Security Settings
+
+123. BACKUP & RECOVERY
+Backup Types
+Database Backup
+File Backup
+Configuration Backup
+
+Requirements
+Automated Backups
+Backup Verification
+Restore Testing
+Recovery Procedures
+
+124. CODING STANDARDS
+PHP Standards
+PSR Standards
+SOLID Principles
+Dependency Injection
+Repository Pattern
+Service Layer Pattern
+Clean Code
+
+JavaScript Standards
+Modular Design
+Reusable Components
+No Inline Scripts
+Centralized API Layer
+
+125. DEVELOPMENT ROADMAP
+Phase 1
+Architecture
+Database Design
+Project Setup
+Authentication
+RBAC
+
+Phase 2
+Technology Management
+Assessment Management
+Section Management
+
+Phase 3
+Question Bank Management
+Question Management
+Import/Export
+Approval Workflow
+
+Phase 4
+Assessment Execution Engine
+Assessment Snapshot Engine
+Timer Management
+Save/Resume
+
+Phase 5
+Scoring Engine
+Results Engine
+Review Workflow
+
+Phase 6
+User Dashboard
+Admin Dashboard
+Analytics
+Reports
+
+Phase 7
+Notifications
+Audit Logging
+Activity Tracking
+File Management
+
+Phase 8
+Security Hardening
+Performance Optimization
+Accessibility
+
+Phase 9
+Testing
+Bug Fixing
+Deployment
+Production Readiness
+
+126. DELIVERABLES
+Every phase shall produce:
+Database Schema
+SQL Scripts
+Entity Models
+Repositories
+Services
+Controllers
+REST APIs
+Validation Rules
+Unit Tests
+UI Screens
+API Documentation
+Deployment Guide
+Security Review
+Release Notes
+
+127. ACCEPTANCE CRITERIA
+Functional
+All approved requirements implemented.
+All workflows operational.
+All permissions enforced.
+All reports operational.
+All dashboards operational.
+
+Security
+Authentication secure.
+Authorization enforced.
+Audit logs operational.
+Sensitive data protected.
+
+Performance
+Performance targets achieved.
+No critical bottlenecks.
+
+Quality
+No Critical Defects.
+No High Severity Defects.
+Documentation Complete.
+
+128. FUTURE EXTENSIBILITY
+The architecture shall support future enhancements without redesign.
+
+Future Features
+AI Question Generation
+AI Assessment Creation
+AI Skill Gap Analysis
+AI Recommendations
+Certification Engine
+Gamification
+Badges
+Leaderboards
+Learning Paths
+Coding Challenges
+Video Assessments
+Organization Management
+Multi-Tenant SaaS
+Subscription Billing
+Payment Gateway
+SSO
+LDAP
+Microsoft Entra ID
+Google Login
+LinkedIn Login
+Mobile Applications
+Public APIs
+
+129. MASTER PRD COMPLETION STATEMENT
+This PRD serves as the authoritative source of truth for the Snapflect Assessment Portal.
+All future:
+Requirements
+Designs
+Database Structures
+API Designs
+UI Implementations
+Security Implementations
+Testing Activities
+Deployment Activities
+must align with this document.
+Any future enhancement shall extend this architecture and shall not violate:
+Technology → Assessment → Section → Question Bank → Question hierarchy
+Assessment Snapshot Integrity
+RBAC Principles
+Security Standards
+Auditability Requirements
+Extensibility Principles
+
+END OF PART 5
+END OF MASTER ENTERPRISE PRD VERSION 1.0

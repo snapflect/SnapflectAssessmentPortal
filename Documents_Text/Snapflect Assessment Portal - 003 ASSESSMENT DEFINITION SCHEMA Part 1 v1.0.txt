@@ -1,0 +1,137 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL
+PART 1 – TECHNOLOGY & ASSESSMENT FOUNDATION
+VERSION 1.0
+Module
+Assessment Definition
+Tables
+technologiestechnology_versionsassessmentsassessment_versions
+Depends On
+001_SECURITY_SCHEMA.SQL v1.0 FINALusers002_GOVERNANCE_FOUNDATION_SCHEMA.SQL v1.0 FINAL
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+TECHNOLOGIES
+Purpose
+Represents technologies, domains, frameworks, or assessment categories.
+Examples:
+.NETAngularSQL ServerAzureReactJava
+
+CREATETABLE technologies(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    technology_code VARCHAR(100) NOTNULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_technologies_uuidUNIQUE (uuid),CONSTRAINT ux_technologies_codeUNIQUE (technology_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+TECHNOLOGIES FOREIGN KEYS
+ALTERTABLE technologiesADDCONSTRAINT fk_technologies_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE technologiesADDCONSTRAINT fk_technologies_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE technologiesADDCONSTRAINT fk_technologies_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+TECHNOLOGIES INDEXES
+CREATEINDEX ix_technologies_statusON technologies(status);CREATEINDEX ix_technologies_is_activeON technologies(is_active);
+
+TECHNOLOGY STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+TECHNOLOGY_VERSIONS
+Purpose
+Stores complete historical snapshots of Technology definitions.
+Uses Full Snapshot Versioning Architecture.
+
+CREATETABLE technology_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    technology_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    technology_name VARCHAR(255) NOTNULL,    technology_category VARCHAR(100) NOTNULL,    parent_technology_id BIGINT UNSIGNED NULL,    description TEXT NULL,    display_order INTNOTNULLDEFAULT0,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_technology_versions_uuidUNIQUE (uuid),CONSTRAINT ux_technology_versions_versionUNIQUE (technology_id, version_number))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+TECHNOLOGY_VERSIONS FOREIGN KEYS
+ALTERTABLE technology_versionsADDCONSTRAINT fk_technology_versions_technologyFOREIGNKEY (technology_id)REFERENCES technologies(id);ALTERTABLE technology_versionsADDCONSTRAINT fk_technology_versions_parentFOREIGNKEY (parent_technology_id)REFERENCES technologies(id);ALTERTABLE technology_versionsADDCONSTRAINT fk_technology_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+TECHNOLOGY_VERSIONS INDEXES
+CREATEINDEX ix_technology_versions_statusON technology_versions(version_status);CREATEINDEX ix_technology_versions_categoryON technology_versions(technology_category);CREATEINDEX ix_technology_versions_parentON technology_versions(parent_technology_id);CREATEINDEX ix_technology_versions_display_orderON technology_versions(display_order);
+
+TECHNOLOGY CATEGORY EXAMPLES
+Application validation examples:
+BackendFrontendDatabaseCloudDevOpsTesting
+
+VERSION STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+ASSESSMENTS
+Purpose
+Represents assessments available within a technology domain.
+Examples:
+.NET Beginner AssessmentAngular FundamentalsAzure Architect Assessment
+
+CREATETABLE assessments(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    technology_id BIGINT UNSIGNED NOTNULL,    assessment_code VARCHAR(100) NOTNULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_assessments_uuidUNIQUE (uuid),CONSTRAINT ux_assessments_codeUNIQUE (assessment_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ASSESSMENTS FOREIGN KEYS
+ALTERTABLE assessmentsADDCONSTRAINT fk_assessments_technologyFOREIGNKEY (technology_id)REFERENCES technologies(id);ALTERTABLE assessmentsADDCONSTRAINT fk_assessments_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE assessmentsADDCONSTRAINT fk_assessments_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE assessmentsADDCONSTRAINT fk_assessments_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+ASSESSMENTS INDEXES
+CREATEINDEX ix_assessments_technologyON assessments(technology_id);CREATEINDEX ix_assessments_statusON assessments(status);CREATEINDEX ix_assessments_is_activeON assessments(is_active);
+
+ASSESSMENT STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+ASSESSMENT_VERSIONS
+Purpose
+Stores complete historical snapshots of Assessment definitions.
+Uses Full Snapshot Versioning Architecture.
+
+CREATETABLE assessment_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    assessment_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    assessment_name VARCHAR(255) NOTNULL,    description TEXT NULL,    estimated_duration_minutes INTNOTNULL,    passing_percentage DECIMAL(5,2) NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_assessment_versions_uuidUNIQUE (uuid),CONSTRAINT ux_assessment_versions_versionUNIQUE (assessment_id, version_number))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ASSESSMENT_VERSIONS FOREIGN KEYS
+ALTERTABLE assessment_versionsADDCONSTRAINT fk_assessment_versions_assessmentFOREIGNKEY (assessment_id)REFERENCES assessments(id);ALTERTABLE assessment_versionsADDCONSTRAINT fk_assessment_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+ASSESSMENT_VERSIONS INDEXES
+CREATEINDEX ix_assessment_versions_statusON assessment_versions(version_status);CREATEINDEX ix_assessment_versions_durationON assessment_versions(estimated_duration_minutes);
+
+ASSESSMENT GOVERNANCE RULES
+Published Assessments
+Only:
+Published
+assessments may be assigned or taken.
+
+Version Creation
+Changes must never overwrite published versions.
+Create:
+New Draft Version
+instead.
+
+Historical Preservation
+All published versions remain available for:
+AuditReportingAssessment HistoryAttempt Reconstruction
+
+CODE IMMUTABILITY RULE
+The following codes are immutable after creation:
+technology_codeassessment_code
+Changes require creation of a new entity.
+
+VALIDATION CHECKLIST
+✓ Technology Hierarchy Supported
+✓ Assessment Hierarchy Supported
+✓ Full Snapshot Versioning Applied
+✓ Version Status Workflow Applied
+✓ Publication Workflow Applied
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ Code Immutability Defined
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+technologiestechnology_versionsassessmentsassessment_versions
+Assessment Definition Completion:
+25%
+
+NEXT STEP
+Perform a focused review of:
+sectionssection_versions
+before generating:
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 2
+because Section architecture directly impacts Question Bank reuse, ordering, runtime navigation, and reporting.
+
+END OF DOCUMENT

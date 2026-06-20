@@ -1,0 +1,289 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+DATA DICTIONARY
+AMENDMENT v1.1
+FINAL DATA MODEL REFINEMENT
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Data Dictionary
+Base Version
+v1.0
+Amendment Version
+v1.1
+Status
+FINAL
+Applies To
+DD Part 1, DD Part 2, DD Part 3, DD Part 4
+
+1. PURPOSE
+This amendment incorporates improvements identified during the Master Data Dictionary Review v1.0.
+Objectives:
+Improve governance
+Improve traceability
+Improve reporting support
+Improve version lineage tracking
+Improve import diagnostics
+Improve schema readiness
+This amendment shall be read together with all four Data Dictionary documents.
+
+DD-A1
+GLOBAL UUID UNIQUENESS STANDARD
+Purpose
+Standardize public identifiers across the platform.
+
+Rule
+Every table containing:
+uuid CHAR(36)
+must enforce:
+UNIQUE (uuid)
+
+Applies To
+Security Layer
+users
+user_profiles
+roles
+permissions
+user_roles
+role_permissions
+user_sessions
+password_resets
+email_verifications
+Assessment Definition Layer
+technologies
+assessments
+assessment_sections
+question_banks
+questions
+question_bank_questions
+question_options
+question_answers
+content_approvals
+Runtime Layer
+assessment_assignments
+assessment_attempts
+attempt_snapshots
+attempt_questions
+attempt_answers
+assessment_results
+assessment_reviews
+assessment_review_comments
+assessment_ratings
+review_acknowledgements
+Governance Layer
+notification_templates
+notification_logs
+notifications
+audit_logs
+activity_logs
+system_settings
+file_uploads
+attachments
+report_jobs
+report_exports
+import_jobs
+export_jobs
+system_health_logs
+assignment_activity_logs
+randomization_audit_logs
+
+Business Rule
+UUID is the public-facing identifier.
+Numeric primary keys remain internal database identifiers.
+
+DD-A2
+ASSESSMENT SECTION SELECTION STRATEGY
+Affected Table
+assessment_sections
+
+New Column
+Column
+Data Type
+Nullable
+Default
+selection_strategy
+VARCHAR(50)
+No
+Random
+
+Purpose
+Controls how questions are selected during assessment generation.
+
+Supported Values
+RandomSequentialDifficulty Balanced
+
+Definitions
+Random
+Questions are selected randomly from the linked question banks.
+
+Sequential
+Questions are selected according to configured display order.
+
+Difficulty Balanced
+Questions are selected proportionally across difficulty levels:
+Beginner
+Intermediate
+Advanced
+Expert
+
+Business Rules
+Used when questions_to_pick is less than total available questions.
+Selection must be reproducible using randomization_seed.
+Selection strategy must be stored in assessment snapshots.
+
+DD-A3
+CONTENT APPROVAL VERSION TRACEABILITY
+Affected Table
+content_approvals
+
+New Column
+Column
+Data Type
+Nullable
+entity_version
+INT
+No
+
+Purpose
+Tracks the exact content version undergoing approval.
+
+Example
+QuestionVersion = 3Approval Status = Approved
+
+Business Rules
+Approval records must always reference a specific version.
+Approval history is immutable.
+Historical approval records remain preserved.
+
+DD-A4
+RESULT PUBLICATION AUDITABILITY
+Affected Table
+assessment_results
+
+New Column
+Column
+Data Type
+Nullable
+published_by
+BIGINT UNSIGNED
+Yes
+
+Purpose
+Provides publication traceability.
+
+Business Rules
+Results may be reviewed before publication.
+Publication actions must be auditable.
+Publication actions shall generate audit log entries.
+
+DD-A5
+ATTACHMENT VERSION LINEAGE
+Affected Table
+attachments
+
+Existing Versioning Columns
+version_numberis_current_version
+
+New Column
+Column
+Data Type
+Nullable
+parent_attachment_id
+BIGINT UNSIGNED
+Yes
+
+Purpose
+Supports attachment version lineage tracking.
+
+Example
+ArchitectureDiagram_v1        ↓ArchitectureDiagram_v2        ↓ArchitectureDiagram_v3
+
+Business Rules
+Historical versions must remain accessible.
+Only one version within a chain may have:
+is_current_version = 1
+Version history must remain intact.
+
+DD-A6
+IMPORT ERROR DETAIL TRACKING
+Affected Table
+import_jobs
+
+Existing Column
+error_summary
+
+New Column
+Column
+Data Type
+Nullable
+error_details_json
+JSON
+Yes
+
+Purpose
+Stores structured validation failures.
+
+Example Structure
+[{"row":15,"field":"question_type","error":"Invalid value"},{"row":22,"field":"difficulty_level","error":"Required field missing"}]
+
+Benefits
+Better troubleshooting
+Better import diagnostics
+Better administrative UX
+
+DD-A7
+ASSIGNMENT RETAKE GOVERNANCE
+Affected Table
+assessment_assignments
+
+New Business Rule
+Completion of an assignment does not automatically prevent future assessment attempts.
+
+Future Extension Support
+The platform may later support:
+Allow RetakesMaximum AttemptsCooldown PeriodRetake Approval Required
+without requiring structural redesign.
+
+VALIDATION RESULTS
+UUID Standardization
+PASS
+
+Content Approval Traceability
+PASS
+
+Question Selection Governance
+PASS
+
+Result Publication Auditability
+PASS
+
+Attachment Version Lineage
+PASS
+
+Import Diagnostics
+PASS
+
+Retake Governance
+PASS
+
+VERSION UPDATE
+Previous Version
+Data Dictionary v1.0
+
+Updated Version
+Data Dictionary v1.1
+
+Status
+FINAL
+
+APPROVAL STATUS
+Approved For:
+MySQL Schema Design
+Database Migration Design
+API Contract Design
+UI/UX Development
+Cursor AI Development
+Production Deployment
+
+END OF DATA DICTIONARY AMENDMENT v1.1
+END OF DATA DICTIONARY v1.1 FINAL

@@ -1,0 +1,116 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+001_SECURITY_SCHEMA.SQL
+PART 2 – RBAC (ROLES, PERMISSIONS, USER_ROLES, ROLE_PERMISSIONS)
+VERSION 1.0
+Module
+Security & User Management
+Tables
+rolespermissionsuser_rolesrole_permissions
+Depends On
+001_SECURITY_SCHEMA.SQL – PART 1(users, user_profiles)
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+ROLES
+CREATETABLEroles(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    role_name VARCHAR(100) NOTNULL,    role_code VARCHAR(100) NOTNULL,    role_type VARCHAR(50) NOTNULLDEFAULT'Custom',    description TEXT NULL,    display_order INTNOTNULLDEFAULT0,    created_by BIGINT UNSIGNED NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_roles_uuidUNIQUE (uuid),CONSTRAINT ux_roles_role_nameUNIQUE (role_name),CONSTRAINT ux_roles_role_codeUNIQUE (role_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ROLES INDEXES
+CREATEINDEX ix_roles_is_activeONroles(is_active);CREATEINDEX ix_roles_role_typeONroles(role_type);CREATEINDEX ix_roles_display_orderONroles(display_order);
+
+ROLES AUDIT FOREIGN KEYS
+ALTERTABLErolesADDCONSTRAINT fk_roles_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLErolesADDCONSTRAINT fk_roles_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLErolesADDCONSTRAINT fk_roles_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+PERMISSIONS
+CREATETABLE permissions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    permission_name VARCHAR(150) NOTNULL,    permission_code VARCHAR(150) NOTNULL,    module_name VARCHAR(100) NOTNULL,    description TEXT NULL,    created_by BIGINT UNSIGNED NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_permissions_uuidUNIQUE (uuid),CONSTRAINT ux_permissions_codeUNIQUE (permission_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+PERMISSIONS INDEXES
+CREATEINDEX ix_permissions_moduleON permissions(module_name);CREATEINDEX ix_permissions_is_activeON permissions(is_active);
+
+PERMISSIONS AUDIT FOREIGN KEYS
+ALTERTABLE permissionsADDCONSTRAINT fk_permissions_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE permissionsADDCONSTRAINT fk_permissions_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE permissionsADDCONSTRAINT fk_permissions_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+USER_ROLES
+CREATETABLE user_roles(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NOTNULL,    role_id BIGINT UNSIGNED NOTNULL,    assigned_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    assigned_by BIGINT UNSIGNED NULL,    effective_from DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    effective_to DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_user_roles_uuidUNIQUE (uuid),CONSTRAINT ux_user_roles_user_roleUNIQUE (user_id, role_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+USER_ROLES FOREIGN KEYS
+ALTERTABLE user_rolesADDCONSTRAINT fk_user_roles_userFOREIGNKEY (user_id)REFERENCES users(id);ALTERTABLE user_rolesADDCONSTRAINT fk_user_roles_roleFOREIGNKEY (role_id)REFERENCESroles(id);ALTERTABLE user_rolesADDCONSTRAINT fk_user_roles_assigned_byFOREIGNKEY (assigned_by)REFERENCES users(id);
+
+USER_ROLES INDEXES
+CREATEINDEX ix_user_roles_userON user_roles(user_id);CREATEINDEX ix_user_roles_roleON user_roles(role_id);CREATEINDEX ix_user_roles_activeON user_roles(is_active);CREATEINDEX ix_user_roles_effective_toON user_roles(effective_to);
+
+ROLE_PERMISSIONS
+CREATETABLE role_permissions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    role_id BIGINT UNSIGNED NOTNULL,    permission_id BIGINT UNSIGNED NOTNULL,    assigned_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    assigned_by BIGINT UNSIGNED NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_role_permissions_uuidUNIQUE (uuid),CONSTRAINT ux_role_permissions_role_permissionUNIQUE (role_id, permission_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ROLE_PERMISSIONS FOREIGN KEYS
+ALTERTABLE role_permissionsADDCONSTRAINT fk_role_permissions_roleFOREIGNKEY (role_id)REFERENCESroles(id);ALTERTABLE role_permissionsADDCONSTRAINT fk_role_permissions_permissionFOREIGNKEY (permission_id)REFERENCES permissions(id);ALTERTABLE role_permissionsADDCONSTRAINT fk_role_permissions_assigned_byFOREIGNKEY (assigned_by)REFERENCES users(id);
+
+ROLE_PERMISSIONS INDEXES
+CREATEINDEX ix_role_permissions_roleON role_permissions(role_id);CREATEINDEX ix_role_permissions_permissionON role_permissions(permission_id);CREATEINDEX ix_role_permissions_activeON role_permissions(is_active);
+
+ROLE TYPE VALUES
+Application validation shall enforce:
+SystemCustom
+
+SYSTEM ROLES
+The following roles are protected system roles:
+SUPER_ADMINASSESSMENT_ADMINUSER
+
+PERMISSION NAMING STANDARD
+Format:
+module.action
+Examples:
+technology.createtechnology.edittechnology.publishassessment.createassessment.editassessment.publishquestion.createquestion.editassignment.createreview.approvereport.export
+
+ROLE GOVERNANCE RULES
+System Roles
+System roles:
+SUPER_ADMINASSESSMENT_ADMINUSER
+cannot be deleted.
+
+Custom Roles
+Custom roles may be:
+CreatedEditedDeactivated
+
+Active Assignments
+Roles having active user assignments:
+user_roles.is_active = 1
+cannot be deleted.
+They must be deactivated instead.
+
+PERMISSION GOVERNANCE RULES
+Permissions are:
+Soft Deletable
+but:
+permission_code
+must never be reused.
+
+ROLE ASSIGNMENT HISTORY RULES
+Historical assignments are preserved.
+Removing a role from a user shall:
+Set is_active = 0Populate effective_to
+No records are physically deleted.
+
+RECOMMENDED SEED DATA
+Roles
+SUPER_ADMINASSESSMENT_ADMINUSER
+
+Role Types
+SUPER_ADMIN      -> SystemASSESSMENT_ADMIN -> SystemUSER             -> System
+
+Permission Categories
+TechnologyAssessmentSectionQuestionBankQuestionAssignmentReviewUserReportSystemAuditNotification
+
+VALIDATION CHECKLIST
+✓ MySQL 8 Compatible
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ Role Type Support Added
+✓ Custom Role Support Added
+✓ Permission Taxonomy Defined
+✓ RBAC Normalization Complete
+✓ FK Strategy Applied
+✓ Index Strategy Applied
+✓ Hostinger Compatible
+
+END OF 001_SECURITY_SCHEMA.SQL – PART 2

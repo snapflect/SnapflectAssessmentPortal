@@ -1,0 +1,156 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+009_INTEGRATION_AUDIT_SCHEMA.SQL
+PART 1 – API SECURITY & WEBHOOK FOUNDATION
+Version 1.0
+
+MODULE
+Integration & Audit
+
+TABLES
+api_clientsapi_keyswebhookswebhook_deliveries
+
+DEPENDS ON
+001_SECURITY_SCHEMA.SQLuserspermissions002_GOVERNANCE_FOUNDATION_SCHEMA.SQL
+
+PURPOSE
+This module establishes the external integration foundation.
+It provides:
+API Client GovernanceAPI Key SecurityAPI Key RotationScope-Based AuthorizationWebhook ManagementWebhook SecurityWebhook Delivery TrackingIntegration Auditability
+
+API_CLIENTS
+Purpose
+Represents logical external systems consuming Snapflect APIs.
+Examples:
+HRMS PlatformLearning Management SystemCertification PortalPartner Assessment Platform
+
+CREATETABLE api_clients(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    client_code VARCHAR(100) NOTNULL,    client_name VARCHAR(255) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'Partner',    rate_limit_per_minute INTNULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_api_clients_uuidUNIQUE (uuid),CONSTRAINT ux_api_clients_codeUNIQUE (client_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+API_CLIENTS FOREIGN KEYS
+ALTERTABLE api_clientsADDCONSTRAINT fk_api_clients_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE api_clientsADDCONSTRAINT fk_api_clients_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+API_CLIENTS INDEXES
+CREATEINDEX ix_api_clients_statusON api_clients(status);CREATEINDEX ix_api_clients_ownershipON api_clients(ownership_type);CREATEINDEX ix_api_clients_rate_limitON api_clients(rate_limit_per_minute);
+
+OWNERSHIP TYPES
+Application validation shall enforce:
+InternalPartnerCustomerSystem
+
+CLIENT STATUS VALUES
+Application validation shall enforce:
+DraftActiveSuspendedRevoked
+
+API_KEYS
+Purpose
+Stores hashed API credentials.
+Supports:
+Key RotationKey ExpiryKey RevocationScope-Based Authorization
+
+Security Rule
+Plaintext API keys must never be stored.
+Only hashed values may be persisted.
+
+CREATETABLE api_keys(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    api_client_id BIGINT UNSIGNED NOTNULL,    key_hash VARCHAR(512) NOTNULL,    scope_json JSON NOTNULL,    expiry_date DATETIME(3) NULL,    rotated_from_key_id BIGINT UNSIGNED NULL,    status VARCHAR(50)NOTNULLDEFAULT'Active',    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    revoked_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_api_keys_uuidUNIQUE (uuid),CONSTRAINT ux_api_keys_hashUNIQUE (key_hash))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+API_KEYS FOREIGN KEYS
+ALTERTABLE api_keysADDCONSTRAINT fk_api_keys_clientFOREIGNKEY (api_client_id)REFERENCES api_clients(id);ALTERTABLE api_keysADDCONSTRAINT fk_api_keys_rotated_fromFOREIGNKEY (rotated_from_key_id)REFERENCES api_keys(id);
+
+API_KEYS INDEXES
+CREATEINDEX ix_api_keys_clientON api_keys(api_client_id);CREATEINDEX ix_api_keys_expiryON api_keys(expiry_date);CREATEINDEX ix_api_keys_statusON api_keys(status);CREATEINDEX ix_api_keys_revokedON api_keys(revoked_date);
+
+API KEY STATUS VALUES
+Application validation shall enforce:
+ActiveExpiredRevoked
+
+SCOPE GOVERNANCE
+Example:
+{"permissions":["Assessment.Read","Assessment.Write","Certificate.Read"]}
+Stored in:
+scope_json
+
+WEBHOOKS
+Purpose
+Represents outbound webhook subscriptions.
+Examples:
+ASSESSMENT_COMPLETEDCERTIFICATE_ISSUEDCERTIFICATE_REVOKEDUSER_CREATED
+
+CREATETABLE webhooks(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    webhook_name VARCHAR(255) NOTNULL,    event_code VARCHAR(100) NOTNULL,    target_url VARCHAR(2000) NOTNULL,    secret_hash VARCHAR(512) NOTNULL,    webhook_version VARCHAR(20)NOTNULLDEFAULT'v1',    max_retry_count INTNOTNULLDEFAULT3,    status VARCHAR(50)NOTNULLDEFAULT'Active',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_webhooks_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+WEBHOOKS FOREIGN KEYS
+ALTERTABLE webhooksADDCONSTRAINT fk_webhooks_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE webhooksADDCONSTRAINT fk_webhooks_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+WEBHOOKS INDEXES
+CREATEINDEX ix_webhooks_eventON webhooks(event_code);CREATEINDEX ix_webhooks_statusON webhooks(status);CREATEINDEX ix_webhooks_versionON webhooks(webhook_version);
+
+WEBHOOK STATUS VALUES
+Application validation shall enforce:
+ActiveInactiveSuspended
+
+WEBHOOK SECURITY GOVERNANCE
+The following field:
+secret_hash
+stores a hashed webhook signing secret.
+Plaintext webhook secrets must never be stored.
+
+WEBHOOK_DELIVERIES
+Purpose
+Tracks webhook delivery attempts.
+Supports:
+Retry ProcessingFailure DiagnosticsPerformance MonitoringTraceability
+
+CREATETABLE webhook_deliveries(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    webhook_id BIGINT UNSIGNED NOTNULL,    correlation_id CHAR(36) NULL,    attempt_number INTNOTNULL,    delivery_status VARCHAR(50) NOTNULL,    response_code INTNULL,    response_time_ms BIGINT NULL,    response_body TEXT NULL,    response_headers_json JSON NULL,    delivery_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_webhook_deliveries_uuidUNIQUE (uuid),CONSTRAINT ux_webhook_delivery_attemptUNIQUE        (            webhook_id,            correlation_id,            attempt_number        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+WEBHOOK_DELIVERIES FOREIGN KEYS
+ALTERTABLE webhook_deliveriesADDCONSTRAINT fk_webhook_deliveries_webhookFOREIGNKEY (webhook_id)REFERENCES webhooks(id);
+
+WEBHOOK_DELIVERIES INDEXES
+CREATEINDEX ix_webhook_deliveries_statusON webhook_deliveries(delivery_status);CREATEINDEX ix_webhook_deliveries_dateON webhook_deliveries(delivery_date);CREATEINDEX ix_webhook_deliveries_correlationON webhook_deliveries(correlation_id);CREATEINDEX ix_webhook_deliveries_response_codeON webhook_deliveries(response_code);
+
+DELIVERY STATUS VALUES
+Application validation shall enforce:
+DeliveredFailedRetryingExpired
+
+RESPONSE DIAGNOSTICS
+Stored for troubleshooting:
+response_coderesponse_time_msresponse_bodyresponse_headers_json
+
+CORRELATION GOVERNANCE
+correlation_id
+links:
+Business Event        ↓Webhook        ↓Delivery Attempts        ↓External System Processing
+for end-to-end traceability.
+
+VALIDATION CHECKLIST
+✓ API Client Governance Applied
+✓ API Key Rotation Applied
+✓ API Key Hashing Applied
+✓ Scope-Based Authorization Applied
+✓ Webhook Security Applied
+✓ Retry Support Applied
+✓ Delivery Diagnostics Applied
+✓ Correlation Tracking Applied
+✓ Audit Compatibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+009_INTEGRATION_AUDIT_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+api_clientsapi_keyswebhookswebhook_deliveries
+Integration & Audit Module Completion:
+50%
+
+NEXT STEP
+Perform architecture review for:
+integration_eventsaudit_eventsdata_exportsdata_imports
+before generating:
+009_INTEGRATION_AUDIT_SCHEMA.SQL – PART 2
+This phase will establish:
+Enterprise Audit TrailCompliance LoggingIntegration Event TrackingImport ProcessingExport ProcessingRegulatory Traceability
+and complete the Integration & Audit module.
+
+END OF DOCUMENT

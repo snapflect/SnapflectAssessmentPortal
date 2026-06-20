@@ -1,0 +1,307 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+014_PLATFORM_API_ARCHITECTURE
+Version 1.0
+Status: APPROVED BASELINE
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Platform API Architecture
+Version
+1.0
+Status
+FINAL
+Based On
+PRD v1.2 FINAL
+Based On
+ERD v1.1 FINAL
+Based On
+Database Standards v1.1 FINAL
+Based On
+013_PLATFORM_SOLUTION_ARCHITECTURE v1.0
+Applies To
+Backend Development
+Applies To
+Frontend Development
+Applies To
+Cursor AI Development
+Applies To
+Future Integrations
+
+1. PURPOSE
+This document defines the authoritative API architecture for the Snapflect Assessment Portal.
+The API layer acts as the contract between:
+FrontendBackendMobile ApplicationsThird Party IntegrationsFuture External Systems
+This document establishes:
+API StandardsAPI VersioningAuthenticationAuthorizationRequest ContractsResponse ContractsError ContractsIntegration Standards
+
+2. API DESIGN PRINCIPLES
+All APIs shall follow:
+REST FirstResource Based DesignVersioned APIsStateless CommunicationJSON Request/ResponsePredictable ContractsBackward CompatibilitySecurity First
+
+3. BASE URL STANDARD
+Production:
+https://snapflect.com/api/v1
+Development:
+https://localhost/api/v1
+Future Versions:
+/api/v2/api/v3
+
+4. API VERSIONING STRATEGY
+Current Version
+v1
+All endpoints must begin with:
+/api/v1/
+Example:
+GET /api/v1/assessments
+
+Versioning Rules
+Breaking changes require:
+New API Version
+Examples:
+v1 → v2
+Non-breaking changes:
+Optional FieldsAdditional Response Properties
+may remain within same version.
+
+5. REQUEST ARCHITECTURE
+Request Format
+Content-Type: application/json
+
+Standard Headers
+Authorization: Bearer {token}Content-Type: application/jsonAccept: application/json
+
+6. RESPONSE ARCHITECTURE
+Success Response
+{"success":true,"message":"Operation completed successfully","data":{}}
+
+Success Collection Response
+{"success":true,"data":[],"pagination":{}}
+
+Error Response
+{"success":false,"message":"Validation failed","errors":[]}
+
+7. PAGINATION STANDARD
+Request
+GET /api/v1/questions?page=1&pageSize=25
+
+Response
+{"success":true,"data":[],"pagination":{"page":1,"pageSize":25,"totalRecords":500,"totalPages":20}}
+
+8. FILTERING STANDARD
+Example:
+GET /api/v1/questions?technologyId=5&status=Published
+
+Rules
+Filtering parameters:
+OptionalCase Sensitive Where ApplicableDatabase Indexed Where Possible
+
+9. SORTING STANDARD
+Example:
+GET /api/v1/questions?sortBy=createdDate&sortOrder=desc
+
+Allowed Values
+ascdesc
+
+10. SEARCH STANDARD
+Example:
+GET /api/v1/questions?search=inheritance
+
+Rules
+Search must support:
+Partial MatchingCase Insensitive SearchIndexed Columns First
+
+11. AUTHENTICATION ARCHITECTURE
+Authentication Technology
+Laravel Sanctum
+
+Login Flow
+User Login      ↓Credential Validation      ↓Token Generation      ↓Authenticated Requests
+
+Login Endpoint
+POST /api/v1/auth/login
+
+Logout Endpoint
+POST /api/v1/auth/logout
+
+Current User Endpoint
+GET /api/v1/auth/me
+
+12. AUTHORIZATION ARCHITECTURE
+Based On:
+RBACRolesPermissions
+
+Authorization Layers
+MiddlewarePoliciesService Layer Validation
+
+Example
+Permission:Assessment.Create
+Required For:
+POST /api/v1/assessments
+
+13. VALIDATION ARCHITECTURE
+Validation Location:
+Laravel Form Requests
+Examples:
+CreateAssessmentRequestCreateQuestionRequestSubmitAttemptRequest
+
+Controllers Must Not
+Contain Validation Logic
+
+14. ERROR HANDLING ARCHITECTURE
+Standard Error Codes
+VALIDATION_ERRORUNAUTHORIZEDFORBIDDENNOT_FOUNDCONFLICTBUSINESS_RULE_VIOLATIONINTERNAL_SERVER_ERROR
+
+Example
+{"success":false,"code":"BUSINESS_RULE_VIOLATION","message":"Assessment already published."}
+
+15. RESOURCE ENDPOINT STANDARDS
+Each resource shall expose:
+GETPOSTPUTDELETE
+where applicable.
+
+Example
+Assessment Resource
+GET    /api/v1/assessmentsGET    /api/v1/assessments/{id}POST   /api/v1/assessmentsPUT    /api/v1/assessments/{id}DELETE /api/v1/assessments/{id}
+
+16. SOFT DELETE RULES
+Aligned With:
+Database Standards v1.1
+
+API Delete
+DELETE /api/v1/questions/{id}
+must perform:
+Soft Delete
+
+Physical Deletes
+Not permitted through standard APIs.
+
+17. VERSIONING ENDPOINTS
+Applicable To:
+AssessmentsSectionsQuestion BanksQuestions
+
+Example
+POST /api/v1/questions/{id}/new-version
+
+Rule
+New version creation:
+Creates New RecordPreserves HistoryMaintains Audit Trail
+
+18. SNAPSHOT ARCHITECTURE RULES
+Snapshot Tables:
+attempt_snapshots
+
+API Restrictions
+Snapshots:
+ImmutableRead Only After Submission
+
+Forbidden Operations
+Update SnapshotDelete Snapshot
+
+19. FILE UPLOAD ARCHITECTURE
+Supported Files:
+ImagesDocumentsCertificatesEvidence Files
+
+Upload Endpoint
+POST /api/v1/files/upload
+
+Storage Strategy
+Metadata → DatabasePhysical File → Storage Folder
+
+20. AUDIT INTEGRATION
+All critical operations shall generate:
+audit_events
+Examples:
+Assessment PublishQuestion ApprovalAttempt SubmissionCertificate IssueInvoice Creation
+
+21. NOTIFICATION INTEGRATION
+Business events may publish:
+notification_queue
+records.
+
+Examples:
+Assessment AssignedAssessment CompletedCertificate IssuedSubscription Renewed
+
+22. MODULE API STRUCTURE
+Security
+/api/v1/auth/api/v1/users/api/v1/roles/api/v1/permissions
+
+Governance
+/api/v1/settings/api/v1/templates
+
+Assessment Definition
+/api/v1/technologies/api/v1/assessments/api/v1/sections/api/v1/question-banks/api/v1/questions
+
+Assessment Execution
+/api/v1/assignments/api/v1/attempts/api/v1/answers/api/v1/draft-saves
+
+Evaluation
+/api/v1/evaluations/api/v1/results
+
+Certification
+/api/v1/certificates/api/v1/certificate-verification
+
+Notifications
+/api/v1/notifications
+
+Reporting
+/api/v1/reports/api/v1/dashboards/api/v1/kpis
+
+Audit
+/api/v1/audit-events
+
+Platform Operations
+/api/v1/system-announcements/api/v1/application-health
+
+AI Proctoring
+/api/v1/proctoring-sessions/api/v1/proctoring-events/api/v1/violations
+
+Billing
+/api/v1/subscriptions/api/v1/invoices/api/v1/payments
+
+23. RATE LIMITING STRATEGY
+Default:
+60 Requests / Minute
+Authenticated:
+120 Requests / Minute
+
+Sensitive Endpoints:
+LoginPassword ResetVerification
+may use stricter limits.
+
+24. CURSOR AI GOVERNANCE
+Cursor SHALL:
+Generate APIs From Approved ContractsGenerate DTOsGenerate Form RequestsGenerate ControllersGenerate Services
+
+Cursor SHALL NOT:
+Invent EndpointsInvent Business RulesChange Response ContractsChange Snapshot RulesChange RBAC Rules
+
+25. OPENAPI REQUIREMENT
+All APIs must ultimately be documented within:
+017_OPENAPI_MASTER_SPECIFICATION
+
+Swagger becomes:
+Single Source Of Truth
+for API consumers.
+
+26. PLATFORM API STATUS
+Aligned With:
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓013_PLATFORM_SOLUTION_ARCHITECTURE✓Schemas 001–012✓
+
+APPROVAL STATUS
+Document:
+014_PLATFORM_API_ARCHITECTURE
+Version:
+v1.0
+Status:
+APPROVEDFROZEN
+
+NEXT STEP
+Proceed to:
+015_SCREEN_INVENTORY_AND_NAVIGATION v1.0
+This document will define:
+Application ScreensMenu StructureNavigation FlowsUser JourneysModule WorkflowsDashboard Architecture
+and will become the authoritative UI blueprint for Cursor AI frontend development.
+
+END OF DOCUMENT

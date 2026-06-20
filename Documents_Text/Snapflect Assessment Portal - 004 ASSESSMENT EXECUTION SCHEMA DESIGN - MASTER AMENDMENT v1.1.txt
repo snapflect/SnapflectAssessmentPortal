@@ -1,0 +1,251 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+004 ASSESSMENT EXECUTION SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+004 Assessment Execution Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Document
+004 Assessment Execution Schema Design v1.0
+Amendment Type
+Runtime Architecture Enhancement
+Approval Status
+Approved
+Effective Version
+004 Assessment Execution Schema v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all findings identified during:
+Assessment Execution Architecture Review v1.0
+The review identified several runtime enhancements that improve:
+Resume Accuracy
+Timer Management
+Assessment Retake Governance
+Submission Auditability
+Draft Management
+Enterprise Runtime Reliability
+No breaking architectural changes are introduced.
+
+2. ASSESSMENT_ATTEMPTS ENHANCEMENTS
+2.1 Maximum Score Support
+New Column
+max_score DECIMAL(10,2) NULL
+Purpose
+Stores the maximum achievable score for the assessment attempt.
+Example
+Candidate Score = 38Maximum Score = 50
+Supports:
+38 / 5076%
+without recalculation.
+
+2.2 Submission User Tracking
+New Column
+submitted_by BIGINT UNSIGNED NULL
+Purpose
+Tracks who performed the submission.
+Supported Scenarios
+Candidate SubmissionAdministrator SubmissionSystem Submission
+
+2.3 Auto Submission Timestamp
+New Column
+auto_submitted_date DATETIME(3) NULL
+Purpose
+Tracks the exact timestamp of automatic submission events.
+Example
+Timer Expired        ↓Assessment Automatically Submitted        ↓Timestamp Recorded
+
+2.4 Activity Tracking
+New Column
+last_activity_date DATETIME(3) NULL
+Purpose
+Tracks latest candidate interaction.
+Future Uses
+Session TimeoutIdle DetectionConcurrency MonitoringSecurity Monitoring
+
+2.5 Runtime Resume Enhancement
+Existing Design
+current_question_version_id
+Problem
+Question Version represents content.
+Resume requires runtime state.
+
+Approved Replacement
+current_attempt_question_id BIGINT UNSIGNED NULL
+References
+assessment_attempt_questions.id
+Benefit
+Resume precisely at:
+Actual Runtime Question
+instead of:
+Question Definition
+
+3. ATTEMPT NUMBER GOVERNANCE
+New Unique Constraint
+UNIQUE(    user_id,    assessment_version_id,    attempt_number)
+
+Purpose
+Ensures:
+Attempt 1Attempt 2Attempt 3
+remain unique for a user and assessment version.
+
+4. ATTEMPT_TIMERS ENHANCEMENT
+New Column
+timer_status VARCHAR(50)
+
+Supported Values
+ActivePausedExpiredCompleted
+
+Runtime Workflow
+Active    ↓Paused    ↓Active    ↓Completed
+or
+Active    ↓Expired
+
+5. QUESTION STATUS ENHANCEMENT
+Existing Statuses
+NotVisitedVisitedAnsweredSkipped
+
+New Status
+MarkedForReview
+
+Purpose
+Supports:
+Answer LaterReview LaterFlagged Questions
+
+Runtime Example
+Question Opened        ↓Marked For Review        ↓Candidate Returns Later
+
+6. DRAFT SAVE ENHANCEMENT
+New Constraint
+UNIQUE(attempt_id)
+
+Purpose
+Stores only the latest draft snapshot.
+
+Behavior
+Draft Save #1        ↓Draft Save #2        ↓Draft Save #3
+Latest save replaces previous snapshot.
+
+Benefits
+Reduced StorageFaster ResumeSimpler Recovery
+
+7. GOVERNANCE RULES
+7.1 Terminal State Rule
+The following statuses are terminal:
+EvaluatedExpiredCancelled
+
+Rule
+Runtime engine must prevent transition back to:
+InProgress
+or
+Paused
+
+7.2 Auto Submission Rule
+When:
+submission_reason = AutoSubmit
+then:
+auto_submitted_date
+must be populated.
+
+7.3 Resume Rule
+Runtime engine must use:
+current_attempt_question_id
+for all resume operations.
+
+Prohibited
+question_version_id
+must never be used as a resume pointer.
+
+7.4 Draft Save Rule
+Only one active draft snapshot may exist per attempt.
+New saves overwrite previous snapshots.
+
+8. UPDATED EXECUTION ARCHITECTURE
+Approved Runtime Hierarchy
+Assessment Version        ↓Assessment Attempt        ↓Attempt Section        ↓Attempt Question Bank        ↓Attempt Question        ↓Question Response
+
+Resume Tracking
+Assessment Attempt        ↓Current Attempt Question        ↓Assessment Attempt Question
+
+Timer Tracking
+Assessment Attempt        ↓Attempt Timer
+
+9. IMPACT ANALYSIS
+Artifact
+Impact
+PRD v1.2 FINAL
+No Change
+ERD v1.1 FINAL
+Clarification Only
+Database Standards v1.1 FINAL
+No Change
+Data Dictionary v1.1 FINAL
+Future Update
+Assessment Definition Schema v1.1 FINAL
+No Change
+Assessment Execution Design v1.0
+Updated
+Runtime Module
+Improved
+Reporting Module
+Improved
+Analytics Module
+Improved
+Audit Module
+Improved
+
+10. FINAL VALIDATION SUMMARY
+Area
+Result
+Runtime Snapshot Architecture
+PASS
+Resume Accuracy
+PASS
+Timer Management
+PASS
+Draft Recovery
+PASS
+Submission Auditability
+PASS
+Retake Governance
+PASS
+Historical Replay
+PASS
+Reporting Compatibility
+PASS
+Security Compatibility
+PASS
+Enterprise Readiness
+PASS
+
+11. APPROVED EXECUTION BASELINE
+The approved runtime tables remain:
+assessment_attemptsattempt_timersassessment_attempt_sectionsassessment_attempt_question_banksassessment_attempt_questionsquestion_responsesdraft_saves
+with all enhancements merged.
+
+APPROVAL STATUS
+Document:
+004 Assessment Execution Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVED
+MERGED INTO BASELINE
+
+FINAL MODULE STATUS
+004 Assessment Execution SchemaVersion 1.1FINALAPPROVED FOR DDL GENERATION
+
+NEXT STEP
+Generate:
+004_ASSESSMENT_EXECUTION_SCHEMA.SQL – PART 1
+Tables:
+assessment_attemptsattempt_timers
+These tables establish the runtime execution engine foundation and all subsequent execution tables will depend upon them.
+
+END OF DOCUMENT

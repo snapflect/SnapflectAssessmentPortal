@@ -1,0 +1,282 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRD
+PART 5 AMENDMENT v1.2
+DATABASE NORMALIZATION & ERD ALIGNMENT UPDATE
+This amendment updates Part 5 Amendment v1.1 and becomes part of the authoritative document.
+Purpose:
+To align the final database architecture, ERD generation rules, and schema design with the approved architecture decisions.
+This amendment supersedes any conflicting references from previous versions.
+
+A5.19 DATABASE NORMALIZATION PRINCIPLES
+The platform database architecture shall prioritize:
+Normalization
+Referential Integrity
+Auditability
+Versioning
+Snapshot Isolation
+Extensibility
+
+Design Objective
+Avoid storing information that can be reliably derived from existing relationships.
+The system shall prefer:
+Derived Analytics
+over
+Persisted Analytics
+unless a measurable performance requirement justifies persistence.
+
+A5.20 QUESTION USAGE ANALYSIS ARCHITECTURE
+Previous Design
+Earlier versions referenced:
+question_usage_analysis
+as a database entity.
+
+Approved Design
+The following entity is officially removed:
+REMOVED:
+question_usage_analysis
+
+Replacement
+Question Usage Analysis Service
+Classification:
+Derived Analytics Service
+Persistence:
+None
+
+Service Responsibilities
+Calculate dynamically:
+Technology Count
+Assessment Count
+Section Count
+Question Bank Count
+Question Usage Count
+Attempt Count
+Historical Usage
+Published Usage
+Draft Usage
+
+Data Sources
+questions
+question_bank_questions
+question_banks
+assessment_sections
+assessments
+technologies
+assessment_attempts
+assessment_results
+
+Architectural Rule
+No physical database table shall exist for:
+question_usage_analysis
+
+A5.21 QUESTION ANSWER NORMALIZATION RULES
+Purpose
+Prevent answer duplication and maintain normalized question structures.
+
+Multiple Choice Questions
+Question Types:
+Single Choice
+Multiple Choice
+True/False
+
+Storage Strategy
+Correct answers shall be stored in:
+question_options
+using:
+is_correct
+
+Example
+Option A
+is_correct = 0
+Option B
+is_correct = 1
+Option C
+is_correct = 0
+Option D
+is_correct = 0
+
+Rule
+No record shall be created in:
+question_answers
+for these question types.
+
+Non-MCQ Questions
+Question Types:
+Fill In Blank
+Descriptive
+Code Snippet
+Scenario Based
+Case Study
+
+Storage Strategy
+Correct answers shall be stored in:
+question_answers
+
+Example
+Question:
+What is Dependency Injection?
+Answer:
+A design pattern implementing inversion of control.
+
+Rule
+question_options is optional for these question types.
+question_answers becomes the authoritative answer source.
+
+Data Integrity Rule
+question_options
+and
+question_answers
+must never duplicate answer definitions.
+Only one answer source shall be authoritative for a given question.
+
+A5.22 UPDATED ENTITY INVENTORY
+Removed Entity
+question_usage_analysis
+
+Final Entity Classification
+Master Data
+users
+user_profiles
+roles
+permissions
+user_roles
+role_permissions
+user_sessions
+password_resets
+email_verifications
+technologies
+assessments
+assessment_sections
+question_banks
+questions
+question_bank_questions
+question_options
+question_answers
+content_approvals
+assessment_assignments
+assessment_publish_validations
+
+Runtime Data
+assessment_attempts
+attempt_snapshots
+attempt_sections
+attempt_questions
+attempt_answers
+assessment_results
+assessment_reviews
+assessment_review_comments
+assessment_ratings
+review_acknowledgements
+assignment_activity_logs
+randomization_audit_logs
+
+Governance Data
+notifications
+notification_templates
+notification_logs
+audit_logs
+activity_logs
+system_settings
+attachments
+file_uploads
+import_jobs
+export_jobs
+report_jobs
+report_exports
+system_health_logs
+
+Derived Services (Non-Persistent)
+Question Usage Analysis Service
+Progress Calculation Engine
+Section Pass Evaluation Engine
+Randomization Engine
+Snapshot Engine
+Scoring Engine
+
+A5.23 ERD GENERATION CONSTRAINTS
+The ERD must comply with all architecture rules.
+
+Mandatory Requirements
+All entities must have a clear ownership boundary.
+All entities must support auditability.
+All entities must support soft delete where applicable.
+All relationships must be explicitly defined.
+All foreign keys must be represented.
+All many-to-many relationships must use mapping tables.
+
+Explicit Constraints
+Do NOT create:
+question_usage_analysis
+table.
+Do NOT duplicate answer storage.
+Do NOT create circular relationships.
+Do NOT allow direct scoring against mutable master data.
+
+A5.24 SCHEMA GENERATION CONSTRAINTS
+The database schema must enforce:
+Referential Integrity
+Unique Constraints
+Foreign Keys
+Soft Deletes
+Versioning
+Snapshot Isolation
+Assignment Isolation
+
+Schema Validation Checklist
+Before schema approval:
+✓ No duplicate entities
+✓ No redundant tables
+✓ No answer duplication
+✓ No circular dependencies
+✓ Snapshot architecture preserved
+✓ Assignment architecture preserved
+✓ Section pass architecture preserved
+
+A5.25 CURSOR AI IMPLEMENTATION CONSTRAINTS
+Cursor-generated code must follow:
+Master PRD Version 1.2
+ERD Version 1.0
+Database Schema Version 1.0
+RBAC Matrix
+API Contract Specifications
+
+Prohibited Implementations
+Do not generate:
+question_usage_analysis table
+Do not bypass snapshot architecture
+Do not bypass RBAC checks
+Do not store duplicate answers
+Do not directly modify published versions
+
+A5.26 FINAL ARCHITECTURE FREEZE
+Architecture Status:
+Frozen
+
+Approved For
+ERD Design
+Database Schema Design
+RBAC Matrix Design
+API Contract Design
+Screen Inventory Design
+Development Planning
+Cursor AI Implementation
+
+Change Control
+Any future architectural changes shall require:
+Architecture Review
+Impact Analysis
+PRD Amendment
+Approval
+before implementation.
+
+A5.27 DOCUMENT VERSION UPDATE
+Master PRD Version:
+1.2
+Status:
+Final
+Architecture Status:
+Approved
+Implementation Readiness:
+Approved
+
+END OF PART 5 AMENDMENT v1.2
+END OF MASTER ENTERPRISE PRD VERSION 1.2 FINAL

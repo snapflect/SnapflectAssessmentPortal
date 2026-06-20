@@ -1,0 +1,140 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+005_EVALUATION_SCHEMA.SQL
+PART 2 – RULE ASSIGNMENT & EVALUATION PROCESSING
+Version 1.0
+
+MODULE
+Evaluation
+
+TABLES
+```text id=“p2_001”assessment_evaluation_rules
+evaluation_jobs
+evaluation_results
+---# DEPENDS ON```text id="p2_002"005_EVALUATION_SCHEMA.SQL – PART 1evaluation_rulesevaluation_rule_versions004_ASSESSMENT_EXECUTION_SCHEMA.SQLassessment_attempts003_ASSESSMENT_DEFINITION_SCHEMA.SQLassessment_versions001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes:
+```text id=“p2_003”Rule Assignment
+Evaluation Processing
+Result Generation
+Re-Evaluation
+Certification Eligibility
+Historical Evaluation Traceability
+---# ASSESSMENT_EVALUATION_RULES## PurposeMaps Assessment Versions to Evaluation Rule Versions.Supports:```text id="p2_004"One Assessment        ↓Many Evaluation RulesOne Evaluation Rule        ↓Many Assessments
+Historical reproducibility is guaranteed through version references.
+
+```sql id=“p2_005”CREATE TABLE assessment_evaluation_rules(id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+uuid CHAR(36) NOT NULL,assessment_version_id BIGINT UNSIGNED NOT NULL,evaluation_rule_version_id BIGINT UNSIGNED NOT NULL,execution_order INT    NOT NULL DEFAULT 1,is_enabled TINYINT(1)    NOT NULL DEFAULT 1,created_by BIGINT UNSIGNED NOT NULL,created_date DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),PRIMARY KEY (id),CONSTRAINT ux_assessment_evaluation_rules_uuid    UNIQUE (uuid),CONSTRAINT ux_assessment_evaluation_rule_mapping    UNIQUE    (        assessment_version_id,        evaluation_rule_version_id    )
+)ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+---# ASSESSMENT_EVALUATION_RULES FOREIGN KEYS```sql id="p2_006"ALTER TABLE assessment_evaluation_rulesADD CONSTRAINT fk_assessment_eval_rules_assessmentFOREIGN KEY (assessment_version_id)REFERENCES assessment_versions(id);ALTER TABLE assessment_evaluation_rulesADD CONSTRAINT fk_assessment_eval_rules_rule_versionFOREIGN KEY (evaluation_rule_version_id)REFERENCES evaluation_rule_versions(id);ALTER TABLE assessment_evaluation_rulesADD CONSTRAINT fk_assessment_eval_rules_created_byFOREIGN KEY (created_by)REFERENCES users(id);
+
+ASSESSMENT_EVALUATION_RULES INDEXES
+```sql id=“p2_007”CREATE INDEX ix_assessment_eval_rules_assessmentON assessment_evaluation_rules(assessment_version_id);
+CREATE INDEX ix_assessment_eval_rules_rule_versionON assessment_evaluation_rules(evaluation_rule_version_id);
+CREATE INDEX ix_assessment_eval_rules_enabledON assessment_evaluation_rules(is_enabled);
+CREATE INDEX ix_assessment_eval_rules_execution_orderON assessment_evaluation_rules(execution_order);
+---# GOVERNANCE RULERules execute in ascending:```text id="p2_008"execution_order
+for the specific assessment.
+Assessment-level ordering overrides global ordering.
+
+EVALUATION_JOBS
+Purpose
+Tracks evaluation processing lifecycle.
+Supports:
+```text id=“p2_009”Auto Evaluation
+Manual Evaluation
+AI Evaluation
+Re-Evaluation
+---```sql id="p2_010"CREATE TABLE evaluation_jobs(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    assessment_attempt_id BIGINT UNSIGNED NOT NULL,    evaluation_rule_version_id BIGINT UNSIGNED NOT NULL,    job_type VARCHAR(50)        NOT NULL,    job_status VARCHAR(50)        NOT NULL DEFAULT 'Pending',    retry_count INT        NOT NULL DEFAULT 0,    started_date DATETIME(3) NULL,    completed_date DATETIME(3) NULL,    last_failure_reason TEXT NULL,    job_metadata_json JSON NULL,    created_by BIGINT UNSIGNED NULL,    created_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    PRIMARY KEY (id),    CONSTRAINT ux_evaluation_jobs_uuid        UNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+EVALUATION_JOBS FOREIGN KEYS
+```sql id=“p2_011”ALTER TABLE evaluation_jobsADD CONSTRAINT fk_evaluation_jobs_attemptFOREIGN KEY (assessment_attempt_id)REFERENCES assessment_attempts(id);
+ALTER TABLE evaluation_jobsADD CONSTRAINT fk_evaluation_jobs_rule_versionFOREIGN KEY (evaluation_rule_version_id)REFERENCES evaluation_rule_versions(id);
+ALTER TABLE evaluation_jobsADD CONSTRAINT fk_evaluation_jobs_created_byFOREIGN KEY (created_by)REFERENCES users(id);
+---# EVALUATION_JOBS INDEXES```sql id="p2_012"CREATE INDEX ix_evaluation_jobs_attemptON evaluation_jobs(assessment_attempt_id);CREATE INDEX ix_evaluation_jobs_statusON evaluation_jobs(job_status);CREATE INDEX ix_evaluation_jobs_typeON evaluation_jobs(job_type);CREATE INDEX ix_evaluation_jobs_started_dateON evaluation_jobs(started_date);CREATE INDEX ix_evaluation_jobs_completed_dateON evaluation_jobs(completed_date);
+
+JOB TYPE VALUES
+Application validation shall enforce:
+```text id=“p2_013”AutoEvaluation
+ManualEvaluation
+AIEvaluation
+ReEvaluation
+---# JOB STATUS VALUESApplication validation shall enforce:```text id="p2_014"PendingQueuedRunningCompletedFailedCancelled
+
+RETRY GOVERNANCE
+text id="p2_015" retry_count
+must increment on each retry attempt.
+Failure details must be stored in:
+text id="p2_016" last_failure_reason
+
+EVALUATION_RESULTS
+Purpose
+Stores immutable evaluation outcome snapshots.
+Supports:
+```text id=“p2_017”Result History
+Appeals
+Manual Corrections
+Re-Evaluation
+Certification
+---```sql id="p2_018"CREATE TABLE evaluation_results(    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,    uuid CHAR(36) NOT NULL,    assessment_attempt_id BIGINT UNSIGNED NOT NULL,    evaluation_job_id BIGINT UNSIGNED NOT NULL,    evaluation_rule_version_id BIGINT UNSIGNED NOT NULL,    result_version INT        NOT NULL DEFAULT 1,    total_score DECIMAL(10,2) NULL,    max_score DECIMAL(10,2) NULL,    percentage DECIMAL(5,2) NULL,    result_status VARCHAR(50)        NOT NULL DEFAULT 'Pending',    is_certification_eligible TINYINT(1)        NOT NULL DEFAULT 0,    evaluated_by BIGINT UNSIGNED NULL,    evaluated_date DATETIME(3) NULL,    result_summary TEXT NULL,    result_details_json JSON NULL,    metadata_json JSON NULL,    superseded_by_result_id BIGINT UNSIGNED NULL,    created_date DATETIME(3)        NOT NULL DEFAULT CURRENT_TIMESTAMP(3),    PRIMARY KEY (id),    CONSTRAINT ux_evaluation_results_uuid        UNIQUE (uuid),    CONSTRAINT ux_evaluation_results_version        UNIQUE        (            assessment_attempt_id,            result_version        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+EVALUATION_RESULTS FOREIGN KEYS
+```sql id=“p2_019”ALTER TABLE evaluation_resultsADD CONSTRAINT fk_evaluation_results_attemptFOREIGN KEY (assessment_attempt_id)REFERENCES assessment_attempts(id);
+ALTER TABLE evaluation_resultsADD CONSTRAINT fk_evaluation_results_jobFOREIGN KEY (evaluation_job_id)REFERENCES evaluation_jobs(id);
+ALTER TABLE evaluation_resultsADD CONSTRAINT fk_evaluation_results_rule_versionFOREIGN KEY (evaluation_rule_version_id)REFERENCES evaluation_rule_versions(id);
+ALTER TABLE evaluation_resultsADD CONSTRAINT fk_evaluation_results_evaluated_byFOREIGN KEY (evaluated_by)REFERENCES users(id);
+ALTER TABLE evaluation_resultsADD CONSTRAINT fk_evaluation_results_supersededFOREIGN KEY (superseded_by_result_id)REFERENCES evaluation_results(id);
+---# EVALUATION_RESULTS INDEXES```sql id="p2_020"CREATE INDEX ix_evaluation_results_attemptON evaluation_results(assessment_attempt_id);CREATE INDEX ix_evaluation_results_statusON evaluation_results(result_status);CREATE INDEX ix_evaluation_results_eligibleON evaluation_results(is_certification_eligible);CREATE INDEX ix_evaluation_results_evaluated_dateON evaluation_results(evaluated_date);CREATE INDEX ix_evaluation_results_rule_versionON evaluation_results(evaluation_rule_version_id);
+
+RESULT STATUS VALUES
+Application validation shall enforce:
+```text id=“p2_021”Pending
+Pass
+Fail
+ManualReviewRequired
+---# RE-EVALUATION GOVERNANCEEvaluation results are immutable.When a re-evaluation occurs:```text id="p2_022"Result Version 1        ↓Result Version 2
+The older result is linked using:
+text id="p2_023" superseded_by_result_id
+Historical audit trail remains intact.
+
+CERTIFICATION ELIGIBILITY
+Field:
+text id="p2_024" is_certification_eligible
+determines whether the candidate qualifies for certification processing.
+Certification issuance remains outside this module.
+
+RESULT DETAILS STRATEGY
+Example:
+json id="p2_025" {   "sectionScores":   {     "Security":85,     "Compliance":78,     "Architecture":91   },   "negativeMarks":2,   "questionsCorrect":42,   "questionsIncorrect":8 }
+
+AI EVALUATION READINESS
+Field:
+text id="p2_026" job_metadata_json
+supports:
+```text id=“p2_027”Model Version
+Prompt Version
+Provider
+Confidence Scores
+---Field:```text id="p2_028"metadata_json
+supports:
+```text id=“p2_029”AI Feedback
+Skill Insights
+Evaluation Extensions
+---# VALIDATION CHECKLIST✓ Assessment Rule Assignment Applied✓ Version-Safe Rule References Applied✓ Evaluation Job Processing Applied✓ Retry Support Applied✓ AI Evaluation Readiness Applied✓ Evaluation Result Versioning Applied✓ Re-Evaluation Support Applied✓ Certification Eligibility Applied✓ Historical Auditability Applied✓ MySQL 8 Compatible✓ Hostinger Compatible---# VERSION005_EVALUATION_SCHEMA.SQL – PART 2Version 1.0Status:APPROVED---# MODULE PROGRESSCompleted:```text id="p2_030"evaluation_rulesevaluation_rule_versionsassessment_evaluation_rulesevaluation_jobsevaluation_results
+Evaluation Module Completion:
+text id="p2_031" 66%
+
+NEXT STEP
+Perform architecture review for:
+```text id=“p2_032”manual_review_queue
+review_assignments
+result_publications
+before generating:```text id="p2_033"005_EVALUATION_SCHEMA.SQL – PART 3
+This phase completes:
+```text id=“p2_034”Manual Review Workflow
+Reviewer Assignment
+Result Publication
+Certification Release Governance```
+and finalizes the Evaluation module.
+
+END OF DOCUMENT

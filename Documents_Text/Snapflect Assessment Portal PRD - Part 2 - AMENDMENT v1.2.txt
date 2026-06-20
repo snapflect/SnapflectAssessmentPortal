@@ -1,0 +1,153 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRD
+PART 2 AMENDMENT v1.2
+QUESTION USAGE ANALYSIS ARCHITECTURE UPDATE
+This amendment updates Part 2 Amendment v1.1 and becomes part of the authoritative document.
+Purpose:
+To improve database normalization, eliminate unnecessary persisted data, and ensure the ERD and schema remain aligned with enterprise architecture principles.
+
+A2.14 QUESTION USAGE ANALYSIS SERVICE
+Purpose
+Provide impact analysis for reusable questions without storing redundant data.
+
+Background
+Questions may be reused across:
+Technology
+Assessment
+Section
+Question Bank
+through the reusable question architecture.
+Administrators need visibility into the impact of modifying a question before changes are made.
+
+Previous Design
+The earlier architecture proposed:
+question_usage_analysis
+as a database entity.
+After architecture review, this design was rejected.
+Reason:
+Usage information can be derived dynamically through existing relationships.
+Persisting usage information introduces:
+Data duplication
+Synchronization risks
+Additional maintenance overhead
+Potential reporting inconsistencies
+
+Approved Design
+The platform shall implement:
+Question Usage Analysis Service
+instead of a physical database table.
+
+Service Responsibilities
+The service shall dynamically calculate:
+Technology Count
+Assessment Count
+Section Count
+Question Bank Count
+Question Usage Count
+Attempt Count
+Historical Usage
+Published Usage
+Draft Usage
+
+Usage Analysis Sources
+The service shall derive information from:
+Questions
+↓
+Question Bank Questions
+↓
+Question Banks
+↓
+Assessment Sections
+↓
+Assessments
+↓
+Technologies
+and
+Assessment Attempts
+Assessment Results
+Assessment Reviews
+
+Administrative Features
+View Question Usage
+View Dependency Graph
+View Assessment Impact
+View Section Impact
+View Technology Impact
+View Historical Attempt Impact
+
+Example
+Question:
+“What is Dependency Injection?”
+Usage:
+Technologies:3
+Assessments:8
+Sections:15
+Question Banks:20
+Attempts:1,250
+
+Business Rules
+Usage information shall always be calculated from source data.
+No usage data shall be persisted.
+Usage information must reflect real-time relationships.
+Historical attempts shall not be modified.
+Impact analysis shall be available before editing published questions.
+
+A2.15 UPDATED QUESTION IMPACT WORKFLOW
+Before modifying a published question:
+System shall display:
+Usage Summary
+Affected Technologies
+Affected Assessments
+Affected Sections
+Affected Question Banks
+Historical Attempt Count
+
+Administrative Actions
+Proceed With Versioning
+Cancel Changes
+Review Dependencies
+Create New Version
+
+Data Integrity Rule
+Published questions shall not be modified directly.
+Versioning shall be used when changes affect assessment behavior.
+Historical attempts must remain reproducible through snapshots.
+
+A2.16 UPDATED DATABASE ENTITY INVENTORY
+The following entity is removed from the logical database model:
+REMOVED:
+question_usage_analysis
+
+Replacement
+Question Usage Analysis Service
+Classification:
+Derived Analytics Service
+Persistence:
+None
+
+A2.17 UPDATED API REQUIREMENTS
+The platform may expose usage information through service endpoints.
+Example:
+/api/questions/{id}/usage
+
+Response Examples
+Technology Usage
+Assessment Usage
+Section Usage
+Question Bank Usage
+Attempt Statistics
+Impact Summary
+
+Business Rules
+Usage responses shall be generated dynamically.
+No persisted usage records shall be maintained.
+
+A2.18 ARCHITECTURAL PRINCIPLE
+The platform shall favor:
+Derived Analytics
+over
+Persisted Analytics
+whenever information can be accurately calculated from existing normalized relationships.
+Exceptions shall require explicit architectural justification.
+
+END OF PART 2 AMENDMENT v1.2

@@ -1,0 +1,270 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+003 ASSESSMENT DEFINITION SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+003 Assessment Definition Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Assessment Definition
+Depends On
+Security Schema v1.0 FINAL, Governance Foundation Schema v1.0 FINAL
+Approved For
+DDL Generation
+
+1. PURPOSE
+The Assessment Definition Schema is the core content management layer of the Assessment Portal.
+It defines:
+Technologies
+Assessments
+Sections
+Question Banks
+Questions
+Question Options
+Question Answers
+Content Versioning
+This module is responsible for creating and managing assessment content.
+
+2. CONTENT HIERARCHY
+Logical User Hierarchy
+Technology    ↓Assessment    ↓Section    ↓Question Bank    ↓Question
+
+Physical Database Architecture
+Technology    ↓Assessment    ↓SectionQuestion Bank    ↓QuestionSection    ↓Section Question Banks    ↓Question Bank
+This architecture allows Question Bank reuse across multiple sections.
+
+3. TABLES IN SCOPE
+Core Content Tables
+technologiesassessmentssectionsquestion_bankssection_question_banksquestionsquestion_optionsquestion_answers
+
+Version Tables
+technology_versionsassessment_versionssection_versionsquestion_bank_versionsquestion_versions
+
+4. VERSIONING STRATEGY
+All content entities support versioning.
+Supported Version Status Values:
+DraftPublishedArchived
+
+Version Governance Rules
+Draft
+Editable
+
+Published
+Read Only
+
+Archived
+Historical Reference
+
+Published versions must never be modified.
+Changes require creation of a new Draft version.
+
+5. TECHNOLOGIES DESIGN
+Purpose
+Represents frameworks, technologies, domains, or assessment categories.
+Examples:
+.NETAngularSQL ServerAzureReactJava
+
+Core Attributes
+technology_nametechnology_codetechnology_categoryparent_technology_iddescriptiondisplay_orderversion_status
+
+Supported Categories
+Examples:
+BackendFrontendDatabaseCloudDevOpsTesting
+
+Hierarchy Support
+Example:
+Cloud   ↓Azure
+Supported using:
+parent_technology_id
+
+6. ASSESSMENTS DESIGN
+Purpose
+Represents an assessment that users can take.
+Examples:
+.NET Beginner AssessmentAngular FundamentalsAzure Architect Assessment
+
+Relationship
+Technology    ↓Assessments
+
+Core Attributes
+technology_idassessment_nameassessment_codedescriptionestimated_duration_minutesversion_statusassessment_status
+
+Assessment Status Values
+DraftPublishedArchived
+
+Governance Rule
+Only:
+Published
+assessments may be taken by users.
+
+7. SECTIONS DESIGN
+Purpose
+Logical grouping of Question Banks.
+Examples:
+BasicsAdvanced TopicsArchitecturePerformance
+
+Relationship
+Assessment    ↓Sections
+
+Core Attributes
+assessment_idsection_namesection_codedisplay_orderestimated_duration_minutesversion_status
+
+Ordering Rule
+Sections are displayed using:
+display_order
+
+8. QUESTION BANKS DESIGN
+Purpose
+Reusable collection of questions.
+Examples:
+C# BasicsLINQAngular RoutingSQL Joins
+
+Core Attributes
+question_bank_namequestion_bank_codedescriptiondifficulty_levelversion_status
+
+Difficulty Levels
+EasyMediumHardExpert
+
+Reusability Rule
+Question Banks are independent content libraries.
+Question Banks do NOT belong directly to Sections.
+
+9. SECTION QUESTION BANKS DESIGN
+Purpose
+Maps Question Banks to Sections.
+Supports content reuse.
+
+Relationship
+Section    ↓Section Question Banks    ↓Question Bank
+
+Core Attributes
+section_idquestion_bank_iddisplay_orderis_mandatory
+
+Example
+.NET Assessment    ↓Basics Section    ↓C# Basics Question Bank.NET Interview Assessment    ↓Basics Section    ↓C# Basics Question Bank
+Same Question Bank reused.
+
+10. QUESTIONS DESIGN
+Purpose
+Represents individual questions.
+
+Relationship
+Question Bank    ↓Questions
+
+Core Attributes
+question_bank_idquestion_codequestion_textquestion_typedifficulty_levelestimated_duration_minutesdisplay_orderversion_status
+
+Supported Question Types
+SingleChoiceMultipleChoiceTrueFalseTextNumber
+
+Future Question Types
+CodingEssayFileUpload
+No schema changes required.
+
+11. QUESTION OPTIONS DESIGN
+Purpose
+Stores selectable options.
+
+Relationship
+Question    ↓Question Options
+
+Core Attributes
+question_idoption_codeoption_textdisplay_orderis_active
+
+Examples
+ABCD
+
+12. QUESTION ANSWERS DESIGN
+Purpose
+Stores normalized answer definitions.
+
+Relationship
+Question    ↓Question Answers
+
+Core Attributes
+question_idanswer_valueanswer_explanationis_correct
+
+Normalization Rule
+Answers must never be stored inside:
+questions
+table.
+
+13. CONTENT PUBLICATION GOVERNANCE
+Published content:
+Read Only
+
+Content updates require:
+New Draft Version
+
+Publishing creates:
+New Published Version
+
+Historical versions remain available.
+
+14. ATTACHMENT SUPPORT
+All content entities support attachments through:
+attachments
+table.
+Supported Entities:
+TechnologyAssessmentSectionQuestion BankQuestion
+
+15. AUDIT SUPPORT
+All content entities support auditing through:
+audit_logs
+
+16. INDEX STRATEGY
+Technologies
+UX_technology_codeIX_technology_categoryIX_technology_parent
+
+Assessments
+UX_assessment_codeIX_assessment_technologyIX_assessment_status
+
+Sections
+UX_section_codeIX_section_assessmentIX_section_order
+
+Question Banks
+UX_question_bank_codeIX_question_bank_difficulty
+
+Questions
+UX_question_codeIX_question_bankIX_question_typeIX_question_difficulty
+
+Mapping Tables
+IX_section_question_bankIX_question_options_questionIX_question_answers_question
+
+17. VALIDATION CHECKLIST
+✓ Technology Hierarchy Supported
+✓ Assessment Hierarchy Supported
+✓ Reusable Question Banks Supported
+✓ Content Versioning Supported
+✓ Publication Workflow Supported
+✓ Difficulty Levels Supported
+✓ Question Types Supported
+✓ Normalized Answers Supported
+✓ Attachment Support Integrated
+✓ Audit Support Integrated
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+APPROVAL STATUS
+Document:
+003 Assessment Definition Schema Design
+Version:
+1.0
+Status:
+FINAL
+APPROVED FOR DDL GENERATION
+
+NEXT STEP
+Generate:
+003_ASSESSMENT_DEFINITION_SCHEMA.SQL – PART 1
+Tables:
+technologiestechnology_versionsassessmentsassessment_versions
+These form the top two layers of the assessment hierarchy and should be generated first before Sections, Question Banks, and Questions.
+
+END OF DOCUMENT

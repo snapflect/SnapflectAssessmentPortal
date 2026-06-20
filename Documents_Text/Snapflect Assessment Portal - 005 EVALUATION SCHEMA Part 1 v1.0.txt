@@ -1,0 +1,156 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+005_EVALUATION_SCHEMA.SQL
+PART 1 – EVALUATION RULE ENGINE FOUNDATION
+Version 1.0
+
+MODULE
+Evaluation
+
+TABLES
+evaluation_rulesevaluation_rule_versions
+
+DEPENDS ON
+001_SECURITY_SCHEMA.SQLusers002_GOVERNANCE_FOUNDATION_SCHEMA.SQLaudit_logsactivity_logs
+
+TARGET PLATFORM
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+PURPOSE
+This module establishes the Evaluation Rule Engine.
+The rule engine is responsible for:
+Pass / Fail LogicNegative MarkingWeighted ScoringCertification RulesSection WeightingFuture AI Evaluation Policies
+All evaluation logic is versioned and historically reproducible.
+
+EVALUATION_RULES
+Purpose
+Represents reusable evaluation rule definitions.
+Rules are versioned through:
+evaluation_rule_versions
+Rule content is never stored in the master table.
+
+CREATETABLE evaluation_rules(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    rule_code VARCHAR(100) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'System',    rule_type VARCHAR(50)NOTNULL,    is_default TINYINT(1)NOTNULLDEFAULT0,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_evaluation_rules_uuidUNIQUE (uuid),CONSTRAINT ux_evaluation_rules_codeUNIQUE (rule_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+EVALUATION_RULES FOREIGN KEYS
+ALTERTABLE evaluation_rulesADDCONSTRAINT fk_evaluation_rules_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE evaluation_rulesADDCONSTRAINT fk_evaluation_rules_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE evaluation_rulesADDCONSTRAINT fk_evaluation_rules_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+EVALUATION_RULES INDEXES
+CREATEINDEX ix_evaluation_rules_rule_typeON evaluation_rules(rule_type);CREATEINDEX ix_evaluation_rules_statusON evaluation_rules(status);CREATEINDEX ix_evaluation_rules_ownershipON evaluation_rules(ownership_type);CREATEINDEX ix_evaluation_rules_defaultON evaluation_rules(is_default);CREATEINDEX ix_evaluation_rules_activeON evaluation_rules(is_active);
+
+OWNERSHIP TYPES
+Application validation shall enforce:
+SystemOrganizationCustom
+
+RULE TYPES
+Application validation shall enforce:
+PassPercentageNegativeMarkingWeightedScoringSectionWeightingCertificationRuleCustomRule
+
+RULE STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+DEFAULT RULE GOVERNANCE
+Only one active rule may be designated:
+is_default = 1
+per rule type.
+Enforced through application services.
+
+EVALUATION_RULE_VERSIONS
+Purpose
+Stores immutable versions of evaluation rules.
+Supports:
+Historical EvaluationAuditAppealsRe-EvaluationFuture Rule Scheduling
+
+CREATETABLE evaluation_rule_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    evaluation_rule_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    rule_name VARCHAR(255) NOTNULL,    execution_order INTNOTNULLDEFAULT1,    rule_definition_json JSON NOTNULL,    validation_schema_json JSON NULL,    effective_from DATETIME(3) NULL,    effective_to DATETIME(3) NULL,    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_evaluation_rule_versions_uuidUNIQUE (uuid),CONSTRAINT ux_evaluation_rule_versions_versionUNIQUE        (            evaluation_rule_id,            version_number        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+EVALUATION_RULE_VERSIONS FOREIGN KEYS
+ALTERTABLE evaluation_rule_versionsADDCONSTRAINT fk_evaluation_rule_versions_ruleFOREIGNKEY (evaluation_rule_id)REFERENCES evaluation_rules(id);ALTERTABLE evaluation_rule_versionsADDCONSTRAINT fk_evaluation_rule_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+EVALUATION_RULE_VERSIONS INDEXES
+CREATEINDEX ix_evaluation_rule_versions_statusON evaluation_rule_versions(version_status);CREATEINDEX ix_evaluation_rule_versions_execution_orderON evaluation_rule_versions(execution_order);CREATEINDEX ix_evaluation_rule_versions_effective_fromON evaluation_rule_versions(effective_from);CREATEINDEX ix_evaluation_rule_versions_effective_toON evaluation_rule_versions(effective_to);
+
+VERSION STATUS VALUES
+Application validation shall enforce:
+DraftPublishedArchived
+
+RULE DEFINITION STRATEGY
+Rules are stored as structured JSON.
+Example:
+{"passPercentage":70,"negativeMark":0.25}
+
+VALIDATION SCHEMA STRATEGY
+Optional validation schema:
+{"required":["passPercentage"]}
+Used by the Rule Engine before publication.
+
+EFFECTIVE DATING STRATEGY
+Supports:
+Scheduled Rule ActivationCompliance WindowsFuture Rule Rollouts
+Rules become active when:
+current_timestamp >= effective_from
+and
+current_timestamp < effective_to
+when effective_to exists.
+
+EXECUTION ORDER STRATEGY
+Rules execute in ascending order.
+Example:
+1 = NegativeMarking2 = WeightedScoring3 = PassPercentage
+Ensures deterministic evaluation.
+
+METADATA STRATEGY
+metadata_json
+supports future:
+AI Evaluation ParametersCertification MetadataRule CategoriesAdvanced Scoring Extensions
+without schema changes.
+
+GOVERNANCE RULES
+Rule Code Immutability
+rule_code
+is immutable after creation.
+Changes require creation of a new rule entity.
+
+Published Version Rule
+Published versions are read-only.
+Changes require creation of:
+New Draft Version
+
+Historical Reproducibility Rule
+Evaluations must always reference the exact:
+evaluation_rule_version_id
+used at evaluation time.
+
+VALIDATION CHECKLIST
+✓ Rule Engine Architecture Applied
+✓ Versioned Rule Architecture Applied
+✓ Effective Dating Applied
+✓ Execution Ordering Applied
+✓ Validation Schema Support Applied
+✓ Historical Reproducibility Applied
+✓ Multi-Tenant Ownership Support Applied
+✓ AI Readiness Applied
+✓ Audit Compatibility Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+005_EVALUATION_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+evaluation_rulesevaluation_rule_versions
+Evaluation Module Completion:
+33%
+
+NEXT STEP
+Perform architecture review for:
+assessment_evaluation_rulesevaluation_jobsevaluation_results
+before generating:
+005_EVALUATION_SCHEMA.SQL – PART 2
+This phase establishes:
+Rule AssignmentEvaluation ProcessingResult Generation
+and forms the core evaluation execution engine.
+
+END OF DOCUMENT

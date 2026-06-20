@@ -1,0 +1,353 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017F_CERTIFICATION_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Certification OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Certification
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+006_CERTIFICATION_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+Certificate GenerationCertificate IssuanceCertificate DownloadsCertificate VerificationPublic VerificationCertificate RevocationDigital SignaturesCertificate TemplatesCertification Lifecycle Management
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Certification APIversion:1.0.0description: Certification Management APIsservers:-url: /api/v1tags:-name: Certificates-name: Certificate Verification-name: Certificate Templates-name: Certificate Revocations
+
+3. SECURITY REQUIREMENTS
+Global Security
+security:-BearerAuth:[]
+Required Permissions
+Certificate.ViewCertificate.IssueCertificate.VerifyCertificate.RevokeTemplate.ViewTemplate.Edit
+
+4. CERTIFICATE APIS
+List Certificates
+Endpoint
+GET /api/v1/certificates
+Permission
+Certificate.View
+Filters
+candidateIdassessmentIdcertificateNumberissuedrevokeddateFromdateTo
+
+Get Certificate
+Endpoint
+GET /api/v1/certificates/{id}
+Permission
+Certificate.View
+
+Generate Certificate
+Endpoint
+POST /api/v1/certificates/generate
+Permission
+Certificate.Issue
+Request DTO
+{"resultId":1001}
+Validation
+resultId Required
+Business Rules
+Result Must ExistResult Must Be PublishedCandidate Must PassCertificate Must Not Already ExistCertificate Must Not Be Revoked
+Processing
+Generate Certificate NumberGenerate Verification CodeCreate Certificate RecordCreate Signature PlaceholderQueue PDF Generation
+Audit Event
+Certificate Generated
+
+Regenerate Certificate PDF
+Endpoint
+POST /api/v1/certificates/{id}/regenerate-pdf
+Permission
+Certificate.Issue
+Audit Event
+Certificate PDF Regenerated
+
+5. CERTIFICATE ISSUANCE APIS
+Issue Certificate
+Endpoint
+POST /api/v1/certificates/{id}/issue
+Permission
+Certificate.Issue
+Request DTO
+{"templateId":1}
+Processing
+Load TemplateGenerate PDFApply SignatureGenerate Verification URLMark IssuedSend Notification
+Audit Event
+Certificate Issued
+
+Bulk Certificate Issuance
+Endpoint
+POST /api/v1/certificates/bulk-issue
+Permission
+Certificate.Issue
+Request DTO
+{"certificateIds":[1,2,3]}
+Processing
+Queue Background ProcessingGenerate PDFsIssue CertificatesSend Notifications
+
+6. CERTIFICATE NUMBERING STANDARD
+Format
+SNAP-YYYY-XXXXXX
+Example
+SNAP-2027-000001
+Rules
+Globally UniqueImmutableNever ReusedSystem Generated Only
+
+7. DIGITAL SIGNATURE APIS
+Get Certificate Signature
+Endpoint
+GET /api/v1/certificates/{id}/signature
+Permission
+Certificate.View
+
+Apply Signature
+Endpoint
+POST /api/v1/certificates/{id}/apply-signature
+Permission
+Certificate.Issue
+Processing
+Create Signature RecordStore Signature MetadataBind Signature To CertificateGenerate Audit Event
+Audit Event
+Signature Applied
+
+8. CERTIFICATE DOWNLOAD APIS
+Download Certificate
+Endpoint
+GET /api/v1/certificates/{id}/download
+Permission
+Certificate.View
+Response
+application/pdf
+
+Candidate Download Own Certificate
+Endpoint
+GET /api/v1/my-certificates/{id}/download
+Permission
+Candidate Own Certificate
+
+Download Metadata
+Endpoint
+GET /api/v1/certificates/{id}/download-info
+Response
+{"fileName":"SNAP-2027-000001.pdf","fileSize":1024000,"generatedAt":"2027-01-01T10:00:00Z"}
+
+9. CERTIFICATE VERIFICATION APIS
+Internal Verification
+Endpoint
+GET /api/v1/certificates/{id}/verify
+Permission
+Certificate.Verify
+Response
+{"valid":true,"certificateNumber":"SNAP-2027-000001","status":"Issued"}
+Audit Event
+Certificate Verified
+
+Verification By Certificate Number
+Endpoint
+GET /api/v1/certificates/verify-number/{certificateNumber}
+Permission
+Certificate.Verify
+
+10. PUBLIC CERTIFICATE VERIFICATION APIS
+Public Verification
+Endpoint
+GET /api/public/certificates/verify
+Authentication
+Not Required
+Query Parameters
+certificateNumberverificationCode
+Response
+{"valid":true,"certificateNumber":"SNAP-2027-000001","candidateName":"John Smith","assessmentName":"Senior .NET Assessment","issueDate":"2027-01-01","status":"Issued"}
+
+Public Verification Status
+Endpoint
+GET /api/public/certificates/status
+Query Parameters
+certificateNumber
+Response
+{"valid":true,"revoked":false}
+
+11. CERTIFICATE REVOCATION APIS
+Revoke Certificate
+Endpoint
+POST /api/v1/certificates/{id}/revoke
+Permission
+Certificate.Revoke
+Request DTO
+{"reason":"Fraud detected"}
+Validation
+reason Required
+Processing
+Create Revocation RecordMark Certificate RevokedInvalidate VerificationNotify CandidateGenerate Audit Event
+Audit Event
+Certificate Revoked
+
+Get Revocation Details
+Endpoint
+GET /api/v1/certificates/{id}/revocation
+Permission
+Certificate.View
+
+12. CERTIFICATE TEMPLATE APIS
+List Templates
+Endpoint
+GET /api/v1/certificate-templates
+Permission
+Template.View
+
+Get Template
+Endpoint
+GET /api/v1/certificate-templates/{id}
+Permission
+Template.View
+
+Create Template
+Endpoint
+POST /api/v1/certificate-templates
+Permission
+Template.Edit
+Request DTO
+{"name":"Default Certificate","templateCode":"CERT_DEFAULT","htmlContent":"<html></html>"}
+Audit Event
+Certificate Template Created
+
+Update Template
+Endpoint
+PUT /api/v1/certificate-templates/{id}
+Permission
+Template.Edit
+Audit Event
+Certificate Template Updated
+
+Activate Template
+Endpoint
+POST /api/v1/certificate-templates/{id}/activate
+Permission
+Template.Edit
+Audit Event
+Certificate Template Activated
+
+13. CANDIDATE CERTIFICATE APIS
+My Certificates
+Endpoint
+GET /api/v1/my-certificates
+Permission
+Authenticated Candidate
+Response
+{"success":true,"data":[]}
+
+My Certificate Details
+Endpoint
+GET /api/v1/my-certificates/{id}
+Permission
+Authenticated Candidate
+
+14. CERTIFICATION ELIGIBILITY APIS
+Check Eligibility
+Endpoint
+GET /api/v1/results/{resultId}/certificate-eligibility
+Permission
+Certificate.View
+Response
+{"eligible":true,"reason":null}
+Rules
+Result PublishedPassed AssessmentNo Existing Active Certificate
+
+15. MULTI-TENANCY RULES
+Candidate
+Own Certificates Only
+
+Organization Administrator
+Own Organization Certificates Only
+
+Platform Administrator
+Global Access
+
+Mandatory Enforcement
+Organization Scope ValidationCandidate Ownership Validation
+
+16. AUDIT REQUIREMENTS
+Mandatory Audit Events
+Certificate GeneratedCertificate IssuedCertificate DownloadedCertificate VerifiedCertificate RevokedCertificate RegeneratedSignature AppliedTemplate CreatedTemplate UpdatedTemplate Activated
+
+17. PERFORMANCE REQUIREMENTS
+Verification APIs
+Public Internet AccessibleIndexed Searches RequiredSub-Second Verification Target
+
+Downloads
+CDN CompatibleCached PDF SupportStreaming Downloads
+
+Expected Scale
+1,000,000+ CertificatesHigh Verification TrafficGlobal Public Verification
+
+18. SECURITY REQUIREMENTS
+Verification Codes
+Cryptographically RandomMinimum 128-bit Entropy
+
+Certificate PDFs
+Tamper ResistantRead OnlyDigitally Signed
+
+Digital Signatures
+ImmutableVersion ControlledAuditable
+
+Revocation
+IrreversibleAudit Protected
+
+19. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Business Rule Violation
+{"success":false,"code":"BUSINESS_RULE_VIOLATION","message":"Certificate already exists."}
+
+Not Found
+{"success":false,"code":"NOT_FOUND","message":"Certificate not found."}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+20. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger AttributesPDF ServicesVerification ServicesSignature Services
+
+Do Not Generate
+Alternative Certificate Number FormatsAlternative Revocation ModelsAlternative Verification ModelsAlternative Signature Workflows
+
+21. IMPLEMENTATION PACKAGE STATUS
+Aligned With
+006_CERTIFICATION_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document
+017F_CERTIFICATION_OPENAPI
+Version
+v1.0
+Status
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017G_NOTIFICATION_OPENAPI v1.0
+Coverage
+Notification TemplatesEmail NotificationsSMS NotificationsIn-App NotificationsNotification QueueDelivery TrackingUser PreferencesSubscriptions
+This module completes the platform communication layer and integrates with Assessment, Evaluation, Certification, Billing, and Operations workflows.
+
+END OF DOCUMENT

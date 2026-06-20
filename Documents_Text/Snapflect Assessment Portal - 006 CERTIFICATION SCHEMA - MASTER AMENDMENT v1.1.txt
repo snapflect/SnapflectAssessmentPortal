@@ -1,0 +1,205 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+006 CERTIFICATION SCHEMA
+MASTER AMENDMENT v1.1
+Version 1.1
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+006 Certification Schema Master Amendment
+Amendment Version
+1.1
+Status
+APPROVED
+Affected Documents
+Part 1, Part 2
+Amendment Type
+Enterprise Certification Enhancement
+Approval Status
+Approved
+Effective Version
+006_CERTIFICATION_SCHEMA v1.1 FINAL
+
+1. PURPOSE
+This amendment incorporates all approved findings from:
+Certification Schema Master Review v1.0
+The review confirmed that the Certification module is production-ready with no critical or high-severity issues.
+This amendment introduces enterprise enhancements focused on:
+Certificate Verification Governance
+Signature Auditability
+Issuance Workflow Control
+Fraud Analytics Readiness
+Certificate Lifecycle Optimization
+
+2. CERTIFICATES ENHANCEMENT
+2.1 Verification Token Expiry Support
+New Column
+verification_token_expiry_date DATETIME(3) NULL
+
+Purpose
+Supports controlled certificate sharing and time-limited verification access.
+
+Example Scenarios
+Private Certificate SharingPartner Verification PortalsTemporary Verification LinksEmployer Verification Windows
+
+Governance
+When NULL:
+Verification Link Never Expires
+When populated:
+Verification Link Expires Automatically
+
+3. CERTIFICATE_SIGNATURES ENHANCEMENT
+3.1 Signer Identity Tracking
+New Column
+signed_by BIGINT UNSIGNED NULL
+
+Purpose
+Stores the identity of the signing authority.
+
+Supported Scenarios
+Administrator SigningCertification Authority SigningAutomated Signing ServiceDelegated Certificate Issuance
+
+Foreign Key
+ALTERTABLE certificate_signaturesADDCONSTRAINT fk_certificate_signatures_signed_byFOREIGNKEY (signed_by)REFERENCES users(id);
+
+Benefits
+Supports:
+Signature Audit TrailCompliance ValidationTrust Chain VerificationDigital Credential Governance
+
+4. CERTIFICATE_ISSUANCES ENHANCEMENT
+4.1 Issuance Status Tracking
+New Column
+issuance_status VARCHAR(50)NOTNULLDEFAULT'Pending'
+
+Purpose
+Tracks certificate issuance workflow state.
+
+Status Values
+PendingCompletedFailedCancelled
+
+Benefits
+Supports:
+Bulk IssuanceRetry ProcessingOperational MonitoringIssuance Failure Recovery
+
+5. CERTIFICATE_VERIFICATIONS ENHANCEMENT
+5.1 Risk Analytics Support
+New Column
+risk_score DECIMAL(5,2) NULL
+
+Purpose
+Stores fraud and anomaly detection scoring.
+
+Example
+0.00  = No Risk25.00 = Low Risk50.00 = Medium Risk75.00 = High Risk100.00 = Critical Risk
+
+Future Applications
+Fraud DetectionVerification Abuse MonitoringBot DetectionAnomaly DetectionEmployer Verification Analytics
+
+6. INDEXING ENHANCEMENTS
+Certificates Lifecycle Optimization
+New Composite Index
+CREATEINDEX ix_certificates_status_expiryON certificates(    certificate_status,    expiry_date);
+
+Purpose
+Optimizes:
+Certificate Expiry JobsRenewal ProcessingCertificate Status ReportingLifecycle Management
+
+7. GOVERNANCE RULES
+Verification Token Governance
+When:
+verification_token_expiry_date
+exists:
+Current Timestamp > Expiry Date
+verification requests should return:
+Expired
+
+Signature Governance
+When:
+signed_by
+is populated:
+The signing actor becomes part of the permanent certificate audit trail.
+
+Issuance Governance
+When:
+issuance_status = Completed
+certificate issuance is considered successful.
+
+When:
+issuance_status = Failed
+certificate publication must not proceed.
+
+Risk Score Governance
+Risk scores are advisory.
+They must never automatically:
+Revoke CertificatesInvalidate CredentialsModify Certificate Status
+without explicit business rules.
+
+8. IMPACT ANALYSIS
+Artifact
+Impact
+Certificate Lifecycle
+Improved
+Verification Engine
+Improved
+Signature Governance
+Improved
+Fraud Analytics
+Improved
+Certificate Operations
+Improved
+Auditability
+Improved
+Enterprise Readiness
+Improved
+
+9. FINAL VALIDATION SUMMARY
+Area
+Result
+Certificate Lifecycle
+PASS
+Verification Architecture
+PASS
+Revocation Governance
+PASS
+Digital Signature Architecture
+PASS
+Public Trust Readiness
+PASS
+Fraud Analytics Readiness
+PASS
+Auditability
+PASS
+Blockchain Readiness
+PASS
+Enterprise Readiness
+PASS
+
+10. APPROVED CERTIFICATION BASELINE
+The approved certification tables are:
+certificate_templatescertificate_template_versionscertificatescertificate_issuancescertificate_verificationscertificate_revocationscertificate_signatures
+with all approved amendments merged.
+
+APPROVAL STATUS
+Document:
+006 Certification Schema Master Amendment
+Version:
+v1.1
+Status:
+APPROVED
+MERGED INTO BASELINE
+
+FINAL MODULE STATUS
+006_CERTIFICATION_SCHEMAVERSION 1.1FINALFROZEN
+
+ARCHITECTURE BASELINE STATUS
+PRD v1.2 FINAL✓ERD v1.1 FINAL✓Database Standards v1.1 FINAL✓Data Dictionary v1.1 FINAL✓Security Schema v1.0 FINAL✓Governance Foundation Schema v1.0 FINAL✓Assessment Definition Schema v1.1 FINAL✓Assessment Execution Schema v1.2 FINAL✓Evaluation Schema v1.1 FINAL✓Certification Schema v1.1 FINAL✓
+
+RECOMMENDED NEXT STEP
+Proceed to:
+007_NOTIFICATION_SCHEMA
+Core Areas:
+notification_templatesnotification_channelsnotification_queuenotification_delivery_logsnotification_preferencesnotification_subscriptions
+This module will implement email, SMS, push notifications, system alerts, reminders, certificate notifications, assessment reminders, and delivery tracking.
+
+END OF DOCUMENT

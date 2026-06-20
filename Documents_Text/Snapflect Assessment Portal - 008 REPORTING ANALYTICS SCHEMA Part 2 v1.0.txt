@@ -1,0 +1,150 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+008_REPORTING_ANALYTICS_SCHEMA.SQL
+PART 2 – DASHBOARDS, ANALYTICS & KPI FRAMEWORK
+Version 1.0
+
+MODULE
+Reporting & Analytics
+
+TABLES
+dashboard_definitionsdashboard_versionsdashboard_widgetsanalytics_snapshotskpi_definitionskpi_snapshots
+
+DEPENDS ON
+008_REPORTING_ANALYTICS_SCHEMA.SQL – PART 1report_definitionsreport_versions001_SECURITY_SCHEMA.SQLuserspermissions
+
+PURPOSE
+This module establishes the Business Intelligence layer.
+It provides:
+Executive DashboardsOperational DashboardsDashboard VersioningAnalytics SnapshotsKPI FrameworkTrend AnalysisExecutive ReportingAI Analytics Readiness
+
+DASHBOARD_DEFINITIONS
+Purpose
+Represents logical dashboard definitions.
+Dashboard layouts and widgets are versioned through:
+dashboard_versions
+
+CREATETABLE dashboard_definitions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    dashboard_code VARCHAR(100) NOTNULL,    dashboard_name VARCHAR(255) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'System',    required_permission_id BIGINT UNSIGNED NULL,    is_system_dashboard TINYINT(1)NOTNULLDEFAULT0,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_dashboard_definitions_uuidUNIQUE (uuid),CONSTRAINT ux_dashboard_definitions_codeUNIQUE (dashboard_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+DASHBOARD_DEFINITIONS FOREIGN KEYS
+ALTERTABLE dashboard_definitionsADDCONSTRAINT fk_dashboard_definitions_permissionFOREIGNKEY (required_permission_id)REFERENCES permissions(id);ALTERTABLE dashboard_definitionsADDCONSTRAINT fk_dashboard_definitions_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE dashboard_definitionsADDCONSTRAINT fk_dashboard_definitions_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+DASHBOARD STATUS VALUES
+DraftPublishedArchived
+
+DASHBOARD_VERSIONS
+Purpose
+Stores immutable dashboard layouts and rendering configurations.
+Supports:
+Layout EvolutionWidget ChangesHistorical DashboardsAuditability
+
+CREATETABLE dashboard_versions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    dashboard_definition_id BIGINT UNSIGNED NOTNULL,    version_number INTNOTNULL,    version_status VARCHAR(50)NOTNULLDEFAULT'Draft',    refresh_interval_seconds INTNULL,    layout_configuration_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_dashboard_versions_uuidUNIQUE (uuid),CONSTRAINT ux_dashboard_versions_versionUNIQUE        (            dashboard_definition_id,            version_number        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+DASHBOARD_VERSIONS FOREIGN KEYS
+ALTERTABLE dashboard_versionsADDCONSTRAINT fk_dashboard_versions_definitionFOREIGNKEY (dashboard_definition_id)REFERENCES dashboard_definitions(id);ALTERTABLE dashboard_versionsADDCONSTRAINT fk_dashboard_versions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+DASHBOARD_WIDGETS
+Purpose
+Represents dashboard components.
+Examples:
+KPI CardsChartsTablesTrend GraphsHeatmaps
+
+CREATETABLE dashboard_widgets(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    dashboard_version_id BIGINT UNSIGNED NOTNULL,    widget_code VARCHAR(100) NOTNULL,    widget_name VARCHAR(255) NOTNULL,    widget_type VARCHAR(100) NOTNULL,    display_order INTNOTNULL,    is_visible TINYINT(1)NOTNULLDEFAULT1,    widget_configuration_json JSON NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_dashboard_widgets_uuidUNIQUE (uuid),CONSTRAINT ux_dashboard_widgets_codeUNIQUE        (            dashboard_version_id,            widget_code        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+DASHBOARD_WIDGETS FOREIGN KEYS
+ALTERTABLE dashboard_widgetsADDCONSTRAINT fk_dashboard_widgets_versionFOREIGNKEY (dashboard_version_id)REFERENCES dashboard_versions(id);
+
+DASHBOARD_WIDGETS INDEXES
+CREATEINDEX ix_dashboard_widgets_orderON dashboard_widgets(    dashboard_version_id,    display_order);CREATEINDEX ix_dashboard_widgets_visibleON dashboard_widgets(is_visible);CREATEINDEX ix_dashboard_widgets_typeON dashboard_widgets(widget_type);
+
+ANALYTICS_SNAPSHOTS
+Purpose
+Stores immutable analytics measurements.
+Supports:
+Hourly AnalyticsDaily AnalyticsWeekly AnalyticsMonthly AnalyticsHistorical Trend Analysis
+
+CREATETABLE analytics_snapshots(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    snapshot_date DATETIME(3) NOTNULL,    snapshot_granularity VARCHAR(50)NOTNULL,    analytics_scope VARCHAR(50)NOTNULL,    snapshot_data_json JSON NOTNULL,    metadata_json JSON NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_analytics_snapshots_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ANALYTICS_SNAPSHOTS INDEXES
+CREATEINDEX ix_analytics_snapshots_dateON analytics_snapshots(snapshot_date);CREATEINDEX ix_analytics_snapshots_scopeON analytics_snapshots(analytics_scope);CREATEINDEX ix_analytics_snapshots_granularityON analytics_snapshots(snapshot_granularity);
+
+SNAPSHOT GRANULARITY VALUES
+HourlyDailyWeeklyMonthlyQuarterlyYearly
+
+ANALYTICS SCOPE VALUES
+AssessmentEvaluationCertificationNotificationSecurityPlatform
+
+KPI_DEFINITIONS
+Purpose
+Defines measurable business KPIs.
+
+CREATETABLE kpi_definitions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    kpi_code VARCHAR(100) NOTNULL,    kpi_name VARCHAR(255) NOTNULL,    kpi_category VARCHAR(100) NOTNULL,    formula_definition_json JSON NOTNULL,    target_value DECIMAL(18,4) NULL,    warning_threshold DECIMAL(18,4) NULL,    critical_threshold DECIMAL(18,4) NULL,    metadata_json JSON NULL,    status VARCHAR(50)NOTNULLDEFAULT'Active',    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_kpi_definitions_uuidUNIQUE (uuid),CONSTRAINT ux_kpi_definitions_codeUNIQUE (kpi_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+KPI_DEFINITIONS FOREIGN KEYS
+ALTERTABLE kpi_definitionsADDCONSTRAINT fk_kpi_definitions_created_byFOREIGNKEY (created_by)REFERENCES users(id);
+
+KPI_DEFINITIONS INDEXES
+CREATEINDEX ix_kpi_definitions_categoryON kpi_definitions(kpi_category);CREATEINDEX ix_kpi_definitions_statusON kpi_definitions(status);
+
+KPI_SNAPSHOTS
+Purpose
+Stores KPI measurements over time.
+Supports:
+Trend AnalysisGoal TrackingExecutive Reporting
+
+CREATETABLE kpi_snapshots(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    kpi_definition_id BIGINT UNSIGNED NOTNULL,    snapshot_date DATETIME(3) NOTNULL,    actual_value DECIMAL(18,4) NOTNULL,    target_value DECIMAL(18,4) NULL,    trend_direction VARCHAR(50) NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_kpi_snapshots_uuidUNIQUE (uuid),CONSTRAINT ux_kpi_snapshot_uniqueUNIQUE        (            kpi_definition_id,            snapshot_date        ))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+KPI_SNAPSHOTS FOREIGN KEYS
+ALTERTABLE kpi_snapshotsADDCONSTRAINT fk_kpi_snapshots_definitionFOREIGNKEY (kpi_definition_id)REFERENCES kpi_definitions(id);
+
+KPI_SNAPSHOTS INDEXES
+CREATEINDEX ix_kpi_snapshots_dateON kpi_snapshots(snapshot_date);CREATEINDEX ix_kpi_snapshots_trendON kpi_snapshots(trend_direction);
+
+TREND DIRECTION VALUES
+ImprovingDecliningStable
+
+KPI FORMULA EXAMPLE
+{"formula":"(passedCandidates / totalCandidates) * 100"}
+Stored in:
+formula_definition_json
+
+AI READINESS
+The following entities support future AI enhancements:
+analytics_snapshots.metadata_jsonkpi_definitions.metadata_jsondashboard_widgets.widget_configuration_json
+Supports:
+Predictive AnalyticsTrend DetectionAnomaly DetectionExecutive Recommendations
+
+VALIDATION CHECKLIST
+✓ Dashboard Versioning Applied
+✓ Widget Governance Applied
+✓ Analytics Snapshots Applied
+✓ KPI Framework Applied
+✓ Trend Analysis Applied
+✓ Dashboard Security Applied
+✓ Auditability Applied
+✓ AI Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+008_REPORTING_ANALYTICS_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+report_definitionsreport_versionsreport_executionsreport_exportsdashboard_definitionsdashboard_versionsdashboard_widgetsanalytics_snapshotskpi_definitionskpi_snapshots
+Reporting & Analytics Completion:
+100%
+
+NEXT STEP
+Perform:
+Reporting & Analytics Schema Master Review v1.0
+Review Scope:
+Part 1Part 2
+Validation Areas:
+Report GovernanceDashboard GovernanceAnalytics SnapshotsKPI FrameworkTrend AnalysisExecutive ReportingPerformance StrategyAI Readiness
+After successful review:
+Freeze:008_REPORTING_ANALYTICS_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

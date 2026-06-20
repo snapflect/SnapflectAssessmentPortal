@@ -1,0 +1,207 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+022_MVP_EXECUTION_PACKAGE
+Version 1.0
+Status: APPROVED BASELINE
+Sprint 01 Production Implementation Package
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+MVP Execution Package
+Version
+1.0
+Status
+FINAL
+Sprint
+Sprint 01
+Modules
+Security + Governance
+Purpose
+First Production Coding Package
+
+1. EXECUTION OBJECTIVE
+Build the entire platform foundation:
+AuthenticationAuthorizationOrganizationsDepartmentsBusiness UnitsLocationsUsersRolesPermissionsSessionsRBAC
+Everything else in Snapflect depends on this foundation.
+
+2. SPRINT 01 SUCCESS CRITERIA
+Platform must support:
+JWT LoginRefresh TokenLogoutCurrent UserOrganization CRUDDepartment CRUDUser CRUDRole CRUDPermission AssignmentRBAC EnforcementAudit Logging
+
+3. DATABASE IMPLEMENTATION SEQUENCE
+Migration 001
+create_organizations_table
+Fields
+idorganization_codeorganization_namestatuscreated_byupdated_bycreated_atupdated_at
+
+Migration 002
+create_departments_table
+
+Migration 003
+create_business_units_table
+
+Migration 004
+create_locations_table
+
+Migration 005
+create_users_table
+
+Migration 006
+create_roles_table
+
+Migration 007
+create_permissions_table
+
+Migration 008
+create_role_permissions_table
+
+Migration 009
+create_user_roles_table
+
+Migration 010
+create_sessions_table
+
+Migration 011
+create_password_reset_tokens_table
+
+Migration 012
+create_refresh_tokens_table
+
+4. MODEL GENERATION PACKAGE
+Generate models in this order.
+OrganizationDepartmentBusinessUnitLocationUserRolePermissionSessionRefreshToken
+
+Mandatory Requirements
+Soft DeletesAudit FieldsRelationshipsOrganization Scope
+
+5. REPOSITORY GENERATION PACKAGE
+Create:
+OrganizationRepositoryInterfaceOrganizationRepositoryDepartmentRepositoryInterfaceDepartmentRepositoryBusinessUnitRepositoryInterfaceBusinessUnitRepositoryLocationRepositoryInterfaceLocationRepositoryUserRepositoryInterfaceUserRepositoryRoleRepositoryInterfaceRoleRepositoryPermissionRepositoryInterfacePermissionRepository
+
+Rules
+No Business LogicDatabase Access Only
+
+6. DTO GENERATION PACKAGE
+Generate:
+LoginDTORefreshTokenDTOCreateUserDTOUpdateUserDTOCreateRoleDTOUpdateRoleDTOAssignRoleDTOCreateOrganizationDTOUpdateOrganizationDTOCreateDepartmentDTOUpdateDepartmentDTO
+
+Rules
+Immutable DTOsTyped PropertiesNo Arrays Between Layers
+
+7. SERVICE GENERATION PACKAGE
+Generate:
+AuthenticationServiceSessionServiceUserServiceRoleServicePermissionServiceOrganizationServiceDepartmentServiceBusinessUnitServiceLocationService
+
+Rules
+Business Logic OnlyTransactionsWorkflow Management
+
+8. POLICY GENERATION PACKAGE
+Generate:
+UserPolicyRolePolicyPermissionPolicyOrganizationPolicyDepartmentPolicyBusinessUnitPolicyLocationPolicy
+
+Source
+016_RBAC_MATRIX
+
+9. REQUEST GENERATION PACKAGE
+Generate Form Requests:
+LoginRequestRefreshTokenRequestCreateUserRequestUpdateUserRequestCreateRoleRequestUpdateRoleRequestAssignRoleRequestCreateOrganizationRequestUpdateOrganizationRequestCreateDepartmentRequestUpdateDepartmentRequest
+
+10. RESOURCE GENERATION PACKAGE
+Generate:
+UserResourceRoleResourcePermissionResourceOrganizationResourceDepartmentResourceBusinessUnitResourceLocationResource
+
+11. CONTROLLER GENERATION PACKAGE
+Generate:
+AuthControllerUserControllerRoleControllerPermissionControllerOrganizationControllerDepartmentControllerBusinessUnitControllerLocationController
+
+Rules
+No Business LogicNo SQLCall Services Only
+
+12. API IMPLEMENTATION PACKAGE
+Authentication APIs
+POST /api/v1/auth/loginPOST /api/v1/auth/refreshPOST /api/v1/auth/logoutGET /api/v1/auth/me
+
+User APIs
+GET /api/v1/usersGET /api/v1/users/{id}POST /api/v1/usersPUT /api/v1/users/{id}DELETE /api/v1/users/{id}
+
+Role APIs
+GET /api/v1/rolesPOST /api/v1/rolesPUT /api/v1/roles/{id}POST /api/v1/roles/{id}/permissions
+
+Permission APIs
+GET /api/v1/permissions
+
+Organization APIs
+GET /api/v1/organizationsPOST /api/v1/organizationsPUT /api/v1/organizations/{id}
+
+Department APIs
+GET /api/v1/departmentsPOST /api/v1/departmentsPUT /api/v1/departments/{id}
+
+13. EVENT PACKAGE
+Generate Events
+UserCreatedUserUpdatedRoleAssignedOrganizationCreatedDepartmentCreatedUserLoggedInUserLoggedOut
+
+14. LISTENER PACKAGE
+Generate:
+CreateAuditEntrySendUserWelcomeNotificationUpdateAnalyticsSnapshot
+
+15. QUEUE PACKAGE
+Generate:
+SendEmailJobAuditProcessingJob
+Driver
+Database Queue
+
+16. ANGULAR EXECUTION PACKAGE
+Generate Screens
+LoginForgot PasswordDashboardUser ManagementRole ManagementOrganization ManagementDepartment Management
+
+Angular Services
+AuthServiceUserServiceRoleServiceOrganizationServiceDepartmentService
+
+17. TEST PACKAGE
+Generate
+Feature Tests
+AuthenticationFeatureTestUserFeatureTestRoleFeatureTestOrganizationFeatureTestDepartmentFeatureTest
+
+Service Tests
+AuthenticationServiceTestUserServiceTestRoleServiceTest
+
+Policy Tests
+UserPolicyTestRolePolicyTestOrganizationPolicyTest
+
+Coverage Target
+80%+
+
+18. SWAGGER PACKAGE
+Generate
+Swagger AttributesOpenAPI JSONOpenAPI UI
+Source
+017A_SECURITY_OPENAPI017B_GOVERNANCE_OPENAPI
+
+19. CURSOR MASTER PROMPT
+Use this as the first Cursor prompt.
+Project:Snapflect Assessment PortalSprint:Sprint 01Modules:SecurityGovernanceTechnology:Laravel 12PHP 8.4MySQL 8Architecture:Modular MonolithUse:001_SECURITY_SCHEMA002_GOVERNANCE_SCHEMA017A_SECURITY_OPENAPI017B_GOVERNANCE_OPENAPI018_API_IMPLEMENTATION_MASTER_PLAN019_LARAVEL_FOLDER_STRUCTURE_AND_CODING_STANDARDSGenerate:MigrationsModelsRepositoriesDTOsServicesPoliciesControllersResourcesEventsListenersJobsTestsFollow repository pattern.Use DTOs.Use policies.No business logic in controllers.No SQL outside repositories.Generate production-ready code.
+
+20. CHATGPT REVIEW PROMPT
+After Cursor generates code.
+Use:
+Perform full architecture review.Review generated Laravel code against:001_SECURITY_SCHEMA002_GOVERNANCE_SCHEMA017A_SECURITY_OPENAPI017B_GOVERNANCE_OPENAPI018_API_IMPLEMENTATION_MASTER_PLAN019_LARAVEL_FOLDER_STRUCTURE_AND_CODING_STANDARDSIdentify:Architecture ViolationsSecurity RisksPerformance IssuesRBAC ViolationsOpenAPI ViolationsRefactoring Recommendations
+
+21. DEFINITION OF DONE
+Sprint 01 is complete only if:
+All Migrations CreatedAll Models CreatedAll Repositories CreatedAll DTOs CreatedAll Services CreatedAll Policies CreatedAll Controllers CreatedAll APIs WorkingAll Tests PassingSwagger GeneratedArchitecture Review PassedSecurity Review Passed80%+ Coverage
+
+IMPLEMENTATION STATUS
+022_MVP_EXECUTION_PACKAGEAPPROVEDPRODUCTION READYCURSOR READYSPRINT 01 READY
+
+WHAT HAPPENS NEXT
+After this document:
+Open Cursor AICreate Laravel 12 ProjectGenerate Sprint 01Run TestsSend Generated Code To ChatGPTPerform ReviewFix FindingsMergeBegin Sprint 02
+
+NEXT DOCUMENT
+023_SPRINT_01_IMPLEMENTATION_REVIEW_FRAMEWORK v1.0
+Purpose
+Code Review ChecklistsArchitecture Review ChecklistsSecurity Review ChecklistsPerformance Review ChecklistsDefinition Of Done Validation
+This becomes the quality gate used after every Cursor-generated implementation.
+
+END OF DOCUMENT

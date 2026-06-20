@@ -1,0 +1,119 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL
+PART 1 – FILE INFRASTRUCTURE LAYER
+VERSION 1.0
+Module
+Governance Foundation
+Tables
+file_uploadsattachments
+Depends On
+001_SECURITY_SCHEMA.SQL v1.0 FINAL(users)
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+FILE_UPLOADS
+Purpose
+Stores metadata for all uploaded files.
+Files are stored in external storage.
+Database stores only metadata and governance information.
+
+CREATETABLE file_uploads(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    file_name VARCHAR(500) NOTNULL,    stored_file_name VARCHAR(500) NOTNULL,    file_path VARCHAR(1000) NOTNULL,    file_extension VARCHAR(50) NOTNULL,    mime_type VARCHAR(255) NOTNULL,    file_size BIGINT NOTNULL,    checksum VARCHAR(128) NOTNULL,    storage_provider VARCHAR(50) NOTNULL,    status VARCHAR(50) NOTNULLDEFAULT'Uploaded',    uploaded_by BIGINT UNSIGNED NOTNULL,    uploaded_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    created_by BIGINT UNSIGNED NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,    is_active TINYINT(1)NOTNULLDEFAULT1,    is_deleted TINYINT(1)NOTNULLDEFAULT0,    deleted_by BIGINT UNSIGNED NULL,    deleted_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_file_uploads_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+FILE_UPLOADS FOREIGN KEYS
+ALTERTABLE file_uploadsADDCONSTRAINT fk_file_uploads_uploaded_byFOREIGNKEY (uploaded_by)REFERENCES users(id);ALTERTABLE file_uploadsADDCONSTRAINT fk_file_uploads_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE file_uploadsADDCONSTRAINT fk_file_uploads_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);ALTERTABLE file_uploadsADDCONSTRAINT fk_file_uploads_deleted_byFOREIGNKEY (deleted_by)REFERENCES users(id);
+
+FILE_UPLOADS INDEXES
+CREATEINDEX ix_file_uploads_statusON file_uploads(status);CREATEINDEX ix_file_uploads_storage_providerON file_uploads(storage_provider);CREATEINDEX ix_file_uploads_checksumON file_uploads(checksum);CREATEINDEX ix_file_uploads_uploaded_byON file_uploads(uploaded_by);CREATEINDEX ix_file_uploads_uploaded_dateON file_uploads(uploaded_date);CREATEINDEX ix_file_uploads_is_activeON file_uploads(is_active);
+
+FILE_UPLOADS STATUS VALUES
+Application validation shall enforce:
+UploadedActiveArchivedQuarantinedDeleted
+
+STORAGE PROVIDERS
+Application validation shall enforce:
+HostingerLocalAzure BlobAWS S3
+
+FILE_UPLOADS BUSINESS RULES
+Physical files must never be stored in database tables.
+Checksum must be generated during upload.
+Quarantined files cannot be attached to business entities.
+Deleted files are soft deleted only.
+Uploaded file records remain historically traceable.
+
+ATTACHMENTS
+Purpose
+Associates uploaded files with business entities.
+Supports polymorphic attachment architecture.
+
+CREATETABLE attachments(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    file_upload_id BIGINT UNSIGNED NOTNULL,    entity_type VARCHAR(100) NOTNULL,    entity_id BIGINT UNSIGNED NOTNULL,    attachment_type VARCHAR(100) NULL,    display_order INTNOTNULLDEFAULT0,    version_number INTNOTNULLDEFAULT1,    is_current_version TINYINT(1)NOTNULLDEFAULT1,    parent_attachment_id BIGINT UNSIGNED NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_attachments_uuidUNIQUE (uuid),CONSTRAINT fk_attachments_file_uploadFOREIGNKEY (file_upload_id)REFERENCES file_uploads(id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ATTACHMENTS SELF-REFERENCE FOREIGN KEY
+ALTERTABLE attachmentsADDCONSTRAINT fk_attachments_parentFOREIGNKEY (parent_attachment_id)REFERENCES attachments(id);
+
+ATTACHMENTS INDEXES
+CREATEINDEX ix_attachments_entityON attachments(entity_type, entity_id);CREATEINDEX ix_attachments_file_uploadON attachments(file_upload_id);CREATEINDEX ix_attachments_current_versionON attachments(is_current_version);CREATEINDEX ix_attachments_parentON attachments(parent_attachment_id);CREATEINDEX ix_attachments_display_orderON attachments(display_order);
+
+SUPPORTED ENTITY TYPES
+Initial supported values:
+TechnologyAssessmentSectionQuestionBankQuestionReview
+Future modules may add entity types without schema changes.
+
+ATTACHMENT VERSIONING RULES
+Versioning is mandatory.
+Example:
+QuestionDiagram_v1       ↓QuestionDiagram_v2       ↓QuestionDiagram_v3
+Rules:
+Historical versions must remain preserved.
+Only one attachment version may have:
+is_current_version = 1
+for a version chain.
+Replacing a file creates a new attachment record.
+Existing attachment records must never be overwritten.
+
+ATTACHMENT GOVERNANCE RULES
+Attachment replacement:
+Create New Version
+Never:
+Overwrite Existing Version
+
+Attachment deletion:
+Detach
+rather than physical deletion.
+
+Attachment lineage:
+parent_attachment_id
+must maintain version history.
+
+VALIDATION CHECKLIST
+✓ Metadata In Database Strategy Applied
+✓ Files Outside Database Strategy Applied
+✓ Polymorphic Attachment Architecture Applied
+✓ Attachment Versioning Applied
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ Storage Provider Strategy Applied
+✓ File Lifecycle Strategy Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+file_uploadsattachments
+Governance Foundation Completion:
+40%
+
+NEXT STEP
+Review Part 1 and then generate:
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL – PART 2
+Table:
+system_settings
+This table is critical because it becomes the centralized configuration engine for the entire platform.
+
+END OF DOCUMENT

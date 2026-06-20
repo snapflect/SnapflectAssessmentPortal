@@ -1,0 +1,175 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL
+PART 3 – GOVERNANCE & COMPLIANCE LAYER
+VERSION 1.0
+Module
+Governance Foundation
+Tables
+audit_logsactivity_logs
+Depends On
+001_SECURITY_SCHEMA.SQL v1.0 FINALusers002_GOVERNANCE_FOUNDATION_SCHEMA.SQLPart 1Part 2
+Target Platform
+MySQL 8+InnoDBUTF8MB4Hostinger Compatible
+
+AUDIT_LOGS
+Purpose
+Stores immutable system audit history.
+Supports:
+Compliance
+Governance
+Traceability
+Security Investigation
+Historical Reconstruction
+Audit records are append-only.
+
+CREATETABLE audit_logs(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    entity_type VARCHAR(100) NOTNULL,    entity_id BIGINT UNSIGNED NOTNULL,    entity_version INTNULL,    action_type VARCHAR(50) NOTNULL,    old_value_json JSON NULL,    new_value_json JSON NULL,    performed_by BIGINT UNSIGNED NULL,    performed_by_type VARCHAR(50)NOTNULLDEFAULT'User',    correlation_id VARCHAR(100) NULL,    record_hash VARCHAR(128) NULL,    event_date DATENOTNULL,    audit_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_audit_logs_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+AUDIT_LOGS FOREIGN KEYS
+ALTERTABLE audit_logsADDCONSTRAINT fk_audit_logs_performed_byFOREIGNKEY (performed_by)REFERENCES users(id);
+
+AUDIT_LOGS INDEXES
+CREATEINDEX ix_audit_logs_entityON audit_logs(entity_type, entity_id);CREATEINDEX ix_audit_logs_actionON audit_logs(action_type);CREATEINDEX ix_audit_logs_performed_byON audit_logs(performed_by);CREATEINDEX ix_audit_logs_correlationON audit_logs(correlation_id);CREATEINDEX ix_audit_logs_event_dateON audit_logs(event_date);CREATEINDEX ix_audit_logs_audit_dateON audit_logs(audit_date);CREATEINDEX ix_audit_logs_entity_versionON audit_logs(entity_version);
+
+SUPPORTED ACTION TYPES
+Application validation shall enforce:
+CreateUpdateDeletePublishApproveRejectAssignSubmitReview
+
+SUPPORTED PERFORMED_BY_TYPE VALUES
+Application validation shall enforce:
+UserSystemJobMigrationAPI
+
+AUDIT GOVERNANCE RULES
+Audit records are:
+Immutable
+Meaning:
+No UpdatesNo Deletes
+after insertion.
+
+Correlation Tracking
+Used for:
+Bulk ImportBulk PublishWorkflow ExecutionAPI Request Tracing
+
+Entity Version Tracking
+Supports:
+Question VersioningAssessment VersioningQuestion Bank Versioning
+
+Tamper Detection
+Supported through:
+record_hash
+Future implementation may use:
+Hash Chain Strategy
+for enhanced compliance.
+
+Retention
+Minimum retention:
+7 Years
+
+ACTIVITY_LOGS
+Purpose
+Tracks user activity and operational events.
+Supports:
+User Analytics
+Security Monitoring
+Reporting
+Usage Insights
+Behavioral Analysis
+Activity logs are append-only.
+
+CREATETABLE activity_logs(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    user_id BIGINT UNSIGNED NULL,    anonymous_identifier VARCHAR(255) NULL,    activity_category VARCHAR(100) NOTNULL,    activity_type VARCHAR(100) NOTNULL,    activity_severity VARCHAR(50)NOTNULLDEFAULT'Info',    activity_details TEXT NULL,    reference_entity_type VARCHAR(100) NULL,    reference_entity_id BIGINT UNSIGNED NULL,    ip_address VARCHAR(50) NULL,    device_fingerprint VARCHAR(255) NULL,    user_agent VARCHAR(1000) NULL,    event_date DATENOTNULL,    activity_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_activity_logs_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+ACTIVITY_LOGS FOREIGN KEYS
+ALTERTABLE activity_logsADDCONSTRAINT fk_activity_logs_userFOREIGNKEY (user_id)REFERENCES users(id);
+
+ACTIVITY_LOGS INDEXES
+CREATEINDEX ix_activity_logs_userON activity_logs(user_id);CREATEINDEX ix_activity_logs_categoryON activity_logs(activity_category);CREATEINDEX ix_activity_logs_typeON activity_logs(activity_type);CREATEINDEX ix_activity_logs_severityON activity_logs(activity_severity);CREATEINDEX ix_activity_logs_event_dateON activity_logs(event_date);CREATEINDEX ix_activity_logs_activity_dateON activity_logs(activity_date);CREATEINDEX ix_activity_logs_referenceON activity_logs(reference_entity_type, reference_entity_id);
+
+SUPPORTED ACTIVITY CATEGORIES
+Application validation shall enforce:
+AuthenticationAssessmentReviewProfileSystemNotificationReporting
+
+SUPPORTED ACTIVITY SEVERITY VALUES
+Application validation shall enforce:
+InfoWarningCritical
+
+EXAMPLE ACTIVITY TYPES
+LoginLogoutRegistrationPassword Reset RequestedPassword Reset CompletedAssessment StartedAssessment SavedAssessment SubmittedReview ViewedProfile Updated
+
+ACTIVITY GOVERNANCE RULES
+Activity records are:
+Append Only
+Meaning:
+No UpdatesNo Deletes
+after insertion.
+
+Anonymous Activity Support
+Supported through:
+anonymous_identifier
+Examples:
+Registration AttemptsLogin AttemptsPassword Reset Requests
+before authentication.
+
+Security Context Tracking
+Supported through:
+ip_addressdevice_fingerprintuser_agent
+
+Reference Tracking
+Activities may be linked to:
+AssessmentReviewQuestionQuestionBankTechnology
+without schema changes.
+
+Retention
+Recommended retention:
+2 Years
+Future configurable through:
+system_settings
+
+GOVERNANCE FOUNDATION STATUS
+Completed Tables:
+file_uploadsattachmentssystem_settingsaudit_logsactivity_logs
+
+GOVERNANCE FOUNDATION COMPLETION
+100%
+
+VALIDATION CHECKLIST
+✓ Metadata In Database Strategy Applied
+✓ Generic Attachment Architecture Applied
+✓ Scoped Configuration Architecture Applied
+✓ Audit Architecture Applied
+✓ Activity Architecture Applied
+✓ Configuration Versioning Applied
+✓ Attachment Versioning Applied
+✓ Correlation Tracking Applied
+✓ Tamper Detection Support Added
+✓ Anonymous Activity Support Added
+✓ Security Context Tracking Added
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+002_GOVERNANCE_FOUNDATION_SCHEMA.SQL
+Version 1.0
+Status:
+APPROVED
+
+NEXT STEP
+Perform:
+Governance Foundation Schema Master Review v1.0
+Review Scope:
+Part 1file_uploadsattachmentsPart 2system_settingsPart 3audit_logsactivity_logs
+Validation Areas:
+FK consistency
+Audit consistency
+Soft delete consistency
+Versioning consistency
+Configuration hierarchy
+Attachment lifecycle
+Audit immutability
+Index strategy
+Future scalability
+After review:
+Freeze:002_GOVERNANCE_FOUNDATION_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

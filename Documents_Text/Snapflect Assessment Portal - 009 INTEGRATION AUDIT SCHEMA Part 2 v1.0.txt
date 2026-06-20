@@ -1,0 +1,169 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+009_INTEGRATION_AUDIT_SCHEMA.SQL
+PART 2 – AUDIT, EVENTS, IMPORTS & EXPORTS
+Version 1.0
+
+MODULE
+Integration & Audit
+
+TABLES
+integration_eventsaudit_eventsdata_exportsdata_imports
+
+DEPENDS ON
+009_INTEGRATION_AUDIT_SCHEMA.SQL – PART 1api_clientsapi_keyswebhookswebhook_deliveries001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes:
+Integration Event TrackingEnterprise Audit TrailData Export GovernanceData Import GovernanceCompliance LoggingForensic TraceabilityRegulatory Readiness
+
+INTEGRATION_EVENTS
+Purpose
+Tracks system-to-system integration activities.
+Supports:
+API CallsWebhook ProcessingImport OperationsExport OperationsSystem Integrations
+
+Governance
+Integration events are operational records.
+They are not replacements for audit records.
+
+CREATETABLE integration_events(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    correlation_id CHAR(36) NULL,    event_code VARCHAR(100) NOTNULL,    event_category VARCHAR(50) NOTNULL,    event_status VARCHAR(50)NOTNULLDEFAULT'Pending',    event_payload_json JSON NOTNULL,    metadata_json JSON NULL,    event_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_integration_events_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+INTEGRATION_EVENTS INDEXES
+CREATEINDEX ix_integration_events_categoryON integration_events(event_category);CREATEINDEX ix_integration_events_statusON integration_events(event_status);CREATEINDEX ix_integration_events_correlationON integration_events(correlation_id);CREATEINDEX ix_integration_events_dateON integration_events(event_date);
+
+EVENT CATEGORIES
+Application validation shall enforce:
+APIWebhookImportExportSystem
+
+EVENT STATUS VALUES
+Application validation shall enforce:
+PendingProcessingCompletedFailed
+
+AUDIT_EVENTS
+Purpose
+Stores immutable enterprise audit records.
+Supports:
+Security AuditingCompliance AuditingChange TrackingForensic InvestigationRegulatory Reporting
+
+Governance
+Audit records are append-only.
+Audit records must never be updated or deleted through normal application workflows.
+
+CREATETABLE audit_events(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    audit_category VARCHAR(50) NOTNULL,    event_type VARCHAR(100) NOTNULL,    entity_type VARCHAR(100) NOTNULL,    entity_id BIGINT UNSIGNED NULL,    performed_by BIGINT UNSIGNED NULL,    source_type VARCHAR(50) NOTNULL,    before_state_json JSON NULL,    after_state_json JSON NULL,    metadata_json JSON NULL,    retention_expiry_date DATETIME(3) NULL,    event_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_audit_events_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+AUDIT_EVENTS FOREIGN KEYS
+ALTERTABLE audit_eventsADDCONSTRAINT fk_audit_events_performed_byFOREIGNKEY (performed_by)REFERENCES users(id);
+
+AUDIT_EVENTS INDEXES
+CREATEINDEX ix_audit_events_categoryON audit_events(audit_category);CREATEINDEX ix_audit_events_entityON audit_events(    entity_type,    entity_id);CREATEINDEX ix_audit_events_performed_byON audit_events(performed_by);CREATEINDEX ix_audit_events_event_dateON audit_events(event_date);CREATEINDEX ix_audit_events_retentionON audit_events(retention_expiry_date);
+
+AUDIT CATEGORIES
+Application validation shall enforce:
+SecurityGovernanceAssessmentEvaluationCertificationNotificationReportingIntegration
+
+SOURCE TYPES
+Application validation shall enforce:
+UserSystemAPIWebhook
+
+BEFORE / AFTER STATE GOVERNANCE
+Fields:
+before_state_jsonafter_state_json
+enable:
+Change ReconstructionForensic InvestigationRegulatory AuditsHistorical Comparison
+
+DATA_EXPORTS
+Purpose
+Tracks business data extraction operations.
+Supports:
+Candidate ExportsAssessment ExportsCertificate ExportsCompliance ExportsAudit Exports
+
+Governance
+Data exports are separate from:
+report_exports
+because they represent business data extraction rather than report generation.
+
+CREATETABLE data_exports(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    export_type VARCHAR(100) NOTNULL,    export_scope VARCHAR(100) NOTNULL,    requested_by BIGINT UNSIGNED NOTNULL,    approved_by BIGINT UNSIGNED NULL,    status VARCHAR(50)NOTNULLDEFAULT'Pending',    file_reference VARCHAR(1000) NULL,    expiry_date DATETIME(3) NULL,    metadata_json JSON NULL,    requested_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    completed_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_data_exports_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+DATA_EXPORTS FOREIGN KEYS
+ALTERTABLE data_exportsADDCONSTRAINT fk_data_exports_requested_byFOREIGNKEY (requested_by)REFERENCES users(id);ALTERTABLE data_exportsADDCONSTRAINT fk_data_exports_approved_byFOREIGNKEY (approved_by)REFERENCES users(id);
+
+DATA_EXPORTS INDEXES
+CREATEINDEX ix_data_exports_statusON data_exports(status);CREATEINDEX ix_data_exports_scopeON data_exports(export_scope);CREATEINDEX ix_data_exports_requestedON data_exports(requested_date);CREATEINDEX ix_data_exports_expiryON data_exports(expiry_date);
+
+EXPORT STATUS VALUES
+Application validation shall enforce:
+PendingApprovedProcessingCompletedFailedExpired
+
+DATA_IMPORTS
+Purpose
+Tracks controlled data ingestion operations.
+Supports:
+Candidate ImportsAssessment ImportsBulk UploadsMigration Operations
+
+CREATETABLE data_imports(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    import_type VARCHAR(100) NOTNULL,    source_reference VARCHAR(1000) NOTNULL,    requested_by BIGINT UNSIGNED NOTNULL,    approved_by BIGINT UNSIGNED NULL,    status VARCHAR(50)NOTNULLDEFAULT'Pending',    total_records INTNOTNULLDEFAULT0,    successful_records INTNOTNULLDEFAULT0,    failed_records INTNOTNULLDEFAULT0,    error_summary_json JSON NULL,    metadata_json JSON NULL,    requested_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    completed_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_data_imports_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+DATA_IMPORTS FOREIGN KEYS
+ALTERTABLE data_importsADDCONSTRAINT fk_data_imports_requested_byFOREIGNKEY (requested_by)REFERENCES users(id);ALTERTABLE data_importsADDCONSTRAINT fk_data_imports_approved_byFOREIGNKEY (approved_by)REFERENCES users(id);
+
+DATA_IMPORTS INDEXES
+CREATEINDEX ix_data_imports_statusON data_imports(status);CREATEINDEX ix_data_imports_requestedON data_imports(requested_date);CREATEINDEX ix_data_imports_completedON data_imports(completed_date);
+
+IMPORT STATUS VALUES
+Application validation shall enforce:
+PendingApprovedProcessingCompletedFailedCancelled
+
+IMPORT VALIDATION GOVERNANCE
+Fields:
+total_recordssuccessful_recordsfailed_records
+support:
+Import ValidationQuality MetricsOperational MonitoringBulk Processing Diagnostics
+
+ERROR DIAGNOSTICS
+Field:
+error_summary_json
+stores import failure summaries.
+Example:
+{"duplicateEmails":5,"invalidRows":3}
+
+CORRELATION GOVERNANCE
+Field:
+correlation_id
+supports end-to-end integration traceability across:
+API RequestsWebhook ProcessingImport OperationsExport Operations
+
+VALIDATION CHECKLIST
+✓ Integration Event Tracking Applied
+✓ Audit Trail Applied
+✓ Before/After State Tracking Applied
+✓ Compliance Logging Applied
+✓ Export Governance Applied
+✓ Import Governance Applied
+✓ Approval Workflow Support Applied
+✓ Correlation Tracking Applied
+✓ Regulatory Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+009_INTEGRATION_AUDIT_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+api_clientsapi_keyswebhookswebhook_deliveriesintegration_eventsaudit_eventsdata_exportsdata_imports
+Integration & Audit Module Completion:
+100%
+
+NEXT STEP
+Perform:
+Integration & Audit Schema Master Review v1.0
+Review Scope:
+Part 1Part 2
+Validation Areas:
+API SecurityWebhook SecurityAudit GovernanceCompliance LoggingImport GovernanceExport GovernanceTraceabilityRegulatory Readiness
+After successful review:
+Freeze:009_INTEGRATION_AUDIT_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

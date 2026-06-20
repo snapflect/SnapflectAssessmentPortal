@@ -1,0 +1,155 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+011_AI_PROCTORING_SCHEMA.SQL
+PART 1 – SESSION MANAGEMENT, EVENTS & VIOLATIONS
+Version 1.0
+
+MODULE
+AI Proctoring
+
+TABLES
+proctoring_sessionsproctoring_eventsproctoring_violations
+
+DEPENDS ON
+004_ASSESSMENT_EXECUTION_SCHEMA.SQLassessment_attempts009_INTEGRATION_AUDIT_SCHEMA.SQLaudit_events
+
+PURPOSE
+This module establishes:
+Proctoring Session ManagementMonitoring Event CollectionViolation DetectionRisk ScoringSession Integrity TrackingInvestigation ReadinessCompliance Auditability
+
+PROCTORING_SESSIONS
+Purpose
+Tracks the complete proctoring lifecycle for an assessment attempt.
+Examples:
+Assessment StartedCamera ActivatedMicrophone ActivatedScreen Sharing ActivatedAssessment Submitted
+
+Governance
+One assessment attempt must have exactly one proctoring session.
+
+CREATETABLE proctoring_sessions(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    assessment_attempt_id BIGINT UNSIGNED NOTNULL,    proctoring_mode VARCHAR(50)NOTNULLDEFAULT'AI',    session_status VARCHAR(50)NOTNULLDEFAULT'Pending',    camera_enabled TINYINT(1)NOTNULLDEFAULT0,    microphone_enabled TINYINT(1)NOTNULLDEFAULT0,    screen_share_enabled TINYINT(1)NOTNULLDEFAULT0,    integrity_score DECIMAL(5,2)NULL,    metadata_json JSON NULL,    started_date DATETIME(3) NULL,    ended_date DATETIME(3) NULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_proctoring_sessions_uuidUNIQUE (uuid),CONSTRAINT ux_proctoring_session_attemptUNIQUE (assessment_attempt_id))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+PROCTORING_SESSIONS FOREIGN KEYS
+ALTERTABLE proctoring_sessionsADDCONSTRAINT fk_proctoring_sessions_attemptFOREIGNKEY (assessment_attempt_id)REFERENCES assessment_attempts(id);
+
+PROCTORING_SESSIONS INDEXES
+CREATEINDEX ix_proctoring_sessions_statusON proctoring_sessions(session_status);CREATEINDEX ix_proctoring_sessions_modeON proctoring_sessions(proctoring_mode);CREATEINDEX ix_proctoring_sessions_integrityON proctoring_sessions(integrity_score);CREATEINDEX ix_proctoring_sessions_startedON proctoring_sessions(started_date);
+
+PROCTORING MODES
+Application validation shall enforce:
+NoneManualAIHybrid
+
+SESSION STATUS VALUES
+Application validation shall enforce:
+PendingActiveCompletedTerminatedFailed
+
+INTEGRITY SCORE GOVERNANCE
+Range:
+0.00 → 100.00
+Examples:
+100.00 = Clean Session75.00 = Moderate Risk30.00 = High Risk
+
+PROCTORING_EVENTS
+Purpose
+Stores immutable monitoring events generated during a session.
+Examples:
+Face DetectedFace MissingMultiple FacesMicrophone NoiseTab SwitchWindow BlurScreen Share Lost
+
+Governance
+Events are immutable and append-only.
+
+CREATETABLE proctoring_events(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    proctoring_session_id BIGINT UNSIGNED NOTNULL,    correlation_id CHAR(36) NULL,    event_category VARCHAR(50) NOTNULL,    event_type VARCHAR(100) NOTNULL,    severity VARCHAR(50) NOTNULL,    confidence_score DECIMAL(5,2) NULL,    event_metadata_json JSON NULL,    event_timestamp DATETIME(3)NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_proctoring_events_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+PROCTORING_EVENTS FOREIGN KEYS
+ALTERTABLE proctoring_eventsADDCONSTRAINT fk_proctoring_events_sessionFOREIGNKEY (proctoring_session_id)REFERENCES proctoring_sessions(id);
+
+PROCTORING_EVENTS INDEXES
+CREATEINDEX ix_proctoring_events_sessionON proctoring_events(proctoring_session_id);CREATEINDEX ix_proctoring_events_categoryON proctoring_events(event_category);CREATEINDEX ix_proctoring_events_severityON proctoring_events(severity);CREATEINDEX ix_proctoring_events_timestampON proctoring_events(event_timestamp);CREATEINDEX ix_proctoring_events_session_dateON proctoring_events(    proctoring_session_id,    event_timestamp);CREATEINDEX ix_proctoring_events_correlationON proctoring_events(correlation_id);
+
+EVENT CATEGORIES
+Application validation shall enforce:
+FaceAudioScreenBrowserSystem
+
+SEVERITY LEVELS
+Application validation shall enforce:
+LowMediumHighCritical
+
+CONFIDENCE SCORE GOVERNANCE
+Range:
+0.00 → 100.00
+Represents model confidence for the detected event.
+
+PROCTORING_VIOLATIONS
+Purpose
+Stores suspected assessment integrity violations.
+Examples:
+Multiple Persons DetectedCamera DisabledBrowser SwitchVirtual Machine DetectedUnauthorized Device
+
+Governance
+Violations may be created by AI, reviewers, or system policies.
+
+CREATETABLE proctoring_violations(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    proctoring_session_id BIGINT UNSIGNED NOTNULL,    correlation_id CHAR(36) NULL,    violation_type VARCHAR(100) NOTNULL,    risk_score DECIMAL(5,2)NOTNULL,    status VARCHAR(50)NOTNULLDEFAULT'Open',    detected_by VARCHAR(50)NOTNULLDEFAULT'AI',    evidence_count INTNOTNULLDEFAULT0,    metadata_json JSON NULL,    detected_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_proctoring_violations_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+PROCTORING_VIOLATIONS FOREIGN KEYS
+ALTERTABLE proctoring_violationsADDCONSTRAINT fk_proctoring_violations_sessionFOREIGNKEY (proctoring_session_id)REFERENCES proctoring_sessions(id);
+
+PROCTORING_VIOLATIONS INDEXES
+CREATEINDEX ix_proctoring_violations_statusON proctoring_violations(status);CREATEINDEX ix_proctoring_violations_riskON proctoring_violations(risk_score);CREATEINDEX ix_proctoring_violations_typeON proctoring_violations(violation_type);CREATEINDEX ix_proctoring_violations_detectedON proctoring_violations(detected_date);CREATEINDEX ix_proctoring_violations_correlationON proctoring_violations(correlation_id);
+
+VIOLATION STATUS VALUES
+Application validation shall enforce:
+OpenUnderReviewConfirmedDismissedEscalated
+
+DETECTION SOURCES
+Application validation shall enforce:
+AIReviewerSystem
+
+RISK SCORE GOVERNANCE
+Range:
+0.00 → 100.00
+Examples:
+15.00 = Low Risk55.00 = Medium Risk90.00 = Critical Risk
+
+EVIDENCE GOVERNANCE
+Field:
+evidence_count
+represents the number of linked evidence artifacts supporting the violation.
+
+CORRELATION GOVERNANCE
+Field:
+correlation_id
+supports traceability across:
+Monitoring Event      ↓AI Detection      ↓Violation      ↓Review
+
+VALIDATION CHECKLIST
+✓ Session Governance Applied
+✓ Monitoring Event Tracking Applied
+✓ Violation Tracking Applied
+✓ Integrity Scoring Applied
+✓ AI Explainability Applied
+✓ Evidence Readiness Applied
+✓ Correlation Tracking Applied
+✓ Compliance Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+011_AI_PROCTORING_SCHEMA.SQL – PART 1
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+proctoring_sessionsproctoring_eventsproctoring_violations
+AI Proctoring Completion:
+50%
+
+NEXT STEP
+Perform architecture review for:
+ai_detection_resultsmedia_evidenceproctoring_reviews
+before generating:
+011_AI_PROCTORING_SCHEMA.SQL – PART 2
+This phase will establish:
+AI Detection ResultsEvidence ManagementHuman Review WorkflowFraud InvestigationAppeal ReadinessAssessment Integrity Governance
+and complete the AI Proctoring module.
+
+END OF DOCUMENT

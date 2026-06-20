@@ -1,0 +1,300 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+002 GOVERNANCE FOUNDATION SCHEMA DESIGN
+Version 1.0
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+002 Governance Foundation Schema Design
+Version
+1.0
+Status
+FINAL
+Module
+Governance Foundation
+Depends On
+001 Security Schema v1.0 FINAL
+Approved For
+DDL Generation
+
+1. PURPOSE
+The Governance Foundation Schema provides shared platform infrastructure services consumed by all application modules.
+This schema establishes:
+File Metadata Management
+Generic Attachment Management
+Configuration Management
+Audit Logging
+Activity Tracking
+All subsequent modules will depend on one or more entities from this schema.
+
+2. TABLES IN SCOPE
+File Infrastructure
+file_uploadsattachments
+
+Configuration Management
+system_settings
+
+Governance & Compliance
+audit_logsactivity_logs
+
+3. ARCHITECTURE PRINCIPLES
+3.1 File Storage Principle
+Approved Architecture:
+Metadata In DatabaseFiles In Storage
+Database Stores:
+File NameStored File NameFile PathChecksumFile SizeMIME TypeStorage ProviderLifecycle Status
+Database Does Not Store:
+Binary ContentImagesDocumentsVideos
+
+3.2 Attachment Principle
+Approved Architecture:
+Generic Polymorphic Attachment Architecture
+Supported Entity Types:
+TechnologyAssessmentSectionQuestion BankQuestionReview
+Future modules can attach files without schema redesign.
+
+3.3 Configuration Principle
+Approved Architecture:
+Scoped Configuration Architecture
+Supported Scopes:
+GlobalTechnologyAssessmentSectionQuestion Bank
+Configuration Resolution Order:
+Section↓Assessment↓Technology↓Global
+
+3.4 Audit Principle
+Approved Architecture:
+Generic Polymorphic Audit Architecture
+Allows auditing of any entity in the system.
+
+3.5 Activity Principle
+Activity logs are intentionally separate from audit logs.
+Audit Log:
+System Change
+Activity Log:
+User Action
+
+4. TABLE CREATION ORDER
+Phase 1
+file_uploads
+No dependencies.
+
+Phase 2
+system_settings
+Depends on:
+users
+
+Phase 3
+attachments
+Depends on:
+file_uploads
+
+Phase 4
+audit_logs
+Depends on:
+users
+
+Phase 5
+activity_logs
+Depends on:
+users
+
+5. ENTITY RELATIONSHIP MODEL
+File Upload → Attachments
+file_uploads (1)        |        |        vattachments (N)
+Relationship:
+One FileMay Be Attached Multiple Times
+
+Users → System Settings
+Used through:
+created_bymodified_bydeleted_by
+
+Users → Audit Logs
+Used through:
+performed_by
+
+Users → Activity Logs
+Used through:
+user_id
+
+6. FILE_UPLOADS DESIGN
+Purpose
+Stores uploaded file metadata.
+
+Core Attributes
+uuidfile_namestored_file_namefile_pathfile_extensionmime_typefile_sizechecksumstorage_providerstatus
+
+Supported Storage Providers
+HostingerLocalAzure BlobAWS S3
+
+Supported Status Values
+UploadedActiveArchivedQuarantinedDeleted
+
+Business Rules
+Physical files remain outside database storage.
+Checksum validates file integrity.
+Quarantined files cannot be attached.
+Deleted files are soft deleted.
+
+7. ATTACHMENTS DESIGN
+Purpose
+Associates uploaded files with business entities.
+
+Architecture
+Polymorphic Attachment Model
+
+Core Attributes
+file_upload_identity_typeentity_idattachment_typedisplay_orderversion_numberis_current_versionparent_attachment_id
+
+Versioning Strategy
+Supported.
+Example:
+QuestionImage_v1      ↓QuestionImage_v2      ↓QuestionImage_v3
+
+Business Rules
+Historical versions are retained.
+Only one active version exists at a time.
+Replacing an attachment creates a new version.
+
+8. SYSTEM_SETTINGS DESIGN
+Purpose
+Stores platform configuration.
+
+Core Attributes
+scope_typescope_idsetting_keysetting_valuesetting_data_typeversion_number
+
+Supported Data Types
+StringIntegerDecimalBooleanJSONDateTime
+
+Supported Scope Types
+GlobalTechnologyAssessmentSectionQuestion Bank
+
+Versioning
+Configuration versioning supported.
+Example:
+Assessment Timerv1 = 30 Minutesv2 = 60 Minutes
+
+Business Rules
+Latest active version is applied.
+Historical versions remain available.
+Resolution follows scope hierarchy.
+
+9. AUDIT_LOGS DESIGN
+Purpose
+Stores immutable system audit history.
+
+Architecture
+Generic Polymorphic Audit Architecture
+
+Core Attributes
+entity_typeentity_identity_versionaction_typeold_value_jsonnew_value_jsonperformed_bycorrelation_id
+
+Supported Actions
+CreateUpdateDeletePublishApproveRejectAssignSubmitReview
+
+Correlation ID Purpose
+Tracks related actions across:
+API RequestsWorkflow ExecutionBulk ImportsBulk Exports
+
+Business Rules
+Audit logs are immutable.
+Audit logs are never deleted.
+Minimum retention period = 7 years.
+Full assessment snapshots are prohibited.
+Metadata changes only.
+
+10. ACTIVITY_LOGS DESIGN
+Purpose
+Tracks user activity.
+
+Core Attributes
+user_idactivity_typeactivity_severityactivity_detailsreference_entity_typereference_entity_id
+
+Activity Severity Values
+InfoWarningCritical
+
+Example Activities
+LoginLogoutAssessment StartedAssessment SavedAssessment SubmittedReview ViewedProfile Updated
+
+Business Rules
+Activity logs supplement audit logs.
+Activity logs remain searchable.
+Activity logs support future analytics and reporting.
+
+11. UUID STRATEGY
+Every table contains:
+uuid CHAR(36)
+Requirement:
+UNIQUE(uuid)
+Mandatory.
+
+12. AUDIT FIELD STRATEGY
+Mutable tables contain:
+created_bycreated_datemodified_bymodified_date
+
+Soft-deletable entities additionally contain:
+is_activeis_deleteddeleted_bydeleted_date
+
+13. SOFT DELETE STRATEGY
+Soft Delete Enabled
+file_uploadssystem_settings
+
+Soft Delete Not Required
+attachmentsaudit_logsactivity_logs
+Reason:
+Historical integrity must be preserved.
+
+14. INDEX STRATEGY
+file_uploads
+UX_file_uploads_uuidIX_file_uploads_statusIX_file_uploads_checksumIX_file_uploads_storage_provider
+
+attachments
+UX_attachments_uuidIX_attachments_entityIX_attachments_current_versionIX_attachments_parent
+
+system_settings
+UX_system_settings_scope_keyIX_system_settings_scopeIX_system_settings_version
+
+audit_logs
+IX_audit_entityIX_audit_actionIX_audit_userIX_audit_correlationIX_audit_date
+
+activity_logs
+IX_activity_userIX_activity_typeIX_activity_severityIX_activity_date
+
+15. VALIDATION CHECKLIST
+✓ Metadata In Database Strategy Applied
+✓ Generic Attachment Architecture Applied
+✓ Scoped Configuration Architecture Applied
+✓ Audit Architecture Applied
+✓ Activity Architecture Applied
+✓ Attachment Versioning Applied
+✓ Configuration Versioning Applied
+✓ Correlation Tracking Applied
+✓ UUID Strategy Applied
+✓ Audit Strategy Applied
+✓ Soft Delete Strategy Applied
+✓ Index Strategy Defined
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+APPROVAL STATUS
+Document:
+002 Governance Foundation Schema DesignVersion 1.0
+Status:
+FINALAPPROVED FOR DDL GENERATION
+
+NEXT STEP
+Generate:
+002_governance_foundation_schema.sql
+Including:
+file_uploadsattachmentssystem_settingsaudit_logsactivity_logs
+with:
+CREATE TABLE statements
+Primary Keys
+Foreign Keys
+Unique Constraints
+Indexes
+Audit Fields
+Soft Delete Support
+Governance Rules
+
+END OF DOCUMENT

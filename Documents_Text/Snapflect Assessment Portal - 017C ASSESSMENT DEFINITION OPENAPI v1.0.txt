@@ -1,0 +1,390 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+017C_ASSESSMENT_DEFINITION_OPENAPI
+Version 1.0
+Status: APPROVED BASELINE
+OpenAPI 3.1 Specification
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+Assessment Definition OpenAPI Specification
+Version
+1.0
+Status
+FINAL
+Module
+Assessment Definition
+OpenAPI Version
+3.1
+Based On
+PRD v1.2 FINAL
+Based On
+003_ASSESSMENT_DEFINITION_SCHEMA
+Based On
+014_PLATFORM_API_ARCHITECTURE
+Based On
+016_RBAC_MATRIX
+Based On
+017_OPENAPI_MASTER_SPECIFICATION
+
+1. MODULE OVERVIEW
+This specification defines APIs for:
+TechnologiesAssessmentsAssessment VersionsSectionsSection VersionsQuestion BanksQuestion Bank VersionsQuestionsQuestion VersionsQuestion ApprovalQuestion RejectionQuestion ImportQuestion ExportAssessment PublishingAssessment ArchivingAssessment Cloning
+
+2. OPENAPI METADATA
+openapi:3.1.0info:title: Snapflect Assessment Definition APIversion:1.0.0description: Assessment Definition Management APIsservers:-url: /api/v1tags:-name: Technologies-name: Assessments-name: Sections-name: Question Banks-name: Questions
+
+3. SECURITY REQUIREMENTS
+Global Security:
+security:-BearerAuth:[]
+
+Permissions:
+Technology.ViewTechnology.CreateTechnology.EditTechnology.DeleteAssessment.ViewAssessment.CreateAssessment.EditAssessment.PublishAssessment.CloneSection.ViewSection.CreateSection.EditQuestionBank.ViewQuestionBank.CreateQuestionBank.EditQuestionBank.ApproveQuestion.ViewQuestion.CreateQuestion.EditQuestion.ApproveQuestion.ImportQuestion.Export
+
+4. TECHNOLOGY APIS
+List Technologies
+Endpoint
+GET /api/v1/technologies
+Permission
+Technology.View
+Query Parameters
+pagepageSizesearchstatus
+
+Get Technology
+Endpoint
+GET /api/v1/technologies/{id}
+Permission
+Technology.View
+
+Create Technology
+Endpoint
+POST /api/v1/technologies
+Permission
+Technology.Create
+Request DTO
+{"name":".NET","code":"DOTNET","description":".NET Technology"}
+Validation
+name          Requiredcode          Required              Unique
+
+Update Technology
+Endpoint
+PUT /api/v1/technologies/{id}
+Permission
+Technology.Edit
+
+Delete Technology
+Endpoint
+DELETE /api/v1/technologies/{id}
+Permission
+Technology.Delete
+Behavior
+Soft Delete
+
+5. ASSESSMENT APIS
+List Assessments
+Endpoint
+GET /api/v1/assessments
+Permission
+Assessment.View
+Filters
+technologyIdstatusversionpublishedsearch
+
+Get Assessment
+Endpoint
+GET /api/v1/assessments/{id}
+Permission
+Assessment.View
+
+Create Assessment
+Endpoint
+POST /api/v1/assessments
+Permission
+Assessment.Create
+Request DTO
+{"technologyId":1,"name":"Senior .NET Assessment","code":"DOTNET-SR-001","description":"","durationMinutes":90,"passingPercentage":70}
+Validation
+technologyId          Requiredname                  Requiredcode                  Required                      UniquedurationMinutes       Required                      > 0passingPercentage     Required                      0-100
+
+Update Assessment
+Endpoint
+PUT /api/v1/assessments/{id}
+Permission
+Assessment.Edit
+
+Publish Assessment
+Endpoint
+POST /api/v1/assessments/{id}/publish
+Permission
+Assessment.Publish
+Publishing Rules
+Assessment ActiveAt Least One SectionAt Least One Approved QuestionNo Draft ComponentsWorkflow Complete
+Audit Event
+Assessment Published
+
+Archive Assessment
+Endpoint
+POST /api/v1/assessments/{id}/archive
+Permission
+Assessment.Publish
+Audit Event
+Assessment Archived
+
+Clone Assessment
+Endpoint
+POST /api/v1/assessments/{id}/clone
+Permission
+Assessment.Clone
+Request DTO
+{"newAssessmentName":"Senior .NET Assessment V2"}
+Audit Event
+Assessment Cloned
+
+Create New Assessment Version
+Endpoint
+POST /api/v1/assessments/{id}/new-version
+Permission
+Assessment.Edit
+Behavior
+Create New Version RecordPreserve Previous VersionMaintain Version History
+
+6. SECTION APIS
+List Sections
+Endpoint
+GET /api/v1/sections
+Permission
+Section.View
+
+Get Section
+Endpoint
+GET /api/v1/sections/{id}
+
+Create Section
+Endpoint
+POST /api/v1/sections
+Permission
+Section.Create
+Request DTO
+{"assessmentId":1,"name":"Core Concepts","description":"","displayOrder":1,"passingPercentage":60}
+
+Update Section
+Endpoint
+PUT /api/v1/sections/{id}
+Permission
+Section.Edit
+
+New Section Version
+Endpoint
+POST /api/v1/sections/{id}/new-version
+Permission
+Section.Edit
+
+7. QUESTION BANK APIS
+List Question Banks
+Endpoint
+GET /api/v1/question-banks
+Permission
+QuestionBank.View
+
+Get Question Bank
+Endpoint
+GET /api/v1/question-banks/{id}
+
+Create Question Bank
+Endpoint
+POST /api/v1/question-banks
+Permission
+QuestionBank.Create
+Request DTO
+{"technologyId":1,"name":"Advanced .NET Questions","description":""}
+
+Update Question Bank
+Endpoint
+PUT /api/v1/question-banks/{id}
+Permission
+QuestionBank.Edit
+
+Approve Question Bank
+Endpoint
+POST /api/v1/question-banks/{id}/approve
+Permission
+QuestionBank.Approve
+Audit Event
+Question Bank Approved
+
+New Question Bank Version
+Endpoint
+POST /api/v1/question-banks/{id}/new-version
+Permission
+QuestionBank.Edit
+
+8. QUESTION APIS
+Supported Question Types
+SingleChoiceMultipleChoiceTrueFalseFillInTheBlankEssayCodingFileUpload
+
+List Questions
+Endpoint
+GET /api/v1/questions
+Permission
+Question.View
+Filters
+technologyIdquestionBankIdquestionTypedifficultyLevelstatusversion
+
+Get Question
+Endpoint
+GET /api/v1/questions/{id}
+
+Create Question
+Endpoint
+POST /api/v1/questions
+Permission
+Question.Create
+Request DTO
+{"questionBankId":1,"questionType":"SingleChoice","difficultyLevel":"Advanced","questionText":"What is Dependency Injection?","score":5,"options":[]}
+Validation
+questionBankId       RequiredquestionType         RequiredquestionText         Requiredscore                Required                      > 0
+Audit Event
+Question Created
+
+Update Question
+Endpoint
+PUT /api/v1/questions/{id}
+Permission
+Question.Edit
+
+Approve Question
+Endpoint
+POST /api/v1/questions/{id}/approve
+Permission
+Question.Approve
+Separation Of Duties
+Question AuthorCannot ApproveOwn Question
+Audit Event
+Question Approved
+
+Reject Question
+Endpoint
+POST /api/v1/questions/{id}/reject
+Permission
+Question.Approve
+Request DTO
+{"comments":"Question requires correction."}
+Audit Event
+Question Rejected
+
+Create New Question Version
+Endpoint
+POST /api/v1/questions/{id}/new-version
+Permission
+Question.Edit
+Behavior
+Create New RecordPreserve Previous VersionMaintain Audit Trail
+
+Delete Question
+Endpoint
+DELETE /api/v1/questions/{id}
+Permission
+Question.Delete
+Behavior
+Soft Delete
+
+9. QUESTION IMPORT APIS
+Import Questions
+Endpoint
+POST /api/v1/questions/import
+Permission
+Question.Import
+Supported Formats
+CSVExcel
+Request
+multipart/form-data
+Audit Event
+Question Imported
+
+Import Validation Result
+Response
+{"success":true,"data":{"totalRecords":100,"successCount":95,"failedCount":5}}
+
+10. QUESTION EXPORT APIS
+Export Questions
+Endpoint
+GET /api/v1/questions/export
+Permission
+Question.Export
+Formats
+CSVExcelJSON
+Filters
+Same as question search filters.
+Audit Event
+Question Exported
+
+11. VERSION HISTORY APIS
+Question Versions
+Endpoint
+GET /api/v1/questions/{id}/versions
+Permission
+Question.View
+
+Assessment Versions
+Endpoint
+GET /api/v1/assessments/{id}/versions
+Permission
+Assessment.View
+
+Section Versions
+Endpoint
+GET /api/v1/sections/{id}/versions
+Permission
+Section.View
+
+12. MULTI-TENANCY RULES
+Organization Administrator:
+Own Organization Only
+
+Platform Administrator:
+All Organizations
+
+Every API must enforce:
+Organization Scope Validation
+
+13. AUDIT REQUIREMENTS
+Mandatory Audit Events:
+Technology CreatedTechnology UpdatedAssessment CreatedAssessment UpdatedAssessment PublishedAssessment ArchivedAssessment ClonedSection CreatedSection UpdatedQuestion Bank ApprovedQuestion CreatedQuestion ApprovedQuestion RejectedQuestion ImportedQuestion Exported
+
+14. STANDARD ERROR RESPONSES
+Validation Error
+{"success":false,"code":"VALIDATION_ERROR","message":"Validation failed","errors":[]}
+
+Business Rule Violation
+{"success":false,"code":"BUSINESS_RULE_VIOLATION","message":"Assessment cannot be published."}
+
+Forbidden
+{"success":false,"code":"FORBIDDEN","message":"Insufficient permissions."}
+
+15. CURSOR AI IMPLEMENTATION CHECKLIST
+Generate:
+RoutesControllersForm RequestsDTOsServicesRepositoriesPoliciesFeature TestsSwagger Attributes
+
+Do Not Generate:
+New Question TypesAlternative Approval ModelsAlternative Versioning ModelsAlternative Publishing Rules
+
+16. IMPLEMENTATION PACKAGE STATUS
+Aligned With:
+003_ASSESSMENT_DEFINITION_SCHEMA✓013_PLATFORM_SOLUTION_ARCHITECTURE✓014_PLATFORM_API_ARCHITECTURE✓016_RBAC_MATRIX✓017_OPENAPI_MASTER_SPECIFICATION✓
+
+APPROVAL STATUS
+Document:
+017C_ASSESSMENT_DEFINITION_OPENAPI
+Version:
+v1.0
+Status:
+APPROVEDIMPLEMENTATION READYCURSOR READY
+
+NEXT STEP
+Proceed to:
+017D_ASSESSMENT_EXECUTION_OPENAPI v1.0
+Coverage:
+AssignmentsAssessment AttemptsAttempt QuestionsAttempt AnswersDraft SavesSubmissionSnapshotsAttempt LifecycleAssessment Results Generation
+This is the most critical runtime module because it governs the entire candidate assessment execution workflow and snapshot architecture.
+
+END OF DOCUMENT

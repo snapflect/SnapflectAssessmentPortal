@@ -1,0 +1,407 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+018_API_IMPLEMENTATION_MASTER_PLAN
+Version 1.0
+Status: APPROVED BASELINE
+Master Development Execution Blueprint
+
+DOCUMENT INFORMATION
+Field
+Value
+Document Name
+API Implementation Master Plan
+Version
+1.0
+Status
+FINAL
+Purpose
+Development Execution Blueprint
+Technology Stack
+Laravel 12 + MySQL 8
+Hosting Platform
+Hostinger Shared Hosting
+Development Tools
+Cursor AI + ChatGPT
+Architecture Style
+Modular Monolith
+
+1. EXECUTIVE SUMMARY
+This document converts:
+PRD → ERD → Database Schemas → Architecture → OpenAPI Specifications
+into
+Production Ready Software
+This document becomes the primary implementation guide for:
+DevelopersCursor AITechnical LeadsArchitecture GovernanceFuture Maintenance
+
+2. APPROVED TECHNOLOGY STACK
+Backend
+PHP 8.4+Laravel 12Laravel Sanctum (Optional)JWT AuthenticationREST APIs
+
+Database
+MySQL 8InnoDBUTF8MB4
+
+Hosting
+Hostinger Shared Hosting
+
+Frontend
+Angular 20
+
+API Documentation
+OpenAPI 3.1Swagger
+
+File Storage
+Hostinger StorageLocal Storage DriverCDN Optional
+
+Queue Strategy
+Database Queue Driver
+
+3. ARCHITECTURE STYLE
+Approved Architecture
+Modular Monolith
+
+Not Approved
+MicroservicesService MeshKubernetesEvent Sourcing
+
+Reason
+Lower CostHostinger CompatibleSimpler DeploymentCursor FriendlyEnterprise Capable
+
+4. APPLICATION STRUCTURE
+Root Structure
+app/Modules/Shared/Infrastructure/Database/Tests/Docs/
+
+5. MODULE INVENTORY
+Module 01
+Security
+AuthenticationUsersRolesPermissionsSessionsTokens
+
+Module 02
+Governance
+OrganizationsDepartmentsBusiness UnitsLocations
+
+Module 03
+Assessment Definition
+Question BankQuestion SetsSectionsAssessmentsTemplates
+
+Module 04
+Assessment Execution
+AssignmentsAttemptsAnswersSubmission Engine
+
+Module 05
+Evaluation
+Auto ScoringManual ScoringResultsPublishing
+
+Module 06
+Certification
+CertificatesVerificationRevocation
+
+Module 07
+Notifications
+EmailSMSIn-AppTemplatesDelivery
+
+Module 08
+Analytics
+DashboardsKPIsReportsSnapshots
+
+Module 09
+Integrations
+WebhooksImportsExportsAudit
+
+Module 10
+Operations
+SchedulersMonitoringHealthAnnouncements
+
+Module 11
+AI Proctoring
+SessionsDetectionsEvidenceReviews
+
+Module 12
+Billing
+PlansSubscriptionsInvoicesPayments
+
+6. STANDARD MODULE STRUCTURE
+Every Module Must Follow:
+ModuleName/Controllers/Requests/DTOs/Services/Repositories/Policies/Resources/Events/Listeners/Jobs/Enums/Validators/Tests/
+
+7. CONTROLLER STANDARDS
+Controllers Must
+Receive RequestCall ServiceReturn Response
+
+Controllers Must Not
+Contain Business LogicContain SQLContain Validation Rules
+
+Maximum Controller Size
+300 Lines
+
+8. SERVICE LAYER STANDARDS
+Services Own
+Business RulesTransactionsWorkflow OrchestrationValidation Coordination
+
+Example
+AssessmentServiceEvaluationServiceCertificationServiceNotificationService
+
+9. REPOSITORY PATTERN
+Required Structure
+Repositories/Interfaces/
+
+Repository Responsibilities
+Database AccessQuery OptimizationData RetrievalPersistence
+
+Forbidden
+DB Calls Inside ControllersDB Calls Inside Policies
+
+10. DTO STANDARDS
+Mandatory DTO Types
+Request DTOResponse DTO
+
+No Raw Arrays
+Between Layers
+
+Example
+CreateAssessmentDTOSubmitAttemptDTOPublishResultDTO
+
+11. REQUEST VALIDATION STANDARDS
+Every Write Endpoint Must Use
+Laravel Form Request
+
+Validation Ownership
+Request Layer
+
+Business Rules Ownership
+Service Layer
+
+12. AUTHENTICATION STRATEGY
+Approved
+JWT Authentication
+
+Token Types
+Access TokenRefresh Token
+
+Security Requirements
+Password PolicyMFA SupportSession TrackingAudit Logging
+
+13. AUTHORIZATION STRATEGY
+Source
+016_RBAC_MATRIX
+
+Implementation
+Laravel PoliciesPermission Middleware
+
+Pattern
+User  → Role      → Permission
+
+14. EVENT ARCHITECTURE
+Mandatory Domain Events
+AssessmentAssignedAssessmentStartedAssessmentSubmittedResultPublishedCertificateIssuedInvoiceGeneratedSubscriptionRenewedViolationDetected
+
+Event Consumers
+NotificationsAnalyticsAuditIntegrations
+
+15. QUEUE ARCHITECTURE
+Queue Driver
+Database
+
+Queue Jobs
+NotificationDeliveryJobCertificateGenerationJobReportGenerationJobAnalyticsSnapshotJobWebhookDeliveryJobEvidenceProcessingJob
+
+Retry Policy
+3 AttemptsExponential Backoff
+
+16. FILE MANAGEMENT STRATEGY
+Stored Files
+CertificatesEvidenceReportsImportsExports
+
+Rules
+Unique NamingVirus Scan HookAudit Downloads
+
+17. AUDIT STRATEGY
+All Critical Operations Logged
+AuthenticationAuthorizationAssessment ChangesResult PublishingCertificate IssuanceBilling ActionsConfiguration Changes
+
+Source
+009_INTEGRATION_AUDIT_SCHEMA
+
+18. API RESPONSE STANDARD
+Success
+{"success":true,"data":{}}
+
+Failure
+{"success":false,"code":"ERROR_CODE","message":"Error message"}
+
+19. ERROR HANDLING STRATEGY
+Standard Codes
+VALIDATION_ERRORUNAUTHORIZEDFORBIDDENNOT_FOUNDBUSINESS_RULE_VIOLATIONSERVER_ERROR
+
+20. TESTING STRATEGY
+Mandatory Tests
+Feature TestsService TestsRepository TestsPolicy Tests
+
+Coverage Target
+80%+
+
+21. API DOCUMENTATION STRATEGY
+Source
+017A → 017K OpenAPI Documents
+
+Generated Artifacts
+Swagger UIOpenAPI JSONDeveloper Docs
+
+22. SECURITY IMPLEMENTATION CHECKLIST
+Mandatory
+JWT AuthenticationRBACInput ValidationOutput EncodingRate LimitingCSRF ProtectionSQL Injection ProtectionXSS ProtectionAudit Logging
+
+23. PERFORMANCE STRATEGY
+Required
+IndexesPaginationLazy Loading PreventionQuery OptimizationCaching Where Appropriate
+
+Forbidden
+N+1 QueriesLarge Unbounded Queries
+
+24. CURSOR AI DEVELOPMENT WORKFLOW
+For Every Module
+Step 1
+Generate Models
+Schema → Models
+
+Step 2
+Generate Repositories
+Models → Repositories
+
+Step 3
+Generate DTOs
+OpenAPI → DTOs
+
+Step 4
+Generate Services
+Business Logic
+
+Step 5
+Generate Policies
+RBAC Matrix
+
+Step 6
+Generate Controllers
+OpenAPI Endpoints
+
+Step 7
+Generate Tests
+Feature + Service + Policy
+
+Step 8
+Architecture Review
+ChatGPT Review
+
+25. CHATGPT GOVERNANCE WORKFLOW
+ChatGPT Responsible For
+Architecture ReviewsSecurity ReviewsPerformance ReviewsCode ReviewsRefactoring GuidanceRelease Planning
+
+Cursor Responsible For
+Code GenerationRefactoringScaffoldingTest Generation
+
+26. DEVELOPMENT PHASES
+Sprint 1
+Foundation
+SecurityUsersOrganizationsRBAC
+
+Sprint 2
+Assessment Builder
+QuestionsSectionsAssessments
+
+Sprint 3
+Assessment Execution
+AssignmentsAttemptsAnswers
+
+Sprint 4
+Evaluation
+ScoringResults
+
+Sprint 5
+Certification
+Certificates
+
+Sprint 6
+Notifications
+EmailSMSIn-App
+
+Sprint 7
+Analytics
+KPIsReportsDashboards
+
+Sprint 8
+Integrations
+AuditImportsExportsWebhooks
+
+Sprint 9
+Operations
+SchedulersHealthMonitoring
+
+Sprint 10
+AI Proctoring
+SessionsEvidenceReviews
+
+Sprint 11
+Billing
+SubscriptionsInvoicesPayments
+
+27. RELEASE STRATEGY
+Release 1
+Core Assessment Platform
+
+Release 2
+CertificationNotifications
+
+Release 3
+AnalyticsIntegrations
+
+Release 4
+AI ProctoringBilling
+
+28. PRODUCTION READINESS CHECKLIST
+Required Before Go-Live
+All Schemas ImplementedAll APIs ImplementedOpenAPI Published80%+ Test CoverageSecurity Review CompletedPerformance Review CompletedBackup Strategy VerifiedMonitoring EnabledAudit Logging Enabled
+
+29. MASTER IMPLEMENTATION STATUS
+Architecture
+COMPLETE ✓
+
+PRD
+COMPLETE ✓
+
+ERD
+COMPLETE ✓
+
+Database Schemas
+001 → 012 COMPLETE ✓
+
+Solution Architecture
+013 COMPLETE ✓
+
+API Architecture
+014 COMPLETE ✓
+
+Screen Inventory
+015 COMPLETE ✓
+
+RBAC Matrix
+016 COMPLETE ✓
+
+OpenAPI Specifications
+017A → 017K COMPLETE ✓
+
+Implementation Planning
+018 COMPLETE ✓
+
+APPROVAL STATUS
+Document
+018_API_IMPLEMENTATION_MASTER_PLAN
+Version
+v1.0
+Status
+APPROVEDBASELINE FROZENIMPLEMENTATION READYCURSOR READYPRODUCTION ROADMAP READY
+
+NEXT STRATEGIC STEP
+Proceed to:
+019_LARAVEL_FOLDER_STRUCTURE_AND_CODING_STANDARDS v1.0
+Coverage
+Final Laravel Project StructureNamespacesCoding StandardsNaming ConventionsBase ClassesAbstract ServicesRepository ContractsShared ComponentsGlobal MiddlewareException Handling Standards
+This will become the final development governance document before actual code generation begins.
+
+END OF DOCUMENT

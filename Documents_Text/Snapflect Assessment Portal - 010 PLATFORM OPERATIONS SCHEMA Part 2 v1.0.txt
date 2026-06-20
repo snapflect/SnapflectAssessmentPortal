@@ -1,0 +1,138 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+010_PLATFORM_OPERATIONS_SCHEMA.SQL
+PART 2 – SCHEDULING, HEALTH MONITORING & SYSTEM ANNOUNCEMENTS
+Version 1.0
+
+MODULE
+Platform Operations
+
+TABLES
+scheduled_tasksapplication_healthsystem_announcements
+
+DEPENDS ON
+010_PLATFORM_OPERATIONS_SCHEMA.SQL – PART 1background_jobsjob_executions001_SECURITY_SCHEMA.SQLusers
+
+PURPOSE
+This module establishes:
+Scheduler FrameworkApplication MonitoringHealth TrackingOperational VisibilitySystem CommunicationsProduction Operations
+
+SCHEDULED_TASKS
+Purpose
+Defines recurring platform tasks.
+Examples:
+Daily Analytics SnapshotCertificate Expiry ScanNotification Queue CleanupAudit ArchivalMonthly Reporting
+
+CREATETABLE scheduled_tasks(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    task_code VARCHAR(100) NOTNULL,    task_name VARCHAR(255) NOTNULL,    background_job_id BIGINT UNSIGNED NOTNULL,    cron_expression VARCHAR(255) NOTNULL,    ownership_type VARCHAR(50)NOTNULLDEFAULT'System',    task_configuration_json JSON NULL,    is_enabled TINYINT(1)NOTNULLDEFAULT1,    last_execution_date DATETIME(3) NULL,    next_execution_date DATETIME(3) NULL,    status VARCHAR(50)NOTNULLDEFAULT'Active',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_scheduled_tasks_uuidUNIQUE (uuid),CONSTRAINT ux_scheduled_tasks_codeUNIQUE (task_code))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SCHEDULED_TASKS FOREIGN KEYS
+ALTERTABLE scheduled_tasksADDCONSTRAINT fk_scheduled_tasks_jobFOREIGNKEY (background_job_id)REFERENCES background_jobs(id);ALTERTABLE scheduled_tasksADDCONSTRAINT fk_scheduled_tasks_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE scheduled_tasksADDCONSTRAINT fk_scheduled_tasks_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+SCHEDULED_TASKS INDEXES
+CREATEINDEX ix_scheduled_tasks_enabledON scheduled_tasks(is_enabled);CREATEINDEX ix_scheduled_tasks_next_executionON scheduled_tasks(next_execution_date);CREATEINDEX ix_scheduled_tasks_statusON scheduled_tasks(status);CREATEINDEX ix_scheduled_tasks_jobON scheduled_tasks(background_job_id);
+
+OWNERSHIP TYPES
+Application validation shall enforce:
+SystemOperationalAnalyticsIntegration
+
+TASK STATUS VALUES
+Application validation shall enforce:
+ActiveInactivePausedRetired
+
+APPLICATION_HEALTH
+Purpose
+Stores immutable health monitoring snapshots.
+Examples:
+API AvailabilityDatabase LatencyQueue DepthStorage CapacityExternal Service Connectivity
+
+CREATETABLE application_health(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    health_component VARCHAR(100) NOTNULL,    component_type VARCHAR(50) NOTNULL,    health_status VARCHAR(50) NOTNULL,    metric_value DECIMAL(18,4) NULL,    metric_unit VARCHAR(50) NULL,    metadata_json JSON NULL,    recorded_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),PRIMARYKEY (id),CONSTRAINT ux_application_health_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+APPLICATION_HEALTH INDEXES
+CREATEINDEX ix_application_health_componentON application_health(health_component);CREATEINDEX ix_application_health_statusON application_health(health_status);CREATEINDEX ix_application_health_recordedON application_health(recorded_date);CREATEINDEX ix_application_health_component_dateON application_health(    health_component,    recorded_date);
+
+COMPONENT TYPES
+Application validation shall enforce:
+APIDatabaseQueueStorageCacheExternalService
+
+HEALTH STATUS VALUES
+Application validation shall enforce:
+HealthyWarningCriticalUnknown
+
+METRIC EXAMPLES
+95.50 %250 ms80.00 GB500 RequestsPerMinute
+
+SYSTEM_ANNOUNCEMENTS
+Purpose
+Stores platform-wide communications.
+Examples:
+Maintenance WindowNew Feature ReleaseSecurity AdvisoryEmergency Outage Notice
+
+CREATETABLE system_announcements(id BIGINT UNSIGNED NOTNULL AUTO_INCREMENT,    uuid CHAR(36) NOTNULL,    announcement_title VARCHAR(500) NOTNULL,    announcement_content LONGTEXT NOTNULL,    announcement_type VARCHAR(50) NOTNULL,    target_audience_json JSON NULL,    requires_acknowledgement TINYINT(1)NOTNULLDEFAULT0,    effective_from DATETIME(3) NOTNULL,    effective_to DATETIME(3) NULL,    status VARCHAR(50)NOTNULLDEFAULT'Draft',    metadata_json JSON NULL,    created_by BIGINT UNSIGNED NOTNULL,    created_date DATETIME(3)NOTNULLDEFAULTCURRENT_TIMESTAMP(3),    modified_by BIGINT UNSIGNED NULL,    modified_date DATETIME(3) NULL,PRIMARYKEY (id),CONSTRAINT ux_system_announcements_uuidUNIQUE (uuid))ENGINE=InnoDBDEFAULT CHARSET=utf8mb4COLLATE=utf8mb4_unicode_ci;
+
+SYSTEM_ANNOUNCEMENTS FOREIGN KEYS
+ALTERTABLE system_announcementsADDCONSTRAINT fk_system_announcements_created_byFOREIGNKEY (created_by)REFERENCES users(id);ALTERTABLE system_announcementsADDCONSTRAINT fk_system_announcements_modified_byFOREIGNKEY (modified_by)REFERENCES users(id);
+
+SYSTEM_ANNOUNCEMENTS INDEXES
+CREATEINDEX ix_system_announcements_statusON system_announcements(status);CREATEINDEX ix_system_announcements_typeON system_announcements(announcement_type);CREATEINDEX ix_system_announcements_effective_fromON system_announcements(effective_from);CREATEINDEX ix_system_announcements_effective_toON system_announcements(effective_to);
+
+ANNOUNCEMENT TYPES
+Application validation shall enforce:
+InformationMaintenanceReleaseSecurityEmergency
+
+ANNOUNCEMENT STATUS VALUES
+Application validation shall enforce:
+DraftPublishedExpiredArchived
+
+TARGET AUDIENCE EXAMPLE
+{"roles":["Admin"],"organizations":[1,2],"environments":["Production"]}
+Stored in:
+target_audience_json
+
+EFFECTIVE DATING GOVERNANCE
+Announcements become visible when:
+current_timestamp >= effective_from
+and remain visible until:
+effective_to
+if specified.
+
+ACKNOWLEDGEMENT GOVERNANCE
+Field:
+requires_acknowledgement
+supports:
+Security NoticesCompliance MessagesMandatory Operational Communications
+
+VALIDATION CHECKLIST
+✓ Scheduler Framework Applied
+✓ Task Ownership Applied
+✓ Health Monitoring Applied
+✓ Severity Classification Applied
+✓ Metric Tracking Applied
+✓ Announcement Governance Applied
+✓ Audience Targeting Applied
+✓ Effective Dating Applied
+✓ SaaS Readiness Applied
+✓ MySQL 8 Compatible
+✓ Hostinger Compatible
+
+VERSION
+010_PLATFORM_OPERATIONS_SCHEMA.SQL – PART 2
+Version 1.0
+Status:
+APPROVED
+
+MODULE PROGRESS
+Completed:
+system_settingsfeature_flagsbackground_jobsjob_executionsscheduled_tasksapplication_healthsystem_announcements
+Platform Operations Completion:
+100%
+
+NEXT STEP
+Perform:
+Platform Operations Schema Master Review v1.0
+Review Scope:
+Part 1Part 2
+Validation Areas:
+Configuration GovernanceFeature ManagementBackground ProcessingScheduling FrameworkHealth MonitoringSystem CommunicationsOperational VisibilityEnterprise Operations
+After successful review:
+Freeze:010_PLATFORM_OPERATIONS_SCHEMA v1.0 FINAL
+
+END OF DOCUMENT

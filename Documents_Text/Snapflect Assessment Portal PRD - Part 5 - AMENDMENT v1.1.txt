@@ -1,0 +1,322 @@
+﻿SNAPFLECT ASSESSMENT PORTAL
+MASTER ENTERPRISE PRD
+PART 5 AMENDMENT v1.1
+DATABASE, API, ARCHITECTURE & FINAL ALIGNMENT ENHANCEMENTS
+This amendment updates Part 5 of the PRD and becomes part of the authoritative document.
+The purpose of this amendment is to align the master architecture, database architecture, API architecture, reporting architecture, and deployment expectations with the enhancements introduced in:
+Part 2 Amendment v1.1
+Part 3 Amendment v1.1
+Part 4 Amendment v1.1
+This amendment serves as the final architecture alignment update before ERD and database schema design.
+
+A5.1 MASTER DOMAIN MODEL UPDATE
+The platform domain model shall be expanded as follows:
+Technology    |    +---- Assessment              |              +---- Section                        |                        +---- Question Bank                                  |                                  +---- Question
+Execution Layer:
+User   |   +---- Assessment Assignment   |   +---- Assessment Attempt               |               +---- Snapshot               |               +---- Attempt Sections               |               +---- Attempt Questions               |               +---- Attempt Answers               |               +---- Assessment Result               |               +---- Assessment Review               |               +---- Review Acknowledgement
+
+A5.2 ASSESSMENT ASSIGNMENT ARCHITECTURE
+Purpose
+Support administrator-driven assessment distribution.
+
+Assignment Types
+Self-Service
+Assigned
+Mandatory Assigned
+
+Assignment Lifecycle
+Assigned
+Accepted
+Started
+Completed
+Expired
+Cancelled
+
+Architecture Rules
+Assignments shall be independent from attempts.
+One assignment may generate multiple attempts.
+Assignment history must remain auditable.
+Assignment completion shall be derived from attempt completion.
+
+A5.3 ASSESSMENT AVAILABILITY ARCHITECTURE
+Assessment Properties
+Available From
+Available To
+
+Validation Rules
+Assessment cannot start before Available From.
+Assessment cannot start after Available To.
+Existing attempts remain valid after expiration.
+Availability changes must be audited.
+Availability rules must be version controlled.
+
+A5.4 RANDOMIZATION ARCHITECTURE
+Purpose
+Support reproducible question selection.
+
+Supported Strategies
+No Randomization
+Assessment-Level Randomization
+Section-Level Randomization
+Question Bank-Level Randomization
+
+Architecture Requirements
+Randomization occurs once.
+Randomization occurs only during assessment start.
+Selected questions are persisted in snapshot.
+Randomization seed is persisted.
+Historical question selection must be reproducible.
+
+A5.5 SECTION PASS RULE ARCHITECTURE
+Supported Models
+Assessment-Level Pass
+Section-Level Pass
+Combined Pass
+
+Combined Example
+Overall Score >= 70%
+AND
+All Mandatory Sections >= 50%
+
+Architecture Rules
+Section pass evaluation must be snapshot driven.
+Section pass results must be persisted.
+Reports must consume persisted results.
+
+A5.6 SNAPSHOT ARCHITECTURE EXPANSION
+Snapshot Contents
+Technology
+Assessment
+Sections
+Question Banks
+Questions
+Options
+Answers
+Instructions
+Terms
+Disclaimers
+Availability Rules
+Pass Rules
+Section Rules
+Randomization Rules
+Selected Questions
+Randomization Seed
+Scoring Rules
+Version Information
+
+Snapshot Requirements
+Immutable
+Auditable
+Reproducible
+Versioned
+Traceable
+
+Snapshot Usage
+Scoring
+Reporting
+Review
+Historical Analysis
+Auditing
+Result Regeneration
+
+A5.7 DATABASE ENTITY INVENTORY UPDATE
+New Master Data Entities
+assessment_assignments
+assessment_publish_validations
+question_usage_analysis
+
+New Runtime Entities
+review_acknowledgements
+assignment_activity_logs
+randomization_audit_logs
+
+New Reporting Entities
+assignment_reports
+progress_analytics
+section_failure_analytics
+acknowledgement_analytics
+availability_monitoring
+
+A5.8 DATABASE FIELD ENHANCEMENTS
+Assessments
+Additional Fields
+assignment_typeavailable_fromavailable_toinstructionsterms_conditionsdisclaimeroverall_pass_rulesection_pass_rulerandomization_strategy
+
+Assessment Sections
+Additional Fields
+minimum_pass_percentagemandatory_pass_flagquestions_to_pickrandomization_enabled
+
+Assessment Attempts
+Additional Fields
+assignment_idprogress_percentagefailure_reasonrandomization_seed
+
+Assessment Results
+Additional Fields
+section_pass_statusoverall_pass_statusacknowledgement_status
+
+A5.9 ERD DESIGN REQUIREMENTS
+The ERD must enforce:
+Referential Integrity
+Soft Deletes
+Auditability
+Versioning
+Snapshot Isolation
+Assignment Isolation
+
+Mandatory Relationships
+Technology → Assessment
+Assessment → Section
+Section → Question Bank
+Question Bank ↔ Question
+User → Assignment
+Assignment → Attempt
+Attempt → Snapshot
+Attempt → Result
+Review → Acknowledgement
+
+A5.10 API INVENTORY UPDATE
+Assignment APIs
+/api/v1/assignments/api/v1/assignments/accept/api/v1/assignments/status/api/v1/assignments/reports
+
+Progress APIs
+/api/v1/progress/api/v1/progress/analytics
+
+Review APIs
+/api/v1/review-acknowledgements
+
+Section Analytics APIs
+/api/v1/section-performance/api/v1/section-failure-analysis
+
+Availability APIs
+/api/v1/availability-monitoring
+
+A5.11 API CONTRACT REQUIREMENTS
+Every API must define:
+Request Model
+Response Model
+Validation Rules
+Permissions
+Error Codes
+Rate Limits
+Audit Events
+
+A5.12 REPORTING ARCHITECTURE UPDATE
+Reports shall support:
+Assignment Analytics
+Progress Analytics
+Section Analytics
+Section Failure Analytics
+Availability Monitoring
+Acknowledgement Analytics
+Randomization Audit Reporting
+
+Reporting Rules
+Reports must consume snapshot-based data.
+Reports must be reproducible.
+Reports must remain historically accurate.
+
+A5.13 RBAC MATRIX UPDATE
+Assignment Permissions
+assignment.create
+assignment.edit
+assignment.cancel
+assignment.accept
+assignment.view
+assignment.report.view
+
+Progress Permissions
+progress.view
+progress.analytics.view
+
+Review Permissions
+review.acknowledge
+acknowledgement.view
+acknowledgement.report.view
+
+Analytics Permissions
+section.analytics.view
+section.failure.view
+availability.monitor.view
+
+A5.14 HOSTINGER DEPLOYMENT CLARIFICATION
+Architecture Capacity
+The application architecture shall be designed to support:
+10,000+ Registered Users
+100,000+ Assessments
+1,000,000+ Assessment Attempts
+when deployed on appropriate infrastructure.
+
+Initial Hostinger Deployment
+The initial deployment target is:
+Hostinger Shared Hosting
+PHP 8.3+
+MySQL 8+
+Apache
+
+Deployment Expectation
+Shared hosting capacity depends on:
+CPU Limits
+Memory Limits
+I/O Limits
+Database Limits
+Concurrent Traffic
+
+Scaling Strategy
+As demand increases, migration path shall support:
+Hostinger VPS
+Dedicated Servers
+Azure
+AWS
+Docker-Based Deployments
+without application redesign.
+
+A5.15 CROSS-PART CONSISTENCY RULES
+All future enhancements must respect:
+Technology → Assessment → Section → Question Bank → Question hierarchy.
+Assessment Definition and Assessment Execution separation.
+Snapshot Integrity.
+Assignment Independence.
+RBAC Enforcement.
+Soft Delete Policy.
+Versioning Strategy.
+Auditability Requirements.
+
+A5.16 IMPLEMENTATION READINESS CHECKLIST
+Before development begins, verify:
+✓ Master PRD Approved
+✓ ERD Designed
+✓ Database Schema Approved
+✓ RBAC Matrix Approved
+✓ API Contracts Approved
+✓ Screen Inventory Approved
+✓ Navigation Flow Approved
+✓ Phase Plan Approved
+
+A5.17 FINAL ACCEPTANCE CRITERIA
+The architecture shall be considered compliant when:
+Assessment assignment workflows function correctly.
+Availability windows are enforced.
+Section pass rules are enforced.
+Randomization remains reproducible.
+Snapshots remain immutable.
+Historical reports remain accurate.
+Review acknowledgements are auditable.
+RBAC controls are enforced.
+Scalability path exists.
+Hostinger deployment is supported.
+
+A5.18 MASTER PRD VERSION UPDATE
+Document Version:
+1.1
+Status:
+Approved for Architecture & Design Phase
+Next Deliverables:
+Entity Relationship Diagram (ERD)
+Normalized MySQL Database Schema
+RBAC Matrix
+Screen Inventory & Navigation Map
+API Contracts (OpenAPI/Swagger)
+Technical Architecture Document
+
+END OF PART 5 AMENDMENT v1.1
+END OF MASTER ENTERPRISE PRD VERSION 1.1
