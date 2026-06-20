@@ -1,0 +1,44 @@
+# Framework Bootstrap and Integration Plan
+
+This plan details the strategy to transition our pure architectural scaffolding into runnable, executable frameworks for both Laravel (Backend) and Angular (Frontend).
+
+## Goal Description
+Up until now, the project has consisted of generated files representing the domain logic, UI scaffolding, and architecture. We will now generate the actual `Laravel` and `Angular` base framework projects, migrate all of our scaffolded directories into them, and verify compilation.
+
+## Proposed Changes
+
+### Backend (Laravel)
+1. **Preserve Scaffolding:** Rename the existing `snapflect` directory to `snapflect_scaffold` to prevent collisions.
+2. **Framework Generation:** Execute `composer create-project laravel/laravel snapflect` to generate a fresh Laravel application.
+3. **Integration:** 
+   * Recursively merge `app/`, `database/`, `routes/`, and `tests/` from the scaffold directory into the new `snapflect` project directory.
+4. **Configuration:** 
+   * Ensure `composer.json` is updated with necessary PSR-4 autoloading configurations if required.
+   * Register essential Service Providers and routing configurations (e.g., ensuring `routes/api.php` is properly booted).
+5. **Verification:** 
+   * Run `composer install`
+   * Run `php artisan about`
+   * Run `php artisan route:list`
+
+### Frontend (Angular)
+1. **Preserve Scaffolding:** Rename the existing `snapflect-frontend` directory to `snapflect-frontend_scaffold`.
+2. **Framework Generation:** Execute `npx @angular/cli@latest new snapflect-frontend --defaults --style=scss` to generate a fresh Angular application. *(Note: Since Angular 20 is not publicly released yet, the latest stable Angular CLI version will be used while strictly adhering to Standalone Component paradigms).*
+3. **Integration:** 
+   * Recursively copy `src/app/core`, `src/app/shared`, `src/app/layout`, `src/app/features`, and `tests/` from the scaffold directory into the new Angular project.
+4. **Configuration & Dependencies:** 
+   * Install Angular Material: `npx ng add @angular/material --skip-confirmation`
+   * Install ApexCharts: `npm install apexcharts ng-apexcharts`
+   * Configure `angular.json` and `tsconfig.json` to properly map absolute paths if needed.
+5. **Verification:** 
+   * Run `npm install`
+   * Run `ng build` to validate that there are no catastrophic DI or compilation failures.
+
+## Verification Plan
+*   **Compile Tests:** The primary verification is that both the Laravel backend and Angular frontend can compile and execute their basic diagnostic commands (`artisan about`, `ng build`) without fatal errors.
+*   **Output Artifact:** A final `097_FRAMEWORK_BOOTSTRAP_REPORT.md` will be generated summarizing the integration status, dependency lists, and any remaining integration warnings.
+
+> [!WARNING]
+> **Compilation Errors Warning:** Since we generated thousands of lines of code purely via templates without a live language server over the last 9 phases, merging them into strict compilers (like TypeScript and PHPStan) will likely reveal hundreds of missing imports or missing type definitions. The goal of this phase is *Integration and Bootstrapping*, not achieving 0 compilation errors immediately.
+
+## User Review Required
+Please review this approach. If approved, I will begin executing the framework generation commands.

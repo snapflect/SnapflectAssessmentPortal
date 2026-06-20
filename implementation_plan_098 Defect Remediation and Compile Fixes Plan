@@ -1,0 +1,48 @@
+# 098 Defect Remediation and Compile Fixes Plan
+
+This plan details the strategy to achieve a successful `ng build` and `ng test` execution by systematically addressing the strict compilation failures introduced during the frontend scaffolding phases.
+
+## Goal Description
+The objective is to fix all compilation, typing, environment, and dependency issues across the Angular 19 application without adding new features or business logic, ensuring the frontend is fully structurally sound and ready for future development.
+
+## Proposed Changes
+
+### Phase 1: Environment Remediation
+*   **Generate:** `src/environments/environment.ts` and `src/environments/environment.prod.ts` containing the `apiBaseUrl` and `production` flags.
+*   **Fix:** Update `BaseApiService` and any other files failing on the `../../../environments/environment` import to correctly point to the new files.
+
+### Phase 2: Dependency Remediation
+*   **Resolution:** Downgrade `ng-apexcharts` to a version strictly compatible with Angular 19, eliminating the need for `--legacy-peer-deps`.
+*   **Clean Installation:** Remove `node_modules` and `package-lock.json`, and run a clean `npm install` to verify proper dependency resolution.
+
+### Phase 3: Angular Material & Component Remediation
+*   **Module Injection:** Write a bulk refactor script to traverse all `.component.ts` files and systematically inject standard Angular Material modules (e.g., `MatCardModule`, `MatButtonModule`, `MatIconModule`) into their `imports: [...]` arrays.
+*   **Template Verification:** Ensure that the generated inline templates compile successfully with the newly imported modules.
+
+### Phase 4: Routing Remediation
+*   **Lazy Loading:** Verify `app.routes.ts` and correct any broken relative paths or missing named exports across `auth.routes.ts`, `governance.routes.ts`, etc.
+*   **Guard Integrity:** Ensure all Route Guards used in routing modules export valid `CanActivateFn` signatures.
+
+### Phase 5 & 6 & 7: State, Facade, and API Remediation
+*   **Typing:** Replace implicit `any` with `unknown` or stub interfaces across all Signal Stores, Facades, and API Services to satisfy TypeScript's strict mode constraints.
+*   **Injection Constraints:** Ensure `HttpClient` is correctly injected in `BaseApiService` and that `provideHttpClient()` is present in `app.config.ts`.
+*   **Observable Safety:** Add correct typing to all RxJS operations within Facades to align with the Signal setters.
+
+## Verification Plan
+
+### Automated Build Validation
+*   Run `npx ng build` iteratively until **0 Errors** remain.
+*   If build fails, analyze the output, apply targeted regex replacements or surgical edits, and repeat.
+
+### Automated Test Validation
+*   Run `npx ng test --watch=false` iteratively until **100% SUCCESS** is achieved across all specs.
+*   If specs fail due to missing HTTP providers or Material harnesses, mock them using `HttpClientTestingModule` or `NoopAnimationsModule`.
+
+### Final Output
+*   Generate `098_DEFECT_REMEDIATION_REPORT.md` capturing the journey, the applied fixes, and the final build/test status.
+
+> [!WARNING]
+> **Extensive File Modification:** This phase requires running wide-reaching Node.js scripts to apply regex replacements across ~100 files simultaneously to fix the strict typing and imports.
+
+## User Review Required
+Please review this automated refactoring strategy. If approved, I will initiate the remediation phases immediately.
