@@ -25,4 +25,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     // Assessment Module Routes
     Route::prefix('assessment')->group(base_path('routes/modules/assessment.php'));
 
+    // Delivery Module Routes
+    Route::prefix('delivery')->group(base_path('routes/modules/delivery.php'));
+
 });
