@@ -37,12 +37,15 @@ Route::apiResource('assessments', AssessmentController::class)
     ->parameters(['assessments' => 'uuid']);
 
 // Special Assessment Routes
-Route::prefix('assessments/{uuid}')->group(function () {
+Route::prefix('assessments/{assessment_uuid}')->group(function () {
+    Route::post('validate', [\App\Modules\Assessment\Controllers\AssessmentValidationController::class, 'validate']);
+    Route::get('validation-report', [\App\Modules\Assessment\Controllers\AssessmentValidationController::class, 'getReport']);
+    Route::post('ready', [\App\Modules\Assessment\Controllers\AssessmentPublicationController::class, 'makeReady']);
+    Route::post('publish', [\App\Modules\Assessment\Controllers\AssessmentPublicationController::class, 'publish']);
+    Route::post('archive', [\App\Modules\Assessment\Controllers\AssessmentPublicationController::class, 'archive']);
     Route::post('submit-review', [AssessmentController::class, 'submitReview']);
     Route::post('approve', [AssessmentController::class, 'approve']);
     Route::post('reject', [AssessmentController::class, 'reject']);
-    Route::post('publish', [AssessmentController::class, 'publish']);
-    Route::post('archive', [AssessmentController::class, 'archive']);
     Route::post('clone', [AssessmentController::class, 'clone']);
     
     // Versions nested under Assessment

@@ -10,10 +10,9 @@ use App\Modules\Delivery\Controllers\AttemptSubmissionController;
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Session Routes
-    Route::post('/sessions/launch', [AssessmentSessionController::class, 'launch']);
-    Route::post('/sessions/{session:uuid}/resume', [AssessmentSessionController::class, 'resume']);
-    Route::post('/sessions/{session:uuid}/terminate', [AssessmentSessionController::class, 'terminate']);
-    Route::get('/sessions/{session:uuid}', [AssessmentSessionController::class, 'show']);
+    Route::post('/sessions', [\App\Modules\Delivery\Controllers\SessionLaunchController::class, 'store']);
+    Route::post('/sessions/{session_uuid}/launch', [\App\Modules\Delivery\Controllers\SessionLaunchController::class, 'launch']);
+    Route::get('/sessions/{session_uuid}', [\App\Modules\Delivery\Controllers\SessionLaunchController::class, 'show']);
 
     // Attempt Routes
     Route::get('/attempts/{attempt:uuid}', [AssessmentAttemptController::class, 'show']);
