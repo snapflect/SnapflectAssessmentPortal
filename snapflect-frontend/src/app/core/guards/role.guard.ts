@@ -10,8 +10,8 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
 
   // If not authenticated, redirect to login
   if (!authStore.isAuthenticated()) {
-    router.navigate(['/auth/login']);
-    return false;
+    console.warn('[roleGuard] Not authenticated, redirecting to /auth/login');
+    return router.parseUrl('/auth/login');
   }
 
   // Check expected roles from route data
@@ -25,7 +25,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return true;
   }
 
-  // Not authorized for this route, redirect to dashboard or access denied
-  router.navigate(['/dashboard']);
-  return false;
+  // Not authorized for this route, redirect to default dashboard
+  console.warn('[roleGuard] Role mismatch. User roles:', userStore.profile()?.roles, 'Expected:', expectedRoles);
+  return router.parseUrl('/dashboard');
 };

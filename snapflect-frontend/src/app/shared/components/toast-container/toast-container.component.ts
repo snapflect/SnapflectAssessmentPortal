@@ -37,12 +37,12 @@ import { ToastService, ToastType } from '../../../core/services/toast.service';
 
           <!-- Content -->
           <div class="flex-1 w-0">
-            <h4 class="text-sm font-bold text-white mb-1">{{ toast.title }}</h4>
-            <p class="text-sm text-slate-300">{{ toast.message }}</p>
+            <h4 class="text-sm font-bold text-main mb-1">{{ toast.title }}</h4>
+            <p class="text-sm text-muted">{{ toast.message }}</p>
           </div>
 
           <!-- Close Button -->
-          <button (click)="toastService.remove(toast.id)" class="flex-shrink-0 text-slate-400 hover:text-white transition-colors focus:outline-none">
+          <button (click)="toastService.remove(toast.id)" class="flex-shrink-0 text-muted hover:text-main transition-colors focus:outline-none">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
@@ -61,11 +61,11 @@ export class ToastContainerComponent {
 
   getToastClasses(type: ToastType): string {
     switch (type) {
-      case 'success': return 'bg-emerald-900/80 border-emerald-500/50';
-      case 'error': return 'bg-red-900/80 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]';
-      case 'warning': return 'bg-amber-900/80 border-amber-500/50';
-      case 'info': return 'bg-blue-900/80 border-blue-500/50';
-      default: return 'bg-slate-800/90 border-slate-600';
+      case 'success': return 'bg-card border border-emerald-500/30 shadow-[0_4px_20px_rgba(16,185,129,0.15)]';
+      case 'error': return 'bg-card border border-red-500/30 shadow-[0_4px_20px_rgba(239,68,68,0.15)]';
+      case 'warning': return 'bg-card border border-amber-500/30 shadow-[0_4px_20px_rgba(245,158,11,0.15)]';
+      case 'info': return 'bg-card border border-blue-500/30 shadow-[0_4px_20px_rgba(59,130,246,0.15)]';
+      default: return 'bg-card border border-border-light shadow-lg';
     }
   }
 }

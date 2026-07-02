@@ -26,8 +26,8 @@ interface AssessmentType {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Assessment Types</h2>
-          <p class="text-slate-400 text-sm mt-1">Manage types used to define the nature of assessments.</p>
+          <h2 class="text-2xl font-bold text-main">Assessment Types</h2>
+          <p class="text-muted text-sm mt-1">Manage types used to define the nature of assessments.</p>
         </div>
         <div>
           <button (click)="openForm()" class="btn-primary flex items-center">
@@ -38,15 +38,15 @@ interface AssessmentType {
       </div>
 
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
-          <p class="text-sm text-slate-400">
-            Showing <span class="text-white font-medium">{{ types.length }}</span> types
+        <div class="p-4 border-b border-border-light bg-input-bg flex justify-between items-center">
+          <p class="text-sm text-muted">
+            Showing <span class="text-main font-medium">{{ types.length }}</span> types
           </p>
           <div class="relative w-64">
             <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-1.5 text-sm bg-surface-darker/50" placeholder="Search types...">
+            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-1.5 text-sm bg-page/50" placeholder="Search types...">
           </div>
         </div>
         <div class="overflow-auto flex-1">
@@ -57,8 +57,8 @@ interface AssessmentType {
             </svg>
           </div>
 
-          <table *ngIf="!loading" class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+          <table *ngIf="!loading" class="w-full text-left text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
@@ -71,21 +71,21 @@ interface AssessmentType {
                 <tr *ngIf="finalTypes.length === 0">
                   <td colspan="4" class="px-6 py-12 text-center text-slate-500">No types found.</td>
                 </tr>
-                <tr *ngFor="let t of finalTypes" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr *ngFor="let t of finalTypes" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ t.attributes.type_code }}</td>
                   <td class="px-6 py-4">
-                    <p class="text-white font-medium">{{ t.attributes.type_name }}</p>
+                    <p class="text-main font-medium">{{ t.attributes.type_name }}</p>
                     <p class="text-xs text-slate-500 mt-0.5">{{ t.attributes.description }}</p>
                   </td>
                   <td class="px-6 py-4">
                     <span class="px-2 py-0.5 text-[10px] font-semibold rounded uppercase"
-                          [ngClass]="t.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'">
+                          [ngClass]="t.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-muted border border-slate-500/20'">
                       {{ t.attributes.status }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-slate-400 hover:text-white transition-colors" (click)="openEdit(t)">Edit</button>
-                    <button class="text-slate-400 hover:text-red-400 transition-colors" (click)="deleteType(t.uuid)">Delete</button>
+                    <button class="text-muted hover:text-main transition-colors" (click)="openEdit(t)">Edit</button>
+                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteType(t.uuid)">Delete</button>
                   </td>
                 </tr>
               </tbody>
@@ -100,25 +100,25 @@ interface AssessmentType {
                       (closeEvent)="closeForm()">
         <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Code *</label>
             <input type="text" formControlName="type_code" class="input-field" placeholder="e.g. MCQ">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Name *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Name *</label>
             <input type="text" formControlName="type_name" class="input-field" placeholder="e.g. Multiple Choice">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Status *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Status *</label>
             <select formControlName="status" class="input-field">
               <option value="ACTIVE">Active</option>
               <option value="INACTIVE">Inactive</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+            <label class="block text-sm font-medium text-muted mb-1">Description</label>
             <textarea formControlName="description" class="input-field h-20 resize-none" placeholder="Describe this type..."></textarea>
           </div>
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting">
               {{ submitting ? 'Saving...' : 'Save Type' }}

@@ -39,8 +39,8 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Assessment Catalog</h2>
-          <p class="text-slate-400 text-sm mt-1">Create and manage all assessments, blueprints and publications.</p>
+          <h2 class="text-2xl font-bold text-main">Assessment Catalog</h2>
+          <p class="text-muted text-sm mt-1">Create and manage all assessments, blueprints and publications.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
         </div>
         <div class="flex gap-2">
           <button *ngFor="let s of statuses" (click)="setStatusFilter(s)" class="px-3 py-2 text-xs rounded-full font-medium transition-all"
-                  [ngClass]="activeStatus === s ? 'bg-brand text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'">
+                  [ngClass]="activeStatus === s ? 'bg-brand text-main' : 'hover:brightness-110 text-muted hover:bg-white/10'">
             {{ s === '' ? 'All' : s }}
           </button>
         </div>
@@ -83,7 +83,7 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
       </div>
 
       <div *ngIf="assessments.length > 0" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 auto-rows-max gap-6 flex-1 overflow-y-auto pr-2 custom-scrollbar pb-6 content-start transition-opacity duration-300" [class.opacity-50]="loading" [class.pointer-events-none]="loading">
-        <div *ngFor="let a of filteredAssessments" class="relative group p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-brand/40 hover:bg-white/[0.04] transition-all duration-300 flex flex-col overflow-hidden shadow-lg hover:shadow-brand/10 hover:-translate-y-1 h-full min-h-[260px]">
+        <div *ngFor="let a of filteredAssessments" class="relative group p-6 rounded-2xl bg-white/[0.02] border border-border-light hover:border-brand/40 hover:bg-white/[0.04] transition-all duration-300 flex flex-col overflow-hidden shadow-lg hover:shadow-brand/10 hover:-translate-y-1 h-full min-h-[260px]">
           
           <!-- Subtle background glow on hover -->
           <div class="absolute inset-0 bg-gradient-to-br from-brand/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
@@ -97,7 +97,7 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
                 </svg>
               </div>
               <div>
-                <span class="px-2.5 py-0.5 text-[10px] uppercase tracking-widest font-semibold rounded-md bg-white/5 text-slate-400 border border-white/10 inline-block">
+                <span class="px-2.5 py-0.5 text-[10px] uppercase tracking-widest font-semibold rounded-md hover:brightness-110 text-muted border border-border-light inline-block">
                   {{ a.attributes.assessment_code }}
                 </span>
               </div>
@@ -109,10 +109,10 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 
           <!-- Body -->
           <div class="relative z-10 flex-1 mb-5">
-            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-brand-light transition-colors duration-300 leading-tight">
+            <h3 class="text-xl font-bold text-main mb-2 group-hover:text-brand-light transition-colors duration-300 leading-tight">
               {{ a.attributes.assessment_name }}
             </h3>
-            <p class="text-slate-400 text-sm line-clamp-2 leading-relaxed">
+            <p class="text-muted text-sm line-clamp-2 leading-relaxed">
               {{ a.attributes.description || 'No description provided.' }}
             </p>
           </div>
@@ -130,17 +130,17 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
           </div>
 
           <!-- Footer Metadata -->
-          <div class="grid grid-cols-2 gap-4 text-sm text-slate-400 mb-6 pt-5 border-t border-white/5 relative z-10">
+          <div class="grid grid-cols-2 gap-4 text-sm text-muted mb-6 pt-5 border-t border-white/5 relative z-10">
             <div class="flex flex-col gap-1">
               <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Duration</span>
-              <span class="flex items-center gap-1.5 text-white font-medium text-sm">
+              <span class="flex items-center gap-1.5 text-main font-medium text-sm">
                 <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 {{ a.attributes.estimated_duration_minutes }} min
               </span>
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Pass Mark</span>
-              <span class="flex items-center gap-1.5 text-white font-medium text-sm">
+              <span class="flex items-center gap-1.5 text-main font-medium text-sm">
                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 {{ a.attributes.pass_percentage }}%
               </span>
@@ -149,7 +149,7 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 
           <!-- Actions -->
           <div class="flex flex-wrap gap-2 relative z-10 mt-auto pt-4">
-            <button (click)="openEditForm(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs transition-all duration-200 shadow-sm border border-white/5 hover:border-white/10 flex items-center justify-center gap-1.5">
+            <button (click)="openEditForm(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl hover:brightness-110 hover:bg-white/10 text-main font-medium text-xs transition-all duration-200 shadow-sm border border-white/5 hover:border-border-light flex items-center justify-center gap-1.5">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
               Edit
             </button>
@@ -195,30 +195,30 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Code *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Code *</label>
               <input type="text" formControlName="assessment_code" class="input-field" placeholder="e.g. ASSESS-001">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Name *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Name *</label>
               <input type="text" formControlName="assessment_name" class="input-field" placeholder="Assessment name">
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+            <label class="block text-sm font-medium text-muted mb-1">Description</label>
             <textarea formControlName="description" class="input-field h-20 resize-none" placeholder="Brief description of this assessment..."></textarea>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Type *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Type *</label>
               <select formControlName="assessment_type_uuid" class="input-field">
                 <option value="">Select type...</option>
                 <option *ngFor="let t of types" [value]="t.uuid">{{ t.attributes.type_name }}</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Category *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Category *</label>
               <select formControlName="assessment_category_uuid" class="input-field">
                 <option value="">Select category...</option>
                 <option *ngFor="let c of categories" [value]="c.uuid">{{ c.attributes.category_name }}</option>
@@ -228,25 +228,25 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 
           <div class="grid grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Duration (min) *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Duration (min) *</label>
               <input type="number" formControlName="estimated_duration_minutes" class="input-field" min="1">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Total Marks *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Total Marks *</label>
               <input type="number" formControlName="total_marks" class="input-field" min="1">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Pass % *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Pass % *</label>
               <input type="number" formControlName="pass_percentage" class="input-field" min="1" max="100">
             </div>
           </div>
 
-          <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+          <div class="flex items-center gap-3 p-3 hover:brightness-110 rounded-lg border border-border-light">
             <input type="checkbox" formControlName="is_randomized" id="is_randomized" class="w-4 h-4 rounded text-brand">
-            <label for="is_randomized" class="text-sm text-slate-300">Randomize question order for each candidate</label>
+            <label for="is_randomized" class="text-sm text-muted">Randomize question order for each candidate</label>
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="assessmentForm.invalid || submitting">
               {{ submitting ? 'Saving...' : 'Save Assessment' }}
@@ -349,13 +349,13 @@ export class AssessmentListPageComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      'DRAFT': 'bg-slate-500/10 text-slate-400 border border-slate-500/20',
+      'DRAFT': 'bg-slate-500/10 text-muted border border-slate-500/20',
       'IN_REVIEW': 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
       'APPROVED': 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
       'PUBLISHED': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
       'ARCHIVED': 'bg-red-500/10 text-red-400 border border-red-500/20',
     };
-    return map[status] || 'bg-slate-500/10 text-slate-400';
+    return map[status] || 'bg-slate-500/10 text-muted';
   }
 
   openCreateForm() {

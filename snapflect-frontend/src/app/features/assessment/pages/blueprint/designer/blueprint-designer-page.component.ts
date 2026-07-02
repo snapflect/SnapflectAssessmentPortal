@@ -67,8 +67,8 @@ interface BlueprintSection {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Blueprint Designer</h2>
-          <p class="text-slate-400 text-sm mt-1">Design assessment structure — define sections, rules, and question distribution.</p>
+          <h2 class="text-2xl font-bold text-main">Blueprint Designer</h2>
+          <p class="text-muted text-sm mt-1">Design assessment structure — define sections, rules, and question distribution.</p>
         </div>
       </div>
 
@@ -78,8 +78,8 @@ interface BlueprintSection {
         <!-- Blueprint List -->
         <div class="w-80 flex flex-col gap-3">
           <div class="glass-card flex-1 overflow-hidden flex flex-col">
-            <div class="px-4 py-3 border-b border-white/10 bg-black/20 flex justify-between items-center">
-              <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Blueprints</h3>
+            <div class="px-4 py-3 border-b border-border-light bg-input-bg flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-muted uppercase tracking-wider">Blueprints</h3>
             </div>
             <div class="overflow-y-auto flex-1 p-3 space-y-2">
               <div *ngIf="loadingBlueprints" class="text-center py-8 text-slate-500 text-sm">Loading...</div>
@@ -88,12 +88,12 @@ interface BlueprintSection {
                       (click)="selectBlueprint(bp)"
                       class="w-full text-left p-3 rounded-lg transition-all border"
                       [ngClass]="activeBlueprintUuid === bp.uuid
-                        ? 'bg-brand/10 border-brand/40 text-white'
-                        : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white'">
+                        ? 'bg-brand/10 border-brand/40 text-main'
+                        : 'hover:brightness-110 border-white/5 text-muted hover:bg-white/10 hover:text-main'">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-xs font-mono text-brand-light">{{ bp.attributes.blueprint_code }}</span>
                   <span class="px-1.5 py-0.5 text-[10px] rounded uppercase font-bold"
-                        [ngClass]="bp.attributes.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'">
+                        [ngClass]="bp.attributes.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-muted'">
                     {{ bp.attributes.status }}
                   </span>
                 </div>
@@ -118,10 +118,10 @@ interface BlueprintSection {
           <!-- Blueprint Design Canvas -->
           <div *ngIf="activeBlueprint" class="flex-1 flex flex-col overflow-hidden">
             <!-- Canvas Header -->
-            <div class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
+            <div class="p-4 border-b border-border-light bg-input-bg flex justify-between items-center">
               <div>
-                <h3 class="text-white font-semibold">{{ activeBlueprint.attributes.title }}</h3>
-                <p class="text-xs text-slate-400 mt-0.5">{{ activeBlueprint.attributes.blueprint_code }}</p>
+                <h3 class="text-main font-semibold">{{ activeBlueprint.attributes.title }}</h3>
+                <p class="text-xs text-muted mt-0.5">{{ activeBlueprint.attributes.blueprint_code }}</p>
               </div>
               <button (click)="openSectionForm()" class="btn-primary text-sm py-1.5 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -140,15 +140,15 @@ interface BlueprintSection {
 
               <!-- Section Cards -->
               <div *ngFor="let section of sections; let i = index"
-                   class="bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-brand/20 transition-all">
+                   class="hover:brightness-110 border border-border-light rounded-xl overflow-hidden hover:border-brand/20 transition-all">
                 <!-- Section Header -->
-                <div class="px-5 py-4 flex items-center justify-between bg-black/20">
+                <div class="px-5 py-4 flex items-center justify-between bg-input-bg">
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center text-brand-light font-bold text-sm">
                       {{ i + 1 }}
                     </div>
                     <div>
-                      <h4 class="text-white font-semibold text-sm">{{ section.attributes.title }}</h4>
+                      <h4 class="text-main font-semibold text-sm">{{ section.attributes.title }}</h4>
                       <p class="text-xs text-slate-500">{{ section.attributes.time_limit_minutes }} min time limit</p>
                     </div>
                   </div>
@@ -159,40 +159,40 @@ interface BlueprintSection {
 
                 <!-- Section Rules -->
                 <div class="px-5 py-4">
-                  <p class="text-sm text-slate-300">{{ section.attributes.description }}</p>
+                  <p class="text-sm text-muted">{{ section.attributes.description }}</p>
                   
                   <div class="mt-4 space-y-2">
                     <!-- If FIXED, show picked questions -->
                     <div *ngIf="section.attributes.selection_strategy === 'FIXED'" class="space-y-2">
-                      <div *ngFor="let sq of section.relationships?.sectionQuestions" class="bg-black/30 border border-white/10 rounded p-3 flex justify-between items-center">
+                      <div *ngFor="let sq of section.relationships?.sectionQuestions" class="bg-input-bg border border-border-light rounded p-3 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                           <span class="bg-brand/20 text-brand-light text-xs font-bold px-2 py-1 rounded">
                             Q{{ sq.attributes.display_order }}
                           </span>
-                          <span class="text-sm text-white truncate max-w-md" [innerHTML]="sq.relationships?.question?.attributes?.question_text"></span>
+                          <span class="text-sm text-main truncate max-w-md" [innerHTML]="sq.relationships?.question?.attributes?.question_text"></span>
                           <span class="text-xs text-slate-500">{{ sq.relationships?.question?.attributes?.question_type }}</span>
                         </div>
                       </div>
 
                       <div class="flex items-center gap-2 pt-2">
-                        <div class="flex-1 border-t border-dashed border-white/10"></div>
+                        <div class="flex-1 border-t border-dashed border-border-light"></div>
                         <button class="text-xs btn-secondary py-1.5 px-3" (click)="openQuestionPicker(section.uuid)">+ Add Specific Questions</button>
                       </div>
                     </div>
 
                     <!-- If RANDOM, show Rules Loop -->
                     <div *ngIf="section.attributes.selection_strategy === 'RANDOM'" class="space-y-2">
-                      <div *ngFor="let rule of section.relationships?.rules" class="bg-black/30 border border-white/10 rounded p-3 flex justify-between items-center">
+                      <div *ngFor="let rule of section.relationships?.rules" class="bg-input-bg border border-border-light rounded p-3 flex justify-between items-center">
                         <div class="flex items-center gap-3">
                           <span class="bg-brand/20 text-brand-light text-xs font-bold px-2 py-1 rounded">
                             {{ rule.attributes.question_count }} Questions
                           </span>
-                          <span class="bg-slate-700/50 text-slate-300 text-xs px-2 py-1 rounded border border-slate-600">
+                          <span class="bg-slate-700/50 text-muted text-xs px-2 py-1 rounded border border-slate-600">
                             {{ rule.attributes.points_per_question }} pts each
                           </span>
                           
-                          <div class="text-sm text-slate-300 flex items-center flex-wrap gap-2">
-                            <span class="text-white">{{ rule.relationships?.competency?.attributes?.competency_name || 'Any Competency' }}</span>
+                          <div class="text-sm text-muted flex items-center flex-wrap gap-2">
+                            <span class="text-main">{{ rule.relationships?.competency?.attributes?.competency_name || 'Any Competency' }}</span>
                             <span class="text-slate-500">&bull;</span>
                             
                             <span *ngIf="rule.relationships?.tag" class="text-indigo-400">
@@ -207,7 +207,7 @@ interface BlueprintSection {
                               'text-emerald-400': rule.attributes.difficulty_level === 'EASY',
                               'text-amber-400': rule.attributes.difficulty_level === 'MEDIUM',
                               'text-rose-400': rule.attributes.difficulty_level === 'HARD',
-                              'text-slate-400': !rule.attributes.difficulty_level
+                              'text-muted': !rule.attributes.difficulty_level
                             }">{{ rule.attributes.difficulty_level || 'Any Difficulty' }}</span>
                           </div>
                         </div>
@@ -215,7 +215,7 @@ interface BlueprintSection {
 
                       <!-- Add Rule Button Row -->
                       <div class="flex items-center gap-2 pt-2">
-                        <div class="flex-1 border-t border-dashed border-white/10"></div>
+                        <div class="flex-1 border-t border-dashed border-border-light"></div>
                         <button class="text-xs btn-secondary py-1.5 px-3" (click)="openRuleForm(section.uuid)">+ Add Rule</button>
                       </div>
                     </div>
@@ -231,37 +231,37 @@ interface BlueprintSection {
       <app-slide-over [isOpen]="isSectionFormOpen" title="Add Section" description="Sections divide an assessment into logical parts." (close)="isSectionFormOpen = false">
         <form [formGroup]="sectionForm" (ngSubmit)="submitSection()" class="space-y-5">
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Section Title *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Section Title *</label>
             <input type="text" formControlName="title" class="input-field" placeholder="e.g. Part A: Core Knowledge">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+            <label class="block text-sm font-medium text-muted mb-1">Description</label>
             <textarea formControlName="description" class="input-field h-20 resize-none" placeholder="Instructions or context for candidates..."></textarea>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Display Order *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Display Order *</label>
               <input type="number" formControlName="display_order" class="input-field" min="1">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Time Limit (min)</label>
+              <label class="block text-sm font-medium text-muted mb-1">Time Limit (min)</label>
               <input type="number" formControlName="time_limit_minutes" class="input-field" min="0" placeholder="0 = no limit">
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Weight (%)</label>
+              <label class="block text-sm font-medium text-muted mb-1">Weight (%)</label>
               <input type="number" formControlName="section_weight" class="input-field" min="0" max="100" placeholder="e.g. 25">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Selection Strategy *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Selection Strategy *</label>
               <select formControlName="selection_strategy" class="input-field">
                 <option value="FIXED">Fixed (All questions)</option>
                 <option value="RANDOM">Random Selection</option>
               </select>
             </div>
           </div>
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light">
             <button type="button" class="btn-secondary" (click)="isSectionFormOpen = false">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="sectionForm.invalid || submittingSection">
               {{ submittingSection ? 'Saving...' : 'Add Section' }}
@@ -275,18 +275,18 @@ interface BlueprintSection {
         <form [formGroup]="ruleForm" (ngSubmit)="submitRule()" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Question Count *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Question Count *</label>
               <input type="number" formControlName="question_count" class="input-field" min="1" placeholder="e.g. 5">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Points Per Question *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Points Per Question *</label>
               <input type="number" formControlName="points_per_question" class="input-field" min="1">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Difficulty Level</label>
+              <label class="block text-sm font-medium text-muted mb-1">Difficulty Level</label>
               <select formControlName="difficulty_level" class="input-field">
                 <option value="ANY">Any Difficulty</option>
                 <option value="EASY">Easy</option>
@@ -295,7 +295,7 @@ interface BlueprintSection {
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Question Type</label>
+              <label class="block text-sm font-medium text-muted mb-1">Question Type</label>
               <select formControlName="question_type" class="input-field">
                 <option value="ANY">Any Type</option>
                 <option value="MULTIPLE_CHOICE">Multiple Choice</option>
@@ -306,7 +306,7 @@ interface BlueprintSection {
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Competency Area</label>
+            <label class="block text-sm font-medium text-muted mb-1">Competency Area</label>
             <select formControlName="competency_uuid" class="input-field">
               <option [ngValue]="null">Any Competency</option>
               <option *ngFor="let comp of competencies" [value]="comp.uuid">
@@ -316,7 +316,7 @@ interface BlueprintSection {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Question Tag</label>
+            <label class="block text-sm font-medium text-muted mb-1">Question Tag</label>
             <select formControlName="tag_uuid" class="input-field">
               <option [ngValue]="null">Any Tag</option>
               <option *ngFor="let tag of tags" [value]="tag.uuid">
@@ -325,7 +325,7 @@ interface BlueprintSection {
             </select>
           </div>
           
-          <div class="pt-6 flex justify-between items-center border-t border-white/10">
+          <div class="pt-6 flex justify-between items-center border-t border-border-light">
             <div>
               <span *ngIf="availablePoolSize !== null" 
                     class="text-xs px-2 py-1 rounded"
@@ -349,7 +349,7 @@ interface BlueprintSection {
         <form [formGroup]="questionPickerForm" class="space-y-4 mb-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Question Bank</label>
+              <label class="block text-sm font-medium text-muted mb-1">Question Bank</label>
               <select formControlName="question_bank_uuid" class="input-field">
                 <option [ngValue]="null">All Banks</option>
                 <option *ngFor="let bank of banks" [value]="bank.uuid">
@@ -358,7 +358,7 @@ interface BlueprintSection {
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Question Tag</label>
+              <label class="block text-sm font-medium text-muted mb-1">Question Tag</label>
               <select formControlName="tag_uuid" class="input-field">
                 <option [ngValue]="null">All Tags</option>
                 <option *ngFor="let tag of tags" [value]="tag.uuid">
@@ -369,26 +369,26 @@ interface BlueprintSection {
           </div>
         </form>
 
-        <div class="flex-1 overflow-y-auto mb-4 border border-white/10 rounded-lg bg-black/20 max-h-96">
+        <div class="flex-1 overflow-y-auto mb-4 border border-border-light rounded-lg bg-input-bg max-h-96">
           <div *ngIf="loadingQuestions" class="p-4 text-center text-slate-500 text-sm">Loading questions...</div>
           <div *ngIf="!loadingQuestions && availableQuestions.length === 0" class="p-4 text-center text-slate-500 text-sm">No questions found matching criteria.</div>
           
-          <div *ngFor="let q of availableQuestions" class="p-3 border-b border-white/5 flex items-start gap-3 hover:bg-white/5 transition-colors">
+          <div *ngFor="let q of availableQuestions" class="p-3 border-b border-white/5 flex items-start gap-3 hover:hover:brightness-110 transition-colors">
             <input type="checkbox" 
                    class="mt-1 w-4 h-4 rounded border-slate-600 bg-slate-800 text-brand-light focus:ring-brand"
                    [checked]="selectedQuestionUuids.has(q.uuid)"
                    (change)="toggleQuestionSelection(q.uuid)">
             <div>
-              <div class="text-sm text-white line-clamp-2" [innerHTML]="q.attributes.question_text"></div>
+              <div class="text-sm text-main line-clamp-2" [innerHTML]="q.attributes.question_text"></div>
               <div class="flex gap-2 mt-1">
-                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded uppercase">{{ q.attributes.question_type }}</span>
-                <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded uppercase">{{ q.attributes.difficulty_level }}</span>
+                <span class="text-[10px] text-muted bg-slate-800 px-1.5 py-0.5 rounded uppercase">{{ q.attributes.question_type }}</span>
+                <span class="text-[10px] text-muted bg-slate-800 px-1.5 py-0.5 rounded uppercase">{{ q.attributes.difficulty_level }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="pt-4 flex justify-between items-center border-t border-white/10">
+        <div class="pt-4 flex justify-between items-center border-t border-border-light">
           <span class="text-sm text-brand-light">{{ selectedQuestionUuids.size }} selected</span>
           <div class="flex space-x-3">
             <button type="button" class="btn-secondary" (click)="isQuestionPickerOpen = false">Cancel</button>

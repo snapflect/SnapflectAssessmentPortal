@@ -39,8 +39,8 @@ interface Organization {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Users &amp; Roles</h2>
-          <p class="text-slate-400 text-sm mt-1">Manage platform access, identities, and RBAC permissions.</p>
+          <h2 class="text-2xl font-bold text-main">Users &amp; Roles</h2>
+          <p class="text-muted text-sm mt-1">Manage platform access, identities, and RBAC permissions.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,18 +51,18 @@ interface Organization {
       </div>
 
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
           <div class="relative w-64">
             <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-surface-darker/50" placeholder="Search users by email...">
+            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search users by email...">
           </div>
         </div>
 
         <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+          <table class="w-full text-left text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
                 <th scope="col" class="px-6 py-4 font-medium">Email</th>
@@ -73,7 +73,7 @@ interface Organization {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && users.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                <td colspan="5" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -87,8 +87,8 @@ interface Organization {
                     No users found matching your search.
                   </td>
                 </tr>
-                <tr *ngFor="let user of filteredUsers" class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td class="px-6 py-4 font-medium text-white">{{ user.attributes.first_name }} {{ user.attributes.last_name }}</td>
+                <tr *ngFor="let user of filteredUsers" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
+                  <td class="px-6 py-4 font-medium text-main">{{ user.attributes.first_name }} {{ user.attributes.last_name }}</td>
                   <td class="px-6 py-4">{{ user.attributes.email }}</td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full"
@@ -107,9 +107,9 @@ interface Organization {
                   <td class="px-6 py-4 text-right space-x-3">
                     <!-- Fix 7: Manage Roles only visible to PLATFORM_ADMIN -->
                     <button *ngIf="isPlatformAdmin"
-                            class="text-brand-light hover:text-white transition-colors text-xs font-medium uppercase"
+                            class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase"
                             (click)="openRoleModal(user)">Manage Roles</button>
-                    <button class="text-slate-400 hover:text-white transition-colors" (click)="openEditForm(user)">Edit</button>
+                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(user)">Edit</button>
                   </td>
                 </tr>
               </ng-container>
@@ -126,7 +126,7 @@ interface Organization {
         <form [formGroup]="userForm" (ngSubmit)="submitForm()" class="space-y-6">
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Organization *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Organization *</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null" disabled>Select an Organization</option>
               <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.attributes.organization_name }}</option>
@@ -135,29 +135,29 @@ interface Organization {
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">First Name *</label>
+              <label class="block text-sm font-medium text-muted mb-1">First Name *</label>
               <input type="text" formControlName="first_name" class="input-field" placeholder="John">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Last Name *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Last Name *</label>
               <input type="text" formControlName="last_name" class="input-field" placeholder="Doe">
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Email Address *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Email Address *</label>
             <input type="email" formControlName="email" class="input-field" placeholder="john.doe@company.com">
           </div>
 
           <div *ngIf="!isEditing">
-            <label class="block text-sm font-medium text-slate-300 mb-1">Temporary Password *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Temporary Password *</label>
             <input type="password" formControlName="password" class="input-field" placeholder="Min 12 chars">
             <p class="text-xs text-slate-500 mt-1">Must be at least 12 characters long.</p>
           </div>
 
           <!-- Fix 8: Optional initial role assignment during user creation -->
-          <div *ngIf="!isEditing && isPlatformAdmin" class="border-t border-white/10 pt-4">
-            <label class="block text-sm font-medium text-slate-300 mb-1">Initial Role <span class="text-slate-500 font-normal">(optional)</span></label>
+          <div *ngIf="!isEditing && isPlatformAdmin" class="border-t border-border-light pt-4">
+            <label class="block text-sm font-medium text-muted mb-1">Initial Role <span class="text-slate-500 font-normal">(optional)</span></label>
             <select formControlName="initial_role_uuid" class="input-field">
               <option [ngValue]="null">No role — assign later via Manage Roles</option>
               <option *ngFor="let role of allRoles" [ngValue]="role.uuid">{{ role.attributes.role_name }}</option>
@@ -165,7 +165,7 @@ interface Organization {
             <p class="text-xs text-slate-500 mt-1">The selected role will be automatically assigned after the user is created.</p>
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="userForm.invalid || submitting">
               <span *ngIf="submitting">Saving...</span>
@@ -181,7 +181,7 @@ interface Organization {
                       description="Assign or revoke roles for this user."
                       (closeEvent)="closeRoleModal()">
         
-        <div *ngIf="rolesLoading" class="text-center py-8 text-slate-400 text-sm">
+        <div *ngIf="rolesLoading" class="text-center py-8 text-muted text-sm">
           <svg class="animate-spin h-6 w-6 mx-auto mb-2 text-brand-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -192,15 +192,15 @@ interface Organization {
         <ng-container *ngIf="!rolesLoading">
           <!-- Current Roles Section -->
           <div class="mb-6">
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Current Roles</h4>
-            <div *ngIf="activeUserRoles.length === 0" class="text-sm text-slate-500 italic py-3 px-4 rounded-lg bg-black/20 border border-white/5">
+            <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Current Roles</h4>
+            <div *ngIf="activeUserRoles.length === 0" class="text-sm text-slate-500 italic py-3 px-4 rounded-lg bg-input-bg border border-white/5">
               No roles assigned yet.
             </div>
-            <div *ngFor="let role of activeUserRoles" class="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-brand/10 mb-2">
+            <div *ngFor="let role of activeUserRoles" class="flex items-center justify-between p-3 rounded-lg border border-border-light bg-brand/10 mb-2">
               <div class="flex items-center gap-3">
                 <span class="w-2 h-2 rounded-full bg-brand-light flex-shrink-0"></span>
                 <div>
-                  <span class="block text-sm font-medium text-slate-200">{{ role.attributes.role_name }}</span>
+                  <span class="block text-sm font-medium text-main">{{ role.attributes.role_name }}</span>
                   <span class="block text-xs text-slate-500">{{ role.attributes.role_code }}</span>
                 </div>
               </div>
@@ -214,13 +214,13 @@ interface Organization {
 
           <!-- Add a Role Section -->
           <div>
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Add a Role</h4>
-            <div *ngIf="unassignedRoles.length === 0" class="text-sm text-slate-500 italic py-3 px-4 rounded-lg bg-black/20 border border-white/5">
+            <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Add a Role</h4>
+            <div *ngIf="unassignedRoles.length === 0" class="text-sm text-slate-500 italic py-3 px-4 rounded-lg bg-input-bg border border-white/5">
               All available roles have been assigned.
             </div>
-            <div *ngFor="let role of unassignedRoles" class="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-black/20 hover:bg-white/5 mb-2 transition-colors">
+            <div *ngFor="let role of unassignedRoles" class="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-input-bg hover:hover:brightness-110 mb-2 transition-colors">
               <div>
-                <span class="block text-sm font-medium text-slate-200">{{ role.attributes.role_name }}</span>
+                <span class="block text-sm font-medium text-main">{{ role.attributes.role_name }}</span>
                 <span class="block text-xs text-slate-500">{{ role.attributes.role_code }}</span>
               </div>
               <button (click)="assignRole(role)"
@@ -232,7 +232,7 @@ interface Organization {
           </div>
         </ng-container>
 
-        <div class="pt-6 flex justify-end mt-8 border-t border-white/10">
+        <div class="pt-6 flex justify-end mt-8 border-t border-border-light">
           <button class="btn-secondary" (click)="closeRoleModal()">Close</button>
         </div>
       </app-slide-over>

@@ -29,8 +29,8 @@ interface Location {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Locations</h2>
-          <p class="text-slate-400 text-sm mt-1">Manage physical or virtual locations for your organization.</p>
+          <h2 class="text-2xl font-bold text-main">Locations</h2>
+          <p class="text-muted text-sm mt-1">Manage physical or virtual locations for your organization.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,19 +41,19 @@ interface Location {
       </div>
 
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
           <div class="relative w-64">
             <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-surface-darker/50" placeholder="Search locations...">
+            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search locations...">
           </div>
           
         </div>
 
         <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+          <table class="w-full text-left text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
@@ -65,7 +65,7 @@ interface Location {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && locations.length === 0">
-                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                <td colspan="6" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -79,9 +79,9 @@ interface Location {
                     No locations found matching your search.
                   </td>
                 </tr>
-                <tr *ngFor="let loc of filteredLocations" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr *ngFor="let loc of filteredLocations" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ loc.attributes.location_code }}</td>
-                  <td class="px-6 py-4 text-white font-medium">{{ loc.attributes.location_name }}</td>
+                  <td class="px-6 py-4 text-main font-medium">{{ loc.attributes.location_name }}</td>
                   <td class="px-6 py-4">{{ loc.attributes.city || '-' }}</td>
                   <td class="px-6 py-4">{{ loc.attributes.country || '-' }}</td>
                   <td class="px-6 py-4">
@@ -91,8 +91,8 @@ interface Location {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-slate-400 hover:text-white transition-colors" (click)="openEditForm(loc)">Edit</button>
-                    <button class="text-slate-400 hover:text-red-400 transition-colors" (click)="deleteLoc(loc.uuid)">Delete</button>
+                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(loc)">Edit</button>
+                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteLoc(loc.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -109,7 +109,7 @@ interface Location {
         <form [formGroup]="locForm" (ngSubmit)="submitForm()" class="space-y-6">
           
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Organization *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Organization *</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null" disabled>Select an Organization</option>
               <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.attributes.organization_name }}</option>
@@ -117,27 +117,27 @@ interface Location {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Location Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Location Code *</label>
             <input type="text" formControlName="location_code" class="input-field" placeholder="e.g. NY-HQ">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Location Name *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Location Name *</label>
             <input type="text" formControlName="location_name" class="input-field" placeholder="e.g. New York Headquarters">
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">City</label>
+              <label class="block text-sm font-medium text-muted mb-1">City</label>
               <input type="text" formControlName="city" class="input-field" placeholder="e.g. New York">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Country</label>
+              <label class="block text-sm font-medium text-muted mb-1">Country</label>
               <input type="text" formControlName="country" class="input-field" placeholder="e.g. USA">
             </div>
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="locForm.invalid || submitting">
               <span *ngIf="submitting">Saving...</span>

@@ -37,14 +37,14 @@ interface RecentResult {
     <div class="h-full flex flex-col overflow-y-auto custom-scrollbar pb-6">
       <div class="flex justify-between items-center mb-6 flex-shrink-0">
         <div>
-          <h2 class="text-2xl font-bold text-white">Analytics & Results</h2>
-          <p class="text-slate-400 text-sm mt-1">Platform-wide performance metrics and scoring overview.</p>
+          <h2 class="text-2xl font-bold text-main">Analytics & Results</h2>
+          <p class="text-muted text-sm mt-1">Platform-wide performance metrics and scoring overview.</p>
         </div>
         <button (click)="fetchAll()" class="btn-secondary text-sm flex items-center gap-2" [disabled]="loading || resultsLoading">
           <svg *ngIf="!(loading || resultsLoading)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          <svg *ngIf="loading || resultsLoading" class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg *ngIf="loading || resultsLoading" class="animate-spin w-4 h-4 text-main" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -88,7 +88,7 @@ interface RecentResult {
 
         <!-- Pass / Fail Donut (SVG-based, no library needed) -->
         <div class="glass-card p-6 flex flex-col items-center">
-          <h3 class="text-sm font-semibold text-slate-300 mb-4 self-start">Pass vs Fail Distribution</h3>
+          <h3 class="text-sm font-semibold text-muted mb-4 self-start">Pass vs Fail Distribution</h3>
           <div class="relative w-40 h-40">
             <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
               <circle cx="50" cy="50" r="40" fill="none" stroke="#1e293b" stroke-width="15"/>
@@ -104,7 +104,7 @@ interface RecentResult {
                       stroke-linecap="round"/>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-2xl font-bold text-white">{{ summary?.pass_rate || 0 }}%</span>
+              <span class="text-2xl font-bold text-main">{{ summary?.pass_rate || 0 }}%</span>
               <span class="text-xs text-slate-500">Pass Rate</span>
             </div>
           </div>
@@ -116,23 +116,23 @@ interface RecentResult {
 
         <!-- Assessment Activity Bar Chart (CSS-based) -->
         <div class="glass-card p-6 md:col-span-2">
-          <h3 class="text-sm font-semibold text-slate-300 mb-4">Assessment Volume Summary</h3>
+          <h3 class="text-sm font-semibold text-muted mb-4">Assessment Volume Summary</h3>
           <div class="space-y-4">
             <div>
               <div class="flex justify-between text-xs text-slate-500 mb-1.5">
                 <span>Total Assessments</span>
-                <span class="text-white font-bold">{{ summary?.total_assessments || 0 }}</span>
+                <span class="text-main font-bold">{{ summary?.total_assessments || 0 }}</span>
               </div>
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+              <div class="h-2 hover:brightness-110 rounded-full overflow-hidden">
                 <div class="h-full bg-brand/60 rounded-full" [style.width.%]="100"></div>
               </div>
             </div>
             <div>
               <div class="flex justify-between text-xs text-slate-500 mb-1.5">
                 <span>Total Attempts</span>
-                <span class="text-white font-bold">{{ summary?.total_attempts || 0 }}</span>
+                <span class="text-main font-bold">{{ summary?.total_attempts || 0 }}</span>
               </div>
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+              <div class="h-2 hover:brightness-110 rounded-full overflow-hidden">
                 <div class="h-full bg-indigo-500/60 rounded-full" [style.width.%]="getAttemptsPct()"></div>
               </div>
             </div>
@@ -141,7 +141,7 @@ interface RecentResult {
                 <span>Passed Attempts</span>
                 <span class="text-emerald-400 font-bold">{{ summary?.total_passed || 0 }}</span>
               </div>
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+              <div class="h-2 hover:brightness-110 rounded-full overflow-hidden">
                 <div class="h-full bg-emerald-500/60 rounded-full" [style.width.%]="getPassedPct()"></div>
               </div>
             </div>
@@ -150,7 +150,7 @@ interface RecentResult {
                 <span>Failed Attempts</span>
                 <span class="text-red-400 font-bold">{{ summary?.total_failed || 0 }}</span>
               </div>
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+              <div class="h-2 hover:brightness-110 rounded-full overflow-hidden">
                 <div class="h-full bg-red-500/60 rounded-full" [style.width.%]="getFailedPct()"></div>
               </div>
             </div>
@@ -160,13 +160,13 @@ interface RecentResult {
 
       <!-- Recent Results Table -->
       <div class="glass-card overflow-hidden flex-shrink-0">
-        <div class="px-6 py-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
-          <h3 class="text-sm font-semibold text-slate-300">Recent Results</h3>
+        <div class="px-6 py-4 border-b border-border-light bg-input-bg flex justify-between items-center">
+          <h3 class="text-sm font-semibold text-muted">Recent Results</h3>
           <span class="text-xs text-slate-600">Latest {{ recentResults.length }} records</span>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-black/40">
+          <table class="w-full text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-black/40">
               <tr>
                 <th class="px-6 py-3 font-medium text-left">Candidate</th>
                 <th class="px-6 py-3 font-medium text-left">Assessment</th>
@@ -182,13 +182,13 @@ interface RecentResult {
               <tr *ngIf="!resultsLoading && recentResults.length === 0">
                 <td colspan="5" class="px-6 py-8 text-center text-slate-500">No results yet.</td>
               </tr>
-              <tr *ngFor="let r of recentResults" class="border-t border-white/5 hover:bg-white/5 transition-colors">
+              <tr *ngFor="let r of recentResults" class="border-t border-white/5 hover:hover:brightness-110 transition-colors">
                 <td class="px-6 py-4">
-                  <span class="text-white font-medium">
+                  <span class="text-main font-medium">
                     {{ r.relationships?.candidate?.attributes?.first_name }} {{ r.relationships?.candidate?.attributes?.last_name }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-slate-400 truncate max-w-xs">
+                <td class="px-6 py-4 text-muted truncate max-w-xs">
                   {{ r.relationships?.assessment?.attributes?.title || '—' }}
                 </td>
                 <td class="px-6 py-4 text-center font-mono">

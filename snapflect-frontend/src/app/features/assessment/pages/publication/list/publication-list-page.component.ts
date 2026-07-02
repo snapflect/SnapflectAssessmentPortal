@@ -32,8 +32,8 @@ interface Publication {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Publications</h2>
-          <p class="text-slate-400 text-sm mt-1">Scheduled assessment events and delivery windows.</p>
+          <h2 class="text-2xl font-bold text-main">Publications</h2>
+          <p class="text-muted text-sm mt-1">Scheduled assessment events and delivery windows.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,10 +45,10 @@ interface Publication {
 
       <!-- Timeline / Table hybrid view -->
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
           <div class="flex gap-2">
             <button *ngFor="let s of statusFilters" (click)="setFilter(s)" class="px-3 py-1.5 text-xs rounded-full font-medium transition-all"
-                    [ngClass]="activeFilter === s ? 'bg-brand text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'">
+                    [ngClass]="activeFilter === s ? 'bg-brand text-main' : 'hover:brightness-110 text-muted hover:bg-white/10'">
               {{ s === '' ? 'All' : s }}
             </button>
           </div>
@@ -85,7 +85,7 @@ interface Publication {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
                 </div>
-                <div class="w-px flex-1 bg-white/5 mt-2 mb-2 last:hidden"></div>
+                <div class="w-px flex-1 hover:brightness-110 mt-2 mb-2 last:hidden"></div>
               </div>
 
               <!-- Publication Card -->
@@ -96,9 +96,9 @@ interface Publication {
                       <span class="text-xs font-mono text-brand-light bg-brand/10 px-2 py-0.5 rounded">{{ pub.attributes.publication_code }}</span>
                       <span *ngIf="pub.attributes.is_proctored" class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded">Proctored</span>
                     </div>
-                    <h3 class="text-white font-semibold">{{ pub.attributes.title }}</h3>
+                    <h3 class="text-main font-semibold">{{ pub.attributes.title }}</h3>
                     <p class="text-slate-500 text-xs mt-1">
-                      Assessment: <span class="text-slate-400">{{ pub.relationships?.assessment?.attributes?.assessment_name || 'N/A' }}</span>
+                      Assessment: <span class="text-muted">{{ pub.relationships?.assessment?.attributes?.assessment_name || 'N/A' }}</span>
                     </p>
                   </div>
                   <span class="px-2.5 py-0.5 text-xs font-medium rounded-full"
@@ -108,7 +108,7 @@ interface Publication {
                 </div>
 
                 <!-- Dates -->
-                <div class="flex gap-6 text-xs text-slate-400 pt-3 border-t border-white/5">
+                <div class="flex gap-6 text-xs text-muted pt-3 border-t border-white/5">
                   <div>
                     <span class="text-slate-600 block uppercase tracking-wider text-[10px] mb-1">Start</span>
                     <span class="text-emerald-400 font-medium">{{ pub.attributes.start_date | date:'dd MMM yyyy, HH:mm' }}</span>
@@ -119,7 +119,7 @@ interface Publication {
                   </div>
                   <div class="ml-auto">
                     <span class="text-slate-600 block uppercase tracking-wider text-[10px] mb-1">Max Attempts</span>
-                    <span class="text-white font-medium">{{ pub.attributes.max_attempts }}</span>
+                    <span class="text-main font-medium">{{ pub.attributes.max_attempts }}</span>
                   </div>
                 </div>
               </div>
@@ -150,7 +150,7 @@ interface Publication {
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Assessment *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Assessment *</label>
             <select formControlName="assessment_uuid" class="input-field">
               <option value="">Select an Approved Assessment...</option>
               <option *ngFor="let a of availableAssessments" [value]="a.uuid">{{ a.attributes.assessment_name }} ({{ a.attributes.assessment_code }})</option>
@@ -158,39 +158,39 @@ interface Publication {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Publication Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Publication Code *</label>
             <input type="text" formControlName="publication_code" class="input-field" placeholder="e.g. PUB-Q3-DEV">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Event Title *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Event Title *</label>
             <input type="text" formControlName="title" class="input-field" placeholder="e.g. Q3 Developer Assessment Cohort">
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Start Date *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Start Date *</label>
               <input type="datetime-local" formControlName="start_date" class="input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">End Date *</label>
+              <label class="block text-sm font-medium text-muted mb-1">End Date *</label>
               <input type="datetime-local" formControlName="end_date" class="input-field">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Max Attempts *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Max Attempts *</label>
               <input type="number" formControlName="max_attempts" class="input-field" min="1">
             </div>
           </div>
 
-          <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+          <div class="flex items-center gap-3 p-3 hover:brightness-110 rounded-lg border border-border-light">
             <input type="checkbox" formControlName="is_proctored" id="is_proctored" class="w-4 h-4 rounded text-brand">
-            <label for="is_proctored" class="text-sm text-slate-300">Require Proctoring</label>
+            <label for="is_proctored" class="text-sm text-muted">Require Proctoring</label>
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="pubForm.invalid || submitting">
               {{ submitting ? 'Publishing...' : 'Publish' }}
@@ -277,20 +277,20 @@ export class PublicationListPageComponent implements OnInit {
     const map: Record<string, string> = {
       'SCHEDULED': 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
       'ACTIVE': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-      'COMPLETED': 'bg-slate-500/10 text-slate-400 border border-slate-500/20',
+      'COMPLETED': 'bg-slate-500/10 text-muted border border-slate-500/20',
       'CANCELLED': 'bg-red-500/10 text-red-400 border border-red-500/20',
     };
-    return map[status] || 'bg-slate-500/10 text-slate-400';
+    return map[status] || 'bg-slate-500/10 text-muted';
   }
 
   getTimelineNodeClass(status: string): string {
     const map: Record<string, string> = {
       'SCHEDULED': 'border-blue-500/50 text-blue-400 bg-blue-500/10',
       'ACTIVE': 'border-emerald-500/50 text-emerald-400 bg-emerald-500/10',
-      'COMPLETED': 'border-slate-500/50 text-slate-400 bg-slate-500/10',
+      'COMPLETED': 'border-slate-500/50 text-muted bg-slate-500/10',
       'CANCELLED': 'border-red-500/50 text-red-400 bg-red-500/10',
     };
-    return map[status] || 'border-slate-500/50 text-slate-400 bg-slate-500/10';
+    return map[status] || 'border-slate-500/50 text-muted bg-slate-500/10';
   }
 
   openCreateForm() {

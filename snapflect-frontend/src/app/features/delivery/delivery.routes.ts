@@ -10,8 +10,12 @@ export const DELIVERY_ROUTES: Routes = [
     loadComponent: () => import('./pages/session/list/session-list-page.component').then(m => m.SessionListPageComponent)
   },
   {
+    path: 'monitor',
+    loadComponent: () => import('./pages/session-monitor/session-monitor-page.component').then(m => m.SessionMonitorPageComponent)
+  },
+  {
     path: 'proctoring',
-    loadComponent: () => import('./pages/session/list/session-list-page.component').then(m => m.SessionListPageComponent)
+    loadComponent: () => import('./pages/proctoring/proctoring-page.component').then(m => m.ProctoringPageComponent)
   },
   {
     path: 'attempts',

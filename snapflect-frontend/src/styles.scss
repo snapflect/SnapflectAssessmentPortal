@@ -2,9 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-page: #f8fafc;
+  --color-card: #ffffff;
+  --color-text-main: #0f172a;
+  --color-text-muted: #475569;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-input-bg: rgba(0, 0, 0, 0.05);
+  --color-backdrop: rgba(255, 255, 255, 0.6);
+}
+
+.dark-theme {
+  --color-page: #0f172a;
+  --color-card: #1e293b;
+  --color-text-main: #ffffff;
+  --color-text-muted: #94a3b8;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-input-bg: rgba(0, 0, 0, 0.2);
+  --color-backdrop: rgba(30, 41, 59, 0.6);
+}
+
 @layer base {
   body {
-    @apply bg-surface-darker text-slate-200 antialiased font-sans;
+    @apply bg-page text-main antialiased font-sans transition-colors duration-300;
   }
 
   /* Premium Dark Mode Scrollbar */
@@ -16,22 +36,22 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full;
+    @apply bg-input-bg rounded-full border border-border-light;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-white/20;
+    @apply bg-border-light;
   }
 
-  /* Style native select options to match dark theme */
+  /* Style native select options to match theme */
   select option {
-    @apply bg-surface-dark text-slate-200 py-2;
+    @apply bg-card text-main py-2;
   }
 }
 
 @layer components {
   /* Reusable glassmorphism card */
   .glass-card {
-    @apply bg-surface-dark/60 backdrop-blur-md border border-white/10 shadow-xl rounded-xl;
+    @apply bg-backdrop backdrop-blur-md border border-border-light shadow-xl rounded-xl;
   }
   
   /* Primary Button */
@@ -41,19 +61,19 @@
 
   /* Secondary Button */
   .btn-secondary {
-    @apply px-4 py-2 bg-surface-dark text-slate-300 font-medium rounded-lg border border-white/10 hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-card text-main font-medium rounded-lg border border-border-light hover:brightness-110 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Input fields */
   .input-field {
-    @apply w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent text-white placeholder-slate-500 transition-all duration-200 outline-none;
+    @apply w-full px-4 py-2 bg-input-bg border border-border-light rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent text-main placeholder-muted transition-all duration-200 outline-none;
   }
 }
 
 @layer components {
   /* Table Responsiveness Wrapper */
   .table-responsive {
-    @apply w-full overflow-x-auto border border-white/10 rounded-lg;
+    @apply w-full overflow-x-auto border border-border-light rounded-lg;
     /* Ensure the scrollbar is styled nicely on mobile */
     &::-webkit-scrollbar {
       height: 4px;

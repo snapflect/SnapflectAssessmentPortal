@@ -10,7 +10,8 @@ export class UserMapper {
       email: apiUser.email,
       roles: apiUser.roles,
       permissions: apiUser.permissions,
-      tenantId: apiUser.organization_id.toString()
+      tenantId: apiUser.organization_id ? apiUser.organization_id.toString() : '',
+      organization_name: (apiUser as any).organization_name
     };
   }
 }

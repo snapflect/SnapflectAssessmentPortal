@@ -41,18 +41,18 @@ import { animate, style, transition, trigger } from '@angular/animations';
           <!-- Slide-over panel -->
           <div 
             @slideOverAnimation
-            class="pointer-events-auto w-screen max-w-md border-l border-white/10 shadow-2xl">
+            class="pointer-events-auto w-screen max-w-md border-l border-border-light shadow-2xl">
             
-            <div class="flex h-full flex-col bg-surface-darker overflow-y-scroll custom-scrollbar">
+            <div class="flex h-full flex-col bg-page overflow-y-scroll custom-scrollbar">
               
               <!-- Header -->
-              <div class="px-6 py-6 border-b border-white/10 bg-surface-dark/50 backdrop-blur-md sticky top-0 z-10 flex items-start justify-between">
+              <div class="px-6 py-6 border-b border-border-light bg-card/50 backdrop-blur-md sticky top-0 z-10 flex items-start justify-between">
                 <div>
-                  <h2 class="text-xl font-bold text-white" id="slide-over-title">{{ title }}</h2>
-                  <p *ngIf="subtitle" class="mt-1 text-sm text-slate-400">{{ subtitle }}</p>
+                  <h2 class="text-xl font-bold text-main" id="slide-over-title">{{ title }}</h2>
+                  <p *ngIf="subtitle" class="mt-1 text-sm text-muted">{{ subtitle }}</p>
                 </div>
                 <div class="ml-3 flex h-7 items-center">
-                  <button type="button" (click)="close()" class="rounded-md bg-transparent text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-surface-darker transition-colors">
+                  <button type="button" (click)="close()" class="rounded-md bg-transparent text-muted hover:text-main focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-surface-darker transition-colors">
                     <span class="sr-only">Close panel</span>
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

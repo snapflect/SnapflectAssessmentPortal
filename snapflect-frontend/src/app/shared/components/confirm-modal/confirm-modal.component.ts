@@ -14,7 +14,7 @@ import { ConfirmService } from '../../../core/services/confirm.service';
            (click)="cancel()"></div>
       
       <!-- Modal Panel -->
-      <div class="relative w-full max-w-sm glass-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
+      <div class="relative w-full max-w-sm glass-card border border-border-light rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
         
         <!-- Header -->
         <div class="px-6 py-5 border-b border-white/5 flex items-center gap-4">
@@ -23,16 +23,16 @@ import { ConfirmService } from '../../../core/services/confirm.service';
             <svg *ngIf="options?.variant === 'warning'" class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             <svg *ngIf="options?.variant === 'info' || !options?.variant" class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
-          <h3 class="text-lg font-bold text-white">{{ options?.title }}</h3>
+          <h3 class="text-lg font-bold text-main">{{ options?.title }}</h3>
         </div>
 
         <!-- Body -->
         <div class="px-6 py-5">
-          <p class="text-sm text-slate-300 leading-relaxed">{{ options?.message }}</p>
+          <p class="text-sm text-muted leading-relaxed">{{ options?.message }}</p>
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-black/20 border-t border-white/5 flex items-center justify-end gap-3">
+        <div class="px-6 py-4 bg-input-bg border-t border-white/5 flex items-center justify-end gap-3">
           <button (click)="cancel()" class="btn-secondary text-sm px-4 py-2 hover:bg-white/10 transition-colors">
             {{ options?.cancelText || 'Cancel' }}
           </button>
@@ -80,10 +80,10 @@ export class ConfirmModalComponent {
 
   getConfirmButtonClass(variant?: string): string {
     switch (variant) {
-      case 'danger': return 'bg-red-500 hover:bg-red-400 text-white focus:ring-red-500/50';
+      case 'danger': return 'bg-red-500 hover:bg-red-400 text-main focus:ring-red-500/50';
       case 'warning': return 'bg-amber-500 hover:bg-amber-400 text-black focus:ring-amber-500/50';
       case 'info':
-      default: return 'bg-brand hover:bg-brand-light text-white focus:ring-brand/50';
+      default: return 'bg-brand hover:bg-brand-light text-main focus:ring-brand/50';
     }
   }
 }

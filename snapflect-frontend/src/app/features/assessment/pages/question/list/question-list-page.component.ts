@@ -34,8 +34,8 @@ interface Question {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Questions</h2>
-          <p class="text-slate-400 text-sm mt-1">Author and manage questions using the rich text studio.</p>
+          <h2 class="text-2xl font-bold text-main">Questions</h2>
+          <p class="text-muted text-sm mt-1">Author and manage questions using the rich text studio.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,16 +46,16 @@ interface Question {
       </div>
 
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
           <div class="flex gap-4">
             <div class="relative w-64">
               <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-              <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-surface-darker/50" placeholder="Search questions...">
+              <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search questions...">
             </div>
             
-            <select class="input-field py-2 text-sm bg-surface-darker/50 w-48" (change)="filterByBank($event)">
+            <select class="input-field py-2 text-sm bg-page/50 w-48" (change)="filterByBank($event)">
               <option value="">All Question Banks</option>
               <option *ngFor="let bank of banks" [value]="bank.uuid">{{ getBankDisplayName(bank) }}</option>
             </select>
@@ -63,8 +63,8 @@ interface Question {
         </div>
 
         <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+          <table class="w-full text-left text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Preview</th>
@@ -76,7 +76,7 @@ interface Question {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && questions.length === 0">
-                <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                <td colspan="6" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -90,14 +90,14 @@ interface Question {
                     No questions found matching your search.
                   </td>
                 </tr>
-                <tr *ngFor="let q of filteredQuestions" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr *ngFor="let q of filteredQuestions" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ q.attributes.question_code }}</td>
                   <td class="px-6 py-4">
                     <!-- Strip HTML tags for preview -->
-                    <div class="line-clamp-2 text-white/90" [innerHTML]="q.attributes.question_text | slice:0:100"></div>
+                    <div class="line-clamp-2 text-main/90" [innerHTML]="q.attributes.question_text | slice:0:100"></div>
                   </td>
                   <td class="px-6 py-4">
-                    <span class="text-slate-400 text-xs">{{ getBankDisplayName(q.relationships?.questionBank) }}</span>
+                    <span class="text-muted text-xs">{{ getBankDisplayName(q.relationships?.questionBank) }}</span>
                   </td>
                   <td class="px-6 py-4">
                     <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-[10px] uppercase font-semibold">
@@ -115,10 +115,10 @@ interface Question {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button *ngIf="!isGlobalQuestion(q)" class="text-slate-400 hover:text-white transition-colors" (click)="openEditForm(q)">Edit</button>
-                    <button *ngIf="isGlobalQuestion(q)" class="text-slate-400 hover:text-white transition-colors" (click)="openEditForm(q)" title="View Only">View</button>
+                    <button *ngIf="!isGlobalQuestion(q)" class="text-muted hover:text-main transition-colors" (click)="openEditForm(q)">Edit</button>
+                    <button *ngIf="isGlobalQuestion(q)" class="text-muted hover:text-main transition-colors" (click)="openEditForm(q)" title="View Only">View</button>
                     <button class="text-brand hover:text-brand-light transition-colors" (click)="openCloneModal(q)">Clone</button>
-                    <button *ngIf="!isGlobalQuestion(q)" class="text-slate-400 hover:text-red-400 transition-colors" (click)="deleteQuestion(q.uuid)">Delete</button>
+                    <button *ngIf="!isGlobalQuestion(q)" class="text-muted hover:text-red-400 transition-colors" (click)="deleteQuestion(q.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -137,7 +137,7 @@ interface Question {
           
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Question Bank *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Question Bank *</label>
               <select formControlName="question_bank_uuid" class="input-field">
                 <option value="">Select a Bank...</option>
                 <option *ngFor="let bank of banks" [value]="bank.uuid">{{ getBankDisplayName(bank) }}</option>
@@ -145,14 +145,14 @@ interface Question {
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Question Code *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Question Code *</label>
               <input type="text" formControlName="question_code" class="input-field" placeholder="e.g. Q-MATH-01">
             </div>
           </div>
 
           <div class="grid grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Type *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Type *</label>
               <select formControlName="question_type" class="input-field" (change)="onTypeChange()">
                 <option value="MCQ">Multiple Choice</option>
                 <option value="MULTI_SELECT">Multi Select</option>
@@ -162,7 +162,7 @@ interface Question {
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Difficulty *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Difficulty *</label>
               <select formControlName="difficulty_level" class="input-field">
                 <option value="EASY">Easy</option>
                 <option value="MEDIUM">Medium</option>
@@ -171,14 +171,14 @@ interface Question {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Max Score *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Max Score *</label>
               <input type="number" formControlName="max_score" class="input-field" min="1">
             </div>
           </div>
 
           <!-- Rich Text Editor for Question Stem -->
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Question Text (Stem) *</label>
+            <label class="block text-sm font-medium text-muted mb-2">Question Text (Stem) *</label>
             <div class="bg-white rounded-md text-black overflow-hidden border border-white/20">
                <quill-editor formControlName="question_text" 
                             [styles]="{height: '200px'}" 
@@ -189,19 +189,19 @@ interface Question {
 
           <!-- Explanation -->
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Explanation (Optional)</label>
+            <label class="block text-sm font-medium text-muted mb-1">Explanation (Optional)</label>
             <textarea formControlName="explanation" class="input-field h-16 resize-none" placeholder="Explanation shown after test or in review..."></textarea>
           </div>
 
           <!-- Options Builder (Only for MCQ, MULTI_SELECT, TRUE_FALSE) -->
-          <div *ngIf="questionForm.get('question_type')?.value !== 'ESSAY'" class="border-t border-white/10 pt-6">
+          <div *ngIf="questionForm.get('question_type')?.value !== 'ESSAY'" class="border-t border-border-light pt-6">
             <div class="flex justify-between items-center mb-4">
-              <h4 class="text-sm font-bold text-white">Answer Options</h4>
+              <h4 class="text-sm font-bold text-main">Answer Options</h4>
               <button type="button" class="text-xs btn-secondary py-1 px-3" (click)="addOption()">+ Add Option</button>
             </div>
 
             <div formArrayName="options" class="space-y-3">
-              <div *ngFor="let opt of options.controls; let i=index" [formGroupName]="i" class="flex gap-3 items-start bg-white/5 p-3 rounded-lg border border-white/5">
+              <div *ngFor="let opt of options.controls; let i=index" [formGroupName]="i" class="flex gap-3 items-start hover:brightness-110 p-3 rounded-lg border border-white/5">
                 
                 <div class="pt-2">
                   <input type="checkbox" formControlName="is_correct" 
@@ -227,7 +227,7 @@ interface Question {
             </div>
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8 pb-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8 pb-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button *ngIf="!isViewingGlobal" type="submit" class="btn-primary" [disabled]="questionForm.invalid || submitting || (options.length === 0 && questionForm.get('question_type')?.value !== 'ESSAY')">
               <span *ngIf="submitting">Saving...</span>
@@ -240,13 +240,13 @@ interface Question {
       <!-- Clone Modal -->
       <div *ngIf="isCloneModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="glass-card w-full max-w-md overflow-hidden animate-slide-up shadow-2xl shadow-brand/20">
-          <div class="p-6 border-b border-white/10 bg-black/20">
-            <h3 class="text-xl font-bold text-white">Clone Question</h3>
-            <p class="text-sm text-slate-400 mt-1">Select a local bank to clone this question into.</p>
+          <div class="p-6 border-b border-border-light bg-input-bg">
+            <h3 class="text-xl font-bold text-main">Clone Question</h3>
+            <p class="text-sm text-muted mt-1">Select a local bank to clone this question into.</p>
           </div>
           
           <div class="p-6">
-            <label class="block text-sm font-medium text-slate-300 mb-1">Target Question Bank *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Target Question Bank *</label>
             <select [(ngModel)]="cloneTargetBankUuid" class="input-field mb-4">
               <option value="">Select a Bank...</option>
               <ng-container *ngFor="let bank of banks">
@@ -256,7 +256,7 @@ interface Question {
             </select>
           </div>
           
-          <div class="p-6 border-t border-white/10 bg-black/30 flex justify-end space-x-3">
+          <div class="p-6 border-t border-border-light bg-input-bg flex justify-end space-x-3">
             <button class="btn-secondary" (click)="isCloneModalOpen = false">Cancel</button>
             <button class="btn-primary" (click)="submitClone()" [disabled]="!cloneTargetBankUuid || submittingClone">
               {{ submittingClone ? 'Cloning...' : 'Clone Question' }}

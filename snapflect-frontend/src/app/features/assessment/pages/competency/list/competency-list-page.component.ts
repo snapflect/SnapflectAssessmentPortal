@@ -35,8 +35,8 @@ interface Competency {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Competency Framework</h2>
-          <p class="text-slate-400 text-sm mt-1">Define competency groups and map individual competencies for assessment blueprints.</p>
+          <h2 class="text-2xl font-bold text-main">Competency Framework</h2>
+          <p class="text-muted text-sm mt-1">Define competency groups and map individual competencies for assessment blueprints.</p>
         </div>
         <div class="flex gap-3">
           <button (click)="openGroupForm()" class="btn-secondary flex items-center text-sm">
@@ -56,19 +56,19 @@ interface Competency {
         <!-- Competency Groups Panel -->
         <div class="w-72 flex flex-col">
           <div class="glass-card flex-1 overflow-hidden flex flex-col">
-            <div class="px-4 py-3 border-b border-white/10 bg-black/20">
-              <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Groups</h3>
+            <div class="px-4 py-3 border-b border-border-light bg-input-bg">
+              <h3 class="text-sm font-semibold text-muted uppercase tracking-wider">Groups</h3>
             </div>
             <div class="overflow-y-auto flex-1 p-2">
               <button (click)="selectGroup(null)"
                       class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors mb-1"
-                      [ngClass]="selectedGroupUuid === null ? 'bg-brand/20 text-brand-light' : 'text-slate-400 hover:bg-white/5 hover:text-white'">
+                      [ngClass]="selectedGroupUuid === null ? 'bg-brand/20 text-brand-light' : 'text-muted hover:hover:brightness-110 hover:text-main'">
                 All Competencies
               </button>
               <button *ngFor="let g of groups"
                       (click)="selectGroup(g.uuid)"
                       class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors mb-1 flex items-center justify-between"
-                      [ngClass]="selectedGroupUuid === g.uuid ? 'bg-brand/20 text-brand-light' : 'text-slate-400 hover:bg-white/5 hover:text-white'">
+                      [ngClass]="selectedGroupUuid === g.uuid ? 'bg-brand/20 text-brand-light' : 'text-muted hover:hover:brightness-110 hover:text-main'">
                 <span>{{ g.attributes.group_name }}</span>
                 <span class="text-[10px] opacity-60">{{ g.attributes.group_code }}</span>
               </button>
@@ -78,15 +78,15 @@ interface Competency {
 
         <!-- Competencies Panel -->
         <div class="flex-1 glass-card overflow-hidden flex flex-col">
-          <div class="p-4 border-b border-white/10 bg-black/20 flex justify-between items-center">
-            <p class="text-sm text-slate-400">
-              Showing <span class="text-white font-medium">{{ filteredCompetencies.length }}</span> competencies
+          <div class="p-4 border-b border-border-light bg-input-bg flex justify-between items-center">
+            <p class="text-sm text-muted">
+              Showing <span class="text-main font-medium">{{ filteredCompetencies.length }}</span> competencies
             </p>
             <div class="relative w-64">
               <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-              <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-1.5 text-sm bg-surface-darker/50" placeholder="Search competencies...">
+              <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-1.5 text-sm bg-page/50" placeholder="Search competencies...">
             </div>
           </div>
           <div class="overflow-auto flex-1">
@@ -97,8 +97,8 @@ interface Competency {
               </svg>
             </div>
 
-            <table *ngIf="competencies.length > 0" class="w-full text-left text-sm text-slate-300 transition-opacity duration-300" [class.opacity-50]="loading" [class.pointer-events-none]="loading">
-              <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+            <table *ngIf="competencies.length > 0" class="w-full text-left text-sm text-muted transition-opacity duration-300" [class.opacity-50]="loading" [class.pointer-events-none]="loading">
+              <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
                 <tr>
                   <th scope="col" class="px-6 py-4 font-medium">Code</th>
                   <th scope="col" class="px-6 py-4 font-medium">Name</th>
@@ -112,13 +112,13 @@ interface Competency {
                   <tr *ngIf="finalCompetencies.length === 0">
                     <td colspan="5" class="px-6 py-12 text-center text-slate-500">No competencies found matching your search.</td>
                   </tr>
-                  <tr *ngFor="let c of finalCompetencies" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr *ngFor="let c of finalCompetencies" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                     <td class="px-6 py-4 font-medium text-brand-light">{{ c.attributes.competency_code }}</td>
                     <td class="px-6 py-4">
-                      <p class="text-white font-medium">{{ c.attributes.competency_name }}</p>
+                      <p class="text-main font-medium">{{ c.attributes.competency_name }}</p>
                       <p class="text-xs text-slate-500 mt-0.5">{{ c.attributes.description }}</p>
                     </td>
-                    <td class="px-6 py-4 text-slate-400 text-xs">{{ c.relationships?.group?.attributes?.group_name || '–' }}</td>
+                    <td class="px-6 py-4 text-muted text-xs">{{ c.relationships?.group?.attributes?.group_name || '–' }}</td>
                     <td class="px-6 py-4">
                       <span class="px-2 py-0.5 text-[10px] font-semibold rounded uppercase"
                             [ngClass]="getProficiencyClass(c.attributes.proficiency_level)">
@@ -126,8 +126,8 @@ interface Competency {
                       </span>
                     </td>
                     <td class="px-6 py-4 text-right space-x-3">
-                      <button class="text-slate-400 hover:text-white transition-colors" (click)="openEditCompetency(c)">Edit</button>
-                      <button class="text-slate-400 hover:text-red-400 transition-colors" (click)="deleteCompetency(c.uuid)">Delete</button>
+                      <button class="text-muted hover:text-main transition-colors" (click)="openEditCompetency(c)">Edit</button>
+                      <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteCompetency(c.uuid)">Delete</button>
                     </td>
                   </tr>
                 </tbody>
@@ -141,18 +141,18 @@ interface Competency {
       <app-slide-over [isOpen]="isGroupFormOpen" title="Create Competency Group" description="Groups help categorize related competencies." (closeEvent)="closeGroupForm()">
         <form [formGroup]="groupForm" (ngSubmit)="submitGroup()" class="space-y-5">
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Group Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Group Code *</label>
             <input type="text" formControlName="group_code" class="input-field" placeholder="e.g. TECH">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Group Name *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Group Name *</label>
             <input type="text" formControlName="group_name" class="input-field" placeholder="e.g. Technical Skills">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+            <label class="block text-sm font-medium text-muted mb-1">Description</label>
             <textarea formControlName="description" class="input-field h-20 resize-none"></textarea>
           </div>
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light">
             <button type="button" class="btn-secondary" (click)="closeGroupForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="groupForm.invalid">Save Group</button>
           </div>
@@ -167,11 +167,11 @@ interface Competency {
         <form [formGroup]="competencyForm" (ngSubmit)="submitCompetency()" class="space-y-5">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Code *</label>
+              <label class="block text-sm font-medium text-muted mb-1">Code *</label>
               <input type="text" formControlName="competency_code" class="input-field" placeholder="e.g. TECH-SQL-01">
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-1">Group</label>
+              <label class="block text-sm font-medium text-muted mb-1">Group</label>
               <select formControlName="group_uuid" class="input-field">
                 <option value="">None</option>
                 <option *ngFor="let g of groups" [value]="g.uuid">{{ g.attributes.group_name }}</option>
@@ -179,11 +179,11 @@ interface Competency {
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Name *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Name *</label>
             <input type="text" formControlName="competency_name" class="input-field" placeholder="e.g. SQL Query Writing">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Proficiency Level *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Proficiency Level *</label>
             <select formControlName="proficiency_level" class="input-field">
               <option value="BEGINNER">Beginner</option>
               <option value="INTERMEDIATE">Intermediate</option>
@@ -192,10 +192,10 @@ interface Competency {
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+            <label class="block text-sm font-medium text-muted mb-1">Description</label>
             <textarea formControlName="description" class="input-field h-20 resize-none" placeholder="Describe what this competency measures..."></textarea>
           </div>
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light">
             <button type="button" class="btn-secondary" (click)="closeCompetencyForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="competencyForm.invalid || submitting">
               {{ submitting ? 'Saving...' : 'Save Competency' }}
@@ -285,7 +285,7 @@ export class CompetencyListPageComponent implements OnInit {
       'ADVANCED': 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
       'EXPERT': 'bg-red-500/10 text-red-400 border border-red-500/20',
     };
-    return map[level] || 'bg-slate-500/10 text-slate-400';
+    return map[level] || 'bg-slate-500/10 text-muted';
   }
 
   openGroupForm() {

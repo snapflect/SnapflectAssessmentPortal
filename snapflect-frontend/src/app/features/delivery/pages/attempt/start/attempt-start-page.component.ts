@@ -19,7 +19,7 @@ import { environment } from '../../../../../../environments/environment';
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <p class="text-slate-400">Loading assessment details...</p>
+        <p class="text-muted">Loading assessment details...</p>
       </div>
 
       <!-- Pre-flight Card -->
@@ -33,37 +33,37 @@ import { environment } from '../../../../../../environments/environment';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
               </svg>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">{{ sessionDetails.attributes?.name || 'Assessment Session' }}</h1>
-            <p class="text-slate-400">Please review the instructions below before starting.</p>
+            <h1 class="text-3xl font-bold text-main mb-2">{{ sessionDetails.attributes?.name || 'Assessment Session' }}</h1>
+            <p class="text-muted">Please review the instructions below before starting.</p>
           </div>
 
           <!-- Info Grid -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-black/20 rounded-lg p-4 text-center border border-white/5">
+            <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
               <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Time Limit</div>
-              <div class="text-white font-bold text-lg">{{ sessionDetails.attributes?.time_limit_minutes || 'Unlimited' }} <span *ngIf="sessionDetails.attributes?.time_limit_minutes" class="text-sm text-slate-400 font-normal">min</span></div>
+              <div class="text-main font-bold text-lg">{{ sessionDetails.attributes?.time_limit_minutes || 'Unlimited' }} <span *ngIf="sessionDetails.attributes?.time_limit_minutes" class="text-sm text-muted font-normal">min</span></div>
             </div>
-            <div class="bg-black/20 rounded-lg p-4 text-center border border-white/5">
+            <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
               <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Questions</div>
-              <div class="text-white font-bold text-lg">{{ sessionDetails.relationships?.assessment?.attributes?.total_questions || '?' }}</div>
+              <div class="text-main font-bold text-lg">{{ sessionDetails.relationships?.assessment?.attributes?.total_questions || '?' }}</div>
             </div>
-            <div class="bg-black/20 rounded-lg p-4 text-center border border-white/5">
+            <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
               <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Passing Score</div>
               <div class="text-emerald-400 font-bold text-lg">{{ sessionDetails.relationships?.assessment?.attributes?.passing_score || 'N/A' }}%</div>
             </div>
-            <div class="bg-black/20 rounded-lg p-4 text-center border border-white/5">
+            <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
               <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Proctoring</div>
-              <div class="text-white font-bold text-lg">{{ sessionDetails.attributes?.proctoring_type === 'NONE' ? 'Standard' : 'Proctored' }}</div>
+              <div class="text-main font-bold text-lg">{{ sessionDetails.attributes?.proctoring_type === 'NONE' ? 'Standard' : 'Proctored' }}</div>
             </div>
           </div>
 
           <!-- Instructions -->
           <div class="mb-8 bg-brand/5 border border-brand/10 rounded-lg p-5">
-            <h3 class="text-white font-semibold mb-3 flex items-center gap-2">
+            <h3 class="text-main font-semibold mb-3 flex items-center gap-2">
               <svg class="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               Important Instructions
             </h3>
-            <ul class="space-y-2 text-sm text-slate-300 list-disc pl-5">
+            <ul class="space-y-2 text-sm text-muted list-disc pl-5">
               <li>Ensure you have a stable internet connection.</li>
               <li>Do not refresh the page or use the browser back button during the test.</li>
               <li>The timer will continue running even if you close the window.</li>
@@ -77,19 +77,19 @@ import { environment } from '../../../../../../environments/environment';
             <label class="flex items-center gap-3 cursor-pointer mb-6 group">
               <div class="relative flex items-center justify-center">
                 <input type="checkbox" [(ngModel)]="agreed" class="peer appearance-none w-5 h-5 border-2 border-slate-600 rounded cursor-pointer checked:border-brand checked:bg-brand transition-colors">
-                <svg class="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute w-3 h-3 text-main opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              <span class="text-slate-300 group-hover:text-white transition-colors">I have read and agree to the instructions and honor code.</span>
+              <span class="text-muted group-hover:text-main transition-colors">I have read and agree to the instructions and honor code.</span>
             </label>
 
             <button 
               [disabled]="!agreed || launching"
               (click)="startAssessment()"
-              class="w-full sm:w-auto px-10 py-3.5 bg-brand hover:bg-brand-light text-white font-bold rounded-lg shadow-lg shadow-brand/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
+              class="w-full sm:w-auto px-10 py-3.5 bg-brand hover:bg-brand-light text-main font-bold rounded-lg shadow-lg shadow-brand/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
               
-              <svg *ngIf="launching" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg *ngIf="launching" class="animate-spin h-5 w-5 text-main" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>

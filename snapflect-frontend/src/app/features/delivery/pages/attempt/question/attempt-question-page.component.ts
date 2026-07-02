@@ -19,13 +19,13 @@ import { debounceTime } from 'rxjs/operators';
       <!-- Top Bar -->
       <header class="flex-none bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-10 shadow-md">
         <div>
-          <h1 class="text-white font-bold text-lg leading-tight">{{ runner.attempt()?.title || 'Assessment' }}</h1>
-          <p class="text-slate-400 text-xs mt-0.5">Attempt in progress</p>
+          <h1 class="text-main font-bold text-lg leading-tight">{{ runner.attempt()?.title || 'Assessment' }}</h1>
+          <p class="text-muted text-xs mt-0.5">Attempt in progress</p>
         </div>
         
         <!-- Timer -->
         <div class="flex items-center gap-3">
-          <div class="bg-black/30 border border-slate-700 px-4 py-2 rounded-lg flex items-center gap-2"
+          <div class="bg-input-bg border border-slate-700 px-4 py-2 rounded-lg flex items-center gap-2"
                [ngClass]="{'border-red-500/50 text-red-400': timeRemaining() !== null && timeRemaining()! < 300, 'text-emerald-400': timeRemaining() === null || timeRemaining()! >= 300}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -33,7 +33,7 @@ import { debounceTime } from 'rxjs/operators';
             <span class="font-mono font-bold text-lg tracking-wider">{{ formattedTime }}</span>
           </div>
           
-          <button (click)="goToSummary()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-colors border border-slate-600 flex items-center gap-2">
+          <button (click)="goToSummary()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-main text-sm font-medium rounded-lg transition-colors border border-slate-600 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             Overview
           </button>
@@ -58,17 +58,17 @@ import { debounceTime } from 'rxjs/operators';
                 <div class="w-10 h-10 bg-brand/20 border border-brand/30 rounded-lg flex items-center justify-center text-brand-light font-bold flex-none">
                   {{ currentSequenceNumber }}
                 </div>
-                <div class="mt-2 text-lg text-white font-medium quill-content" [innerHTML]="question.attributes?.stem_text"></div>
+                <div class="mt-2 text-lg text-main font-medium quill-content" [innerHTML]="question.attributes?.stem_text"></div>
               </div>
               <div class="flex-none">
-                <span class="px-2.5 py-1 bg-slate-700/50 text-slate-300 text-xs font-semibold rounded-md border border-slate-600">
+                <span class="px-2.5 py-1 bg-slate-700/50 text-muted text-xs font-semibold rounded-md border border-slate-600">
                   {{ question.attributes?.type }}
                 </span>
               </div>
             </div>
 
             <!-- Answer Area -->
-            <div class="p-6 bg-black/20">
+            <div class="p-6 bg-input-bg">
               
               <!-- Multiple Choice / Single Choice -->
               <div *ngIf="question.attributes?.type === 'MULTIPLE_CHOICE' || question.attributes?.type === 'SINGLE_CHOICE'" class="space-y-3">
@@ -93,7 +93,7 @@ import { debounceTime } from 'rxjs/operators';
                            class="w-5 h-5 rounded border-slate-500 text-brand bg-slate-900 focus:ring-brand focus:ring-offset-slate-900">
                   </div>
                   
-                  <div class="text-slate-300" [innerHTML]="opt.attributes?.option_text"></div>
+                  <div class="text-muted" [innerHTML]="opt.attributes?.option_text"></div>
                 </label>
               </div>
 
@@ -118,7 +118,7 @@ import { debounceTime } from 'rxjs/operators';
       <footer class="flex-none bg-slate-800 border-t border-slate-700 p-4 flex justify-between items-center z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         
         <div class="flex items-center gap-4">
-          <button (click)="navigate('previous')" [disabled]="navigating || loading" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors border border-slate-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button (click)="navigate('previous')" [disabled]="navigating || loading" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-main font-medium rounded-lg transition-colors border border-slate-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             Previous
           </button>
@@ -127,10 +127,10 @@ import { debounceTime } from 'rxjs/operators';
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2 mr-4" *ngIf="saving">
             <svg class="animate-spin h-4 w-4 text-brand-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-            <span class="text-xs text-slate-400">Saving...</span>
+            <span class="text-xs text-muted">Saving...</span>
           </div>
         
-          <button (click)="toggleFlag()" [disabled]="!question" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-lg transition-colors border flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          <button (click)="toggleFlag()" [disabled]="!question" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-muted font-medium rounded-lg transition-colors border flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   [ngClass]="isFlagged ? 'border-amber-500/50 text-amber-400 bg-amber-500/10' : 'border-slate-600'">
             <svg class="w-4 h-4" [attr.fill]="isFlagged ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
@@ -138,7 +138,7 @@ import { debounceTime } from 'rxjs/operators';
             {{ isFlagged ? 'Flagged' : 'Flag for Review' }}
           </button>
           
-          <button (click)="navigate('next')" [disabled]="navigating || loading" class="px-8 py-2.5 bg-brand hover:bg-brand-light text-white font-bold rounded-lg shadow-lg shadow-brand/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button (click)="navigate('next')" [disabled]="navigating || loading" class="px-8 py-2.5 bg-brand hover:bg-brand-light text-main font-bold rounded-lg shadow-lg shadow-brand/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             Next
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </button>

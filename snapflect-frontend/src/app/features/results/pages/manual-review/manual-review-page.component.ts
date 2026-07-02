@@ -34,11 +34,11 @@ interface PendingReview {
     <div class="h-full flex flex-col">
       <div class="flex justify-between items-center mb-6 flex-shrink-0">
         <div>
-          <h2 class="text-2xl font-bold text-white">Manual Scoring</h2>
-          <p class="text-slate-400 text-sm mt-1">Review essay and subjective answers requiring human evaluation.</p>
+          <h2 class="text-2xl font-bold text-main">Manual Scoring</h2>
+          <p class="text-muted text-sm mt-1">Review essay and subjective answers requiring human evaluation.</p>
         </div>
         <div class="flex items-center gap-3">
-          <span class="text-sm text-slate-500 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+          <span class="text-sm text-slate-500 hover:brightness-110 px-3 py-1.5 rounded-lg border border-border-light">
             <span class="text-amber-400 font-bold">{{ pendingReviews.length }}</span> pending
           </span>
         </div>
@@ -65,8 +65,8 @@ interface PendingReview {
         <!-- Left: Review Queue -->
         <div class="w-80 flex flex-col flex-shrink-0">
           <div class="glass-card flex-1 overflow-hidden flex flex-col">
-            <div class="px-4 py-3 border-b border-white/10 bg-black/20">
-              <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Review Queue</h3>
+            <div class="px-4 py-3 border-b border-border-light bg-input-bg">
+              <h3 class="text-sm font-semibold text-muted uppercase tracking-wider">Review Queue</h3>
             </div>
             <div class="overflow-y-auto flex-1 p-2 space-y-1">
               <button *ngFor="let review of pendingReviews; let i = index"
@@ -74,7 +74,7 @@ interface PendingReview {
                       class="w-full text-left p-3 rounded-lg transition-all border"
                       [ngClass]="activeReview?.uuid === review.uuid
                         ? 'bg-brand/10 border-brand/30'
-                        : 'bg-white/3 border-white/5 hover:bg-white/5'">
+                        : 'bg-white/3 border-white/5 hover:hover:brightness-110'">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-xs text-slate-500">#{{ i + 1 }}</span>
                   <span class="text-xs px-1.5 py-0.5 rounded uppercase font-bold"
@@ -82,7 +82,7 @@ interface PendingReview {
                     {{ review.attributes.status }}
                   </span>
                 </div>
-                <p class="text-white text-xs font-medium leading-tight line-clamp-2">
+                <p class="text-main text-xs font-medium leading-tight line-clamp-2">
                   {{ review.relationships?.result?.relationships?.candidate?.attributes?.first_name }}
                   {{ review.relationships?.result?.relationships?.candidate?.attributes?.last_name }}
                 </p>
@@ -110,11 +110,11 @@ interface PendingReview {
 
             <!-- Candidate & Assessment Info -->
             <div class="glass-card p-4 flex items-center gap-4 flex-shrink-0">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand/40 to-brand-light/40 flex items-center justify-center text-white font-bold text-sm">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand/40 to-brand-light/40 flex items-center justify-center text-main font-bold text-sm">
                 {{ getInitials(activeReview) }}
               </div>
               <div class="flex-1">
-                <p class="text-white font-semibold">
+                <p class="text-main font-semibold">
                   {{ activeReview.relationships?.result?.relationships?.candidate?.attributes?.first_name }}
                   {{ activeReview.relationships?.result?.relationships?.candidate?.attributes?.last_name }}
                 </p>
@@ -122,7 +122,7 @@ interface PendingReview {
               </div>
               <div class="text-right">
                 <span class="text-xs text-slate-500">Max Score</span>
-                <div class="text-lg font-bold text-white">{{ activeReview.attributes.max_score }}</div>
+                <div class="text-lg font-bold text-main">{{ activeReview.attributes.max_score }}</div>
               </div>
             </div>
 
@@ -132,25 +132,25 @@ interface PendingReview {
               <!-- Left: Question + Candidate Answer -->
               <div class="flex flex-col gap-3 overflow-hidden">
                 <div class="glass-card p-4 flex-shrink-0">
-                  <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Question</h4>
-                  <div class="text-white text-sm leading-relaxed" [innerHTML]="activeReview.attributes.question_text"></div>
+                  <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Question</h4>
+                  <div class="text-main text-sm leading-relaxed" [innerHTML]="activeReview.attributes.question_text"></div>
                 </div>
                 <div class="glass-card p-4 flex-1 overflow-y-auto">
-                  <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Candidate Answer</h4>
-                  <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{{ activeReview.attributes.candidate_answer || 'No answer provided.' }}</div>
+                  <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Candidate Answer</h4>
+                  <div class="text-muted text-sm leading-relaxed whitespace-pre-wrap">{{ activeReview.attributes.candidate_answer || 'No answer provided.' }}</div>
                 </div>
               </div>
 
               <!-- Right: Grading Panel -->
               <div class="flex flex-col gap-3 overflow-hidden">
                 <div class="glass-card p-5 flex-shrink-0">
-                  <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Scoring Panel</h4>
+                  <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-4">Scoring Panel</h4>
 
                   <form [formGroup]="scoreForm" (ngSubmit)="submitScore()" class="space-y-4">
 
                     <!-- Score Slider + Input -->
                     <div>
-                      <label class="block text-sm text-slate-300 mb-2">
+                      <label class="block text-sm text-muted mb-2">
                         Awarded Score
                         <span class="text-brand-light font-bold ml-2">{{ scoreForm.get('awarded_score')?.value }} / {{ activeReview.attributes.max_score }}</span>
                       </label>
@@ -160,7 +160,7 @@ interface PendingReview {
                              class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand">
 
                       <!-- Visual score bar -->
-                      <div class="mt-2 h-2 bg-white/5 rounded-full overflow-hidden">
+                      <div class="mt-2 h-2 hover:brightness-110 rounded-full overflow-hidden">
                         <div class="h-full bg-gradient-to-r from-brand to-brand-light rounded-full transition-all"
                              [style.width.%]="getScorePct()"></div>
                       </div>
@@ -168,7 +168,7 @@ interface PendingReview {
 
                     <!-- Reviewer Notes -->
                     <div>
-                      <label class="block text-sm text-slate-300 mb-1">Reviewer Notes</label>
+                      <label class="block text-sm text-muted mb-1">Reviewer Notes</label>
                       <textarea formControlName="notes" class="input-field h-24 resize-none text-sm" placeholder="Add notes for candidate feedback or internal records..."></textarea>
                     </div>
 
@@ -183,7 +183,7 @@ interface PendingReview {
 
                 <!-- Scoring Guide -->
                 <div class="glass-card p-4 flex-1">
-                  <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Grading Guide</h4>
+                  <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Grading Guide</h4>
                   <div class="space-y-2">
                     <div *ngFor="let guide of gradingGuide" class="flex items-start gap-2">
                       <span class="text-brand-light text-xs font-bold flex-shrink-0 w-12">{{ guide.range }}</span>

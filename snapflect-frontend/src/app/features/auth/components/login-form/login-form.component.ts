@@ -13,7 +13,7 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()" class="glass-card p-8">
       <div class="mb-6">
-        <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+        <label for="email" class="block text-sm font-medium text-muted mb-2">Email Address</label>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
@@ -27,8 +27,8 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
 
       <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
-          <label for="password" class="block text-sm font-medium text-slate-300">Password</label>
-          <a href="#" class="text-sm font-medium text-brand-light hover:text-white transition-colors">Forgot password?</a>
+          <label for="password" class="block text-sm font-medium text-muted">Password</label>
+          <a href="#" class="text-sm font-medium text-brand-light hover:text-main transition-colors">Forgot password?</a>
         </div>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

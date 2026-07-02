@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const ASSESSMENT_ROUTES: Routes = [
   {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/authoring-dashboard-page.component').then(m => m.AuthoringDashboardPageComponent)
+  },
+  {
     path: 'assessments',
     loadComponent: () => import('./pages/assessment/list/assessment-list-page.component').then(m => m.AssessmentListPageComponent)
   },
@@ -33,5 +37,5 @@ export const ASSESSMENT_ROUTES: Routes = [
     path: 'publications',
     loadComponent: () => import('./pages/publication/list/publication-list-page.component').then(m => m.PublicationListPageComponent)
   },
-  { path: '', redirectTo: 'assessments', pathMatch: 'full' }
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

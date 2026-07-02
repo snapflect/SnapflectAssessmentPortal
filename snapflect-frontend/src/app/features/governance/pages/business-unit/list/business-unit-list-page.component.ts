@@ -35,8 +35,8 @@ interface Organization {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Business Units</h2>
-          <p class="text-slate-400 text-sm mt-1">Manage broad organizational groups and cost centers.</p>
+          <h2 class="text-2xl font-bold text-main">Business Units</h2>
+          <p class="text-muted text-sm mt-1">Manage broad organizational groups and cost centers.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,19 +47,19 @@ interface Organization {
       </div>
 
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
           <div class="relative w-64">
             <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-surface-darker/50" placeholder="Search business units...">
+            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search business units...">
           </div>
           
         </div>
 
         <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+          <table class="w-full text-left text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
@@ -69,7 +69,7 @@ interface Organization {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && businessUnits.length === 0">
-                <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+                <td colspan="4" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -83,9 +83,9 @@ interface Organization {
                     No business units found matching your search.
                   </td>
                 </tr>
-                <tr *ngFor="let bu of filteredBUs" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr *ngFor="let bu of filteredBUs" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ bu.attributes.business_unit_code }}</td>
-                  <td class="px-6 py-4 text-white font-medium">{{ bu.attributes.business_unit_name }}</td>
+                  <td class="px-6 py-4 text-main font-medium">{{ bu.attributes.business_unit_name }}</td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full"
                           [ngClass]="bu.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
@@ -93,8 +93,8 @@ interface Organization {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-slate-400 hover:text-white transition-colors" (click)="openEditForm(bu)">Edit</button>
-                    <button class="text-slate-400 hover:text-red-400 transition-colors" (click)="deleteBU(bu.uuid)">Delete</button>
+                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(bu)">Edit</button>
+                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteBU(bu.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -111,7 +111,7 @@ interface Organization {
         <form [formGroup]="buForm" (ngSubmit)="submitForm()" class="space-y-6">
           
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Organization *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Organization *</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null" disabled>Select an Organization</option>
               <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.attributes.organization_name }}</option>
@@ -119,16 +119,16 @@ interface Organization {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Business Unit Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Business Unit Code *</label>
             <input type="text" formControlName="business_unit_code" class="input-field" placeholder="e.g. SALES">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Business Unit Name *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Business Unit Name *</label>
             <input type="text" formControlName="business_unit_name" class="input-field" placeholder="e.g. Global Sales Group">
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="buForm.invalid || submitting">
               <span *ngIf="submitting">Saving...</span>

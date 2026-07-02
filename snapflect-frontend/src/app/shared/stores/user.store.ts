@@ -38,4 +38,12 @@ export class UserStore {
     const userPerms = this._profile()?.permissions || [];
     return permissions.some(p => userPerms.includes(p));
   }
+
+  public getDefaultRoute(): string {
+    if (!this._profile()) {
+      return '/auth/login';
+    }
+    // All roles land on /dashboard — the dashboard page renders role-specific content
+    return '/dashboard';
+  }
 }

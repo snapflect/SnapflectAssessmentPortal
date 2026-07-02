@@ -49,8 +49,8 @@ interface Permission {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white">Roles</h2>
-          <p class="text-slate-400 text-sm mt-1">Manage RBAC roles and assign permissions via the matrix.</p>
+          <h2 class="text-2xl font-bold text-main">Roles</h2>
+          <p class="text-muted text-sm mt-1">Manage RBAC roles and assign permissions via the matrix.</p>
         </div>
         <button (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,18 +61,18 @@ interface Permission {
       </div>
 
       <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
+        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
           <div class="relative w-64">
             <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-surface-darker/50" placeholder="Search roles...">
+            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search roles...">
           </div>
         </div>
 
         <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs text-slate-400 uppercase bg-surface-dark sticky top-0 z-10 shadow-sm">
+          <table class="w-full text-left text-sm text-muted">
+            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
@@ -83,7 +83,7 @@ interface Permission {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && roles.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                <td colspan="5" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -97,15 +97,15 @@ interface Permission {
                     No roles found matching your search.
                   </td>
                 </tr>
-                <tr *ngFor="let role of filteredRoles" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <tr *ngFor="let role of filteredRoles" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ role.attributes.role_code }}</td>
-                  <td class="px-6 py-4 text-white font-medium">
+                  <td class="px-6 py-4 text-main font-medium">
                     {{ role.attributes.role_name }}
                     <p class="text-xs text-slate-500 mt-1 font-normal">{{ role.attributes.description }}</p>
                   </td>
                   <td class="px-6 py-4">
                     <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-xs" *ngIf="role.attributes.is_system_role">System</span>
-                    <span class="bg-slate-500/10 text-slate-400 border border-slate-500/20 px-2 py-0.5 rounded text-xs" *ngIf="!role.attributes.is_system_role">Custom</span>
+                    <span class="bg-slate-500/10 text-muted border border-slate-500/20 px-2 py-0.5 rounded text-xs" *ngIf="!role.attributes.is_system_role">Custom</span>
                   </td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full"
@@ -114,9 +114,9 @@ interface Permission {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-brand-light hover:text-white transition-colors text-xs font-medium uppercase" (click)="openPermissionsModal(role)">Permissions</button>
-                    <button class="text-slate-400 hover:text-white transition-colors" (click)="openEditForm(role)">Edit</button>
-                    <button *ngIf="!role.attributes.is_system_role" class="text-slate-400 hover:text-red-400 transition-colors" (click)="deleteRole(role.uuid)">Delete</button>
+                    <button class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase" (click)="openPermissionsModal(role)">Permissions</button>
+                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(role)">Edit</button>
+                    <button *ngIf="!role.attributes.is_system_role" class="text-muted hover:text-red-400 transition-colors" (click)="deleteRole(role.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -133,7 +133,7 @@ interface Permission {
         <form [formGroup]="roleForm" (ngSubmit)="submitForm()" class="space-y-6">
           
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Organization (Optional)</label>
+            <label class="block text-sm font-medium text-muted mb-1">Organization (Optional)</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null">Global (System-wide)</option>
               <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.attributes.organization_name }}</option>
@@ -141,21 +141,21 @@ interface Permission {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Role Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Role Code *</label>
             <input type="text" formControlName="role_code" class="input-field" placeholder="e.g. EDITOR">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Role Name *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Role Name *</label>
             <input type="text" formControlName="role_name" class="input-field" placeholder="e.g. Content Editor">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1">Description</label>
+            <label class="block text-sm font-medium text-muted mb-1">Description</label>
             <textarea formControlName="description" class="input-field h-24 resize-none" placeholder="What does this role do?"></textarea>
           </div>
 
-          <div class="pt-6 flex justify-end space-x-3 border-t border-white/10 mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="roleForm.invalid || submitting">
               <span *ngIf="submitting">Saving...</span>
@@ -167,33 +167,33 @@ interface Permission {
 
       <!-- Assign Permissions Matrix Modal (Full Screen or Large Modal) -->
       <div *ngIf="isPermissionsModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div class="bg-surface-dark glass-card w-full max-w-5xl h-[85vh] flex flex-col rounded-xl border border-white/10 shadow-2xl overflow-hidden">
+        <div class="bg-card glass-card w-full max-w-5xl h-[85vh] flex flex-col rounded-xl border border-border-light shadow-2xl overflow-hidden">
           
           <!-- Header -->
-          <div class="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
+          <div class="p-6 border-b border-border-light flex justify-between items-center bg-input-bg">
             <div>
-              <h3 class="text-xl font-bold text-white">Manage Permissions</h3>
+              <h3 class="text-xl font-bold text-main">Manage Permissions</h3>
               <p class="text-sm text-brand-light font-medium mt-1">Role: {{ activeRoleForPermissions?.attributes?.role_name }}</p>
             </div>
-            <button class="text-slate-400 hover:text-white" (click)="closePermissionsModal()">
+            <button class="text-muted hover:text-main" (click)="closePermissionsModal()">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
           </div>
           
           <!-- Body: The Matrix -->
           <div class="flex-1 overflow-y-auto p-6 custom-scrollbar bg-gradient-to-b from-transparent to-black/20">
-            <div *ngIf="permissionsLoading" class="text-center py-12 text-slate-400">Loading permission matrix...</div>
+            <div *ngIf="permissionsLoading" class="text-center py-12 text-muted">Loading permission matrix...</div>
             
             <div *ngIf="!permissionsLoading" class="space-y-8">
               
-              <div *ngFor="let module of objectKeys(groupedPermissions)" class="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
-                <div class="bg-black/30 px-4 py-3 border-b border-white/10 flex items-center justify-between">
-                  <h4 class="font-semibold text-slate-200 capitalize">{{ module }} Module</h4>
+              <div *ngFor="let module of objectKeys(groupedPermissions)" class="hover:brightness-110 border border-border-light rounded-lg overflow-hidden">
+                <div class="bg-input-bg px-4 py-3 border-b border-border-light flex items-center justify-between">
+                  <h4 class="font-semibold text-main capitalize">{{ module }} Module</h4>
                 </div>
                 
                 <div class="p-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   <label *ngFor="let perm of groupedPermissions[module]" 
-                         class="flex items-start space-x-3 p-3 rounded-lg hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5 group">
+                         class="flex items-start space-x-3 p-3 rounded-lg hover:hover:brightness-110 cursor-pointer transition-colors border border-transparent hover:border-white/5 group">
                     <div class="flex-shrink-0 pt-0.5">
                       <input type="checkbox" 
                              [checked]="isPermissionSelected(perm.uuid)"
@@ -201,7 +201,7 @@ interface Permission {
                              class="w-4 h-4 rounded border-white/20 bg-black/50 text-brand focus:ring-brand focus:ring-offset-0">
                     </div>
                     <div>
-                      <span class="block text-sm font-medium text-slate-200 group-hover:text-white transition-colors leading-tight">
+                      <span class="block text-sm font-medium text-main group-hover:text-main transition-colors leading-tight">
                         {{ formatPermissionName(perm.attributes.permission_code) }}
                       </span>
                       <span class="block text-[10px] text-slate-500 mt-1 tracking-wider">
@@ -216,8 +216,8 @@ interface Permission {
           </div>
 
           <!-- Footer -->
-          <div class="p-6 border-t border-white/10 bg-black/30 flex justify-between items-center">
-            <span class="text-sm text-slate-400">{{ selectedPermissionUuids.size }} permissions selected</span>
+          <div class="p-6 border-t border-border-light bg-input-bg flex justify-between items-center">
+            <span class="text-sm text-muted">{{ selectedPermissionUuids.size }} permissions selected</span>
             <div class="space-x-3 flex">
               <button class="btn-secondary" (click)="closePermissionsModal()">Cancel</button>
               <button class="btn-primary" (click)="savePermissions()" [disabled]="savingPermissions">

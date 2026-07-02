@@ -7,20 +7,16 @@ import { switchMap } from 'rxjs/operators';
 
 interface Session {
   uuid: string;
-  attributes: {
-    session_code: string;
-    status: string;
-    started_at: string;
-    expires_at: string;
-    candidate_name?: string;
-    candidate_email?: string;
-    ip_address?: string;
-    browser_info?: string;
-  };
-  relationships?: {
-    publication?: { attributes: { title: string } };
-    candidate?: { attributes: { first_name: string; last_name: string; email: string } };
-  };
+  session_status: string;
+  access_started_at: string;
+  access_expires_at: string;
+  created_date: string;
+  candidate_name?: string;
+  candidate_email?: string;
+  ip_address?: string;
+  browser_info?: string;
+  candidate?: { first_name: string; last_name: string; email: string };
+  assessment?: { title: string };
 }
 
 @Component({
@@ -31,14 +27,14 @@ interface Session {
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+          <h2 class="text-2xl font-bold text-main flex items-center gap-3">
             Active Sessions
             <span class="relative flex h-3 w-3">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
             </span>
           </h2>
-          <p class="text-slate-400 text-sm mt-1">Real-time proctor view — auto-refreshes every 15 seconds.</p>
+          <p class="text-muted text-sm mt-1">Real-time proctor view — auto-refreshes every 15 seconds.</p>
         </div>
         <div class="flex items-center gap-4">
           <span class="text-xs text-slate-500">Last updated: {{ lastUpdated | date:'HH:mm:ss' }}</span>
@@ -91,29 +87,29 @@ interface Session {
           <div *ngFor="let session of sessions" class="glass-card p-5 relative overflow-hidden group">
             <!-- Status stripe -->
             <div class="absolute top-0 left-0 w-1 h-full"
-                 [ngClass]="getStripeClass(session.attributes.status)"></div>
+                 [ngClass]="getStripeClass(session.session_status)"></div>
 
             <div class="pl-3">
               <!-- Header -->
               <div class="flex items-start justify-between mb-3">
                 <div>
-                  <span class="text-xs font-mono text-brand-light">{{ session.attributes.session_code }}</span>
+                  <span class="text-xs font-mono text-brand-light">{{ session.uuid.substring(0,8) }}</span>
                   <div class="flex items-center gap-2 mt-1">
-                    <span class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="getDotClass(session.attributes.status)"></span>
-                    <span class="text-xs text-slate-400 uppercase tracking-wider font-medium">{{ session.attributes.status }}</span>
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="getDotClass(session.session_status)"></span>
+                    <span class="text-xs text-muted uppercase tracking-wider font-medium">{{ session.session_status }}</span>
                   </div>
                 </div>
-                <span class="text-xs text-slate-600">{{ session.attributes.started_at | date:'HH:mm' }}</span>
+                <span class="text-xs text-slate-600">{{ (session.access_started_at || session.created_date) | date:'HH:mm' }}</span>
               </div>
 
               <!-- Candidate Info -->
               <div class="mb-3">
                 <div class="flex items-center gap-2 mb-1">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand/40 to-brand-light/40 flex items-center justify-center text-white font-bold text-xs">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand/40 to-brand-light/40 flex items-center justify-center text-main font-bold text-xs">
                     {{ getCandidateInitials(session) }}
                   </div>
                   <div>
-                    <p class="text-white font-medium text-sm">{{ getCandidateName(session) }}</p>
+                    <p class="text-main font-medium text-sm">{{ getCandidateName(session) }}</p>
                     <p class="text-slate-500 text-xs">{{ getCandidateEmail(session) }}</p>
                   </div>
                 </div>
@@ -121,15 +117,15 @@ interface Session {
 
               <!-- Assessment -->
               <div class="text-xs text-slate-500 mb-3 truncate">
-                📋 {{ session.relationships?.publication?.attributes?.title || 'Unknown Assessment' }}
+                📋 {{ session.assessment?.title || 'Unknown Assessment' }}
               </div>
 
               <!-- Time Remaining -->
-              <div class="flex items-center justify-between pt-3 border-t border-white/5">
+              <div class="flex items-center justify-between pt-3 border-t border-border-light">
                 <div class="text-xs">
                   <span class="text-slate-600">Expires: </span>
-                  <span [ngClass]="isExpiringSoon(session.attributes.expires_at) ? 'text-red-400 font-medium' : 'text-slate-400'">
-                    {{ session.attributes.expires_at | date:'HH:mm' }}
+                  <span [ngClass]="isExpiringSoon(session.access_expires_at) ? 'text-red-400 font-medium' : 'text-muted'">
+                    {{ session.access_expires_at | date:'HH:mm' }}
                   </span>
                 </div>
                 <div class="flex gap-2">
@@ -154,26 +150,28 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
   lastUpdated = new Date();
   private refreshSub?: Subscription;
 
-  get activeSessions() { return this.sessions.filter(s => s.attributes.status === 'ACTIVE').length; }
-  get pausedSessions() { return this.sessions.filter(s => s.attributes.status === 'PAUSED').length; }
-  get completedToday() { return this.sessions.filter(s => s.attributes.status === 'COMPLETED').length; }
-  get expiredSessions() { return this.sessions.filter(s => s.attributes.status === 'EXPIRED').length; }
+  get activeSessions() { return this.sessions.filter(s => s.session_status === 'ACTIVE').length; }
+  get pausedSessions() { return this.sessions.filter(s => s.session_status === 'PAUSED').length; }
+  get completedToday() { return this.sessions.filter(s => s.session_status === 'COMPLETED').length; }
+  get expiredSessions() { return this.sessions.filter(s => s.session_status === 'EXPIRED').length; }
 
   private http = inject(HttpClient);
 
   ngOnInit() {
-    this.fetchSessions();
+    this.fetchSessions(true);
     // Auto-refresh every 15 seconds
-    this.refreshSub = interval(15000).subscribe(() => this.fetchSessions());
+    this.refreshSub = interval(15000).subscribe(() => this.fetchSessions(false));
   }
 
   ngOnDestroy() {
     this.refreshSub?.unsubscribe();
   }
 
-  fetchSessions() {
-    this.loading = true;
-    this.http.get<any>(`${environment.apiUrl}/delivery/sessions?include=publication,candidate&per_page=50`)
+  fetchSessions(showLoader = false) {
+    if (showLoader) {
+      this.loading = true;
+    }
+    this.http.get<any>(`${environment.apiUrl}/delivery/sessions?include=candidate,assessment&per_page=50`)
       .subscribe({
         next: (res) => {
           this.sessions = res.data || res;
@@ -188,14 +186,14 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
   }
 
   getCandidateName(s: Session): string {
-    if (s.relationships?.candidate) {
-      return `${s.relationships.candidate.attributes.first_name} ${s.relationships.candidate.attributes.last_name}`;
+    if (s.candidate) {
+      return `${s.candidate.first_name} ${s.candidate.last_name}`;
     }
-    return s.attributes.candidate_name || 'Unknown';
+    return s.candidate_name || 'Unknown';
   }
 
   getCandidateEmail(s: Session): string {
-    return s.relationships?.candidate?.attributes?.email || s.attributes.candidate_email || '';
+    return s.candidate?.email || s.candidate_email || '';
   }
 
   getCandidateInitials(s: Session): string {
@@ -203,7 +201,8 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   }
 
-  isExpiringSoon(expiresAt: string): boolean {
+  isExpiringSoon(expiresAt: string | undefined): boolean {
+    if (!expiresAt) return false;
     const diff = new Date(expiresAt).getTime() - Date.now();
     return diff > 0 && diff < 10 * 60 * 1000; // less than 10 minutes
   }

@@ -16,11 +16,13 @@ module.exports = {
           dark: '#7c3aed',
           light: '#a78bfa',
         },
-        'surface': {
-          DEFAULT: '#ffffff',
-          dark: '#1e293b', // Slate 800
-          darker: '#0f172a', // Slate 900
-        }
+        'page': 'var(--color-page)',
+        'card': 'var(--color-card)',
+        'main': 'var(--color-text-main)',
+        'muted': 'var(--color-text-muted)',
+        'border-light': 'var(--color-border)',
+        'input-bg': 'var(--color-input-bg)',
+        'backdrop': 'var(--color-backdrop)',
       }
     },
   },
