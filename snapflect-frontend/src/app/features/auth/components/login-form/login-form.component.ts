@@ -9,9 +9,45 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatInputModule, MatButtonModule, MatCardModule],
-  template: "<form [formGroup]='form' (ngSubmit)='submit()'><mat-card><mat-card-header><mat-card-title>Login</mat-card-title></mat-card-header><mat-card-content><mat-form-field appearance='outline' class='w-100'><mat-label>Email</mat-label><input matInput formControlName='email' type='email' /></mat-form-field><mat-form-field appearance='outline' class='w-100'><mat-label>Password</mat-label><input matInput formControlName='password' type='password' /></mat-form-field></mat-card-content><mat-card-actions><button mat-raised-button color='primary' type='submit' [disabled]='form.invalid'>Sign In</button></mat-card-actions></mat-card></form>",
-  styles: [".w-100 { width: 100%; display: block; margin-bottom: 16px; }"]
+  imports: [CommonModule, ReactiveFormsModule],
+  template: `
+    <form [formGroup]="form" (ngSubmit)="submit()" class="glass-card p-8">
+      <div class="mb-6">
+        <label for="email" class="block text-sm font-medium text-muted mb-2">Email Address</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </div>
+          <input id="email" type="email" formControlName="email" class="input-field pl-10" placeholder="you@example.com" />
+        </div>
+        <p *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="mt-2 text-sm text-red-400">
+          Please enter a valid email address.
+        </p>
+      </div>
+
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-2">
+          <label for="password" class="block text-sm font-medium text-muted">Password</label>
+          <a href="#" class="text-sm font-medium text-brand-light hover:text-main transition-colors">Forgot password?</a>
+        </div>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          </div>
+          <input id="password" type="password" formControlName="password" class="input-field pl-10" placeholder="••••••••" />
+        </div>
+        <p *ngIf="form.get('password')?.touched && form.get('password')?.invalid" class="mt-2 text-sm text-red-400">
+          Password is required.
+        </p>
+      </div>
+
+      <button type="submit" [disabled]="form.invalid" class="w-full btn-primary flex justify-center items-center h-11">
+        Sign In
+        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </button>
+    </form>
+  `,
+  styles: []
 })
 export class LoginFormComponent {
   private fb = inject(FormBuilder);

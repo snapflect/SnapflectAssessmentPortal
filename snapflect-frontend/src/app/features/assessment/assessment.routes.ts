@@ -1,15 +1,41 @@
 import { Routes } from '@angular/router';
-import { AssessmentListPageComponent } from './pages/assessment/list/assessment-list-page.component';
-import { QuestionBankListPageComponent } from './pages/question-bank/list/question-bank-list-page.component';
-import { QuestionListPageComponent } from './pages/question/list/question-list-page.component';
-import { CompetencyListPageComponent } from './pages/competency/list/competency-list-page.component';
-import { BlueprintDesignerPageComponent } from './pages/blueprint/designer/blueprint-designer-page.component';
 
 export const ASSESSMENT_ROUTES: Routes = [
-  { path: 'assessments', component: AssessmentListPageComponent },
-  { path: 'question-banks', component: QuestionBankListPageComponent },
-  { path: 'questions', component: QuestionListPageComponent },
-  { path: 'competencies', component: CompetencyListPageComponent },
-  { path: 'blueprints', component: BlueprintDesignerPageComponent },
-  { path: '', redirectTo: 'assessments', pathMatch: 'full' }
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/authoring-dashboard-page.component').then(m => m.AuthoringDashboardPageComponent)
+  },
+  {
+    path: 'assessments',
+    loadComponent: () => import('./pages/assessment/list/assessment-list-page.component').then(m => m.AssessmentListPageComponent)
+  },
+  {
+    path: 'question-banks',
+    loadComponent: () => import('./pages/question-bank/list/question-bank-list-page.component').then(m => m.QuestionBankListPageComponent)
+  },
+  {
+    path: 'questions',
+    loadComponent: () => import('./pages/question/list/question-list-page.component').then(m => m.QuestionListPageComponent)
+  },
+  {
+    path: 'competencies',
+    loadComponent: () => import('./pages/competency/list/competency-list-page.component').then(m => m.CompetencyListPageComponent)
+  },
+  {
+    path: 'categories',
+    loadComponent: () => import('./pages/category/list/category-list-page.component').then(m => m.CategoryListPageComponent)
+  },
+  {
+    path: 'types',
+    loadComponent: () => import('./pages/type/list/type-list-page.component').then(m => m.TypeListPageComponent)
+  },
+  {
+    path: 'blueprints',
+    loadComponent: () => import('./pages/blueprint/designer/blueprint-designer-page.component').then(m => m.BlueprintDesignerPageComponent)
+  },
+  {
+    path: 'publications',
+    loadComponent: () => import('./pages/publication/list/publication-list-page.component').then(m => m.PublicationListPageComponent)
+  },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

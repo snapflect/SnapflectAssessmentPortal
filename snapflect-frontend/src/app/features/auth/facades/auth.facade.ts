@@ -18,9 +18,12 @@ export class AuthFacade {
   public login(credentials: LoginRequestModel): Observable<any> {
     return this.api.login(credentials).pipe(
       tap(res => {
+        console.log('[AuthFacade] Login response received:', res.user?.roles);
         this.authStore.setToken(res.access_token);
         this.userStore.setProfile(UserMapper.toUserProfile(res.user));
-        this.router.navigate(['/dashboard']);
+        const route = this.userStore.getDefaultRoute();
+        console.log('[AuthFacade] Token set, isAuthenticated:', this.authStore.isAuthenticated(), '| navigating to:', route);
+        this.router.navigate([route]);
       })
     );
   }
@@ -30,7 +33,7 @@ export class AuthFacade {
       tap(() => {
         this.authStore.clearToken();
         this.userStore.setProfile(null as any);
-        this.router.navigate(['/auth/login']);
+        window.location.href = '/auth/login';
       })
     );
   }

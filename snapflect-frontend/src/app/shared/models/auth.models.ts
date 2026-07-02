@@ -15,6 +15,7 @@ export interface AuthenticatedUserModel {
   last_name: string;
   email: string;
   organization_id: number;
+  organization_name?: string | null;
   roles: string[];
   permissions: string[];
 }
