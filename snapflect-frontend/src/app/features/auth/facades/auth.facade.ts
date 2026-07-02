@@ -30,7 +30,7 @@ export class AuthFacade {
       tap(() => {
         this.authStore.clearToken();
         this.userStore.setProfile(null as any);
-        this.router.navigate(['/auth/login']);
+        window.location.href = '/auth/login';
       })
     );
   }

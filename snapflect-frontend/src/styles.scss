@@ -1,4 +1,79 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+@layer base {
+  body {
+    @apply bg-surface-darker text-slate-200 antialiased font-sans;
+  }
+
+  /* Premium Dark Mode Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+
+  /* Style native select options to match dark theme */
+  select option {
+    @apply bg-surface-dark text-slate-200 py-2;
+  }
+}
+
+@layer components {
+  /* Reusable glassmorphism card */
+  .glass-card {
+    @apply bg-surface-dark/60 backdrop-blur-md border border-white/10 shadow-xl rounded-xl;
+  }
+  
+  /* Primary Button */
+  .btn-primary {
+    @apply px-4 py-2 bg-brand text-white font-medium rounded-lg shadow-lg hover:bg-brand-dark hover:shadow-brand/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply px-4 py-2 bg-surface-dark text-slate-300 font-medium rounded-lg border border-white/10 hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Input fields */
+  .input-field {
+    @apply w-full px-4 py-2 bg-black/20 border border-white/10 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent text-white placeholder-slate-500 transition-all duration-200 outline-none;
+  }
+}
+
+@layer components {
+  /* Table Responsiveness Wrapper */
+  .table-responsive {
+    @apply w-full overflow-x-auto border border-white/10 rounded-lg;
+    /* Ensure the scrollbar is styled nicely on mobile */
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+  }
+
+  /* Optimize glass cards for mobile */
+  @media (max-width: 640px) {
+    .glass-card {
+      @apply rounded-none border-x-0;
+    }
+    .p-6 {
+      @apply p-4;
+    }
+  }
+}
+
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@import 'quill/dist/quill.snow.css';
