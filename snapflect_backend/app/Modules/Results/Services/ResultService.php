@@ -15,50 +15,80 @@ use Illuminate\Support\Facades\DB;
 
 class ResultService
 {
+    public function __construct(
+        private ScoringOrchestratorService $scoringOrchestrator
+    ) {}
+
     public function calculate(CalculateResultDto $dto, int $organizationId, int $userId): AssessmentResult
     {
-        return DB::transaction(function () use ($dto, $organizationId, $userId) {
-            // Logic to orchestrate initial calculation
-            $result = new AssessmentResult(); // Placeholder
-            $this->createAudit($result->id ?? 0, 'RESULT_CREATED', 'Initial calculation generated', $organizationId, $userId);
-            return $result;
-        });
+        // For admin manual recalculation, we can just force the scoring pipeline
+        $persistenceDto = $this->scoringOrchestrator->executeScoringPipeline($dto->attempt_uuid, true);
+        return AssessmentResult::where('uuid', $persistenceDto->resultUuid)->firstOrFail();
     }
 
     public function recalculate(RecalculateResultDto $dto, int $organizationId, int $userId): AssessmentResult
     {
-        return DB::transaction(function () use ($dto, $organizationId, $userId) {
-            // Recalculation logic
-            $result = new AssessmentResult(); // Placeholder
-            
-            // VERSIONING RULE: Create new version, never modify historical
-            $this->createVersion($result, $dto->recalculation_reason, $organizationId, $userId);
-            
-            $this->createAudit($result->id ?? 0, 'RESULT_UPDATED', 'Recalculation performed', $organizationId, $userId);
-            return $result;
-        });
+        $result = AssessmentResult::where('uuid', $dto->result_uuid)->firstOrFail();
+        $attempt = \App\Modules\Delivery\Models\AssessmentAttempt::findOrFail($result->assessment_attempt_id);
+
+        // For manual recalculation
+        $persistenceDto = $this->scoringOrchestrator->executeScoringPipeline($attempt->uuid, true);
+        
+        $recalculatedResult = AssessmentResult::where('uuid', $persistenceDto->resultUuid)->firstOrFail();
+        
+        // Log manual recalculation reason if needed (Audit is mostly handled by orchestrator)
+        $this->createAudit($recalculatedResult->id, 'RESULT_UPDATED', $dto->recalculation_reason, $organizationId, $userId);
+        
+        return $recalculatedResult;
     }
 
     public function createVersion(AssessmentResult $result, string $reason, int $organizationId, int $userId): ResultVersion
     {
         return DB::transaction(function () use ($result, $reason, $organizationId, $userId) {
-            // Version creation logic
             $version = new ResultVersion();
+            $version->uuid = \Illuminate\Support\Str::uuid()->toString();
+            $version->organization_id = $organizationId;
+            $version->assessment_result_id = $result->id;
+            $version->version_number = $result->result_version + 1;
+            $version->version_label = 'v' . ($result->result_version + 1);
+            $version->version_reason = $reason;
+            $version->created_by = $userId;
+            $version->save();
             return $version;
         });
     }
 
     public function createSnapshot(AssessmentResult $result, ResultVersion $version, int $organizationId, int $userId): ResultSnapshot
     {
-        return DB::transaction(function () use ($result, $version, $organizationId, $userId) {
-            // SNAPSHOT RULE: Serialize, hash, persist
+        return DB::transaction(function () use ($result, $version, $organizationId) {
+            $snapshotJson = json_encode($result->toArray());
+            $rulesSnapshotJson = json_encode([]);
+            
             $snapshot = new ResultSnapshot();
+            $snapshot->uuid = \Illuminate\Support\Str::uuid()->toString();
+            $snapshot->organization_id = $organizationId;
+            $snapshot->assessment_result_id = $result->id;
+            $snapshot->result_version_id = $version->id;
+            $snapshot->snapshot_json = $snapshotJson;
+            $snapshot->rules_snapshot_json = $rulesSnapshotJson;
+            $snapshot->snapshot_hash = hash('sha256', $snapshotJson);
+            $snapshot->calculated_at = \Carbon\Carbon::now();
+            $snapshot->save();
             return $snapshot;
         });
     }
 
-    private function createAudit(int $resultId, string $type, string $description, int $organizationId, int $userId): void
+    public function createAudit(int $resultId, string $type, string $description, int $organizationId, int $userId): void
     {
-        // Audit persistence logic
+        DB::table('result_audits')->insert([
+            'uuid' => \Illuminate\Support\Str::uuid()->toString(),
+            'organization_id' => $organizationId,
+            'assessment_result_id' => $resultId,
+            'audit_type' => $type,
+            'audit_description' => $description,
+            'new_value_json' => '{}',
+            'performed_by' => $userId,
+            'performed_at' => \Carbon\Carbon::now(),
+        ]);
     }
 }

@@ -38,11 +38,19 @@ class CertificateController extends Controller
                 'certificates.verification_code as verificationCode',
                 'certificates.status',
                 'certificates.storage_path as downloadUrl',
-                'users.name as candidateName',
-                'assessments.title as assessmentName'
+                'users.first_name',
+                'users.last_name',
+                'assessments.assessment_name as assessmentName'
             )
             ->orderBy('certificates.issued_at', 'desc')
             ->paginate($perPage);
+
+        // Map the paginated results to include candidateName
+        $results->getCollection()->transform(function ($item) {
+            $item->candidateName = preg_replace('/\s+/', ' ', trim($item->first_name . ' ' . $item->last_name));
+            unset($item->first_name, $item->last_name);
+            return $item;
+        });
 
         return CertificateResource::collection($results)->response();
     }
@@ -55,9 +63,86 @@ class CertificateController extends Controller
     {
         try {
             // Remediated: Enforce ownership validation using authenticated user context
-            $ownerUserId = $request->user()->id;
+            $user = $request->user();
+            $ownerUserId = ($user->hasRole(['ADMIN', 'TENANT_ADMIN', 'CLIENT_ADMIN', 'PLATFORM_ADMIN', 'REVIEWER'])) ? null : $user->id;
             $dto = $this->verificationService->getCertificateByUuid($certificateUuid, $ownerUserId);
             return response()->json(['data' => new CertificateResource($dto)]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'type' => 'about:blank',
+                'title' => 'Not Found',
+                'status' => 404,
+                'detail' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
+     * GET /api/v1/certificates/{certificateUuid}/download
+     * Returns the raw HTML for the certificate so the frontend can print it to PDF.
+     */
+    public function download(string $certificateUuid, Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            $ownerUserId = ($user->hasRole(['ADMIN', 'TENANT_ADMIN', 'CLIENT_ADMIN', 'PLATFORM_ADMIN', 'REVIEWER'])) ? null : $user->id;
+            $dto = $this->verificationService->getCertificateByUuid($certificateUuid, $ownerUserId);
+            
+            $candidateName = $dto->candidateName;
+            $assessmentName = $dto->assessmentName;
+                
+            $score = \Illuminate\Support\Facades\DB::table('assessment_results')
+                ->join('certificates', 'assessment_results.id', '=', 'certificates.assessment_result_id')
+                ->where('certificates.uuid', $dto->certificateUuid)
+                ->value('overall_percentage');
+
+            $html = view('certificate', [
+                'candidateName' => $candidateName,
+                'assessmentName' => $assessmentName,
+                'score' => $score,
+                'date' => \Carbon\Carbon::parse($dto->issuedAt)->format('d M, Y'),
+                'certificateId' => $dto->certificateUuid,
+                'verificationCode' => $dto->verificationCode
+            ])->render();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'html' => $html
+                ]
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'type' => 'about:blank',
+                'title' => 'Not Found',
+                'status' => 404,
+                'detail' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
+     * GET /api/v1/results/{resultUuid}/certificate/download
+     */
+    public function downloadByResult(string $resultUuid, Request $request): JsonResponse
+    {
+        try {
+            $resultId = \Illuminate\Support\Facades\DB::table('assessment_results')->where('uuid', $resultUuid)->value('id');
+            if (!$resultId) {
+                throw new \InvalidArgumentException("Result not found.");
+            }
+
+            $cert = \Illuminate\Support\Facades\DB::table('certificates')
+                ->where('assessment_result_id', $resultId)
+                ->where('status', 'VALID')
+                ->where('is_deleted', false)
+                ->first();
+
+            if (!$cert) {
+                throw new \InvalidArgumentException("Certificate not generated yet or is inactive.");
+            }
+
+            return $this->download($cert->uuid, $request);
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'type' => 'about:blank',

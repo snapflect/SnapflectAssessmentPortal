@@ -18,13 +18,18 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
     Route::prefix('auth')->group(function() {
         require base_path('routes/modules/auth.php');
     });
+
+    Route::prefix('delivery')->group(function() {
+        Route::post('register', [\App\Modules\Delivery\Controllers\PublicRegistrationController::class, 'register']);
+    });
 });
 
 // Protected API V1 Grouping
 Route::prefix('v1')->middleware([
     \App\Http\Middleware\MockAuthMiddleware::class,
     'throttle:api',
-    \App\Modules\Delivery\Middleware\ApiProblemDetailsMiddleware::class
+    \App\Modules\Delivery\Middleware\ApiProblemDetailsMiddleware::class,
+    'subscription.active'
 ])->group(function () {
     
     // Governance Module Routes
@@ -60,6 +65,16 @@ Route::prefix('v1')->middleware([
     // Analytics Module Routes
     Route::prefix('analytics')->group(function() {
         require base_path('routes/modules/analytics.php');
+    });
+
+    // Billing Module Routes
+    Route::prefix('billing')->group(function() {
+        require base_path('routes/modules/billing.php');
+    });
+
+    // Support Module Routes
+    Route::prefix('support')->group(function() {
+        require base_path('routes/modules/support.php');
     });
 
     // Results & Scoring Module Routes

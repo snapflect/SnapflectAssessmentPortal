@@ -18,7 +18,7 @@ class UpdateAnswerRequest extends FormRequest
     {
         return [
             'answer_uuid' => ['required', 'uuid'],
-            'answer_type' => ['required', 'string', 'in:SINGLE_CHOICE,MULTIPLE_CHOICE,TRUE_FALSE,SHORT_TEXT,LONG_TEXT,NUMERIC'],
+            'answer_type' => ['sometimes', 'string', 'in:SINGLE_CHOICE,MULTIPLE_CHOICE,TRUE_FALSE,SHORT_TEXT,LONG_TEXT,ESSAY,NUMERIC,MCQ,MRQ'],
             'selected_option_uuid' => ['nullable', 'uuid'],
             'selected_option_uuids_json' => ['nullable', 'array'],
             'text_answer' => ['nullable', 'string'],

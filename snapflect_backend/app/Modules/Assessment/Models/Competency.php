@@ -48,4 +48,9 @@ class Competency extends Model
     {
         return $this->belongsTo(CompetencyGroup::class, 'competency_group_id');
     }
+
+    public function questions(): BelongsToMany
+    {
+        return $this->belongsToMany(Question::class, 'question_competencies')->withPivot('weight_percentage');
+    }
 }

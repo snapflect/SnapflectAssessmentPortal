@@ -15,7 +15,7 @@ class PublicationStateMachine
     public const STATE_ARCHIVED = 'ARCHIVED';
 
     private const ALLOWED_TRANSITIONS = [
-        self::STATE_DRAFT => [self::STATE_IN_REVIEW],
+        self::STATE_DRAFT    => [self::STATE_IN_REVIEW, self::STATE_APPROVED],
         self::STATE_IN_REVIEW => [self::STATE_APPROVED, self::STATE_DRAFT], // Draft is for reject
         self::STATE_APPROVED => [self::STATE_PUBLISHED],
         self::STATE_PUBLISHED => [self::STATE_ARCHIVED],

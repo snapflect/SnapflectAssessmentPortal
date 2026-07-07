@@ -32,18 +32,32 @@ class CandidateAssessmentResource extends JsonResource
             }
         }
 
-        $attempt = $this->whenLoaded('attempt');
+        $attempts = $this->whenLoaded('attempts', function() {
+            return $this->attempts;
+        });
         
         $isCompleted = false;
         $isPassed = false;
         $score = null;
-        $attemptsUsed = $attempt ? 1 : 0; // Simple logic: if attempt exists, they used 1 attempt
+        $attemptsUsed = 0;
+        $latestAttempt = null;
         
-        if ($attempt) {
-            if ($attempt->attempt_status === 'COMPLETED' || $attempt->attempt_status === 'EXPIRED') {
-                $isCompleted = true;
-                $score = $attempt->score_percentage ?? 0;
-                $isPassed = $attempt->is_passed ?? false;
+        if ($attempts && count($attempts) > 0) {
+            $attemptsUsed = count($attempts);
+            
+            // Get the latest attempt by created date or id
+            $latestAttempt = $attempts->sortByDesc('id')->first();
+            
+            if ($latestAttempt) {
+                if ($latestAttempt->result) {
+                    $score = $latestAttempt->result->overall_percentage;
+                    $isPassed = $latestAttempt->result->pass_fail_status === 'PASS';
+                }
+                
+                // If the latest attempt is terminal, they have completed this specific attempt round.
+                if (in_array($latestAttempt->status, ['SUBMITTED', 'COMPLETED', 'EXPIRED'])) {
+                    $isCompleted = true;
+                }
             }
         }
 
@@ -51,17 +65,15 @@ class CandidateAssessmentResource extends JsonResource
         $attemptsRemaining = max(0, $maxAttempts - $attemptsUsed);
 
         // Derive overall status
-        // If completed an attempt and passed, or used all attempts -> COMPLETED
+        // If they passed, or used all attempts -> COMPLETED
         // If no attempt but publication is ACTIVE -> ACTIVE
         // If publication is SCHEDULED -> SCHEDULED
         // If publication is COMPLETED/CANCELLED -> COMPLETED
         $overallStatus = $pubStatus;
-        if ($isCompleted) {
-            if ($isPassed || $attemptsRemaining <= 0) {
-                $overallStatus = 'COMPLETED';
-            } else if ($pubStatus === 'ACTIVE') {
-                $overallStatus = 'ACTIVE';
-            }
+        if ($isPassed || $attemptsRemaining <= 0) {
+            $overallStatus = 'COMPLETED';
+        } else if ($pubStatus === 'ACTIVE') {
+            $overallStatus = 'ACTIVE';
         }
 
         return [
@@ -90,6 +102,8 @@ class CandidateAssessmentResource extends JsonResource
                 'attempts_remaining' => $attemptsRemaining,
                 'best_score' => $score,
                 'is_passed' => $isPassed,
+                'latest_attempt_uuid' => $latestAttempt ? $latestAttempt->uuid : null,
+                'latest_result_uuid' => $latestAttempt?->result?->uuid,
             ]
         ];
     }

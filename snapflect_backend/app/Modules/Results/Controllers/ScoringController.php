@@ -77,8 +77,8 @@ class ScoringController extends Controller
 
     public function recalculateScore(Request $request, string $attemptUuid): JsonResponse
     {
-        // $tenantId = $this->contextResolver->resolveOrganizationId($request);
-        // Add auth gates for Admin here
+        $tenantId = $this->contextResolver->resolveOrganizationId($request);
+        $this->authorize('calculate', \App\Modules\Results\Models\AssessmentResult::class);
 
         try {
             // We bypass idempotency check and force a new version

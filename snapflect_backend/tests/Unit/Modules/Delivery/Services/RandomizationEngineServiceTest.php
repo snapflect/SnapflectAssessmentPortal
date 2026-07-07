@@ -60,7 +60,14 @@ class RandomizationEngineServiceTest extends TestCase
                                     ['uuid' => 'opt-3b', 'is_correct' => false],
                                     ['uuid' => 'opt-3c', 'is_correct' => true],
                                 ]
-                            ]
+                            ],
+                            ['uuid' => 'q-4', 'options' => [['uuid' => 'opt-4']]],
+                            ['uuid' => 'q-5', 'options' => [['uuid' => 'opt-5']]],
+                            ['uuid' => 'q-6', 'options' => [['uuid' => 'opt-6']]],
+                            ['uuid' => 'q-7', 'options' => [['uuid' => 'opt-7']]],
+                            ['uuid' => 'q-8', 'options' => [['uuid' => 'opt-8']]],
+                            ['uuid' => 'q-9', 'options' => [['uuid' => 'opt-9']]],
+                            ['uuid' => 'q-10', 'options' => [['uuid' => 'opt-10']]]
                         ]
                     ]
                 ]

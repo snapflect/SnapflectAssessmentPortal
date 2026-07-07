@@ -22,12 +22,12 @@ class AssessmentPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'REVIEWER']);
+        return $user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'REVIEWER', 'READ_ONLY']);
     }
 
     public function view(User $user, Assessment $assessment): bool
     {
-        if (!$user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'REVIEWER'])) {
+        if (!$user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'REVIEWER', 'READ_ONLY'])) {
             return false;
         }
         return $user->organization_id === $assessment->organization_id;
@@ -118,6 +118,9 @@ class AssessmentPolicy
         }
         if ($assessment->current_state !== 'IN_REVIEW') {
             return false;
+        }
+        if ($user->id === $assessment->created_by && !$user->hasRole('CLIENT_ADMIN')) {
+            return false; // Segregation of Duties: Creator cannot approve, unless they are a Client Admin
         }
         return true;
     }

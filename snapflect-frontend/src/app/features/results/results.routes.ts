@@ -6,13 +6,13 @@ export const RESULTS_ROUTES: Routes = [
     path: '',
     loadComponent: () => import('./pages/dashboard/results-dashboard-page.component').then(m => m.ResultsDashboardPageComponent),
     canActivate: [roleGuard],
-    data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER'] }
+    data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'READ_ONLY'] }
   },
   {
     path: 'analytics',
     loadComponent: () => import('./pages/dashboard/results-dashboard-page.component').then(m => m.ResultsDashboardPageComponent),
     canActivate: [roleGuard],
-    data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER'] }
+    data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'READ_ONLY'] }
   },
   {
     path: 'reviewer-dashboard',

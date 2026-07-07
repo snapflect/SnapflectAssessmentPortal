@@ -159,5 +159,61 @@ class BlueprintService
             }
         });
     }
+
+
+    public function cloneBlueprint(int $sourceAssessmentId, int $newAssessmentId, int $clonedBy): void
+    {
+        $sourceBlueprint = \App\Modules\Assessment\Models\AssessmentBlueprint::where('assessment_id', $sourceAssessmentId)->first();
+        
+        if (!$sourceBlueprint) {
+            return; // No blueprint to clone
+        }
+
+        // 1. Clone Blueprint
+        $newBlueprintData = $sourceBlueprint->toArray();
+        unset($newBlueprintData['id'], $newBlueprintData['uuid'], $newBlueprintData['created_date'], $newBlueprintData['modified_date']);
+        $newBlueprintData['uuid'] = (string) \Illuminate\Support\Str::uuid();
+        $newBlueprintData['assessment_id'] = $newAssessmentId;
+        $newBlueprintData['created_by'] = $clonedBy;
+        $newBlueprintData['modified_by'] = null;
+
+        $newBlueprint = \App\Modules\Assessment\Models\AssessmentBlueprint::create($newBlueprintData);
+
+        // 2. Clone Sections
+        foreach ($sourceBlueprint->sections as $sourceSection) {
+            $newSectionData = $sourceSection->toArray();
+            unset($newSectionData['id'], $newSectionData['uuid'], $newSectionData['created_date'], $newSectionData['modified_date']);
+            $newSectionData['uuid'] = (string) \Illuminate\Support\Str::uuid();
+            $newSectionData['blueprint_id'] = $newBlueprint->id;
+            $newSectionData['created_by'] = $clonedBy;
+            $newSectionData['modified_by'] = null;
+
+            $newSection = \App\Modules\Assessment\Models\BlueprintSection::create($newSectionData);
+
+            // 3. Clone Rules
+            foreach ($sourceSection->rules as $sourceRule) {
+                $newRuleData = $sourceRule->toArray();
+                unset($newRuleData['id'], $newRuleData['uuid'], $newRuleData['created_date'], $newRuleData['modified_date']);
+                $newRuleData['uuid'] = (string) \Illuminate\Support\Str::uuid();
+                $newRuleData['blueprint_section_id'] = $newSection->id;
+                $newRuleData['created_by'] = $clonedBy;
+                $newRuleData['modified_by'] = null;
+
+                \App\Modules\Assessment\Models\BlueprintRule::create($newRuleData);
+            }
+
+            // 4. Clone Questions
+            foreach ($sourceSection->sectionQuestions as $sourceQuestion) {
+                $newQuestionData = $sourceQuestion->toArray();
+                unset($newQuestionData['id'], $newQuestionData['uuid'], $newQuestionData['created_date'], $newQuestionData['modified_date']);
+                $newQuestionData['uuid'] = (string) \Illuminate\Support\Str::uuid();
+                $newQuestionData['blueprint_section_id'] = $newSection->id;
+                $newQuestionData['created_by'] = $clonedBy;
+                $newQuestionData['modified_by'] = null;
+
+                \App\Modules\Assessment\Models\BlueprintSectionQuestion::create($newQuestionData);
+            }
+        }
+    }
 }
 

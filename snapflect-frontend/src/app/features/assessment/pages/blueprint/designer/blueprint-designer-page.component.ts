@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -62,13 +62,19 @@ interface BlueprintSection {
 @Component({
   selector: 'app-blueprint-designer-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SlideOverComponent],
+  imports: [CommonModule, ReactiveFormsModule, SlideOverComponent, RouterLink],
   template: `
     <div class="h-full flex flex-col relative">
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-main">Blueprint Designer</h2>
-          <p class="text-muted text-sm mt-1">Design assessment structure — define sections, rules, and question distribution.</p>
+      <div class="flex flex-col gap-2 mb-6">
+        <a *ngIf="sourceAssessmentUuid" routerLink="/authoring/assessments" class="text-brand hover:text-brand-light text-sm flex items-center gap-1.5 w-max transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Assessment Catalog
+        </a>
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-2xl font-bold text-main">Blueprint Designer</h2>
+            <p class="text-muted text-sm mt-1">Design assessment structure — define sections, rules, and question distribution.</p>
+          </div>
         </div>
       </div>
 
@@ -410,6 +416,7 @@ export class BlueprintDesignerPageComponent implements OnInit {
   tags: any[] = [];
   banks: any[] = [];
   availablePoolSize: number | null = null;
+  sourceAssessmentUuid: string | null = null;
   
   loadingBlueprints = true;
   
@@ -459,6 +466,7 @@ export class BlueprintDesignerPageComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.sourceAssessmentUuid = this.route.snapshot.queryParamMap.get('assessment_uuid');
     this.fetchBlueprints();
     this.fetchCompetencies();
     this.fetchTags();
@@ -536,7 +544,14 @@ export class BlueprintDesignerPageComponent implements OnInit {
 
   fetchBlueprints() {
     this.loadingBlueprints = true;
-    this.http.get<any>(`${environment.apiUrl}/assessment/blueprints?include=assessment,sections.rules.competency,sections.rules.tag&per_page=100`)
+    const targetAssessmentUuid = this.route.snapshot.queryParamMap.get('assessment_uuid');
+    
+    let url = `${environment.apiUrl}/assessment/blueprints?include=assessment,sections.rules.competency,sections.rules.tag&per_page=100`;
+    if (targetAssessmentUuid) {
+      url += `&assessment_uuid=${targetAssessmentUuid}`;
+    }
+
+    this.http.get<any>(url)
       .subscribe({
         next: (res) => {
           this.blueprints = res.data || res;

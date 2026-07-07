@@ -7,6 +7,7 @@ namespace Tests\Unit\Modules\Assessment\Requests;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use App\Modules\Assessment\Requests\CreateBlueprintRequest;
 
 class BlueprintRequestTest extends TestCase
 {
@@ -20,9 +21,26 @@ class BlueprintRequestTest extends TestCase
 
     public function test_nested_blueprint_validation()
     {
-        $this->markTestIncomplete('Test generated for architecture review.');
-    }\n\n    public function test_uuid_validation()
+        $request = new CreateBlueprintRequest();
+        $rules = $request->rules();
+
+        $this->assertArrayHasKey('sections', $rules);
+        $this->assertArrayHasKey('sections.*.section_name', $rules);
+        $this->assertArrayHasKey('sections.*.rules.*.question_count', $rules);
+        $this->assertArrayHasKey('sections.*.questions.*.question_uuid', $rules);
+        
+        $this->assertContains('required', $rules['sections']);
+        $this->assertContains('required', $rules['sections.*.section_name']);
+    }
+
+    public function test_uuid_validation()
     {
-        $this->markTestIncomplete('Test generated for architecture review.');
+        $request = new CreateBlueprintRequest();
+        $rules = $request->rules();
+
+        $this->assertContains('uuid', $rules['assessment_uuid']);
+        $this->assertContains('uuid', $rules['sections.*.rules.*.tag_uuid']);
+        $this->assertContains('uuid', $rules['sections.*.rules.*.competency_uuid']);
+        $this->assertContains('uuid', $rules['sections.*.questions.*.question_uuid']);
     }
 }

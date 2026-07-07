@@ -15,6 +15,7 @@ Route::prefix('candidates/results')->group(function () {
     Route::get('/history', [CandidateResultsController::class, 'history']);
     Route::get('/{resultUuid}', [CandidateResultsController::class, 'show']);
     Route::get('/{resultUuid}/competencies', [CandidateResultsController::class, 'competencies']);
+    Route::get('/{resultUuid}/certificate/download', [CertificateController::class, 'downloadByResult']);
 });
 
 // -----------------------------------------------------------------------------
@@ -40,4 +41,5 @@ Route::prefix('leaderboards')->group(function () {
 Route::prefix('certificates')->group(function () {
     Route::get('/', [CertificateController::class, 'index']);
     Route::get('/{certificateUuid}', [CertificateController::class, 'show']);
+    Route::get('/{certificateUuid}/download', [CertificateController::class, 'download']);
 });

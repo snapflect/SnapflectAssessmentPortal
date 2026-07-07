@@ -212,7 +212,7 @@ class AutoScoringServiceTest extends TestCase
 
         $this->assertSame(4.0, $results[0]->awardedScore);
         $this->assertSame(1.0, $results[0]->penaltyApplied);
-        $this->assertTrue($results[0]->isCorrect); // net > 0
+        $this->assertFalse($results[0]->isCorrect); // partially correct
         $this->assertSame(ScoringStrategyResolver::STRATEGY_PROPORTIONAL, $results[0]->strategyApplied);
     }
 }

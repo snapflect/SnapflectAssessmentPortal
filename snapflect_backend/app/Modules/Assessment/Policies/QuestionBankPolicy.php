@@ -22,12 +22,12 @@ class QuestionBankPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasPermission('Assessment.QuestionBanks.View') || $user->hasPermission('Assessment.QuestionBanks.Manage');
+        return $user->hasPermission('Assessment.QuestionBanks.View') || $user->hasPermission('Assessment.QuestionBanks.Manage') || $user->hasPermission('Assessment.Questions.View');
     }
 
     public function view(User $user, QuestionBank $questionBank): bool
     {
-        if (!($user->hasPermission('Assessment.QuestionBanks.View') || $user->hasPermission('Assessment.QuestionBanks.Manage'))) {
+        if (!($user->hasPermission('Assessment.QuestionBanks.View') || $user->hasPermission('Assessment.QuestionBanks.Manage') || $user->hasPermission('Assessment.Questions.View'))) {
             return false;
         }
         // Can view if it belongs to their org, OR if it's a platform system bank

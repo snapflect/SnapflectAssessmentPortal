@@ -29,8 +29,8 @@ class AuthController extends Controller
         $user->load(['userProfile', 'roles.permissions', 'organization']);
         $permissions = $user->roles->flatMap->permissions->pluck('permission_code')->unique()->values()->toArray();
 
-        // Generate a random mock token string
-        $token = base64_encode(random_bytes(40));
+        // Generate a mock token string that encodes the email and token_version
+        $token = base64_encode(json_encode(['email' => $user->email, 'v' => $user->token_version]));
 
         return response()->json([
             'access_token' => $token,
@@ -50,8 +50,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        if ($request->user() && $request->user()->currentAccessToken()) {
-            $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user) {
+            $user->token_version = $user->token_version + 1;
+            $user->save();
         }
 
         return response()->json(['success' => true]);

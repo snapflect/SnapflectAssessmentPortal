@@ -22,12 +22,12 @@ class CompetencyPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('CLIENT_ADMIN');
+        return $user->hasPermission('Assessment.Competencies.View') || $user->hasPermission('Assessment.Competencies.Manage') || $user->hasPermission('Assessment.Questions.View');
     }
 
     public function view(User $user, Competency $competency): bool
     {
-        if (!$user->hasRole('CLIENT_ADMIN')) {
+        if (!($user->hasPermission('Assessment.Competencies.View') || $user->hasPermission('Assessment.Competencies.Manage') || $user->hasPermission('Assessment.Questions.View'))) {
             return false;
         }
         return $user->organization_id === $competency->organization_id;
@@ -35,12 +35,12 @@ class CompetencyPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('CLIENT_ADMIN');
+        return $user->hasPermission('Assessment.Competencies.Manage');
     }
 
     public function update(User $user, Competency $competency): bool
     {
-        if (!$user->hasRole('CLIENT_ADMIN')) {
+        if (!$user->hasPermission('Assessment.Competencies.Manage')) {
             return false;
         }
         return $user->organization_id === $competency->organization_id;
@@ -48,7 +48,7 @@ class CompetencyPolicy
 
     public function delete(User $user, Competency $competency): bool
     {
-        if (!$user->hasRole('CLIENT_ADMIN')) {
+        if (!$user->hasPermission('Assessment.Competencies.Manage')) {
             return false;
         }
         return $user->organization_id === $competency->organization_id;

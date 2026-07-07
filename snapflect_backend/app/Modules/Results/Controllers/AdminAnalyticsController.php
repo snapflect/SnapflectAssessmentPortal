@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Modules\Results\Models\AssessmentResult;
 
 class AdminAnalyticsController extends Controller
 {
@@ -16,7 +17,7 @@ class AdminAnalyticsController extends Controller
      */
     public function assessmentSummary(string $assessmentUuid, Request $request): JsonResponse
     {
-        // 1. Validate permissions
+        $this->authorize('viewAny', AssessmentResult::class);
         // 2. Fetch Materialized View directly (O(1))
         $summary = DB::table('assessment_analytics_summary')
             ->where('assessment_uuid', $assessmentUuid)
@@ -42,6 +43,7 @@ class AdminAnalyticsController extends Controller
      */
     public function competencySummaries(string $assessmentUuid, Request $request): JsonResponse
     {
+        $this->authorize('viewAny', AssessmentResult::class);
         $summaries = DB::table('competency_analytics_summary')
             ->where('assessment_uuid', $assessmentUuid)
             ->get();
@@ -54,6 +56,7 @@ class AdminAnalyticsController extends Controller
      */
     public function questionSummaries(string $assessmentUuid, Request $request): JsonResponse
     {
+        $this->authorize('viewAny', AssessmentResult::class);
         $summaries = DB::table('question_analytics_summary')
             ->where('assessment_uuid', $assessmentUuid)
             ->get();

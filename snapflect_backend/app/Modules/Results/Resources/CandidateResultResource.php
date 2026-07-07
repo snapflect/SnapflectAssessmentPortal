@@ -23,7 +23,9 @@ class CandidateResultResource extends JsonResource
         return [
             'resultUuid' => $this->uuid,
             'assessmentName' => $this->assessment_name ?? null,
-            'publishedAt' => $this->published_at ? $this->published_at->toIso8601String() : null,
+            'calculatedAt' => $this->calculated_at 
+                ? \Carbon\Carbon::parse($this->calculated_at)->toIso8601String() 
+                : ($this->published_at ? \Carbon\Carbon::parse($this->published_at)->toIso8601String() : null),
             'resultVersion' => (int) $this->result_version,
             'score' => $scoreVisibility ? (float) $this->overall_score : null,
             'percentage' => $scoreVisibility ? (float) $this->overall_percentage : null,

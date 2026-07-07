@@ -23,6 +23,7 @@ class SectionScoreResource extends JsonResource
             'section_score' => $this->section_score,
             'section_percentage' => $this->section_percentage,
             'section_weight' => $this->section_weight,
+            'section_name' => $this->whenLoaded('section', fn() => $this->section->section_name),
             ],
             'relationships' => [
             ],

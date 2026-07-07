@@ -28,29 +28,25 @@ class AttemptTimerServiceTest extends TestCase
         Config::set('assessment.grace_period_seconds', 0); // default to 0
     }
 
-    private function createAttempt(int $orgId = 1, int $userId = 1, ?Carbon $startedAt = null, ?Carbon $expiresAt = null, string $status = 'CREATED'): AssessmentAttempt
+    private function createAttempt(?int $orgId = null, ?int $userId = null, ?Carbon $startedAt = null, ?Carbon $expiresAt = null, string $status = 'CREATED'): AssessmentAttempt
     {
-        // For testing we will fake the DB constraint requirement by bypassing relationships
-        // But since we use RefreshDatabase, we need to bypass FKs or mock. 
-        // We will just use Eloquent factories or raw DB inserts for a standalone attempt.
-        // Actually, since we need real DB testing, we can disable FK checks temporarily or create fake orgs.
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = OFF;');
 
         $attempt = new AssessmentAttempt();
-        $attempt->uuid = Str::uuid()->toString();
-        $attempt->organization_id = $orgId;
+        $attempt->uuid                  = Str::uuid()->toString();
+        $attempt->organization_id       = $orgId ?? 1;
         $attempt->assessment_session_id = 1;
-        $attempt->assessment_id = 1;
+        $attempt->assessment_id         = 1;
         $attempt->assessment_version_id = 1;
         $attempt->assessment_snapshot_id = 1;
-        $attempt->candidate_user_id = $userId;
-        $attempt->status = $status;
-        $attempt->started_at = $startedAt;
-        $attempt->expires_at = $expiresAt;
+        $attempt->candidate_user_id     = $userId ?? 1;
+        $attempt->status                = $status;
+        $attempt->started_at            = $startedAt;
+        $attempt->expires_at            = $expiresAt;
         $attempt->save();
 
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        
+        \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = ON;');
+
         return $attempt;
     }
 

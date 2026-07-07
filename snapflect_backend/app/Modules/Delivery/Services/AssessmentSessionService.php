@@ -10,6 +10,8 @@ use App\Modules\Delivery\DTOs\ResumeSessionDto;
 use App\Modules\Delivery\DTOs\TerminateSessionDto;
 use Illuminate\Support\Facades\DB;
 use App\Modules\Delivery\Exceptions\AssessmentSessionException;
+use App\Modules\Delivery\Models\AssessmentSession;
+use App\Modules\Delivery\DTOs\ExpireAttemptDto;
 
 class AssessmentSessionService
 {
@@ -35,26 +37,42 @@ class AssessmentSessionService
     public function resumeSession(ResumeSessionDto $dto): array
     {
         return DB::transaction(function () use ($dto) {
-            // Validate Session Active
-            // Load Attempt
-            // Audit Event: SESSION_RESUMED
-            return [];
+            $session = AssessmentSession::where('uuid', $dto->session_uuid)->firstOrFail();
+            
+            if ($session->session_status === 'LAUNCHED') {
+                $session->session_status = 'PAUSED';
+            } elseif ($session->session_status === 'PAUSED') {
+                $session->session_status = 'LAUNCHED';
+            }
+            $session->save();
+            
+            return ['status' => $session->session_status];
         });
     }
 
     public function terminateSession(TerminateSessionDto $dto): void
     {
         DB::transaction(function () use ($dto) {
-            // Mark Session Terminated
-            // Audit Event
+            $session = AssessmentSession::where('uuid', $dto->session_uuid)->firstOrFail();
+            $session->session_status = 'TERMINATED';
+            $session->save();
         });
     }
 
     public function expireSession(string $sessionUuid): void
     {
         DB::transaction(function () use ($sessionUuid) {
-            // Mark EXPIRED
-            // Audit Event
+            $session = AssessmentSession::where('uuid', $sessionUuid)->first();
+            if ($session && $session->session_status !== 'EXPIRED') {
+                $session->session_status = 'EXPIRED';
+                $session->save();
+
+                // If there's an active attempt, expire it too
+                $latestAttempt = $session->latestAttempt;
+                if ($latestAttempt && $latestAttempt->status === 'IN_PROGRESS') {
+                    $this->attemptService->expireAttempt(new ExpireAttemptDto($latestAttempt->uuid, 'Session expired'));
+                }
+            }
         });
     }
 

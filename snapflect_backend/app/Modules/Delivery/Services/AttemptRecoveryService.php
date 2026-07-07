@@ -28,11 +28,11 @@ class AttemptRecoveryService
             throw ResumeException::attemptNotFound();
         }
 
+        if (in_array($attempt->status, ['SUBMITTED', 'SCORED', 'EVALUATED'])) {
+            throw ResumeException::invalidState($attempt->status);
+        }
         if ($attempt->status === 'EXPIRED') {
             throw ResumeException::invalidState('EXPIRED');
-        }
-        if ($attempt->status === 'SUBMITTED') {
-            throw ResumeException::invalidState('SUBMITTED');
         }
         if ($attempt->status === 'CANCELLED') {
             throw ResumeException::invalidState('CANCELLED');
@@ -61,39 +61,70 @@ class AttemptRecoveryService
         if (!$attempt->randomization_seed || !$attempt->question_order_json || !$attempt->option_order_json) {
             throw ResumeException::randomizationMissing();
         }
-
+        
         $snapshotPayload = json_decode($attempt->assessmentSnapshot->snapshot_json, true);
-        $totalQuestions = $attempt->assessmentSnapshot->question_count ?? $this->countQuestions($snapshotPayload);
+        $snapshotQuestions = $this->extractAllQuestionUuids($snapshotPayload);
+        $totalQuestions = count($snapshotQuestions);
+        $snapshotOptions = $this->extractAllOptionUuids($snapshotPayload);
 
-        $qOrder = json_decode($attempt->question_order_json, true);
-        if (count($qOrder) !== $totalQuestions) {
+        $qOrderSections = json_decode($attempt->question_order_json, true);
+        $qOrderUuids = [];
+        foreach ($qOrderSections ?? [] as $s) {
+            if (is_array($s) && isset($s['questions'])) {
+                foreach ($s['questions'] as $q) {
+                    if (isset($q['uuid'])) {
+                        $qOrderUuids[] = $q['uuid'];
+                    } elseif (is_string($q)) {
+                        $qOrderUuids[] = $q;
+                    }
+                }
+            } elseif (is_string($s)) {
+                $qOrderUuids[] = $s; // Flat array fallback
+            }
+        }
+
+        if (count($qOrderUuids) !== $totalQuestions) {
             throw ResumeException::randomizationCorrupted('Question count mismatch');
         }
 
-        $snapshotQuestions = $this->extractAllQuestionUuids($snapshotPayload);
-        
-        if (count(array_unique($qOrder)) !== count($qOrder)) {
-            throw ResumeException::randomizationCorrupted('Duplicate question UUIDs found in randomization');
+        if (count(array_unique($qOrderUuids)) !== count($qOrderUuids)) {
+            throw ResumeException::randomizationCorrupted('Duplicate question UUIDs');
         }
 
-        foreach ($qOrder as $uuid) {
-            if (!in_array($uuid, $snapshotQuestions, true)) {
-                throw ResumeException::randomizationCorrupted('Missing or invalid question UUID: ' . $uuid);
+        $optOrderSections = json_decode($attempt->option_order_json, true);
+        $optOrderUuids = [];
+        
+        // If it's stored as sections array (like RandomizationEngineService does)
+        if (is_array($optOrderSections) && isset($optOrderSections[0]['questions'])) {
+            foreach ($optOrderSections as $s) {
+                foreach ($s['questions'] ?? [] as $q) {
+                    foreach ($q['options'] ?? [] as $opt) {
+                        if (isset($opt['uuid'])) {
+                            $optOrderUuids[] = $opt['uuid'];
+                        }
+                    }
+                }
+            }
+        } else {
+            // Fallback for legacy key-value format [qUuid => [optUuid1, optUuid2]]
+            foreach ($optOrderSections ?? [] as $qUuid => $options) {
+                if (is_array($options)) {
+                    foreach ($options as $optUuid) {
+                        $optOrderUuids[] = $optUuid;
+                    }
+                }
             }
         }
-        
-        // Option mapping integrity
-        $oOrder = json_decode($attempt->option_order_json, true);
-        $snapshotOptions = $this->extractAllOptionUuids($snapshotPayload);
-        
-        foreach ($oOrder as $qUuid => $options) {
-            if (!in_array($qUuid, $snapshotQuestions, true)) {
-                 throw ResumeException::randomizationCorrupted('Corrupted option mapping references invalid question: ' . $qUuid);
-            }
-            foreach ($options as $optUuid) {
-                 if (!in_array($optUuid, $snapshotOptions, true)) {
-                     throw ResumeException::randomizationCorrupted('Corrupted option mapping references invalid option: ' . $optUuid);
-                 }
+
+        foreach ($optOrderUuids as $optUuid) {
+            if (!in_array($optUuid, $snapshotOptions, true)) {
+                \Illuminate\Support\Facades\Log::error("Corrupted option mapping", [
+                    'optUuid' => $optUuid,
+                    'snapshotOptions' => $snapshotOptions,
+                    'optOrderUuids' => $optOrderUuids,
+                    'optOrderSections' => $optOrderSections
+                ]);
+                throw ResumeException::randomizationCorrupted('Corrupted option mapping');
             }
         }
     }

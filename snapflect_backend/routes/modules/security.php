@@ -11,6 +11,15 @@ Route::apiResource('users', UserController::class)->parameters([
     'users' => 'uuid'
 ]);
 
+Route::get('users/{userUuid}/activity', [UserController::class, 'activityLogs'])
+    ->name('users.activity');
+
+Route::post('users/{userUuid}/reset-password', [UserController::class, 'resetPassword'])
+    ->name('users.reset-password');
+
+Route::post('users/{userUuid}/force-logout', [UserController::class, 'forceLogout'])
+    ->name('users.force-logout');
+
 Route::post('users/{userUuid}/roles/{roleUuid}', [UserController::class, 'assignRole'])
     ->name('users.assign-role');
 

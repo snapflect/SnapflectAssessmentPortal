@@ -1,3 +1,4 @@
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -39,11 +40,11 @@ interface Competency {
           <p class="text-muted text-sm mt-1">Define competency groups and map individual competencies for assessment blueprints.</p>
         </div>
         <div class="flex gap-3">
-          <button (click)="openGroupForm()" class="btn-secondary flex items-center text-sm">
+          <button *ngIf="userStore.hasAnyPermission(['Assessment.Competencies.Manage'])" (click)="openGroupForm()" class="btn-secondary flex items-center text-sm">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             New Group
           </button>
-          <button (click)="openCompetencyForm()" class="btn-primary flex items-center">
+          <button *ngIf="userStore.hasAnyPermission(['Assessment.Competencies.Manage'])" (click)="openCompetencyForm()" class="btn-primary flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Add Competency
           </button>
@@ -126,8 +127,8 @@ interface Competency {
                       </span>
                     </td>
                     <td class="px-6 py-4 text-right space-x-3">
-                      <button class="text-muted hover:text-main transition-colors" (click)="openEditCompetency(c)">Edit</button>
-                      <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteCompetency(c.uuid)">Delete</button>
+                      <button *ngIf="userStore.hasAnyPermission(['Assessment.Competencies.Manage'])" class="text-muted hover:text-main transition-colors" (click)="openEditCompetency(c)">Edit</button>
+                      <button *ngIf="(userStore.hasAnyPermission(['Assessment.Competencies.Manage'])) && userStore.hasAnyPermission(['Assessment.Competencies.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteCompetency(c.uuid)">Delete</button>
                     </td>
                   </tr>
                 </tbody>
@@ -220,6 +221,8 @@ export class CompetencyListPageComponent implements OnInit {
 
   groupForm: FormGroup;
   competencyForm: FormGroup;
+  userStore = inject(UserStore);
+
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);

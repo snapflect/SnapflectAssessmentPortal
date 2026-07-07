@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
+import { ToastService } from '../../../../core/services/toast.service';
 
 interface AssessmentResultDetail {
   id: string;
@@ -67,8 +68,12 @@ interface AssessmentResultDetail {
             <a [routerLink]="['/results', result.id, 'versions']" class="px-4 py-2 border border-border bg-input-bg text-main text-sm font-semibold rounded-md hover:bg-slate-800 transition-colors">
               Version History
             </a>
-            <button class="px-4 py-2 bg-brand text-white text-sm font-semibold rounded-md hover:bg-brand-dark transition-colors">
-              Download PDF
+            <button 
+              class="px-4 py-2 text-sm font-semibold rounded-md transition-colors"
+              [ngClass]="result.attributes.is_passed ? 'bg-brand text-white hover:bg-brand-dark' : 'bg-slate-700 text-slate-400 cursor-not-allowed opacity-50'"
+              [disabled]="!result.attributes.is_passed"
+              (click)="downloadCertificate(result)">
+              Download Certificate Pdf
             </button>
           </div>
         </div>
@@ -106,12 +111,82 @@ interface AssessmentResultDetail {
           </div>
         </div>
 
-        <!-- Details Tabs placeholder -->
-        <div class="glass-card flex-1 p-6">
-          <h3 class="text-lg font-bold text-main border-b border-border pb-4 mb-4">Detailed Breakdown</h3>
-          <div class="flex flex-col items-center justify-center text-muted py-12">
-            <svg class="w-12 h-12 mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            <p>Section and question level breakdowns will appear here.</p>
+        <!-- Detailed Breakdown -->
+        <div class="glass-card flex-1 p-6 flex flex-col min-h-[400px]">
+          <div class="border-b border-border flex gap-6 mb-6">
+            <button class="pb-3 text-sm font-bold border-b-2 transition-colors" [ngClass]="activeTab === 'competencies' ? 'border-brand text-brand-light' : 'border-transparent text-muted hover:text-main'" (click)="activeTab = 'competencies'">Competencies</button>
+            <button class="pb-3 text-sm font-bold border-b-2 transition-colors" [ngClass]="activeTab === 'sections' ? 'border-brand text-brand-light' : 'border-transparent text-muted hover:text-main'" (click)="activeTab = 'sections'">Sections</button>
+            <button class="pb-3 text-sm font-bold border-b-2 transition-colors" [ngClass]="activeTab === 'questions' ? 'border-brand text-brand-light' : 'border-transparent text-muted hover:text-main'" (click)="activeTab = 'questions'">Questions</button>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+            
+            <!-- Competencies Tab -->
+            <div *ngIf="activeTab === 'competencies'">
+              <div *ngIf="!result.relationships.competency_scores?.length" class="text-center text-muted py-8">
+                <p>No competency breakdown available.</p>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let comp of result.relationships.competency_scores" class="p-4 border border-border/50 bg-surface/30 rounded-xl">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-main font-semibold text-sm">{{ comp.attributes.competency_name || 'Competency Score' }}</span>
+                    <span class="text-brand-light font-bold text-sm">{{ comp.attributes.competency_percentage | number:'1.0-0' }}%</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-brand-light rounded-full" [style.width.%]="comp.attributes.competency_percentage"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sections Tab -->
+            <div *ngIf="activeTab === 'sections'">
+              <div *ngIf="!result.relationships.section_scores?.length" class="text-center text-muted py-8">
+                <p>No section breakdown available.</p>
+              </div>
+              <div class="space-y-4">
+                <div *ngFor="let sec of result.relationships.section_scores" class="p-4 border border-border/50 bg-surface/30 rounded-xl flex items-center justify-between">
+                  <div>
+                    <h4 class="text-main font-semibold text-sm mb-1">{{ sec.attributes.section_name || 'Assessment Section' }}</h4>
+                    <p class="text-xs text-muted">Weight: {{ sec.attributes.section_weight }}</p>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-brand-light font-bold">{{ sec.attributes.section_percentage | number:'1.0-0' }}%</div>
+                    <div class="text-xs text-slate-500">{{ sec.attributes.section_score }} Points</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Questions Tab -->
+            <div *ngIf="activeTab === 'questions'">
+              <div *ngIf="!result.relationships.question_scores?.length" class="text-center text-muted py-8">
+                <p>No question breakdown available.</p>
+              </div>
+              <div class="space-y-3">
+                <div *ngFor="let q of result.relationships.question_scores; let i = index" class="p-4 border border-border/50 bg-surface/30 rounded-xl flex items-center gap-4">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" 
+                       [ngClass]="q.attributes.percentage === 100 ? 'bg-emerald-500/20 text-emerald-400' : (q.attributes.percentage > 0 ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400')">
+                    <span class="text-xs font-bold">Q{{i + 1}}</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex justify-between mb-1">
+                      <span class="text-main font-medium text-sm">{{ q.attributes.question_text || 'Question Evaluation' }}</span>
+                      <span class="text-sm font-semibold" 
+                            [ngClass]="q.attributes.percentage === 100 ? 'text-emerald-400' : (q.attributes.percentage > 0 ? 'text-amber-400' : 'text-rose-400')">
+                        {{ q.attributes.awarded_score }} / {{ q.attributes.max_score }}
+                      </span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                      <div class="h-full rounded-full" 
+                           [ngClass]="q.attributes.percentage === 100 ? 'bg-emerald-400' : (q.attributes.percentage > 0 ? 'bg-amber-400' : 'bg-rose-400')"
+                           [style.width.%]="q.attributes.percentage"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </ng-container>
@@ -124,6 +199,9 @@ export class ResultDetailPageComponent implements OnInit {
   
   result: AssessmentResultDetail | null = null;
   loading = true;
+  activeTab: 'competencies' | 'sections' | 'questions' = 'questions';
+
+  private toastService = inject(ToastService);
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -146,6 +224,27 @@ export class ResultDetailPageComponent implements OnInit {
         error: (err) => {
           console.error('Error fetching result detail', err);
           this.loading = false;
+        }
+      });
+  }
+
+  downloadCertificate(result: AssessmentResultDetail) {
+    if (!result.attributes.is_passed) return;
+    this.http.get<any>(`${environment.apiUrl}/candidates/results/${result.id}/certificate/download`)
+      .subscribe({
+        next: (res) => {
+          if (res.data && res.data.html) {
+            const newWindow = window.open('', '_blank');
+            if (newWindow) {
+              newWindow.document.open();
+              newWindow.document.write(res.data.html);
+              newWindow.document.close();
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Error downloading certificate', err);
+          this.toastService.warning('Not Available', 'Certificate not available for this result.');
         }
       });
   }

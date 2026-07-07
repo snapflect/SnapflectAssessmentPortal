@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ProctoringService, ProctoringSession } from '../../services/proctoring.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-proctoring-page',
@@ -23,11 +25,11 @@ import { CommonModule } from '@angular/common';
         <div class="flex gap-4">
           <div class="bg-slate-800 px-4 py-2 rounded-md flex items-center gap-3">
             <span class="text-sm text-slate-400">Active Candidates</span>
-            <span class="text-xl font-bold text-emerald-400">24</span>
+            <span class="text-xl font-bold text-emerald-400">{{ activeCandidatesCount }}</span>
           </div>
           <div class="bg-slate-800 px-4 py-2 rounded-md flex items-center gap-3">
             <span class="text-sm text-slate-400">Flagged Events</span>
-            <span class="text-xl font-bold text-rose-400">3</span>
+            <span class="text-xl font-bold text-rose-400">{{ flaggedEventsCount }}</span>
           </div>
         </div>
       </div>
@@ -100,15 +102,30 @@ import { CommonModule } from '@angular/common';
     </div>
   `
 })
-export class ProctoringPageComponent {
-  activeSessions = [
-    { candidateName: 'John Doe', assessmentName: 'Frontend Senior Eng.', timeElapsed: '00:45:12', progress: 65, cameraOn: true, micOn: true, flagged: false },
-    { candidateName: 'Jane Smith', assessmentName: 'Backend Dev', timeElapsed: '01:12:05', progress: 82, cameraOn: true, micOn: true, flagged: true },
-    { candidateName: 'Michael Brown', assessmentName: 'Full Stack Dev', timeElapsed: '00:15:30', progress: 20, cameraOn: true, micOn: false, flagged: false },
-    { candidateName: 'Sarah Connor', assessmentName: 'Security Eng', timeElapsed: '01:45:00', progress: 95, cameraOn: false, micOn: false, flagged: true },
-    { candidateName: 'Emily Clark', assessmentName: 'Frontend Senior Eng.', timeElapsed: '00:30:15', progress: 45, cameraOn: true, micOn: true, flagged: false },
-    { candidateName: 'David Wilson', assessmentName: 'DevOps Eng', timeElapsed: '00:05:22', progress: 5, cameraOn: true, micOn: true, flagged: false },
-    { candidateName: 'Chris Evans', assessmentName: 'Backend Dev', timeElapsed: '00:55:10', progress: 70, cameraOn: true, micOn: true, flagged: false },
-    { candidateName: 'Jessica Alba', assessmentName: 'UI/UX Design', timeElapsed: '01:20:45', progress: 88, cameraOn: true, micOn: true, flagged: false },
-  ];
+export class ProctoringPageComponent implements OnInit, OnDestroy {
+  private proctoringService = inject(ProctoringService);
+  private subscription: Subscription | null = null;
+  
+  activeSessions: ProctoringSession[] = [];
+  activeCandidatesCount = 0;
+  flaggedEventsCount = 0;
+
+  ngOnInit() {
+    this.subscription = this.proctoringService.liveSessions$.subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.activeSessions = res.data;
+          this.activeCandidatesCount = this.activeSessions.length;
+          this.flaggedEventsCount = this.activeSessions.filter(s => s.flagged).length;
+        }
+      },
+      error: (err) => console.error('Error fetching live sessions', err)
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 }

@@ -95,7 +95,7 @@ class QuestionController extends Controller
 
     public function show(string $uuid): JsonResponse
     {
-        $record = $this->repository->findByUuidWithRelations($uuid, ['bank', 'options']);
+        $record = $this->repository->findByUuidWithRelations($uuid, ['bank', 'options', 'competencies', 'tags']);
         if (!$record) {
             abort(404, 'Question not found');
         }
@@ -119,7 +119,7 @@ class QuestionController extends Controller
             $request->user()->id
         );
         
-        $record->load(['bank', 'options']);
+        $record->load(['bank', 'options', 'competencies', 'tags']);
         
         return response()->json([
             'success' => true,
@@ -146,7 +146,7 @@ class QuestionController extends Controller
         
         $this->service->updateQuestion($record->id, $request->toDto(), $request->user()->id);
         
-        $updatedRecord = $this->repository->findByIdWithRelations($record->id, ['bank', 'options']);
+        $updatedRecord = $this->repository->findByIdWithRelations($record->id, ['bank', 'options', 'competencies', 'tags']);
         
         return response()->json([
             'success' => true,
@@ -197,7 +197,7 @@ class QuestionController extends Controller
             $request->user()->id
         );
         
-        $clonedRecord->load(['bank', 'options']);
+        $clonedRecord->load(['bank', 'options', 'competencies', 'tags']);
         
         return response()->json([
             'success' => true,

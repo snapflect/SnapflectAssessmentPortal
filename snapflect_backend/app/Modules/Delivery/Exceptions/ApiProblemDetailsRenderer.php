@@ -84,10 +84,14 @@ class ApiProblemDetailsRenderer
         }
         
         if ($e instanceof ResumeException) {
-            if (str_contains($e->getMessage(), 'Cannot resume')) {
-                return 403; // EXPIRED or SUBMITTED
-            }
-            return 500;
+            return match ($e->getErrorCode()) {
+                ResumeException::ATTEMPT_EXPIRED => 403,
+                ResumeException::ATTEMPT_SUBMITTED => 403,
+                ResumeException::ATTEMPT_NOT_FOUND => 404,
+                ResumeException::SNAPSHOT_NOT_FOUND => 404,
+                ResumeException::INVALID_RESUME_STATE => 400,
+                default => 500,
+            };
         }
 
         return 500;

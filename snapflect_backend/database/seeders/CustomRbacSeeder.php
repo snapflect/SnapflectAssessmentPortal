@@ -43,62 +43,85 @@ class CustomRbacSeeder extends Seeder
         $permissions = [
             'Security' => [
                 'Security.Users.View', 'Security.Users.Manage', 
-                'Security.Roles.View', 'Security.Roles.Manage', 'Security.Permissions.Assign'
+                'Security.Roles.View', 'Security.Roles.Manage', 'Security.Permissions.View', 'Security.Permissions.Assign'
             ],
             'Governance' => [
                 'Governance.Organizations.View', 'Governance.Organizations.Manage', 
-                'Governance.BusinessUnits.Manage', 'Governance.Departments.Manage', 'Governance.Locations.Manage'
+                'Governance.BusinessUnits.View', 'Governance.BusinessUnits.Manage', 
+                'Governance.Departments.View', 'Governance.Departments.Manage', 
+                'Governance.Locations.View', 'Governance.Locations.Manage'
             ],
             'Assessment' => [
-                'Assessment.QuestionBanks.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 
-                'Assessment.Competencies.Manage', 'Assessment.Catalog.Manage', 
-                'Assessment.Blueprints.Manage', 'Assessment.Publications.Manage'
+                'Assessment.QuestionBanks.View', 'Assessment.QuestionBanks.Manage', 
+                'Assessment.Questions.View', 'Assessment.Questions.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 
+                'Assessment.Competencies.View', 'Assessment.Competencies.Manage', 
+                'Assessment.Catalog.View', 'Assessment.Catalog.Manage', 
+                'Assessment.Blueprints.View', 'Assessment.Blueprints.Manage', 
+                'Assessment.Publications.View', 'Assessment.Publications.Manage',
+                'Assessment.Metadata.Manage'
             ],
             'Delivery' => [
-                'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate', 'Delivery.MyAssessments.Take'
+                'Delivery.Sessions.View', 'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate', 'Delivery.MyAssessments.Take'
             ],
             'Results' => [
                 'Results.Analytics.View', 'Results.Analytics.Export', 'Results.ManualScoring.Score', 
-                'Results.MyResults.View', 'Results.Certificates.View'
+                'Results.MyResults.View', 'Results.AllResults.View', 'Results.Certificates.View', 'Results.Certificates.Manage'
             ],
             'Billing' => [
                 'Billing.Invoices.View', 'Billing.Subscription.Manage'
+            ],
+            'Support' => [
+                'Support.Tickets.View', 'Support.Tickets.Manage', 'Support.Tickets.Create'
             ]
         ];
 
         $roleAssignments = [
             'CLIENT_ADMIN' => [
-                'Security.Users.View', 'Security.Users.Manage', 'Security.Roles.View', 'Security.Roles.Manage',
-                'Governance.BusinessUnits.Manage', 'Governance.Departments.Manage', 'Governance.Locations.Manage',
-                'Assessment.QuestionBanks.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 'Assessment.Competencies.Manage', 'Assessment.Catalog.Manage', 'Assessment.Blueprints.Manage', 'Assessment.Publications.Manage',
-                'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate',
-                'Results.Analytics.View', 'Results.Analytics.Export', 'Results.ManualScoring.Score',
-                'Billing.Invoices.View', 'Billing.Subscription.Manage'
+                'Security.Users.View', 'Security.Users.Manage', 'Security.Roles.View', 'Security.Roles.Manage', 'Security.Permissions.View', 'Security.Permissions.Assign',
+                'Governance.BusinessUnits.View', 'Governance.BusinessUnits.Manage', 'Governance.Departments.View', 'Governance.Departments.Manage', 'Governance.Locations.View', 'Governance.Locations.Manage',
+                'Assessment.QuestionBanks.View', 'Assessment.QuestionBanks.Manage', 'Assessment.Questions.View', 'Assessment.Questions.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 'Assessment.Competencies.View', 'Assessment.Competencies.Manage', 'Assessment.Catalog.View', 'Assessment.Catalog.Manage', 'Assessment.Blueprints.View', 'Assessment.Blueprints.Manage', 'Assessment.Publications.View', 'Assessment.Publications.Manage',
+                'Assessment.Metadata.Manage',
+                'Delivery.Sessions.View', 'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate',
+                'Results.Analytics.View', 'Results.Analytics.Export', 'Results.ManualScoring.Score', 'Results.AllResults.View', 'Results.Certificates.View', 'Results.Certificates.Manage',
+                'Billing.Invoices.View', 'Billing.Subscription.Manage',
+                'Support.Tickets.View', 'Support.Tickets.Manage', 'Support.Tickets.Create'
             ],
             'ASSESSMENT_MANAGER' => [
-                'Assessment.QuestionBanks.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 'Assessment.Competencies.Manage', 'Assessment.Catalog.Manage', 'Assessment.Blueprints.Manage', 'Assessment.Publications.Manage',
-                'Results.Analytics.View', 'Results.Analytics.Export', 'Results.ManualScoring.Score'
+                'Assessment.QuestionBanks.View', 'Assessment.QuestionBanks.Manage', 'Assessment.Questions.View', 'Assessment.Questions.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 'Assessment.Competencies.View', 'Assessment.Competencies.Manage', 'Assessment.Catalog.View', 'Assessment.Catalog.Manage', 'Assessment.Blueprints.View', 'Assessment.Blueprints.Manage', 'Assessment.Publications.View', 'Assessment.Publications.Manage',
+                'Results.Analytics.View', 'Results.Analytics.Export', 'Results.ManualScoring.Score', 'Results.AllResults.View',
+                'Support.Tickets.Create'
             ],
             'CONTENT_CREATOR' => [
-                'Assessment.QuestionBanks.Manage', 'Assessment.Questions.Create', 'Assessment.Competencies.Manage', 'Assessment.Catalog.Manage'
+                'Assessment.QuestionBanks.View', 'Assessment.QuestionBanks.Manage', 'Assessment.Questions.View', 'Assessment.Questions.Create', 'Assessment.Competencies.View', 'Assessment.Competencies.Manage', 'Assessment.Catalog.View', 'Assessment.Catalog.Manage',
+                'Support.Tickets.Create'
             ],
             'REVIEWER' => [
-                'Assessment.Questions.Review', 'Results.ManualScoring.Score'
+                'Assessment.Questions.View', 'Assessment.Questions.Review', 'Results.ManualScoring.Score',
+                'Support.Tickets.Create'
             ],
             'CANDIDATE' => [
-                'Delivery.MyAssessments.Take', 'Results.MyResults.View', 'Results.Certificates.View'
+                'Delivery.MyAssessments.Take', 'Results.MyResults.View', 'Results.Certificates.View',
+                'Support.Tickets.Create'
             ],
             'PROCTOR' => [
-                'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate'
+                'Delivery.Sessions.View', 'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate',
+                'Support.Tickets.Create'
             ],
             'SUPPORT' => [
-                'Security.Users.View', 'Delivery.Sessions.Proctor'
+                'Security.Users.View', 'Delivery.Sessions.View', 'Delivery.Sessions.Proctor',
+                'Support.Tickets.View', 'Support.Tickets.Manage', 'Support.Tickets.Create'
             ],
             'BILLING_ADMIN' => [
-                'Billing.Invoices.View', 'Billing.Subscription.Manage'
+                'Billing.Invoices.View', 'Billing.Subscription.Manage',
+                'Support.Tickets.Create'
             ],
             'READ_ONLY' => [
-                'Governance.Organizations.View'
+                'Governance.Organizations.View', 'Governance.BusinessUnits.View', 'Governance.Departments.View', 'Governance.Locations.View',
+                'Security.Users.View', 'Security.Roles.View', 'Security.Permissions.View',
+                'Assessment.QuestionBanks.View', 'Assessment.Questions.View', 'Assessment.Competencies.View', 'Assessment.Catalog.View', 'Assessment.Blueprints.View', 'Assessment.Publications.View',
+                'Results.AllResults.View', 'Results.Analytics.View',
+                'Support.Tickets.Create',
+                'Delivery.Sessions.View', 'Billing.Invoices.View'
             ]
         ];
 

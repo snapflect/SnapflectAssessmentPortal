@@ -14,6 +14,8 @@ readonly class RandomizationResultDto
         public bool $questionRandomized,
         public bool $optionRandomized,
         public string $randomizedAt,
+        public ?string $startedAt,
+        public ?string $expiresAt,
         public ?string $snapshotJson = null
     ) {
     }

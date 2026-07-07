@@ -31,13 +31,31 @@ class EvaluationService
             $rawScore = 0.0;
         }
 
-        $percentage = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0.0;
-        $percentage = round($percentage, 2);
-
         $scoringRules = $blueprint['scoring_rules'] ?? [];
+        $scoringModel = $scoringRules['scoring_model'] ?? 'STANDARD_SUM';
+
+        if ($scoringModel === 'WEIGHTED_COMPETENCIES' && !empty($competencyScores)) {
+            $weightedPercentage = 0.0;
+            $totalWeight = 0.0;
+
+            foreach ($competencyScores as $cs) {
+                $weightedPercentage += ($cs->percentage * $cs->weight);
+                $totalWeight += $cs->weight;
+            }
+
+            if ($totalWeight > 0) {
+                $percentage = $weightedPercentage / $totalWeight;
+            } else {
+                $percentage = 0.0;
+            }
+            $percentage = round($percentage, 2);
+        } else {
+            $percentage = $maxScore > 0 ? ($rawScore / $maxScore) * 100 : 0.0;
+            $percentage = round($percentage, 2);
+        }
         
         // 1. Evaluate Overall Score Threshold
-        $passThreshold = (float) ($scoringRules['pass_threshold_percentage'] ?? 0.0);
+        $passThreshold = (float) ($blueprint['passing_threshold'] ?? $scoringRules['pass_threshold_percentage'] ?? 0.0);
         $scorePassed = $percentage >= $passThreshold;
 
         // 2. Evaluate Competency Rules

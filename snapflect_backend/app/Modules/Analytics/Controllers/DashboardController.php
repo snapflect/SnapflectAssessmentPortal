@@ -56,7 +56,7 @@ class DashboardController extends Controller
         ];
 
         // Safe helpers
-        $orgCount = class_exists(\App\Modules\Governance\Models\Organization::class) ? \App\Modules\Governance\Models\Organization::where('is_deleted', false)->count() : 0;
+        $orgCount = class_exists(\App\Modules\Governance\Models\Organization::class) ? \App\Modules\Governance\Models\Organization::where('is_deleted', false)->where('id', '!=', 1)->count() : 0;
         $userCount = class_exists(\App\Modules\Security\Models\User::class) ? \App\Modules\Security\Models\User::where('is_deleted', false)->count() : 0;
         $tenantUserCount = class_exists(\App\Modules\Security\Models\User::class) ? \App\Modules\Security\Models\User::where('organization_id', $orgId)->where('is_deleted', false)->count() : 0;
         
@@ -85,13 +85,51 @@ class DashboardController extends Controller
                 $data['assessments_count'] = $tenantAssessmentCount;
                 $data['pending_reviews'] = $tenantPendingReviews;
                 $data['active_sessions'] = $tenantActiveSessions;
+                
+                // Add required frontend stats
+                $data['total_assessments'] = $tenantAssessmentCount;
+                $data['total_attempts'] = class_exists(\App\Modules\Delivery\Models\AssessmentAttempt::class) 
+                    ? \App\Modules\Delivery\Models\AssessmentAttempt::where('organization_id', $orgId)->where('status', 'SCORED')->count() 
+                    : 0;
+
+                // Calculate passed/failed/average based on latest result per attempt
+                $latestResults = \Illuminate\Support\Facades\DB::table('assessment_results as ar1')
+                    ->where('ar1.organization_id', $orgId)
+                    ->where('ar1.is_deleted', 0)
+                    ->whereRaw('ar1.id = (SELECT MAX(ar2.id) FROM assessment_results ar2 WHERE ar2.assessment_attempt_id = ar1.assessment_attempt_id AND ar2.is_deleted = 0)')
+                    ->select('ar1.pass_fail_status', 'ar1.overall_percentage')
+                    ->get();
+                
+                $data['total_passed'] = $latestResults->where('pass_fail_status', 'PASS')->count();
+                $data['total_failed'] = $latestResults->where('pass_fail_status', 'FAIL')->count();
+                $data['average_score'] = $latestResults->count() > 0 ? round($latestResults->avg('overall_percentage'), 2) : 0;
+                $data['pass_rate'] = $data['total_attempts'] > 0 ? round(($data['total_passed'] / $data['total_attempts']) * 100, 2) : 0;
                 break;
 
             case 'ASSESSMENT_MANAGER':
                 $data['assessments_count'] = $tenantAssessmentCount;
                 $data['active_question_banks'] = class_exists(\App\Modules\Assessment\Models\QuestionBank::class) ? \App\Modules\Assessment\Models\QuestionBank::where('organization_id', $orgId)->count() : 0;
                 $data['pending_reviews'] = $tenantPendingReviews;
-                $data['total_attempts'] = $tenantAttempts;
+                $data['active_sessions'] = $tenantActiveSessions;
+                
+                // Add required frontend stats (same logic as CLIENT_ADMIN)
+                $data['total_assessments'] = $tenantAssessmentCount;
+                $data['total_attempts'] = class_exists(\App\Modules\Delivery\Models\AssessmentAttempt::class) 
+                    ? \App\Modules\Delivery\Models\AssessmentAttempt::where('organization_id', $orgId)->where('status', 'SCORED')->count() 
+                    : 0;
+
+                // Calculate passed/failed/average based on latest result per attempt
+                $latestResults = \Illuminate\Support\Facades\DB::table('assessment_results as ar1')
+                    ->where('ar1.organization_id', $orgId)
+                    ->where('ar1.is_deleted', 0)
+                    ->whereRaw('ar1.id = (SELECT MAX(ar2.id) FROM assessment_results ar2 WHERE ar2.assessment_attempt_id = ar1.assessment_attempt_id AND ar2.is_deleted = 0)')
+                    ->select('ar1.pass_fail_status', 'ar1.overall_percentage')
+                    ->get();
+                
+                $data['total_passed'] = $latestResults->where('pass_fail_status', 'PASS')->count();
+                $data['total_failed'] = $latestResults->where('pass_fail_status', 'FAIL')->count();
+                $data['average_score'] = $latestResults->count() > 0 ? round($latestResults->avg('overall_percentage'), 2) : 0;
+                $data['pass_rate'] = $data['total_attempts'] > 0 ? round(($data['total_passed'] / $data['total_attempts']) * 100, 2) : 0;
                 break;
 
             case 'CONTENT_CREATOR':
@@ -104,46 +142,54 @@ class DashboardController extends Controller
             case 'REVIEWER':
                 $data['pending_reviews'] = $tenantPendingReviews;
                 $data['completed_reviews'] = class_exists(\App\Modules\Results\Models\ManualScoreReview::class) ? \App\Modules\Results\Models\ManualScoreReview::where('organization_id', $orgId)->where('review_status', 'COMPLETED')->count() : 0;
-                $data['average_score_awarded'] = 75; // Mocked for now
+                $data['average_score_awarded'] = 82; // Mocked for now
+                $data['turnaround_time'] = '24h'; // Mocked
+                $data['priority_queue'] = [
+                    ['uuid' => 'REV-1', 'candidate_name' => 'John Doe', 'assessment_name' => 'Software Engineering Written Exam', 'date_submitted' => now()->subHours(2)->diffForHumans(), 'status' => 'Pending'],
+                    ['uuid' => 'REV-2', 'candidate_name' => 'Sarah Connor', 'assessment_name' => 'Security Fundamentals', 'date_submitted' => now()->subHours(5)->diffForHumans(), 'status' => 'Pending'],
+                    ['uuid' => 'REV-3', 'candidate_name' => 'Alex Johnson', 'assessment_name' => 'UI/UX Design Challenge', 'date_submitted' => now()->subDays(1)->diffForHumans(), 'status' => 'Overdue'],
+                ];
+                $data['reviewer_chart'] = [
+                    'categories' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    'series' => [
+                        ['name' => 'Reviews Assigned', 'data' => [12, 19, 15, 22, 14, 5, 8]],
+                        ['name' => 'Reviews Completed', 'data' => [10, 15, 18, 20, 12, 4, 9]]
+                    ]
+                ];
                 break;
 
             case 'CANDIDATE':
-                $data['pending_assessments'] = 0;
-                $data['completed_assessments'] = 0;
-                $data['certificates_earned'] = 0;
+                $completed = 0;
+                $certificates = 0;
+                $pending = 0;
+                
+                // Completed Assessments (Unique assessments taken)
+                $completed = \Illuminate\Support\Facades\DB::table('assessment_results')
+                    ->join('assessment_attempts', 'assessment_results.assessment_attempt_id', '=', 'assessment_attempts.id')
+                    ->where('assessment_results.candidate_user_id', $user->id)
+                    ->distinct('assessment_attempts.assessment_id')
+                    ->count('assessment_attempts.assessment_id');
+
+                // Certificates Earned
+                $certificates = \Illuminate\Support\Facades\DB::table('certificates')
+                    ->join('assessment_results', 'certificates.assessment_result_id', '=', 'assessment_results.id')
+                    ->where('assessment_results.candidate_user_id', $user->id)
+                    ->where('certificates.status', 'ACTIVE')
+                    ->where('certificates.is_deleted', false)
+                    ->count();
+
+                // Pending Assessments
+                // We'll count publications assigned to this user that are active/scheduled.
+                $pending = \Illuminate\Support\Facades\DB::table('publication_candidates')
+                    ->join('assessment_publications', 'publication_candidates.publication_id', '=', 'assessment_publications.id')
+                    ->where('publication_candidates.candidate_id', $user->id)
+                    ->whereIn('assessment_publications.status', ['ACTIVE', 'SCHEDULED'])
+                    ->count();
+
+                $data['completed_assessments'] = $completed;
+                $data['certificates_earned'] = $certificates;
+                $data['pending_assessments'] = $pending;
                 $data['upcoming_sessions'] = [];
-
-                if (class_exists(\App\Modules\Results\Models\AssessmentResult::class)) {
-                    $data['completed_assessments'] = \App\Modules\Results\Models\AssessmentResult::where('candidate_id', $user->id)->count();
-                }
-
-                // Upcoming scheduled sessions for this candidate
-                if (class_exists(\App\Modules\Delivery\Models\AssessmentSession::class)) {
-                    $sessions = \App\Modules\Delivery\Models\AssessmentSession::where('candidate_id', $user->id)
-                        ->whereIn('status', ['SCHEDULED', 'IN_PROGRESS'])
-                        ->with('assessment')
-                        ->orderBy('scheduled_at')
-                        ->limit(5)
-                        ->get();
-
-                    $data['pending_assessments'] = $sessions->count();
-                    $data['upcoming_sessions'] = $sessions->map(function ($s) {
-                        return [
-                            'assessment_name' => $s->assessment->name ?? $s->assessment->title ?? 'Assessment',
-                            'scheduled_date'  => $s->scheduled_at ? $s->scheduled_at->format('d M Y, H:i') : 'TBD',
-                            'status'          => $s->status,
-                        ];
-                    })->values()->toArray();
-                } else {
-                    // Mocked fallback for development
-                    $data['pending_assessments'] = 2;
-                    $data['completed_assessments'] = 5;
-                    $data['certificates_earned'] = 1;
-                    $data['upcoming_sessions'] = [
-                        ['assessment_name' => 'Angular Developer Assessment', 'scheduled_date' => '05 Jul 2026, 10:00', 'status' => 'SCHEDULED'],
-                        ['assessment_name' => 'Problem Solving Test',         'scheduled_date' => '08 Jul 2026, 14:00', 'status' => 'SCHEDULED'],
-                    ];
-                }
                 break;
 
             case 'PROCTOR':
@@ -153,21 +199,46 @@ class DashboardController extends Controller
                 break;
 
             case 'BILLING_ADMIN':
-                $data['active_subscriptions'] = 5; // Mocked
-                $data['pending_invoices'] = 2; // Mocked
-                $data['organizations_count'] = $orgCount;
+                if ($orgId === 1) {
+                    $data['active_subscriptions'] = class_exists(\App\Modules\Billing\Models\TenantSubscription::class) ? \App\Modules\Billing\Models\TenantSubscription::where('status', 'ACTIVE')->count() : 0;
+                    $data['pending_invoices'] = class_exists(\App\Modules\Billing\Models\Invoice::class) ? \App\Modules\Billing\Models\Invoice::whereIn('status', ['DRAFT', 'OVERDUE'])->count() : 0;
+                    $data['organizations_count'] = $orgCount;
+                    $data['is_platform_billing_admin'] = true;
+                } else {
+                    $data['active_subscriptions'] = class_exists(\App\Modules\Billing\Models\TenantSubscription::class) ? \App\Modules\Billing\Models\TenantSubscription::where('organization_id', $orgId)->where('status', 'ACTIVE')->count() : 0;
+                    $data['pending_invoices'] = class_exists(\App\Modules\Billing\Models\Invoice::class) ? \App\Modules\Billing\Models\Invoice::where('organization_id', $orgId)->whereIn('status', ['DRAFT', 'OVERDUE'])->count() : 0;
+                    $data['is_platform_billing_admin'] = false;
+                }
                 break;
 
             case 'READ_ONLY':
-                $data['organizations_count'] = $orgCount;
-                $data['users_count'] = $userCount;
-                $data['assessments_count'] = $assessmentCount;
+                $isPlatformAdmin = in_array('PLATFORM_ADMIN', $availableRoles);
+                $isPlatformWideReadOnly = $isPlatformAdmin || $orgId === 1;
+
+                if ($isPlatformWideReadOnly) {
+                    $data['organizations_count'] = $orgCount;
+                    $data['users_count'] = $userCount;
+                    $data['assessments_count'] = $assessmentCount;
+                } else {
+                    $data['organizations_count'] = 1;
+                    $data['users_count'] = $tenantUserCount;
+                    $data['assessments_count'] = $tenantAssessmentCount;
+                }
                 break;
 
             case 'SUPPORT':
-                $data['users_count'] = $userCount;
-                $data['active_sessions'] = $activeSessions;
-                $data['open_tickets'] = 12; // Mocked
+                $isPlatformAdmin = in_array('PLATFORM_ADMIN', $availableRoles);
+                $isPlatformWideSupport = $isPlatformAdmin || $orgId === 1;
+
+                if ($isPlatformWideSupport) {
+                    $data['users_count'] = $userCount;
+                    $data['active_sessions'] = $activeSessions;
+                    $data['open_tickets'] = class_exists(\App\Modules\Support\Models\SupportTicket::class) ? \App\Modules\Support\Models\SupportTicket::where('status', 'OPEN')->count() : 12;
+                } else {
+                    $data['users_count'] = $tenantUserCount;
+                    $data['active_sessions'] = $tenantActiveSessions;
+                    $data['open_tickets'] = class_exists(\App\Modules\Support\Models\SupportTicket::class) ? \App\Modules\Support\Models\SupportTicket::where('organization_id', $orgId)->where('status', 'OPEN')->count() : 12;
+                }
                 break;
         }
 
@@ -198,8 +269,11 @@ class DashboardController extends Controller
 
             // User Growth (Attempts over last 6 months)
             $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
-            $attemptsByMonth = \App\Modules\Delivery\Models\AssessmentAttempt::where('created_date', '>=', $sixMonthsAgo)
-                ->selectRaw($selectMonth)
+            $queryMonth = \App\Modules\Delivery\Models\AssessmentAttempt::where('created_date', '>=', $sixMonthsAgo);
+            if ($orgId !== 1) {
+                $queryMonth->where('organization_id', $orgId);
+            }
+            $attemptsByMonth = $queryMonth->selectRaw($selectMonth)
                 ->groupBy('year', 'month')
                 ->orderBy('year')
                 ->orderBy('month')
@@ -224,8 +298,11 @@ class DashboardController extends Controller
 
             // Completion Rates (Last 4 weeks)
             $fourWeeksAgo = now()->subWeeks(3)->startOfWeek();
-            $attemptsByWeek = \App\Modules\Delivery\Models\AssessmentAttempt::where('created_date', '>=', $fourWeeksAgo)
-                ->selectRaw($selectWeek)
+            $queryWeek = \App\Modules\Delivery\Models\AssessmentAttempt::where('created_date', '>=', $fourWeeksAgo);
+            if ($orgId !== 1) {
+                $queryWeek->where('organization_id', $orgId);
+            }
+            $attemptsByWeek = $queryWeek->selectRaw($selectWeek)
                 ->groupBy('year', 'week', 'status')
                 ->orderBy('year')
                 ->orderBy('week')

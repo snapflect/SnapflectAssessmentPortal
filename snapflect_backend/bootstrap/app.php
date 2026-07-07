@@ -13,8 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'subscription.active' => \App\Http\Middleware\EnsureActiveSubscription::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (Throwable $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*')) {
+                return \App\Modules\Delivery\Exceptions\ApiProblemDetailsRenderer::render($request, $e);
+            }
+            return null;
+        });
     })->create();

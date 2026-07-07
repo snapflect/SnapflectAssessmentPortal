@@ -36,7 +36,7 @@ class TimerPolicyHelper
             return 0;
         }
 
-        return Carbon::now()->diffInSeconds($attempt->expires_at, false);
+        return (int) Carbon::now('UTC')->diffInSeconds($attempt->expires_at, false);
     }
 
     /**

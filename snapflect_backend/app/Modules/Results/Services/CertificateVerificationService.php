@@ -42,8 +42,10 @@ class CertificateVerificationService
                 'certificates.status',
                 'certificates.issued_at',
                 'certificates.storage_path',
-                'users.name as candidate_name',
-                'assessments.title as assessment_name'
+                'certificates.storage_path',
+                'users.first_name',
+                'users.last_name',
+                'assessments.assessment_name'
             );
 
         if ($ownerUserId !== null) {
@@ -61,9 +63,9 @@ class CertificateVerificationService
             verificationCode: $cert->verification_code,
             status: $cert->status, // 'VALID' or 'REVOKED'
             issuedAt: $cert->issued_at,
-            candidateName: $cert->candidate_name,
+            candidateName: preg_replace('/\s+/', ' ', trim($cert->first_name . ' ' . $cert->last_name)),
             assessmentName: $cert->assessment_name,
-            downloadUrl: Storage::disk('s3')->url($cert->storage_path)
+            downloadUrl: $cert->storage_path
         );
     }
 }

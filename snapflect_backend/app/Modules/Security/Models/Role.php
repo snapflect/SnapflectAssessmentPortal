@@ -11,10 +11,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Role extends Model
 {
-    use HasUuid, HasAuditFields;
+    use HasFactory, HasUuid, HasAuditFields;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\RoleFactory::new();
+    }
 
     public const DELETED_AT = 'deleted_date';
     public const CREATED_AT = 'created_date';

@@ -77,56 +77,90 @@ export class NavigationService {
 
     // ── Governance ────────────────────────────────────────────────────────
     { name: 'Organizations',     path: '/governance/organizations',  icon: this.icons.organization,   group: 'Governance',  permissions: ['Governance.Organizations.View', 'Governance.Organizations.Manage'] },
-    { name: 'Business Units',    path: '/governance/business-units', icon: this.icons.businessUnits,  group: 'Governance',  permissions: ['Governance.BusinessUnits.Manage'] },
-    { name: 'Departments',       path: '/governance/departments',    icon: this.icons.department,     group: 'Governance',  permissions: ['Governance.Departments.Manage'] },
-    { name: 'Locations',         path: '/governance/locations',      icon: this.icons.locations,      group: 'Governance',  permissions: ['Governance.Locations.Manage'] },
+    { name: 'Business Units',    path: '/governance/business-units', icon: this.icons.businessUnits,  group: 'Governance',  permissions: ['Governance.BusinessUnits.View', 'Governance.BusinessUnits.Manage'] },
+    { name: 'Departments',       path: '/governance/departments',    icon: this.icons.department,     group: 'Governance',  permissions: ['Governance.Departments.View', 'Governance.Departments.Manage'] },
+    { name: 'Locations',         path: '/governance/locations',      icon: this.icons.locations,      group: 'Governance',  permissions: ['Governance.Locations.View', 'Governance.Locations.Manage'] },
     { name: 'Users',             path: '/governance/users',          icon: this.icons.users,          group: 'Governance',  permissions: ['Security.Users.View', 'Security.Users.Manage'] },
     { name: 'Roles',             path: '/governance/roles',          icon: this.icons.scoring,        group: 'Governance',  permissions: ['Security.Roles.View', 'Security.Roles.Manage'] },
-    { name: 'Permissions',       path: '/governance/permissions',    icon: this.icons.billing,        group: 'Governance',  permissions: ['Security.Permissions.Assign'] },
+    { name: 'Permissions',       path: '/governance/permissions',    icon: this.icons.billing,        group: 'Governance',  permissions: ['Security.Permissions.View', 'Security.Permissions.Assign'] },
 
     // ── Billing ───────────────────────────────────────────────────────────
-    { name: 'Subscriptions',     path: '/governance/billing/subscriptions',        icon: this.icons.billing,        group: 'Billing',     permissions: ['Billing.Subscription.Manage'] },
-    { name: 'Invoices',          path: '/governance/billing/invoices',        icon: this.icons.invoice,        group: 'Billing',     permissions: ['Billing.Invoices.View'] },
+    { name: 'Billing',           path: '/governance/billing',        icon: this.icons.billing,        group: 'Billing', permissions: ['Billing.Invoices.View', 'Billing.Subscription.Manage'] },
 
     // ── Authoring Studio ─────────────────────────────────────────────────
-    { name: 'Authoring Dashboard', path: '/authoring/dashboard',    icon: this.icons.dashboard,      group: 'Authoring',   permissions: ['Assessment.Catalog.Manage'] },
-    { name: 'Question Banks',    path: '/authoring/question-banks',  icon: this.icons.questionBanks,  group: 'Authoring',   permissions: ['Assessment.QuestionBanks.Manage'] },
-    { name: 'Questions',         path: '/authoring/questions',       icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Questions.Create', 'Assessment.Questions.Review'] },
-    { name: 'Categories',        path: '/authoring/categories',      icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Catalog.Manage'] },
-    { name: 'Types',             path: '/authoring/types',           icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Catalog.Manage'] },
-    { name: 'Competencies',      path: '/authoring/competencies',    icon: this.icons.results,        group: 'Authoring',   permissions: ['Assessment.Competencies.Manage'] },
-    { name: 'Assessment Catalog',path: '/authoring/assessments',     icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Catalog.Manage'] },
-    { name: 'Blueprint Designer',path: '/authoring/blueprints',      icon: this.icons.candidateAssessments, group: 'Authoring', permissions: ['Assessment.Blueprints.Manage'] },
-    { name: 'Publications',      path: '/authoring/publications',    icon: this.icons.publications,   group: 'Authoring',   permissions: ['Assessment.Publications.Manage'] },
+    { name: 'Authoring Dashboard', path: '/authoring/dashboard',    icon: this.icons.dashboard,      group: 'Authoring',   permissions: ['Assessment.Catalog.View', 'Assessment.Catalog.Manage'] },
+    { name: 'Assessment Catalog',path: '/authoring/assessments',     icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Catalog.View', 'Assessment.Catalog.Manage'] },
+    { name: 'Questions',         path: '/authoring/questions',       icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Questions.View', 'Assessment.Questions.Create'] },
+    { name: 'Question Banks',    path: '/authoring/question-banks',  icon: this.icons.questionBanks,  group: 'Authoring',   permissions: ['Assessment.QuestionBanks.View', 'Assessment.QuestionBanks.Manage'] },
+    { name: 'Question Tags',     path: '/authoring/question-tags',   icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Metadata.View', 'Assessment.Metadata.Manage'] }, // M-1 Fix: Taxonomy admin — restricted to CLIENT_ADMIN+ only
+    { name: 'Competencies',      path: '/authoring/competencies',    icon: this.icons.results,        group: 'Authoring',   permissions: ['Assessment.Competencies.View', 'Assessment.Competencies.Manage'] },
+    { name: 'Categories',        path: '/authoring/categories',      icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Metadata.View', 'Assessment.Metadata.Manage'] }, // M-2 Fix: System-level metadata — restricted to CLIENT_ADMIN+ only
+    { name: 'Types',             path: '/authoring/types',           icon: this.icons.assessments,    group: 'Authoring',   permissions: ['Assessment.Metadata.View', 'Assessment.Metadata.Manage'] }, // M-3 Fix: System-level metadata — restricted to CLIENT_ADMIN+ only
+    { name: 'Blueprint Designer',path: '/authoring/blueprints',      icon: this.icons.candidateAssessments, group: 'Authoring', permissions: ['Assessment.Blueprints.View', 'Assessment.Blueprints.Manage'] },
+    { name: 'Publications',      path: '/authoring/publications',    icon: this.icons.publications,   group: 'Authoring',   permissions: ['Assessment.Publications.View', 'Assessment.Publications.Manage'] },
 
     // ── Delivery & Scoring ────────────────────────────────────────────────
-    { name: 'Reviewer Dashboard',path: '/results/reviewer-dashboard',icon: this.icons.dashboard,      group: 'Delivery',    permissions: ['Results.ManualScoring.Score'] },
-    { name: 'Active Sessions',   path: '/delivery/proctoring',       icon: this.icons.activeSessions, group: 'Delivery',    permissions: ['Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate'] },
+    { name: 'Reviewer Dashboard',path: '/results/reviewer-dashboard',icon: this.icons.dashboard,      group: 'Delivery',    permissions: ['Results.ManualScoring.Score'] }, // H-1: Filtered separately for AM in navGroups computed
+    { name: 'Active Sessions',   path: '/delivery/proctoring',       icon: this.icons.activeSessions, group: 'Delivery',    permissions: ['Delivery.Sessions.View', 'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate'] },
+    { name: 'Session Management',path: '/delivery/sessions',         icon: this.icons.activeSessions, group: 'Delivery',    permissions: ['Delivery.Sessions.View', 'Delivery.Sessions.Proctor', 'Delivery.Sessions.Terminate'] }, // H-2 Fix: Corrected guard — delivery/ops permission, not publish permission
     { name: 'Manual Scoring',    path: '/scoring/manual',            icon: this.icons.scoring,        group: 'Delivery',    permissions: ['Results.ManualScoring.Score'] },
 
     // ── Analytics ─────────────────────────────────────────────────────────
     { name: 'Analytics & Results',path: '/results/analytics',        icon: this.icons.results,        group: 'Analytics',   permissions: ['Results.Analytics.View', 'Results.Analytics.Export'] },
 
     // ── Support Tools ─────────────────────────────────────────────────────
-    { name: 'User Lookup',       path: '/governance/user-lookup',    icon: this.icons.users,          group: 'Support',     permissions: ['Security.Users.View'] },
-    { name: 'Session Monitor',   path: '/delivery/monitor',          icon: this.icons.monitor,        group: 'Support',     permissions: ['Delivery.Sessions.Proctor'] },
+    { name: 'Ticket Queue',      path: '/support/tickets',           icon: this.icons.support,        group: 'Support Desk',permissions: ['Support.Tickets.View', 'Support.Tickets.Manage'] },
+    { name: 'User Lookup',       path: '/governance/user-lookup',    icon: this.icons.users,          group: 'Support Desk',permissions: ['Security.Users.View'] },
+    { name: 'Session Monitor',   path: '/delivery/monitor',          icon: this.icons.monitor,        group: 'Support Desk',permissions: ['Delivery.Sessions.View', 'Delivery.Sessions.Proctor'] },
 
     // ── Learner Portal (CANDIDATE) ────────────────────────────────────────
     { name: 'My Assessments',    path: '/delivery/dashboard',        icon: this.icons.candidateAssessments, group: 'Learner Portal', permissions: ['Delivery.MyAssessments.Take'] },
-    { name: 'My Results',        path: '/results/candidate',         icon: this.icons.results,        group: 'Learner Portal', permissions: ['Results.MyResults.View'] },
-    { name: 'My Certificates',   path: '/certificates',              icon: this.icons.certificates,   group: 'Learner Portal', permissions: ['Results.Certificates.View'] },
+    { name: 'My Results',        path: '/results/candidate',         icon: this.icons.certificates,         group: 'Learner Portal', permissions: ['Results.MyResults.View'] },
+    
+    // ── Help & Support ────────────────────────────────────────────────────
+    { name: 'My Tickets',        path: '/support/tickets',           icon: this.icons.support,        group: 'Help & Support', permissions: ['Support.Tickets.Create'] },
   ];
 
   public navGroups = computed<NavGroup[]>(() => {
     const profile = this.userStore.profile();
 
+    // For pure CANDIDATE: hide Admin groups
+    // For pure CONTENT_CREATOR: hide global dashboard link in favor of Authoring Dashboard
+    const isOnlyCandidate = profile?.roles?.length === 1 && profile.roles[0] === 'CANDIDATE';
+    const isOnlyContentCreator = profile?.roles?.length === 1 && profile.roles[0] === 'CONTENT_CREATOR';
+    const isOnlyReviewer = profile?.roles?.length === 1 && profile.roles[0] === 'REVIEWER';
+    const isOnlyAssessmentManager = profile?.roles?.length === 1 && profile.roles[0] === 'ASSESSMENT_MANAGER';
+    const isOnlyProctor = profile?.roles?.length === 1 && profile.roles[0] === 'PROCTOR';
+    const adminOnlyGroups = ['Governance', 'Authoring', 'Delivery', 'Analytics', 'Billing', 'Support Desk'];
+
     const allowedLinks = this.allLinks.filter(link => {
+      // Hide global Dashboard for pure Content Creators, Reviewers, Assessment Managers, and Proctors
+      if (link.name === 'Dashboard' && (isOnlyContentCreator || isOnlyReviewer || isOnlyAssessmentManager || isOnlyProctor)) {
+        return false;
+      }
+      if (link.name === 'Billing' && this.userStore.hasAnyRole(['PLATFORM_ADMIN'])) {
+        return false;
+      }
+      // H-1 Fix: Reviewer Dashboard is a task-queue for Reviewers only.
+      // Assessment Manager shares Results.ManualScoring.Score but should NOT see this item.
+      if (link.name === 'Reviewer Dashboard' && isOnlyAssessmentManager) {
+        return false;
+      }
+      if (link.name === 'My Tickets' && this.userStore.hasAnyPermission(['Support.Tickets.View'])) {
+        // Hide "My Tickets" if they already have access to the full "Ticket Queue"
+        return false;
+      }
+      if ((link.group === 'Support Desk' || link.group === 'Help & Support') && this.userStore.hasAnyRole(['READ_ONLY'])) {
+        // Hide all Support-related menus for READ_ONLY users. 
+        // Even though they have Security.Users.View (which allows User Lookup), they shouldn't see Support Desk.
+        return false;
+      }
       if (!link.permissions || link.permissions.length === 0) return true; // no restriction
       return this.userStore.hasAnyPermission(link.permissions);
     });
 
     const groupsMap = new Map<string, NavLink[]>();
-    const groupOrder = ['Home', 'Governance', 'Billing', 'Authoring', 'Delivery', 'Analytics', 'Support', 'Learner Portal'];
+    const groupOrder = ['Home', 'Governance', 'Billing', 'Authoring', 'Delivery', 'Analytics', 'Support Desk', 'Learner Portal', 'Help & Support'];
 
     allowedLinks.forEach(link => {
       const g = link.group || 'Other';
@@ -145,10 +179,6 @@ export class NavigationService {
       }));
     });
 
-    // For CANDIDATE: hide Support/Delivery/Admin groups entirely even if some leak through
-    const isOnlyCandidate = profile?.roles?.length === 1 && profile.roles[0] === 'CANDIDATE';
-    const adminOnlyGroups = ['Governance', 'Authoring', 'Delivery', 'Analytics', 'Billing', 'Support'];
-    
     const result: NavGroup[] = [];
     groupOrder.forEach(g => {
       if (isOnlyCandidate && adminOnlyGroups.includes(g)) return; // hide admin groups for pure candidates

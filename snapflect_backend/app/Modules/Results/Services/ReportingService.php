@@ -16,103 +16,79 @@ class ReportingService
 {
     public function assessmentReport(ResultFilterDto $filter, int $organizationId, int $userId): Collection
     {
-        return new Collection([
-            [
-                'assessment_name' => 'Angular Developer Assessment',
-                'total_attempts' => 150,
-                'completed' => 120,
-                'pass_rate' => 75.5,
-                'average_score' => 82.3,
-            ],
-            [
-                'assessment_name' => 'Java Programming Basics',
-                'total_attempts' => 85,
-                'completed' => 80,
-                'pass_rate' => 90.0,
-                'average_score' => 88.1,
-            ],
-            [
-                'assessment_name' => 'React Frontend Interview',
-                'total_attempts' => 200,
-                'completed' => 180,
-                'pass_rate' => 60.5,
-                'average_score' => 65.4,
-            ]
-        ]);
+        $query = \App\Modules\Results\Models\AssessmentResult::query()
+            ->where('assessment_results.organization_id', $organizationId)
+            ->join('assessments', 'assessment_results.assessment_id', '=', 'assessments.id')
+            ->select(
+                'assessments.assessment_name as assessment_name',
+                \Illuminate\Support\Facades\DB::raw('COUNT(assessment_results.id) as total_attempts'),
+                \Illuminate\Support\Facades\DB::raw('SUM(CASE WHEN assessment_results.result_status = \'COMPLETED\' THEN 1 ELSE 0 END) as completed'),
+                \Illuminate\Support\Facades\DB::raw('ROUND(AVG(assessment_results.overall_percentage), 2) as average_score'),
+                \Illuminate\Support\Facades\DB::raw('ROUND(SUM(CASE WHEN assessment_results.pass_fail_status = \'PASS\' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(assessment_results.id), 0), 2) as pass_rate')
+            )
+            ->groupBy('assessments.id', 'assessments.assessment_name');
+
+        if ($filter->assessment_uuid) {
+            $query->where('assessments.uuid', $filter->assessment_uuid);
+        }
+
+        return $query->get();
     }
 
     public function competencyReport(ResultFilterDto $filter, int $organizationId, int $userId): Collection
     {
-        return new Collection([
-            [
-                'competency_name' => 'Frontend Architecture',
-                'average_score' => 78.5,
-                'candidates_evaluated' => 120,
-                'proficient_count' => 90,
-            ],
-            [
-                'competency_name' => 'State Management',
-                'average_score' => 65.2,
-                'candidates_evaluated' => 150,
-                'proficient_count' => 60,
-            ],
-            [
-                'competency_name' => 'UI/UX Implementation',
-                'average_score' => 88.9,
-                'candidates_evaluated' => 200,
-                'proficient_count' => 180,
-            ]
-        ]);
+        $query = \App\Modules\Results\Models\CompetencyScore::query()
+            ->where('competency_scores.organization_id', $organizationId)
+            ->join('competencies', 'competency_scores.competency_id', '=', 'competencies.id')
+            ->select(
+                'competencies.competency_name as competency_name',
+                \Illuminate\Support\Facades\DB::raw('ROUND(AVG(competency_scores.competency_percentage), 2) as average_score'),
+                \Illuminate\Support\Facades\DB::raw('COUNT(competency_scores.id) as candidates_evaluated'),
+                \Illuminate\Support\Facades\DB::raw('SUM(CASE WHEN competency_scores.competency_status = \'PASS\' OR competency_scores.competency_status = \'PROFICIENT\' OR competency_scores.competency_percentage >= competency_scores.threshold_score THEN 1 ELSE 0 END) as proficient_count')
+            )
+            ->groupBy('competencies.id', 'competencies.competency_name');
+
+        return $query->get();
     }
 
     public function passFailReport(ResultFilterDto $filter, int $organizationId, int $userId): Collection
     {
-        return new Collection([
-            [
-                'assessment_name' => 'Angular Developer Assessment',
-                'passed' => 90,
-                'failed' => 30,
-                'pass_percentage' => 75.0,
-            ],
-            [
-                'assessment_name' => 'Java Programming Basics',
-                'passed' => 72,
-                'failed' => 8,
-                'pass_percentage' => 90.0,
-            ],
-             [
-                'assessment_name' => 'React Frontend Interview',
-                'passed' => 108,
-                'failed' => 72,
-                'pass_percentage' => 60.0,
-            ]
-        ]);
+        $query = \App\Modules\Results\Models\AssessmentResult::query()
+            ->where('assessment_results.organization_id', $organizationId)
+            ->join('assessments', 'assessment_results.assessment_id', '=', 'assessments.id')
+            ->select(
+                'assessments.assessment_name as assessment_name',
+                \Illuminate\Support\Facades\DB::raw('SUM(CASE WHEN assessment_results.pass_fail_status = \'PASS\' THEN 1 ELSE 0 END) as passed'),
+                \Illuminate\Support\Facades\DB::raw('SUM(CASE WHEN assessment_results.pass_fail_status = \'FAIL\' THEN 1 ELSE 0 END) as failed'),
+                \Illuminate\Support\Facades\DB::raw('ROUND(SUM(CASE WHEN assessment_results.pass_fail_status = \'PASS\' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(assessment_results.id), 0), 2) as pass_percentage')
+            )
+            ->groupBy('assessments.id', 'assessments.assessment_name');
+
+        if ($filter->assessment_uuid) {
+            $query->where('assessments.uuid', $filter->assessment_uuid);
+        }
+
+        return $query->get();
     }
 
     public function candidateReport(ResultFilterDto $filter, int $organizationId, int $userId): Collection
     {
-        return new Collection([
-            [
-                'candidate_name' => 'John Doe',
-                'email' => 'john.doe@example.com',
-                'assessments_taken' => 3,
-                'average_score' => 85.5,
-                'passed_count' => 3,
-            ],
-            [
-                'candidate_name' => 'Jane Smith',
-                'email' => 'jane.smith@example.com',
-                'assessments_taken' => 2,
-                'average_score' => 60.0,
-                'passed_count' => 1,
-            ],
-            [
-                'candidate_name' => 'Alice Johnson',
-                'email' => 'alice.j@example.com',
-                'assessments_taken' => 5,
-                'average_score' => 92.0,
-                'passed_count' => 5,
-            ]
-        ]);
+        $query = \App\Modules\Results\Models\AssessmentResult::query()
+            ->where('assessment_results.organization_id', $organizationId)
+            ->join('users', 'assessment_results.candidate_user_id', '=', 'users.id')
+            ->select(
+                \Illuminate\Support\Facades\DB::raw("CONCAT(users.first_name, ' ', users.last_name) as candidate_name"),
+                'users.email',
+                \Illuminate\Support\Facades\DB::raw('COUNT(assessment_results.id) as assessments_taken'),
+                \Illuminate\Support\Facades\DB::raw('ROUND(AVG(assessment_results.overall_percentage), 2) as average_score'),
+                \Illuminate\Support\Facades\DB::raw('SUM(CASE WHEN assessment_results.pass_fail_status = \'PASS\' THEN 1 ELSE 0 END) as passed_count')
+            )
+            ->groupBy('users.id', 'users.first_name', 'users.last_name', 'users.email');
+
+        if ($filter->candidate_uuid) {
+            $query->where('users.uuid', $filter->candidate_uuid);
+        }
+
+        return $query->get();
     }
 }

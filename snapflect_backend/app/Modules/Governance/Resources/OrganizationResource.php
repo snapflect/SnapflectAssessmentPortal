@@ -23,6 +23,12 @@ class OrganizationResource extends JsonResource
                 'timezone' => $this->timezone,
                 'status' => $this->status,
                 'is_deleted' => $this->is_deleted,
+                'current_subscription' => $this->whenLoaded('currentSubscription', function () {
+                    return [
+                        'status' => $this->currentSubscription->status,
+                        'plan_name' => $this->currentSubscription->plan->plan_name ?? null,
+                    ];
+                }),
             ],
             'relationships' => [
                 'business_units_count' => $this->whenCounted('businessUnits'),

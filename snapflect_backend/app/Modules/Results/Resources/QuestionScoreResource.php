@@ -24,6 +24,7 @@ class QuestionScoreResource extends JsonResource
             'awarded_score' => $this->awarded_score,
             'percentage' => $this->percentage,
             'scoring_type' => $this->scoring_type,
+            'question_text' => $this->whenLoaded('question', fn() => $this->question->question_text),
             ],
             'relationships' => [
             ],

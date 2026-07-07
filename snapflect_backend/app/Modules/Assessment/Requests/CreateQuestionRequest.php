@@ -27,7 +27,7 @@ class CreateQuestionRequest extends FormRequest
             'explanation' => ['nullable', 'string', 'max:5000'],
             'max_score' => ['required', 'numeric', 'min:0'],
             'options' => [
-                'required',
+                Rule::requiredIf($this->input('question_type') !== 'ESSAY'),
                 'array',
                 Rule::when($this->input('question_type') !== 'ESSAY', ['min:1'])
             ],

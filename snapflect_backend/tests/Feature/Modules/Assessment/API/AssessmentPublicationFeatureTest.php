@@ -22,51 +22,49 @@ class AssessmentPublicationFeatureTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create([
-            'organization_id' => 1,
-        ]);
+        $this->user = User::factory()->create();
 
-        $this->assessment = Assessment::create([
-            'uuid' => Str::uuid()->toString(),
-            'organization_id' => 1,
+        $this->assessment = Assessment::factory()->create([
+            'organization_id' => $this->user->organization_id,
             'assessment_code' => 'PUB-001',
             'assessment_name' => 'Publication Test Assessment',
             'estimated_duration_minutes' => 60,
-            'is_published' => false,
-            'status' => 'draft',
-            'current_state' => 'DRAFT',
-            'created_by' => $this->user->id
+            'is_published'    => false,
+            'status'          => 'draft',
+            'current_state'   => 'DRAFT',
+            'created_by'      => $this->user->id,
         ]);
-        
-        Sanctum::actingAs($this->user, ['*']);
+
+        $this->actingAs($this->user);
     }
 
     public function test_tenant_isolation_prevents_publishing_other_org_assessment()
     {
-        $otherOrgAssessment = Assessment::create([
-            'uuid' => Str::uuid()->toString(),
-            'organization_id' => 2,
+        $otherOrg = \App\Modules\Governance\Models\Organization::factory()->create();
+
+        $otherOrgAssessment = Assessment::factory()->create([
+            'organization_id' => $otherOrg->id,
             'assessment_code' => 'PUB-002',
             'assessment_name' => 'Other Org Assessment',
             'estimated_duration_minutes' => 60,
-            'is_published' => false,
-            'status' => 'draft',
-            'current_state' => 'READY',
-            'created_by' => $this->user->id
+            'is_published'    => false,
+            'status'          => 'draft',
+            'current_state'   => 'READY',
+            'created_by'      => $this->user->id,
         ]);
 
         $response = $this->postJson("/api/v1/assessment/assessments/{$otherOrgAssessment->uuid}/publish");
 
-        $response->assertStatus(500); // Because it throws AssessmentPublicationException
+        $response->assertStatus(404); // Tenant isolation means they can't even see it
     }
 
     public function test_draft_to_ready_fails_validation()
     {
         // This assessment has no blueprint, so it fails validation
         $response = $this->postJson("/api/v1/assessment/assessments/{$this->assessment->uuid}/ready");
-        
-        $response->assertStatus(500);
-        
+
+        $response->assertStatus(422);
+
         $this->assessment->refresh();
         $this->assertEquals('DRAFT', $this->assessment->current_state);
     }

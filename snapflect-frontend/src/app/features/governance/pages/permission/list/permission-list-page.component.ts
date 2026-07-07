@@ -1,3 +1,4 @@
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -28,7 +29,7 @@ interface Permission {
           <h2 class="text-2xl font-bold text-main">System Permissions</h2>
           <p class="text-muted text-sm mt-1">Manage granular permissions across modules.</p>
         </div>
-        <button (click)="openCreateModal()" class="btn-primary flex items-center gap-2">
+        <button *ngIf="userStore.hasAnyPermission(['Security.Roles.Manage'])" (click)="openCreateModal()" class="btn-primary flex items-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           Create Permission
         </button>
@@ -142,6 +143,8 @@ export class PermissionListPageComponent implements OnInit {
   permissions: Permission[] = [];
   loading = true;
   searchTerm = '';
+  userStore = inject(UserStore);
+
   private http = inject(HttpClient);
 
   showCreateModal = false;

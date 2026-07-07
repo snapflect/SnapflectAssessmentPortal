@@ -43,9 +43,7 @@ export const GOVERNANCE_ROUTES: Routes = [
   { path: 'users/:uuid/edit', loadComponent: () => import('./pages/user/edit/user-edit-page.component').then(m => m.UserEditPageComponent) },
 
   // Billing
-  { path: 'billing/subscriptions', loadComponent: () => import('./pages/billing/subscription-page.component').then(m => m.SubscriptionPageComponent) },
-  { path: 'billing/invoices', loadComponent: () => import('./pages/billing/invoices-page.component').then(m => m.InvoicesPageComponent) },
-  { path: 'billing', redirectTo: 'billing/subscriptions', pathMatch: 'full' },
+  { path: 'billing', loadComponent: () => import('./pages/billing/billing-page.component').then(m => m.BillingPageComponent) },
 
   // Fallback
   { path: '', redirectTo: 'organizations', pathMatch: 'full' }

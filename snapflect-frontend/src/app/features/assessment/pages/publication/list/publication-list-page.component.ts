@@ -1,9 +1,10 @@
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { environment } from '../../../../../../environments/environment';
-import { SlideOverComponent } from '../../../../../shared/components/slide-over/slide-over.component';
+import { PublishWizardComponent } from '../../../components/publish-wizard/publish-wizard.component';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 
@@ -27,7 +28,7 @@ interface Publication {
 @Component({
   selector: 'app-publication-list-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SlideOverComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PublishWizardComponent],
   template: `
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
@@ -35,7 +36,7 @@ interface Publication {
           <h2 class="text-2xl font-bold text-main">Publications</h2>
           <p class="text-muted text-sm mt-1">Scheduled assessment events and delivery windows.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Assessment.Publications.Manage'])) && userStore.hasAnyPermission(['Assessment.Publications.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -93,7 +94,12 @@ interface Publication {
                 <div class="flex items-start justify-between mb-3">
                   <div>
                     <div class="flex items-center gap-2 mb-1">
-                      <span class="text-xs font-mono text-brand-light bg-brand/10 px-2 py-0.5 rounded">{{ pub.attributes.publication_code }}</span>
+                      <span class="text-xs font-mono text-brand-light bg-brand/10 px-2 py-0.5 rounded flex items-center gap-1">
+                        {{ pub.attributes.publication_code }}
+                        <button (click)="copyLink(pub.attributes.publication_code)" class="hover:text-white transition-colors" title="Copy Registration Link">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        </button>
+                      </span>
                       <span *ngIf="pub.attributes.is_proctored" class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded">Proctored</span>
                     </div>
                     <h3 class="text-main font-semibold">{{ pub.attributes.title }}</h3>
@@ -128,76 +134,13 @@ interface Publication {
         </div>
       </div>
 
-      <!-- Publish SlideOver -->
-      <app-slide-over [isOpen]="isSlideOverOpen" 
-                      title="Publish Assessment" 
-                      description="Create a new publication window for an approved assessment."
-                      (closeEvent)="closeForm()">
-        <form [formGroup]="pubForm" (ngSubmit)="submitForm()" class="space-y-5">
-
-          <!-- Validation Errors Banner -->
-          <div *ngIf="validationErrors.length > 0" class="p-4 rounded-md bg-red-500/10 border border-red-500/20">
-            <h3 class="text-sm font-medium text-red-400 flex items-center">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-              Assessment Validation Failed
-            </h3>
-            <div class="mt-3 text-sm text-red-300/90">
-              <ul class="list-disc pl-5 space-y-1">
-                <li *ngFor="let err of validationErrors">{{ err }}</li>
-              </ul>
-            </div>
-            <p class="text-xs text-red-400/70 mt-3 border-t border-red-500/10 pt-2">Please fix these errors in the Assessment Builder before publishing.</p>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-muted mb-1">Assessment *</label>
-            <select formControlName="assessment_uuid" class="input-field">
-              <option value="">Select an Approved Assessment...</option>
-              <option *ngFor="let a of availableAssessments" [value]="a.uuid">{{ a.attributes.assessment_name }} ({{ a.attributes.assessment_code }})</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-muted mb-1">Publication Code *</label>
-            <input type="text" formControlName="publication_code" class="input-field" placeholder="e.g. PUB-Q3-DEV">
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-muted mb-1">Event Title *</label>
-            <input type="text" formControlName="title" class="input-field" placeholder="e.g. Q3 Developer Assessment Cohort">
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-muted mb-1">Start Date *</label>
-              <input type="datetime-local" formControlName="start_date" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-muted mb-1">End Date *</label>
-              <input type="datetime-local" formControlName="end_date" class="input-field">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-muted mb-1">Max Attempts *</label>
-              <input type="number" formControlName="max_attempts" class="input-field" min="1">
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 p-3 hover:brightness-110 rounded-lg border border-border-light">
-            <input type="checkbox" formControlName="is_proctored" id="is_proctored" class="w-4 h-4 rounded text-brand">
-            <label for="is_proctored" class="text-sm text-muted">Require Proctoring</label>
-          </div>
-
-          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
-            <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
-            <button type="submit" class="btn-primary" [disabled]="pubForm.invalid || submitting">
-              {{ submitting ? 'Publishing...' : 'Publish' }}
-            </button>
-          </div>
-        </form>
-      </app-slide-over>
+      <!-- Publish Wizard -->
+      <app-publish-wizard 
+        *ngIf="isSlideOverOpen"
+        [availableAssessments]="availableAssessments"
+        (closed)="closeForm()"
+        (published)="submitForm($event)">
+      </app-publish-wizard>
     </div>
   `
 })
@@ -212,24 +155,12 @@ export class PublicationListPageComponent implements OnInit {
   isSlideOverOpen = false;
   submitting = false;
   validationErrors: string[] = [];
-  pubForm: FormGroup;
+  userStore = inject(UserStore);
+
 
   private http = inject(HttpClient);
-  private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
-
-  constructor() {
-    this.pubForm = this.fb.group({
-      assessment_uuid: ['', Validators.required],
-      publication_code: ['', Validators.required],
-      title: ['', Validators.required],
-      start_date: ['', Validators.required],
-      end_date: ['', Validators.required],
-      max_attempts: [1, [Validators.required, Validators.min(1)]],
-      is_proctored: [false]
-    });
-  }
 
   ngOnInit() {
     this.fetchPublications();
@@ -237,12 +168,11 @@ export class PublicationListPageComponent implements OnInit {
   }
 
   fetchAvailableAssessments() {
-    // Ideally we would filter for status=APPROVED here.
     this.http.get<any>(`${environment.apiUrl}/assessment/assessments?per_page=100`)
       .subscribe({
         next: (res) => {
           const allAss = res.data?.data || res.data || res;
-          this.availableAssessments = allAss.filter((a: any) => a.attributes.current_state === 'APPROVED' || a.attributes.status === 'APPROVED');
+          this.availableAssessments = allAss.filter((a: any) => ['APPROVED', 'PUBLISHED'].includes(a.attributes.current_state) || ['APPROVED', 'PUBLISHED'].includes(a.attributes.status));
         }
       });
   }
@@ -294,56 +224,50 @@ export class PublicationListPageComponent implements OnInit {
   }
 
   openCreateForm() {
-    this.pubForm.reset({
-      max_attempts: 1,
-      is_proctored: false
-    });
-    this.validationErrors = [];
     this.isSlideOverOpen = true;
   }
 
-  async closeForm(force: boolean = false) {
-    if (!force && this.pubForm.dirty) {
-      const confirmed = await this.confirmService.confirm({
-        title: 'Unsaved Changes',
-        message: 'You have unsaved changes. Are you sure you want to discard them?',
-        variant: 'warning',
-        confirmText: 'Discard',
-        cancelText: 'Keep Editing'
-      });
-      if (!confirmed) return;
-    }
+  closeForm() {
     this.isSlideOverOpen = false;
+    this.validationErrors = [];
   }
 
-  submitForm() {
-    if (this.pubForm.invalid) {
-      this.pubForm.markAllAsTouched();
-      return;
-    }
+  submitForm(schedulingData: any) {
     this.submitting = true;
     this.validationErrors = [];
-    
-    // Convert datetime-local to standard ISO format string if necessary
-    const payload = { ...this.pubForm.getRawValue() };
+    const payload = {
+      assessment_uuid: schedulingData.assessment_uuid,
+      ...schedulingData
+    };
 
     this.http.post(`${environment.apiUrl}/assessment/publications`, payload)
       .subscribe({
         next: () => {
           this.submitting = false;
           this.toastService.success('Assessment Published', 'The assessment has been successfully published.');
-          this.closeForm(true);
+          this.closeForm();
           this.fetchPublications();
         },
         error: (err) => {
           this.submitting = false;
-          if (err.error?.validation_errors) {
+          if (err.status === 422 && err.error?.detail && typeof err.error.detail === 'object') {
+            this.validationErrors = (Object.values(err.error.detail) as string[][]).reduce((acc, val) => acc.concat(val), []);
+          } else if (err.error?.validation_errors) {
             this.validationErrors = err.error.validation_errors.map((e: any) => e.message);
           } else {
-            const msg = err.error?.message || 'Failed to publish assessment.';
+            const msg = err.error?.message || (typeof err.error?.detail === 'string' ? err.error.detail : 'Failed to publish assessment.');
             this.toastService.error('Error', msg);
           }
         }
       });
+  }
+
+  copyLink(code: string) {
+    const url = window.location.origin + '/delivery/register/' + code;
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastService.success('Copied', 'Public registration link copied to clipboard.');
+    }).catch(() => {
+      this.toastService.error('Error', 'Failed to copy link.');
+    });
   }
 }

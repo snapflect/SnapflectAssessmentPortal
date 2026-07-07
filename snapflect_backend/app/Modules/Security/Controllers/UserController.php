@@ -130,4 +130,52 @@ class UserController extends Controller
             'message' => 'Role revoked successfully'
         ]);
     }
+
+    public function activityLogs(string $userUuid): JsonResponse
+    {
+        $user = $this->userService->findByUuid($userUuid);
+        $this->authorize('view', $user);
+
+        // Dummy data for now, ideally fetch from an audit/activity log table
+        $logs = [
+            ['timestamp' => now()->subMinutes(10)->toIso8601String(), 'action' => 'Logged In', 'ip_address' => '192.168.1.100'],
+            ['timestamp' => now()->subHours(2)->toIso8601String(), 'action' => 'Started Assessment', 'ip_address' => '192.168.1.100'],
+            ['timestamp' => now()->subDays(1)->toIso8601String(), 'action' => 'Password Changed', 'ip_address' => '192.168.1.100'],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Activity logs retrieved successfully',
+            'data' => $logs
+        ]);
+    }
+
+    public function resetPassword(string $userUuid, Request $request): JsonResponse
+    {
+        $user = $this->userService->findByUuid($userUuid);
+        $this->authorize('update', $user);
+
+        // In a real system, generate a token and send an email.
+        // For MVP, just update the password to a default.
+        $this->userService->resetPassword($userUuid);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset initiated successfully'
+        ]);
+    }
+
+    public function forceLogout(string $userUuid, Request $request): JsonResponse
+    {
+        $user = $this->userService->findByUuid($userUuid);
+        $this->authorize('update', $user);
+
+        // Instantly invalidate all existing stateless tokens by bumping the version
+        $this->userService->forceLogout($userUuid);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User logged out successfully'
+        ]);
+    }
 }

@@ -22,12 +22,12 @@ class AssessmentCategoryPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER']);
+        return $user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'CLIENT_ADMIN', 'REVIEWER', 'READ_ONLY']);
     }
 
     public function view(User $user, AssessmentCategory $category): bool
     {
-        if (!$user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER'])) {
+        if (!$user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'CLIENT_ADMIN', 'REVIEWER', 'READ_ONLY'])) {
             return false;
         }
         return $user->organization_id === $category->organization_id;

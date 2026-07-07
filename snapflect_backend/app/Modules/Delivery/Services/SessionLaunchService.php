@@ -60,6 +60,16 @@ class SessionLaunchService
             $session->created_by = $userId;
             $session->save();
 
+            $subscription = \App\Modules\Billing\Models\TenantSubscription::where('organization_id', $organizationId)
+                ->whereIn('status', ['ACTIVE', 'TRIALING', 'PAST_DUE'])
+                ->orderBy('created_date', 'desc')
+                ->first();
+            
+            if ($subscription) {
+                $subscription->assessments_used += 1;
+                $subscription->save();
+            }
+
             return new LaunchSessionDto($session->uuid);
         });
     }
@@ -76,32 +86,45 @@ class SessionLaunchService
                 throw new SessionLaunchException(SessionLaunchException::SESSION_NOT_FOUND, "Session not found or access denied.");
             }
 
-            // Check idempotent transition
-            if ($session->session_status === SessionStateMachine::STATE_LAUNCHED) {
-                $attempt = $session->attempt;
-                $snapshot = $session->assessmentSnapshot;
-                
-                // Immutability Guard: If already randomized and launched, we can't recalculate.
-                // Since this endpoint is idempotent, we just return the existing data.
+            $latestAttempt = $session->latestAttempt;
+
+            // If there's an IN_PROGRESS attempt, just resume it.
+            if ($latestAttempt && $latestAttempt->status === 'IN_PROGRESS') {
+                $snapshot = $latestAttempt->assessmentSnapshot;
                 return new \App\Modules\Delivery\DTOs\RandomizationResultDto(
-                    $attempt ? $attempt->uuid : '',
+                    $latestAttempt->uuid,
                     $snapshot ? $snapshot->uuid : '',
-                    $attempt ? $attempt->randomization_seed : '',
+                    $latestAttempt->randomization_seed,
                     $snapshot ? $snapshot->snapshot_schema_version : '1.0',
-                    (bool)($attempt && $attempt->question_order_json),
-                    (bool)($attempt && $attempt->option_order_json),
+                    (bool)$latestAttempt->question_order_json,
+                    (bool)$latestAttempt->option_order_json,
                     $session->access_started_at ? $session->access_started_at->toIso8601String() : now()->toIso8601String(),
+                    $latestAttempt->started_at ? $latestAttempt->started_at->toIso8601String() : null,
+                    $latestAttempt->expires_at ? $latestAttempt->expires_at->toIso8601String() : null,
                     $snapshot ? $snapshot->snapshot_json : null
                 );
             }
-
-            // Perform transition
-            $this->stateMachine->transition($session->session_status, SessionStateMachine::STATE_LAUNCHED);
 
             // Re-validate Assessment
             $assessment = Assessment::find($session->assessment_id);
             if (!$assessment || !$assessment->is_published || $assessment->current_state !== 'PUBLISHED') {
                 throw new SessionLaunchException(SessionLaunchException::ASSESSMENT_NOT_PUBLISHED, "Assessment is no longer published.");
+            }
+
+            // Check Max Attempts if they have a previous attempt
+            if ($latestAttempt) {
+                $publication = $assessment->activePublication;
+                $maxAttempts = $publication ? $publication->max_attempts : 1;
+                $attemptsUsed = $session->attempts()->count();
+                
+                if ($attemptsUsed >= $maxAttempts) {
+                    throw new SessionLaunchException(SessionLaunchException::SESSION_NOT_FOUND, "Maximum number of attempts reached.");
+                }
+            }
+
+            // Perform transition if necessary
+            if ($session->session_status !== SessionStateMachine::STATE_LAUNCHED) {
+                $this->stateMachine->transition($session->session_status, SessionStateMachine::STATE_LAUNCHED);
             }
 
             // Generate Snapshot
@@ -120,10 +143,12 @@ class SessionLaunchService
                 $candidate->uuid ?? ''
             );
 
-            // Bind Snapshot to Session
+            // Bind Snapshot to Session (keeps track of latest snapshot used)
             $session->assessment_snapshot_id = $snapshot->id;
             $session->session_status = SessionStateMachine::STATE_LAUNCHED;
-            $session->access_started_at = now();
+            if (!$session->access_started_at) {
+                $session->access_started_at = now();
+            }
             $session->modified_by = $userId;
             $session->save();
 
@@ -141,6 +166,8 @@ class SessionLaunchService
                 $randomizationData['question_randomized'],
                 $randomizationData['option_randomized'],
                 $session->access_started_at->toIso8601String(),
+                $attempt->started_at ? $attempt->started_at->toIso8601String() : null,
+                $attempt->expires_at ? $attempt->expires_at->toIso8601String() : null,
                 $snapshot->snapshot_json
             );
         });

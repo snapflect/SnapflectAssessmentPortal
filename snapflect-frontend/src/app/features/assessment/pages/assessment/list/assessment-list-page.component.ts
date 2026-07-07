@@ -1,10 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { environment } from '../../../../../../environments/environment';
 import { SlideOverComponent } from '../../../../../shared/components/slide-over/slide-over.component';
+import { PublishWizardComponent } from '../../../components/publish-wizard/publish-wizard.component';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 
@@ -20,6 +22,7 @@ interface Assessment {
     total_marks: number;
     pass_percentage: number;
     is_randomized: boolean;
+    created_by?: number;
   };
   relationships?: {
     type?: { uuid: string; attributes: { type_name: string } };
@@ -34,7 +37,7 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 @Component({
   selector: 'app-assessment-list-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, SlideOverComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, SlideOverComponent, PublishWizardComponent],
   template: `
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
@@ -42,7 +45,7 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
           <h2 class="text-2xl font-bold text-main">Assessment Catalog</h2>
           <p class="text-muted text-sm mt-1">Create and manage all assessments, blueprints and publications.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Assessment.Catalog.Manage'])) && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -149,37 +152,41 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 
           <!-- Actions -->
           <div class="flex flex-wrap gap-2 relative z-10 mt-auto pt-4">
-            <button (click)="openEditForm(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl hover:brightness-110 hover:bg-white/10 text-main font-medium text-xs transition-all duration-200 shadow-sm border border-white/5 hover:border-border-light flex items-center justify-center gap-1.5">
+            <button *ngIf="(userStore.hasAnyPermission(['Assessment.Catalog.Manage'])) && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])"  (click)="openEditForm(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl hover:brightness-110 hover:bg-white/10 text-main font-medium text-xs transition-all duration-200 shadow-sm border border-white/5 hover:border-border-light flex items-center justify-center gap-1.5">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
               Edit
             </button>
-            <button *ngIf="a.attributes.current_state === 'DRAFT' || a.attributes.current_state === 'IN_REVIEW'" (click)="goToDesigner(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 font-medium text-xs transition-all duration-200 shadow-sm border border-purple-500/20 hover:border-purple-500/40 flex items-center justify-center gap-1.5">
+            <button *ngIf="(a.attributes.current_state === 'DRAFT' || a.attributes.current_state === 'IN_REVIEW') && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="goToDesigner(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 font-medium text-xs transition-all duration-200 shadow-sm border border-purple-500/20 hover:border-purple-500/40 flex items-center justify-center gap-1.5">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
               Designer
             </button>
-            <button *ngIf="a.attributes.current_state === 'DRAFT'" (click)="submitReview(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-medium text-xs border border-amber-500/20 hover:border-amber-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <button *ngIf="(a.attributes.current_state === 'DRAFT') && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="submitReview(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-medium text-xs border border-amber-500/20 hover:border-amber-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
               Submit
             </button>
-            <button *ngIf="a.attributes.current_state === 'IN_REVIEW'" (click)="rejectAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-xs border border-red-500/20 hover:border-red-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-              Reject
-            </button>
-            <button *ngIf="a.attributes.current_state === 'IN_REVIEW'" (click)="approveAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium text-xs border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+            <button *ngIf="(a.attributes.current_state === 'IN_REVIEW' && canApprove(a)) && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="approveAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-medium text-xs border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
               Approve
             </button>
-            <button *ngIf="a.attributes.current_state === 'APPROVED'" (click)="publishAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium text-xs border border-blue-500/20 hover:border-blue-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19V6m0 0l-5 5m5-5l5 5M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+            <button *ngIf="(a.attributes.current_state === 'APPROVED' && canApprove(a)) && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="openPublishWizard(a)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium text-xs border border-blue-500/20 hover:border-blue-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
               Publish
             </button>
-            <button *ngIf="a.attributes.current_state === 'PUBLISHED'" (click)="archiveAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-xs border border-red-500/20 hover:border-red-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+            <button *ngIf="(a.attributes.current_state === 'APPROVED' || a.attributes.current_state === 'PUBLISHED') && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="cloneAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium text-xs border border-indigo-500/20 hover:border-indigo-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              Clone
+            </button>
+            <button *ngIf="(a.attributes.current_state === 'IN_REVIEW' && canApprove(a)) && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="rejectAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-xs border border-red-500/20 hover:border-red-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Reject
+            </button>
+            <button *ngIf="(a.attributes.current_state === 'PUBLISHED') && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="archiveAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-xs border border-red-500/20 hover:border-red-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
               Archive
             </button>
-            <button *ngIf="a.attributes.current_state === 'APPROVED' || a.attributes.current_state === 'PUBLISHED'" (click)="cloneAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium text-xs border border-indigo-500/20 hover:border-indigo-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-              Clone
+            <button *ngIf="(a.attributes.current_state !== 'PUBLISHED') && userStore.hasAnyPermission(['Assessment.Catalog.Manage'])" (click)="deleteAssessment(a.uuid)" class="flex-1 min-w-[100px] py-2 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium text-xs border border-red-500/20 hover:border-red-500/40 transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              Delete
             </button>
           </div>
         </div>
@@ -254,6 +261,14 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
           </div>
         </form>
       </app-slide-over>
+
+      <!-- Publish Wizard Modal -->
+      <app-publish-wizard 
+        *ngIf="showPublishWizard"
+        [assessment]="selectedPublishAssessment"
+        (closed)="showPublishWizard = false; selectedPublishAssessment = null"
+        (published)="submitPublish($event)">
+      </app-publish-wizard>
     </div>
   `
 })
@@ -271,12 +286,16 @@ export class AssessmentListPageComponent implements OnInit {
   activeStatus = '';
   statuses = ['', 'DRAFT', 'IN_REVIEW', 'APPROVED', 'PUBLISHED', 'ARCHIVED'];
 
+  showPublishWizard = false;
+  selectedPublishAssessment: Assessment | null = null;
+
   assessmentForm: FormGroup;
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
   private router = inject(Router);
+  public userStore = inject(UserStore);
 
   constructor() {
     this.assessmentForm = this.fb.group({
@@ -467,16 +486,33 @@ export class AssessmentListPageComponent implements OnInit {
       });
   }
 
-  publishAssessment(uuid: string) {
-    this.http.post(`${environment.apiUrl}/assessment/assessments/${uuid}/publish`, {})
+  openPublishWizard(assessment: Assessment) {
+    this.selectedPublishAssessment = assessment;
+    this.showPublishWizard = true;
+  }
+
+  submitPublish(schedulingData: any) {
+    if (!this.selectedPublishAssessment) return;
+    const uuid = this.selectedPublishAssessment.uuid;
+    
+    this.http.post(`${environment.apiUrl}/assessment/assessments/${uuid}/publish`, { scheduling: schedulingData })
       .subscribe({ 
         next: () => {
           this.toastService.success('Assessment Published', 'The assessment is now live.');
+          this.showPublishWizard = false;
+          this.selectedPublishAssessment = null;
           this.fetchAssessments();
         },
         error: (err) => {
-          const msg = err.error?.message || 'Failed to publish assessment.';
-          this.toastService.error('Error', msg);
+          if (err.status === 422 && err.error?.detail && typeof err.error.detail === 'object') {
+             const errors = (Object.values(err.error.detail) as string[][]).reduce((acc, val) => acc.concat(val), []);
+             this.toastService.error('Validation Error', errors.join(' '));
+          } else {
+             const msg = err.error?.message || (typeof err.error?.detail === 'string' ? err.error.detail : 'Failed to publish assessment.');
+             this.toastService.error('Error', msg);
+          }
+          this.showPublishWizard = false;
+          this.selectedPublishAssessment = null;
         }
       });
   }
@@ -496,7 +532,11 @@ export class AssessmentListPageComponent implements OnInit {
   }
 
   cloneAssessment(uuid: string) {
-    this.http.post(`${environment.apiUrl}/assessment/assessments/${uuid}/clone`, {})
+    const payload = {
+      assessment_uuid: uuid,
+      change_summary: 'Cloned from existing assessment.'
+    };
+    this.http.post(`${environment.apiUrl}/assessment/assessments/${uuid}/clone`, payload)
       .subscribe({ 
         next: () => {
           this.toastService.success('Assessment Cloned', 'A new draft copy has been created.');
@@ -510,8 +550,49 @@ export class AssessmentListPageComponent implements OnInit {
   }
 
   goToDesigner(assessment: Assessment) {
-    // We assume the blueprint uuid is available, or we just pass the assessment uuid to the designer and let it figure it out.
-    // The BlueprintDesigner currently lists all blueprints and doesn't filter by assessment, but we can pass the assessment uuid so it auto-selects.
     this.router.navigate(['/authoring/blueprints'], { queryParams: { assessment_uuid: assessment.uuid } });
+  }
+
+  deleteAssessment(uuid: string) {
+    this.confirmService.confirm({
+      title: 'Delete Assessment',
+      message: 'Are you sure you want to delete this draft assessment? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    }).then((confirmed) => {
+      if (confirmed) {
+        this.http.delete(`${environment.apiUrl}/assessment/assessments/${uuid}`)
+          .subscribe({
+            next: () => {
+              this.toastService.success('Assessment Deleted', 'The draft assessment was permanently removed.');
+              this.fetchAssessments();
+            },
+            error: (err) => {
+              const msg = err.error?.message || 'Failed to delete assessment.';
+              this.toastService.error('Error', msg);
+            }
+          });
+      }
+    });
+  }
+
+  canApprove(assessment: Assessment): boolean {
+    const user = this.userStore.profile();
+    if (!user) return false;
+    
+    // Check if user has an approving role
+    const hasApprovingRole = this.userStore.hasAnyRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'REVIEWER']);
+    if (!hasApprovingRole) {
+      return false;
+    }
+
+    // Check if the current user is the creator (Segregation of Duties)
+    // EXCEPTION: Client Admins are exempt from this rule
+    const isClientAdmin = this.userStore.hasAnyRole(['CLIENT_ADMIN']);
+    if (assessment.attributes.created_by && user.id === assessment.attributes.created_by && !isClientAdmin) {
+      return false;
+    }
+    
+    return true;
   }
 }

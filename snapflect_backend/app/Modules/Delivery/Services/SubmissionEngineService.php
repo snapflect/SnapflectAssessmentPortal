@@ -23,7 +23,7 @@ class SubmissionEngineService
     public function submitAttempt(SubmitAttemptDto $dto, int $organizationId, int $userId): SubmissionResultDto
     {
         // 1. Load Attempt for Idempotency Check BEFORE transaction locks to remain fast
-        $attempt = AssessmentAttempt::with(['assessmentSnapshot', 'attemptSubmission'])
+        $attempt = AssessmentAttempt::with(['assessmentSnapshot', 'submission'])
             ->where('uuid', $dto->attemptUuid)
             ->where('organization_id', $organizationId)
             ->where('candidate_user_id', $userId)
@@ -34,8 +34,8 @@ class SubmissionEngineService
         }
 
         // 2. Idempotency Short-Circuit
-        if ($attempt->status === 'SUBMITTED') {
-            return $this->buildResultDto($attempt, $attempt->attemptSubmission->total_answered ?? 0);
+        if (in_array($attempt->status, ['SUBMITTED', 'SCORED'])) {
+            return $this->buildResultDto($attempt, $attempt->submission->total_answered ?? 0);
         }
 
         // 3. Enter Transaction to lock execution
@@ -44,8 +44,8 @@ class SubmissionEngineService
             $lockedAttempt = AssessmentAttempt::where('id', $attempt->id)->lockForUpdate()->first();
 
             // Re-check idempotency in case of race condition
-            if ($lockedAttempt->status === 'SUBMITTED') {
-                return $this->buildResultDto($lockedAttempt, $attempt->attemptSubmission->total_answered ?? 0);
+            if (in_array($lockedAttempt->status, ['SUBMITTED', 'SCORED'])) {
+                return $this->buildResultDto($lockedAttempt, $attempt->submission->total_answered ?? 0);
             }
 
             // 4. Validate all boundaries

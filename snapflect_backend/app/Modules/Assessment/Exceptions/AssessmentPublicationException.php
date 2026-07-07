@@ -36,11 +36,16 @@ class AssessmentPublicationException extends Exception
 
     public function render($request)
     {
+        $status = 422;
+        if ($this->getMessage() === 'Assessment not found or access denied.') {
+            $status = 404;
+        }
+
         return response()->json([
             'success' => false,
             'message' => $this->getMessage(),
             'error_code' => $this->errorCode,
             'validation_errors' => $this->errors
-        ], 422);
+        ], $status);
     }
 }

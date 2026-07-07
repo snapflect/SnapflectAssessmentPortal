@@ -16,8 +16,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Mockery;
 use Carbon\Carbon;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
 class AssessmentPublicationServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     private AssessmentPublicationService $service;
     private $repositoryMock;
     private $validationServiceMock;
@@ -29,7 +33,7 @@ class AssessmentPublicationServiceTest extends TestCase
         $this->repositoryMock = Mockery::mock(AssessmentRepositoryInterface::class);
         $this->validationServiceMock = Mockery::mock(AssessmentValidationService::class);
         $this->stateMachine = new PublicationStateMachine();
-        
+
         $this->service = new AssessmentPublicationService(
             $this->repositoryMock,
             $this->validationServiceMock,
@@ -42,42 +46,48 @@ class AssessmentPublicationServiceTest extends TestCase
         $builderMock = Mockery::mock(Builder::class);
         $builderMock->shouldReceive('where')->andReturnSelf();
         $builderMock->shouldReceive('first')->andReturn($assessment);
-        
+
         $this->repositoryMock->shouldReceive('query')->andReturn($builderMock);
         $this->repositoryMock->shouldReceive('update')->andReturn(true);
     }
 
+    /** @test — isMutable: DRAFT and IN_REVIEW are mutable; PUBLISHED and ARCHIVED are not */
     public function test_state_machine_mutability()
     {
         $this->assertTrue(PublicationStateMachine::isMutable('DRAFT'));
-        $this->assertTrue(PublicationStateMachine::isMutable('READY'));
+        $this->assertTrue(PublicationStateMachine::isMutable('IN_REVIEW'));
+        $this->assertTrue(PublicationStateMachine::isMutable('APPROVED'));
         $this->assertFalse(PublicationStateMachine::isMutable('PUBLISHED'));
         $this->assertFalse(PublicationStateMachine::isMutable('ARCHIVED'));
     }
 
+    /** @test — makeReady throws when assessment is not found (tenant mismatch) */
     public function test_fails_on_tenant_mismatch()
     {
         $this->setupRepositoryMock(null);
 
         $this->expectException(AssessmentPublicationException::class);
         $this->expectExceptionMessage('Assessment not found or access denied.');
-        
+
         $this->service->makeReady('uuid-1', 999, 1);
     }
 
-    public function test_idempotent_ready_transition()
+    /** @test — APPROVED is idempotent (already in the target state) */
+    public function test_idempotent_approved_transition()
     {
-        $assessment = new Assessment(['current_state' => 'READY']);
+        $assessment = new Assessment(['current_state' => 'APPROVED']);
         $this->setupRepositoryMock($assessment);
 
         $result = $this->service->makeReady('uuid-1', 1, 1);
-        $this->assertEquals('READY', $result->currentStatus);
-        $this->assertEquals('READY', $result->previousStatus);
+        $this->assertEquals('APPROVED', $result->currentStatus);
+        $this->assertEquals('APPROVED', $result->previousStatus);
     }
 
-    public function test_draft_to_ready_denied_when_validation_fails()
+    /** @test — DRAFT → APPROVED denied when validation fails */
+    public function test_draft_to_approved_denied_when_validation_fails()
     {
-        $assessment = new Assessment(['current_state' => 'DRAFT', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'DRAFT']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
         $this->validationServiceMock->shouldReceive('validate')
@@ -85,14 +95,16 @@ class AssessmentPublicationServiceTest extends TestCase
             ->andReturn(new ValidationResultDto('uuid-1', false, false, [], Carbon::now()->toIso8601String()));
 
         $this->expectException(AssessmentPublicationException::class);
-        $this->expectExceptionMessage('Assessment failed validation and cannot be marked as READY.');
+        $this->expectExceptionMessage('Assessment failed validation and cannot be approved.');
 
         $this->service->makeReady('uuid-1', 1, 1);
     }
 
-    public function test_draft_to_ready_success()
+    /** @test — DRAFT → APPROVED succeeds when valid */
+    public function test_draft_to_approved_success()
     {
-        $assessment = new Assessment(['current_state' => 'DRAFT', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'DRAFT']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
         $this->validationServiceMock->shouldReceive('validate')
@@ -100,71 +112,104 @@ class AssessmentPublicationServiceTest extends TestCase
             ->andReturn(new ValidationResultDto('uuid-1', true, true, [], Carbon::now()->toIso8601String()));
 
         $result = $this->service->makeReady('uuid-1', 1, 1);
-        
-        $this->assertEquals('READY', $result->currentStatus);
+
+        $this->assertEquals('APPROVED', $result->currentStatus);
         $this->assertEquals('DRAFT', $result->previousStatus);
     }
 
-    public function test_ready_to_publish_denied_when_revalidation_fails()
+    /** @test — APPROVED → PUBLISHED denied when re-validation fails */
+    public function test_approved_to_published_denied_when_revalidation_fails()
     {
-        $assessment = new Assessment(['current_state' => 'READY', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'APPROVED']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
-        // Simulated scenario: Assessment became invalid after being marked READY
         $this->validationServiceMock->shouldReceive('validate')
             ->once()
             ->andReturn(new ValidationResultDto('uuid-1', false, false, [], Carbon::now()->toIso8601String()));
 
         $this->expectException(AssessmentPublicationException::class);
-        $this->expectExceptionMessage('Assessment validation failed during publish attempt.');
+        $this->expectExceptionMessage('Assessment validation failed');
 
-        $this->service->publish('uuid-1', 1, 1);
+        $schedulingData = [
+            'publication_code' => 'PUB-001',
+            'title' => 'Test Pub',
+            'start_date' => Carbon::now()->toIso8601String(),
+            'end_date' => Carbon::now()->addDays(7)->toIso8601String(),
+            'max_attempts' => 1,
+            'is_proctored' => false
+        ];
+        $this->service->publish('uuid-1', $schedulingData, 1, 1);
     }
 
-    public function test_ready_to_publish_success()
+    /** @test — APPROVED → PUBLISHED succeeds when valid */
+    public function test_approved_to_published_success()
     {
-        $assessment = new Assessment(['current_state' => 'READY', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'APPROVED']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
         $this->validationServiceMock->shouldReceive('validate')
             ->once()
             ->andReturn(new ValidationResultDto('uuid-1', true, true, [], Carbon::now()->toIso8601String()));
 
-        $result = $this->service->publish('uuid-1', 1, 1);
-        
+        $schedulingData = [
+            'publication_code' => 'PUB-001',
+            'title' => 'Test Pub',
+            'start_date' => Carbon::now()->toIso8601String(),
+            'end_date' => Carbon::now()->addDays(7)->toIso8601String(),
+            'max_attempts' => 1,
+            'is_proctored' => false
+        ];
+        $result = $this->service->publish('uuid-1', $schedulingData, 1, 1);
+
         $this->assertEquals('PUBLISHED', $result->currentStatus);
-        $this->assertEquals('READY', $result->previousStatus);
+        $this->assertEquals('APPROVED', $result->previousStatus);
     }
 
+    /** @test — PUBLISHED → DRAFT denied (cannot go backwards) */
     public function test_published_to_draft_denied()
     {
-        $assessment = new Assessment(['current_state' => 'PUBLISHED', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'PUBLISHED']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
         $this->expectException(AssessmentPublicationException::class);
-        
+
         $this->service->makeReady('uuid-1', 1, 1);
     }
 
+    /** @test — PUBLISHED → ARCHIVED succeeds */
     public function test_published_to_archived_success()
     {
-        $assessment = new Assessment(['current_state' => 'PUBLISHED', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'PUBLISHED']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
         $result = $this->service->archive('uuid-1', 1, 1);
-        
+
         $this->assertEquals('ARCHIVED', $result->currentStatus);
         $this->assertEquals('PUBLISHED', $result->previousStatus);
     }
 
+    /** @test — ARCHIVED → PUBLISHED denied */
     public function test_archived_to_published_denied()
     {
-        $assessment = new Assessment(['current_state' => 'ARCHIVED', 'id' => 1]);
+        $assessment = new Assessment(['current_state' => 'ARCHIVED']);
+        $assessment->id = 1;
         $this->setupRepositoryMock($assessment);
 
         $this->expectException(AssessmentPublicationException::class);
-        
-        $this->service->publish('uuid-1', 1, 1);
+
+        $schedulingData = [
+            'publication_code' => 'PUB-001',
+            'title' => 'Test Pub',
+            'start_date' => Carbon::now()->toIso8601String(),
+            'end_date' => Carbon::now()->addDays(7)->toIso8601String(),
+            'max_attempts' => 1,
+            'is_proctored' => false
+        ];
+        $this->service->publish('uuid-1', $schedulingData, 1, 1);
     }
 
     protected function tearDown(): void

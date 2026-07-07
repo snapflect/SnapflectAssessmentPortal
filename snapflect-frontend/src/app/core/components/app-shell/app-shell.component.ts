@@ -111,7 +111,7 @@ import { NavigationStore } from '../../../shared/stores/navigation.store';
         </header>
 
         <!-- Page Router Outlet -->
-        <div class="flex-1 overflow-auto p-4 relative z-0">
+        <div class="flex-1 overflow-auto p-4">
           <router-outlet></router-outlet>
         </div>
       </main>

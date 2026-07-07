@@ -27,6 +27,7 @@ class SubmissionValidationService
         $snapshotPayload = json_decode($attempt->assessmentSnapshot->snapshot_json, true);
 
         $this->validateRandomization($attempt, $snapshotPayload);
+
         $this->validateDrafts($attempt, $snapshotPayload);
     }
 
@@ -49,20 +50,31 @@ class SubmissionValidationService
             throw SubmissionException::randomizationCorrupted("Missing randomization data.");
         }
 
-        $totalQuestions = $attempt->assessmentSnapshot->question_count ?? $this->countQuestions($snapshotPayload);
-        $qOrder = json_decode($attempt->question_order_json, true);
+        $snapshotQuestions = $this->extractAllQuestionUuids($snapshotPayload);
+        $totalQuestions = count($snapshotQuestions);
 
-        if (count($qOrder) !== $totalQuestions) {
+        // question_order_json stores sections (not flat UUID list), so extract UUIDs from it
+        $qOrderSections = json_decode($attempt->question_order_json, true);
+        $qOrderUuids = [];
+        foreach ($qOrderSections ?? [] as $s) {
+            foreach ($s['questions'] ?? [] as $q) {
+                if (isset($q['uuid'])) {
+                    $qOrderUuids[] = $q['uuid'];
+                } elseif (is_string($q)) {
+                    $qOrderUuids[] = $q;
+                }
+            }
+        }
+
+        if (count($qOrderUuids) !== $totalQuestions) {
             throw SubmissionException::randomizationCorrupted('Question count mismatch.');
         }
 
-        $snapshotQuestions = $this->extractAllQuestionUuids($snapshotPayload);
-        
-        if (count(array_unique($qOrder)) !== count($qOrder)) {
+        if (count(array_unique($qOrderUuids)) !== count($qOrderUuids)) {
             throw SubmissionException::randomizationCorrupted('Duplicate question UUIDs found in randomization.');
         }
 
-        foreach ($qOrder as $uuid) {
+        foreach ($qOrderUuids as $uuid) {
             if (!in_array($uuid, $snapshotQuestions, true)) {
                 throw SubmissionException::randomizationCorrupted('Missing or invalid question UUID: ' . $uuid);
             }

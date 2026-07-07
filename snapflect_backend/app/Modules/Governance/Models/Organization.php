@@ -9,10 +9,18 @@ use App\Shared\Traits\HasUuid;
 use App\Modules\Security\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Modules\Billing\Models\TenantSubscription;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Organization extends Model
 {
-    use HasUuid, HasAuditFields;
+    use HasFactory, HasUuid, HasAuditFields;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\OrganizationFactory::new();
+    }
 
     public const DELETED_AT = 'deleted_date';
     public const CREATED_AT = 'created_date';
@@ -68,5 +76,12 @@ class Organization extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'organization_id', 'id');
+    }
+
+    public function currentSubscription(): HasOne
+    {
+        return $this->hasOne(TenantSubscription::class, 'organization_id', 'id')
+                    ->whereIn('status', ['ACTIVE', 'TRIALING', 'PAST_DUE'])
+                    ->latestOfMany('created_date');
     }
 }

@@ -18,6 +18,10 @@ export const ASSESSMENT_ROUTES: Routes = [
     loadComponent: () => import('./pages/question/list/question-list-page.component').then(m => m.QuestionListPageComponent)
   },
   {
+    path: 'question-tags',
+    loadComponent: () => import('./pages/question-tag/list/question-tag-list-page.component').then(m => m.QuestionTagListPageComponent)
+  },
+  {
     path: 'competencies',
     loadComponent: () => import('./pages/competency/list/competency-list-page.component').then(m => m.CompetencyListPageComponent)
   },

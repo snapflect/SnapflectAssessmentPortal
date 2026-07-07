@@ -25,7 +25,7 @@ interface AuthoringMetrics {
   template: `
     <div class="h-full flex flex-col relative pb-10">
       <div class="mb-8">
-        <h2 class="text-3xl font-extrabold text-main tracking-tight">Authoring Dashboard</h2>
+        <h2 class="text-2xl font-bold text-main">Authoring Dashboard</h2>
         <p class="text-muted text-sm mt-1">Overview of content creation and publishing.</p>
       </div>
 

@@ -13,6 +13,7 @@ class ScoringOrchestratorService
 {
     public function __construct(
         private AutoScoringService $autoScoringService,
+        private SectionScoringService $sectionScoringService,
         private CompetencyScoringService $competencyScoringService,
         private EvaluationService $evaluationService,
         private AuditGenerationService $auditService,
@@ -55,21 +56,57 @@ class ScoringOrchestratorService
             $blueprint = json_decode($snapshotJson, true) ?? [];
 
             $candidateAnswersRaw = DB::table('candidate_answers')
-                ->where('assessment_attempt_id', $attempt->id)
+                ->join('attempt_questions', 'candidate_answers.attempt_question_id', '=', 'attempt_questions.id')
+                ->where('candidate_answers.assessment_attempt_id', $attempt->id)
+                ->select('candidate_answers.*', 'attempt_questions.snapshot_question_uuid')
                 ->get();
             
             // Map answers for the AutoScoringService
             $candidateAnswers = [];
             foreach ($candidateAnswersRaw as $ans) {
-                // Determine question uuid. (Mocked mapping lookup if needed).
-                $qUuid = 'q-mock-uuid'; 
+                $qUuid = $ans->snapshot_question_uuid; 
                 $candidateAnswers[$qUuid] = [
-                    'payload' => json_decode($ans->selected_option_uuids_json ?? '[]', true),
+                    'payload' => $ans->selected_option_uuids_json ? json_decode($ans->selected_option_uuids_json, true) : ($ans->selected_option_uuid ?? $ans->text_answer ?? $ans->numeric_answer),
                 ];
             }
 
             // 4. Mathematical Pipeline
             $questionScores = $this->autoScoringService->evaluateAttempt($blueprint, $candidateAnswers);
+            
+            // 4.1 Apply Manual Score Overrides
+            $manualReviews = DB::table('manual_score_reviews')
+                ->join('assessment_results', 'manual_score_reviews.assessment_result_id', '=', 'assessment_results.id')
+                ->join('question_scores', 'manual_score_reviews.question_score_id', '=', 'question_scores.id')
+                ->join('attempt_questions', 'question_scores.attempt_question_id', '=', 'attempt_questions.id')
+                ->where('assessment_results.assessment_attempt_id', $attempt->id)
+                ->where('manual_score_reviews.review_status', 'COMPLETED')
+                ->select('attempt_questions.snapshot_question_uuid', 'manual_score_reviews.reviewed_score', 'manual_score_reviews.review_comments')
+                ->get()
+                ->keyBy('snapshot_question_uuid')
+                ->toArray();
+
+            foreach ($questionScores as $index => $qs) {
+                if (isset($manualReviews[$qs->questionUuid])) {
+                    $review = $manualReviews[$qs->questionUuid];
+                    $awardedScore = (float) $review->reviewed_score;
+                    $isCorrect = $awardedScore > 0;
+                    $explanation = 'Manual Override: ' . ($review->review_comments ?? 'Score updated by reviewer.');
+                    
+                    $questionScores[$index] = new \App\Modules\Results\DTOs\QuestionScoreDto(
+                        $qs->questionUuid,
+                        $qs->maxScore,
+                        $awardedScore,
+                        $qs->penaltyApplied,
+                        $isCorrect,
+                        $qs->strategyApplied,
+                        $explanation,
+                        $qs->candidateAnswer,
+                        $qs->correctAnswer
+                    );
+                }
+            }
+
+            $sectionScores = $this->sectionScoringService->evaluateSections($blueprint, $questionScores);
             $competencyScores = $this->competencyScoringService->evaluateCompetencies($blueprint, $questionScores);
             $evaluation = $this->evaluationService->evaluateAttempt($blueprint, $questionScores, $competencyScores);
 
@@ -81,6 +118,7 @@ class ScoringOrchestratorService
                 $attempt,
                 $evaluation,
                 $questionScores,
+                $sectionScores,
                 $competencyScores,
                 $auditPayload
             );

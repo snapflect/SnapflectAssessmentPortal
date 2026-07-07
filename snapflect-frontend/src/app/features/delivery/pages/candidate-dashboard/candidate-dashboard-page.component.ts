@@ -25,6 +25,8 @@ interface MyPublication {
     attempts_remaining: number;
     best_score?: number;
     is_passed?: boolean;
+    latest_attempt_uuid?: string;
+    latest_result_uuid?: string;
   };
 }
 
@@ -35,7 +37,7 @@ interface MyPublication {
   template: `
     <div class="h-full flex flex-col relative">
       <div class="mb-8">
-        <h2 class="text-3xl font-extrabold text-main tracking-tight">My Assessments</h2>
+        <h2 class="text-2xl font-bold text-main">My Assessments</h2>
         <p class="text-muted text-sm mt-1">Your assigned tests and current progress.</p>
       </div>
 
@@ -115,15 +117,18 @@ interface MyPublication {
               <h3 class="text-lg font-bold text-main leading-tight mb-1 line-clamp-2" [title]="pub.attributes.title">{{ pub.attributes.title }}</h3>
               <p class="text-sm text-slate-500 mb-4 line-clamp-1">{{ pub.relationships?.assessment?.attributes?.title }}</p>
 
-              <!-- Meta Grid -->
               <div class="grid grid-cols-2 gap-3 mb-6 bg-surface/40 p-3 rounded-xl border border-border-light/50">
                 <div>
                   <span class="block text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Duration</span>
-                  <span class="text-sm font-medium text-main">{{ pub.attributes.duration_minutes ? pub.attributes.duration_minutes + ' min' : 'Untimed' }}</span>
+                  <span class="text-sm font-medium text-main">{{ pub.attributes.duration_minutes ? pub.attributes.duration_minutes + ' min' : 'No Limit' }}</span>
                 </div>
                 <div>
                   <span class="block text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Attempts</span>
-                  <span class="text-sm font-medium text-main">{{ pub.meta?.attempts_used || 0 }} / {{ pub.attributes.max_attempts }}</span>
+                  <span class="text-sm font-medium" [ngClass]="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) <= 0 ? 'text-red-400' : 'text-main'">
+                    {{ pub.meta?.attempts_used || 0 }} / {{ pub.attributes.max_attempts }}
+                    <span *ngIf="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) > 0" class="text-[10px] text-emerald-400 ml-1">({{ pub.meta?.attempts_remaining ?? pub.attributes.max_attempts }} left)</span>
+                    <span *ngIf="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) <= 0" class="text-[10px] text-red-400 ml-1">(None left)</span>
+                  </span>
                 </div>
                 <div class="col-span-2 pt-2 border-t border-border-light/50">
                   <span class="block text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Window</span>
@@ -143,12 +148,19 @@ interface MyPublication {
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   
-                  <span *ngIf="launching !== pub.uuid">{{ (pub.meta?.attempts_used || 0) > 0 ? 'Retake Assessment' : 'Start Assessment' }}</span>
+                  <ng-container *ngIf="launching !== pub.uuid">
+                    <svg *ngIf="(pub.meta?.attempts_used || 0) > 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <svg *ngIf="(pub.meta?.attempts_used || 0) === 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                    <span>{{ (pub.meta?.attempts_used || 0) > 0 ? 'Retake Assessment' : 'Start Assessment' }}</span>
+                    <span class="text-[10px] opacity-70 ml-1" *ngIf="(pub.meta?.attempts_used || 0) > 0">
+                      (Attempt {{ (pub.meta?.attempts_used || 0) + 1 }} of {{ pub.attributes.max_attempts }})
+                    </span>
+                  </ng-container>
                   <span *ngIf="launching === pub.uuid">Launching...</span>
-                  
-                  <svg *ngIf="launching !== pub.uuid" class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                  </svg>
                 </button>
 
                 <!-- Results State -->
@@ -165,8 +177,9 @@ interface MyPublication {
                       <p class="text-[10px] text-muted">Final Score</p>
                     </div>
                   </div>
-                  <button class="mr-2 p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-main transition-colors" title="View Detailed Results">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button (click)="viewResults(pub)" class="mr-2 px-3 py-1.5 rounded-lg bg-surface hover:bg-white/10 border border-border-light text-xs font-semibold text-main hover:text-white transition-colors flex items-center gap-1 shadow-sm" title="View Detailed Results">
+                    View Results
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                   </button>
@@ -258,7 +271,7 @@ export class CandidateDashboardPageComponent implements OnInit {
 
   getDaysUntil(startDate: string): number {
     const diff = new Date(startDate).getTime() - Date.now();
-    return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }
 
   startAssessment(pub: MyPublication) {
@@ -280,6 +293,14 @@ export class CandidateDashboardPageComponent implements OnInit {
         this.launching = null;
       }
     });
+  }
+
+  viewResults(pub: MyPublication) {
+    if (pub.meta?.latest_result_uuid) {
+      this.router.navigate(['/results', pub.meta.latest_result_uuid]);
+    } else {
+      this.toast.error('Error', 'No result found to display.');
+    }
   }
 
   getStatusBarClass(pub: MyPublication): string {

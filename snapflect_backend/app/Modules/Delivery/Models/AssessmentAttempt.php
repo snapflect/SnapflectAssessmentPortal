@@ -99,4 +99,9 @@ class AssessmentAttempt extends Model
     {
         return $this->hasOne(AttemptSubmission::class);
     }
+
+    public function result(): HasOne
+    {
+        return $this->hasOne(\App\Modules\Results\Models\AssessmentResult::class, 'assessment_attempt_id')->latest('id');
+    }
 }

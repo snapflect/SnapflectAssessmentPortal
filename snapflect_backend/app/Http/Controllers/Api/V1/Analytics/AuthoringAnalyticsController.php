@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Modules\Assessment\Models\Question;
 use App\Modules\Assessment\Models\Assessment;
 use App\Modules\Assessment\Models\AssessmentPublication;
+use App\Modules\Assessment\Models\Competency;
 
 class AuthoringAnalyticsController extends Controller
 {
@@ -15,15 +16,36 @@ class AuthoringAnalyticsController extends Controller
     {
         $organizationId = $request->user()->organization_id;
 
-        $totalQuestions = Question::where('organization_id', $organizationId)->count();
+        $totalQuestions = Question::where('organization_id', $organizationId)
+            ->where('is_deleted', false)
+            ->count();
         $draftQuestions = Question::where('organization_id', $organizationId)
             ->where('status', 'DRAFT')
+            ->where('is_deleted', false)
             ->count();
         
-        $totalAssessments = Assessment::where('organization_id', $organizationId)->count();
+        $totalAssessments = Assessment::where('organization_id', $organizationId)
+            ->where('is_deleted', false)
+            ->count();
         $activePublications = AssessmentPublication::where('organization_id', $organizationId)
             ->where('status', 'ACTIVE')
+            ->where('is_deleted', false)
             ->count();
+
+        $competencies = Competency::where('organization_id', $organizationId)
+            ->where('is_deleted', false)
+            ->withCount(['questions' => function ($query) {
+                $query->where('questions.is_deleted', false);
+            }])
+            ->whereHas('questions', function ($query) {
+                $query->where('questions.is_deleted', false);
+            })
+            ->orderByDesc('questions_count')
+            ->take(5)
+            ->get();
+
+        $categories = $competencies->pluck('competency_name')->toArray();
+        $seriesData = $competencies->pluck('questions_count')->toArray();
 
         return response()->json([
             'status' => 'success',
@@ -34,9 +56,9 @@ class AuthoringAnalyticsController extends Controller
                 'active_publications' => $activePublications,
                 'charts' => [
                     'competencyCoverage' => [
-                        'categories' => ['Communication', 'Leadership', 'Technical', 'Problem Solving', 'Ethics'],
+                        'categories' => $categories,
                         'series' => [
-                            ['name' => 'Questions Count', 'data' => [45, 30, 80, 50, 20]]
+                            ['name' => 'Questions Count', 'data' => $seriesData]
                         ]
                     ]
                 ]

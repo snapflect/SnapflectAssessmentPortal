@@ -14,7 +14,8 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->foreignId('organization_id')->constrained('organizations')->restrictOnDelete();
             $table->foreignId('assessment_attempt_id')->constrained('assessment_attempts')->restrictOnDelete();
-            $table->foreignId('blueprint_section_id')->constrained('blueprint_sections')->restrictOnDelete();
+            $table->uuid('snapshot_section_uuid')->nullable();
+            $table->foreignId('blueprint_section_id')->nullable()->constrained('blueprint_sections')->restrictOnDelete();
             $table->string('section_name', 255);
             $table->integer('display_order');
             $table->integer('total_questions')->default(0);

@@ -62,8 +62,13 @@ class AssessmentSession extends Model
         return $this->belongsTo(User::class, 'candidate_user_id');
     }
 
-    public function attempt(): HasOne
+    public function attempts(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasOne(AssessmentAttempt::class);
+        return $this->hasMany(AssessmentAttempt::class, 'assessment_session_id');
+    }
+
+    public function latestAttempt(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(AssessmentAttempt::class, 'assessment_session_id')->latest('id');
     }
 }

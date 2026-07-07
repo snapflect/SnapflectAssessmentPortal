@@ -24,6 +24,7 @@ class CompetencyScoreResource extends JsonResource
             'competency_percentage' => $this->competency_percentage,
             'threshold_score' => $this->threshold_score,
             'competency_status' => $this->competency_status,
+            'competency_name' => $this->whenLoaded('competency', fn() => $this->competency->competency_name),
             ],
             'relationships' => [
             ],

@@ -14,7 +14,7 @@ class TenantContextResolver
         $user = $request->user();
 
         if (!$user) {
-            throw new AccessDeniedHttpException('Unauthenticated context.');
+            throw new \Illuminate\Auth\AuthenticationException('Unauthenticated context.');
         }
 
         if (!$user->organization_id) {

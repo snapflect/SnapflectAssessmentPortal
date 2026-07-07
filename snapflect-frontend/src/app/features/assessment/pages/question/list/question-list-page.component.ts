@@ -9,6 +9,7 @@ import { ConfirmService } from '../../../../../core/services/confirm.service';
 import { QuillModule } from 'ngx-quill';
 import { GlobalSearchPipe } from '../../../../../shared/pipes/global-search.pipe';
 import { UserStore } from '../../../../../shared/stores/user.store';
+import { MultiSelectDropdownComponent } from '../../../../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 
 interface Question {
   id: number;
@@ -18,18 +19,21 @@ interface Question {
     question_type: string;
     difficulty_level: string;
     question_text: string;
+    explanation?: string;
     max_score: number;
     status: string;
   };
   relationships?: {
     questionBank?: { uuid: string; attributes: { bank_name: string } };
+    competencies?: any[];
+    tags?: any[];
   };
 }
 
 @Component({
   selector: 'app-question-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SlideOverComponent, QuillModule, GlobalSearchPipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, SlideOverComponent, MultiSelectDropdownComponent, GlobalSearchPipe],
   template: `
     <div class="h-full flex flex-col relative">
       <div class="flex justify-between items-center mb-6">
@@ -37,7 +41,7 @@ interface Question {
           <h2 class="text-2xl font-bold text-main">Questions</h2>
           <p class="text-muted text-sm mt-1">Author and manage questions using the rich text studio.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Assessment.Questions.Create'])) && userStore.hasAnyPermission(['Assessment.Questions.Create'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -115,10 +119,10 @@ interface Question {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button *ngIf="!isGlobalQuestion(q)" class="text-muted hover:text-main transition-colors" (click)="openEditForm(q)">Edit</button>
-                    <button *ngIf="isGlobalQuestion(q)" class="text-muted hover:text-main transition-colors" (click)="openEditForm(q)" title="View Only">View</button>
-                    <button class="text-brand hover:text-brand-light transition-colors" (click)="openCloneModal(q)">Clone</button>
-                    <button *ngIf="!isGlobalQuestion(q)" class="text-muted hover:text-red-400 transition-colors" (click)="deleteQuestion(q.uuid)">Delete</button>
+                    <button *ngIf="(!isGlobalQuestion(q)) && userStore.hasAnyPermission(['Assessment.Questions.Create'])" class="text-muted hover:text-main transition-colors" (click)="openEditForm(q)">Edit</button>
+                    <button *ngIf="(isGlobalQuestion(q)) && userStore.hasAnyPermission(['Assessment.Questions.Create'])" class="text-muted hover:text-main transition-colors" (click)="openEditForm(q)" title="View Only">View</button>
+                    <button *ngIf="userStore.hasAnyPermission(['Assessment.Questions.Create'])" class="text-brand hover:text-brand-light transition-colors" (click)="openCloneModal(q)">Clone</button>
+                    <button *ngIf="(!isGlobalQuestion(q)) && userStore.hasAnyPermission(['Assessment.Questions.Create'])" class="text-muted hover:text-red-400 transition-colors" (click)="deleteQuestion(q.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -176,14 +180,31 @@ interface Question {
             </div>
           </div>
 
-          <!-- Rich Text Editor for Question Stem -->
           <div>
-            <label class="block text-sm font-medium text-muted mb-2">Question Text (Stem) *</label>
-            <div class="bg-white rounded-md text-black overflow-hidden border border-white/20">
-               <quill-editor formControlName="question_text" 
-                            [styles]="{height: '200px'}" 
-                            placeholder="Type the question content here...">
-              </quill-editor>
+            <label class="block text-sm font-medium text-muted mb-1">Question Text (Stem) *</label>
+            <textarea formControlName="question_text" class="input-field h-32 resize-none" placeholder="Type the question content here..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-muted mb-1">Competencies</label>
+              <app-multi-select-dropdown 
+                formControlName="competency_uuids" 
+                [options]="competencies" 
+                valueKey="uuid" 
+                nestedLabelKey="attributes.competency_name"
+                placeholder="Select competencies...">
+              </app-multi-select-dropdown>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-muted mb-1">Tags</label>
+              <app-multi-select-dropdown 
+                formControlName="tag_uuids" 
+                [options]="tags" 
+                valueKey="uuid" 
+                nestedLabelKey="attributes.tag_name"
+                placeholder="Select tags...">
+              </app-multi-select-dropdown>
             </div>
           </div>
 
@@ -237,17 +258,19 @@ interface Question {
         </form>
       </app-slide-over>
 
-      <!-- Clone Modal -->
-      <div *ngIf="isCloneModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="glass-card w-full max-w-md overflow-hidden animate-slide-up shadow-2xl shadow-brand/20">
-          <div class="p-6 border-b border-border-light bg-input-bg">
-            <h3 class="text-xl font-bold text-main">Clone Question</h3>
-            <p class="text-sm text-muted mt-1">Select a local bank to clone this question into.</p>
+      <!-- Clone Slider -->
+      <app-slide-over [isOpen]="isCloneModalOpen" title="Clone Question" (closeEvent)="isCloneModalOpen = false">
+        <div class="space-y-6">
+          <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg">
+            <h4 class="text-sm font-semibold text-blue-400 mb-1">Cloning Question</h4>
+            <p class="text-sm text-brand-light font-mono">{{ questionToClone?.attributes?.question_code }}</p>
+            <p class="text-xs text-slate-400 mt-2 truncate">{{ questionToClone?.attributes?.question_text }}</p>
           </div>
-          
-          <div class="p-6">
-            <label class="block text-sm font-medium text-muted mb-1">Target Question Bank *</label>
-            <select [(ngModel)]="cloneTargetBankUuid" class="input-field mb-4">
+
+          <div>
+            <label class="block text-sm font-medium text-muted mb-2">Target Question Bank *</label>
+            <p class="text-xs text-slate-500 mb-3">Select a local bank to clone this question into.</p>
+            <select [(ngModel)]="cloneTargetBankUuid" class="input-field">
               <option value="">Select a Bank...</option>
               <ng-container *ngFor="let bank of banks">
                  <!-- Clients can only clone into their own non-system banks -->
@@ -256,20 +279,22 @@ interface Question {
             </select>
           </div>
           
-          <div class="p-6 border-t border-border-light bg-input-bg flex justify-end space-x-3">
+          <div class="pt-6 border-t border-border-light flex justify-end space-x-3 mt-8 pb-8">
             <button class="btn-secondary" (click)="isCloneModalOpen = false">Cancel</button>
             <button class="btn-primary" (click)="submitClone()" [disabled]="!cloneTargetBankUuid || submittingClone">
               {{ submittingClone ? 'Cloning...' : 'Clone Question' }}
             </button>
           </div>
         </div>
-      </div>
+      </app-slide-over>
     </div>
   `
 })
 export class QuestionListPageComponent implements OnInit {
   questions: Question[] = [];
   banks: any[] = [];
+  competencies: any[] = [];
+  tags: any[] = [];
   loading = true;
   searchTerm = '';
   isSlideOverOpen = false;
@@ -282,7 +307,7 @@ export class QuestionListPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
-  private userStore = inject(UserStore);
+  public userStore = inject(UserStore);
 
   isPlatformAdmin = false;
   isViewingGlobal = false;
@@ -290,7 +315,7 @@ export class QuestionListPageComponent implements OnInit {
   // Clone Modal State
   isCloneModalOpen = false;
   cloneTargetBankUuid = '';
-  questionToCloneUuid = '';
+  questionToClone: Question | null = null;
   submittingClone = false;
 
   constructor() {
@@ -302,6 +327,8 @@ export class QuestionListPageComponent implements OnInit {
       question_text: ['', Validators.required],
       explanation: [''],
       max_score: [1, [Validators.required, Validators.min(1)]],
+      competency_uuids: [[]],
+      tag_uuids: [[]],
       options: this.fb.array([])
     });
   }
@@ -314,6 +341,8 @@ export class QuestionListPageComponent implements OnInit {
     this.isPlatformAdmin = this.userStore.hasAnyRole(['PLATFORM_ADMIN', 'Platform Admin']);
     this.fetchBanks();
     this.fetchQuestions();
+    this.fetchCompetencies();
+    this.fetchTags();
   }
 
   fetchBanks() {
@@ -325,6 +354,22 @@ export class QuestionListPageComponent implements OnInit {
         },
         error: (err) => console.error(err)
       });
+  }
+
+  fetchCompetencies() {
+    this.http.get<any>(`${environment.apiUrl}/assessment/competencies?per_page=100`)
+      .subscribe({ next: (res) => {
+        const data = res.data || res;
+        this.competencies = data.filter((c: any) => c.attributes.status === 'ACTIVE');
+      }});
+  }
+
+  fetchTags() {
+    this.http.get<any>(`${environment.apiUrl}/assessment/tags?per_page=100`)
+      .subscribe({ next: (res) => {
+        const data = res.data || res;
+        this.tags = data.filter((t: any) => t.attributes.status === 'ACTIVE');
+      }});
   }
 
   fetchQuestions(bankUuid: string = '') {
@@ -402,7 +447,9 @@ export class QuestionListPageComponent implements OnInit {
     this.questionForm.reset({
       question_type: 'MCQ',
       difficulty_level: 'MEDIUM',
-      max_score: 1
+      max_score: 1,
+      competency_uuids: [],
+      tag_uuids: []
     });
     this.options.clear();
     this.addOption('Option 1');
@@ -424,10 +471,12 @@ export class QuestionListPageComponent implements OnInit {
           question_bank_uuid: q.relationships?.questionBank?.uuid || '',
           question_code: fullQ.attributes.question_code,
           question_type: fullQ.attributes.question_type,
-          difficulty_level: fullQ.attributes.difficulty_level,
-          question_text: fullQ.attributes.question_text,
-          explanation: fullQ.attributes.explanation,
-          max_score: fullQ.attributes.max_score
+          difficulty_level: q.attributes.difficulty_level,
+          question_text: q.attributes.question_text,
+          explanation: q.attributes.explanation,
+          max_score: q.attributes.max_score,
+          competency_uuids: fullQ.relationships?.competencies?.map((c: any) => c.uuid) || [],
+          tag_uuids: fullQ.relationships?.tags?.map((t: any) => t.uuid) || []
         });
         
         this.options.clear();
@@ -537,7 +586,7 @@ export class QuestionListPageComponent implements OnInit {
   }
   
   openCloneModal(q: Question) {
-    this.questionToCloneUuid = q.uuid;
+    this.questionToClone = q;
     this.cloneTargetBankUuid = '';
     this.isCloneModalOpen = true;
   }
@@ -545,7 +594,7 @@ export class QuestionListPageComponent implements OnInit {
   submitClone() {
     this.submittingClone = true;
     const payload = { target_question_bank_uuid: this.cloneTargetBankUuid };
-    this.http.post(`${environment.apiUrl}/assessment/questions/${this.questionToCloneUuid}/clone`, payload)
+    this.http.post(`${environment.apiUrl}/assessment/questions/${this.questionToClone?.uuid}/clone`, payload)
       .subscribe({
         next: () => {
           this.submittingClone = false;

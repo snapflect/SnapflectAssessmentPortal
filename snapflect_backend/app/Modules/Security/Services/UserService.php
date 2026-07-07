@@ -101,6 +101,13 @@ class UserService
                 throw new TenantValidationException("Cannot assign role from a different organization.");
             }
 
+            if ($role->role_code === 'PLATFORM_ADMIN') {
+                $assigner = User::find($userId);
+                if (!$assigner || !$assigner->roles->contains('role_code', 'PLATFORM_ADMIN')) {
+                    throw new \Illuminate\Auth\Access\AuthorizationException("Only Platform Administrators can assign the PLATFORM_ADMIN role.");
+                }
+            }
+
             // Use firstOrCreate so the Eloquent model events fire (HasUuid auto-generates the uuid column)
             UserRole::firstOrCreate(
                 ['user_id' => $user->id, 'role_id' => $role->id],
@@ -123,6 +130,20 @@ class UserService
                 ->where('role_id', $role->id)
                 ->delete();
         });
+    }
+
+    public function resetPassword(string $uuid): void
+    {
+        $user = $this->findByUuid($uuid);
+        $user->password = \Illuminate\Support\Facades\Hash::make('Temporary123!');
+        $user->save();
+    }
+
+    public function forceLogout(string $uuid): void
+    {
+        $user = $this->findByUuid($uuid);
+        $user->token_version = $user->token_version + 1;
+        $user->save();
     }
 
     private function validateTenant(int $organizationId, ?int $businessUnitId, ?int $departmentId, ?int $locationId): void

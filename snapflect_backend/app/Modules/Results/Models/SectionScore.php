@@ -71,4 +71,9 @@ class SectionScore extends Model
     {
         return $this->belongsTo(AssessmentResult::class);
     }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Assessment\Models\BlueprintSection::class, 'assessment_section_id');
+    }
 }

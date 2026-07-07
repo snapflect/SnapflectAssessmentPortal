@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-session-monitor-page',
@@ -30,19 +33,19 @@ import { CommonModule } from '@angular/common';
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 shrink-0 transition-opacity duration-300" [class.opacity-50]="isRefreshing">
         <div class="bg-card border border-border-light rounded-xl p-6 shadow-sm">
           <h3 class="text-sm font-medium text-muted mb-2">Total Active</h3>
-          <p class="text-3xl font-bold text-main">1,204</p>
+          <p class="text-3xl font-bold text-main">{{ metrics.total_active | number }}</p>
         </div>
         <div class="bg-card border border-border-light rounded-xl p-6 shadow-sm">
           <h3 class="text-sm font-medium text-muted mb-2">Flagged Sessions</h3>
-          <p class="text-3xl font-bold text-rose-500">23</p>
+          <p class="text-3xl font-bold text-rose-500">{{ metrics.flagged_sessions | number }}</p>
         </div>
         <div class="bg-card border border-border-light rounded-xl p-6 shadow-sm">
           <h3 class="text-sm font-medium text-muted mb-2">Network Warnings</h3>
-          <p class="text-3xl font-bold text-amber-500">89</p>
+          <p class="text-3xl font-bold text-amber-500">{{ metrics.network_warnings | number }}</p>
         </div>
         <div class="bg-card border border-border-light rounded-xl p-6 shadow-sm">
           <h3 class="text-sm font-medium text-muted mb-2">Avg. Completion</h3>
-          <p class="text-3xl font-bold text-emerald-500">42%</p>
+          <p class="text-3xl font-bold text-emerald-500">{{ metrics.avg_completion }}%</p>
         </div>
       </div>
 
@@ -93,7 +96,7 @@ import { CommonModule } from '@angular/common';
                    </div>
                  </td>
                  <td class="p-4 text-right">
-                   <button class="text-sm border border-border-light px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors">View Logs</button>
+                   <button (click)="viewLogs(session)" class="text-sm border border-border-light px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors">View Logs</button>
                  </td>
                </tr>
                <tr *ngIf="filteredSessions.length === 0">
@@ -108,17 +111,24 @@ import { CommonModule } from '@angular/common';
     </div>
   `
 })
-export class SessionMonitorPageComponent {
+export class SessionMonitorPageComponent implements OnInit {
   isRefreshing = false;
   searchTerm = '';
   
-  sessions = [
-    { id: 'SES-94A2B1', candidate: 'John Doe', email: 'john@example.com', ip: '192.168.1.42', status: 'Healthy', latency: 45 },
-    { id: 'SES-82F1C9', candidate: 'Jane Smith', email: 'jane@example.com', ip: '10.0.0.15', status: 'Flagged', latency: 320 },
-    { id: 'SES-37E4D5', candidate: 'Michael Brown', email: 'mike@example.com', ip: '172.16.254.1', status: 'Healthy', latency: 88 },
-    { id: 'SES-19C8A4', candidate: 'Sarah Connor', email: 'sarah@example.com', ip: '198.51.100.14', status: 'Warning', latency: 150 },
-    { id: 'SES-55B2D1', candidate: 'Alex Johnson', email: 'alex@example.com', ip: '203.0.113.88', status: 'Healthy', latency: 62 },
-  ];
+  sessions: any[] = [];
+  metrics = {
+    total_active: 0,
+    flagged_sessions: 0,
+    network_warnings: 0,
+    avg_completion: 0
+  };
+
+  private toast = inject(ToastService);
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    this.refreshData();
+  }
 
   get filteredSessions() {
     if (!this.searchTerm) return this.sessions;
@@ -140,24 +150,28 @@ export class SessionMonitorPageComponent {
   refreshData() {
     this.isRefreshing = true;
     
-    // Simulate network delay
-    setTimeout(() => {
-      // Randomize telemetry to show "live" data changing
-      this.sessions = this.sessions.map(session => {
-        // Randomly fluctuate latency by +/- 20ms
-        const latencyChange = Math.floor(Math.random() * 41) - 20; 
-        let newLatency = session.latency + latencyChange;
-        if (newLatency < 10) newLatency = 10;
-        
-        // Randomly fix warnings sometimes
-        let newStatus = session.status;
-        if (newStatus === 'Warning' && Math.random() > 0.5) newStatus = 'Healthy';
-        if (newStatus === 'Healthy' && Math.random() > 0.9) newStatus = 'Warning';
+    this.http.get<any>(`${environment.apiUrl}/delivery/telemetry`).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.sessions = response.data.sessions;
+          this.metrics = {
+            total_active: response.data.total_active,
+            flagged_sessions: response.data.flagged_sessions,
+            network_warnings: response.data.network_warnings,
+            avg_completion: response.data.avg_completion
+          };
+        }
+        this.isRefreshing = false;
+      },
+      error: (err) => {
+        console.error('Failed to load telemetry', err);
+        this.isRefreshing = false;
+      }
+    });
+  }
 
-        return { ...session, latency: newLatency, status: newStatus };
-      });
-      
-      this.isRefreshing = false;
-    }, 800);
+  viewLogs(session: any) {
+    console.log('Viewing logs for session:', session);
+    this.toast.info('Feature Coming Soon', 'Detailed telemetry logs and attempt audits will be available in the next release.');
   }
 }

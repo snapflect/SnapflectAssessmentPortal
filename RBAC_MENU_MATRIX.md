@@ -10,7 +10,7 @@ It defines the exact menu items visible to each of the 10 core personas when the
 | :--- | :--- | :--- |
 | **Platform Administrator** | `admin@snapflect.com` | Dashboard, Organizations, Business Units, Departments, Locations, Users, Roles, Permissions, Question Banks, Questions, Competencies, Assessment Catalog, Blueprint Designer, Publications, Active Sessions, Manual Scoring, Analytics & Results, Billing |
 | **Client Admin** | `client_admin@snapflect.com` | Dashboard, Business Units, Departments, Locations, Users, Roles, Question Banks, Questions, Competencies, Assessment Catalog, Blueprint Designer, Publications, Active Sessions, Manual Scoring, Analytics & Results |
-| **Assessment Manager** | `assessment_manager@snapflect.com` | Dashboard, Question Banks, Questions, Competencies, Assessment Catalog, Blueprint Designer, Publications, Manual Scoring, Analytics & Results |
+| **Assessment Manager** | `assessment_manager@snapflect.com` | Authoring Dashboard, Question Banks, Questions, Competencies, Assessment Catalog, Blueprint Designer, Publications, Manual Scoring, Analytics & Results |
 | **Content Creator** | `content_creator@snapflect.com` | Dashboard, Question Banks, Questions, Competencies, Assessment Catalog |
 | **Reviewer** | `reviewer@snapflect.com` | Dashboard, Question Banks, Manual Scoring |
 | **Candidate** | `candidate@snapflect.com` | Dashboard, My Assessments, My Results, My Certificates |
@@ -39,6 +39,8 @@ The following table defines the specific underlying permissions granted to each 
 
 > **Note:** `PLATFORM_ADMIN` automatically receives 100% of all permissions in the system. The table below highlights the specific assignments for the other primary roles.
 
+> **Security Note:** The `PLATFORM_ADMIN` role is a strict global system role. To prevent privilege escalation, it is completely hidden from tenant users and cannot be assigned or revoked by anyone other than an existing `PLATFORM_ADMIN`. Client Admins (`CLIENT_ADMIN`) are restricted to managing users and assigning non-platform roles exclusively within their own organization.
+
 | Module | Permission Code | Description | Granted Roles (Excluding Platform Admin) |
 | :--- | :--- | :--- | :--- |
 | **Security** | `Security.Users.View` | View users | Client Admin, Support |
@@ -64,5 +66,6 @@ The following table defines the specific underlying permissions granted to each 
 | **Results** | `Results.Analytics.Export` | Export Result Data | Client Admin, Assessment Manager |
 | **Results** | `Results.ManualScoring.Score` | Manually Score Essays/Video | Client Admin, Assessment Manager, Reviewer |
 | **Results** | `Results.MyResults.View` | View personal results | Candidate |
+| **Assessment** | `Assessment.Metadata.Manage` | Manage taxonomy admin screens: Categories, Types, Question Tags | Platform Admin (auto), Client Admin |
 | **Billing** | `Billing.Invoices.View` | View invoices | Client Admin, Billing Admin |
 | **Billing** | `Billing.Subscription.Manage` | Manage Subscriptions | Client Admin, Billing Admin |

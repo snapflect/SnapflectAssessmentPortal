@@ -33,7 +33,15 @@ class BlueprintController extends Controller
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', AssessmentBlueprint::class);
-        $blueprints = $this->blueprintRepo->paginateByOrganization(auth()->user()->organization_id, 100);
+        $query = AssessmentBlueprint::where('organization_id', auth()->user()->organization_id);
+
+        if ($request->filled('assessment_uuid')) {
+            $query->whereHas('assessment', function ($q) use ($request) {
+                $q->where('uuid', $request->query('assessment_uuid'));
+            });
+        }
+
+        $blueprints = $query->paginate(100);
         $blueprints->load(['assessment', 'sections.rules.competency', 'sections.rules.tag', 'sections.sectionQuestions.question']);
         
         return response()->json([
@@ -58,7 +66,7 @@ class BlueprintController extends Controller
     public function store(CreateBlueprintRequest $request): JsonResponse
     {
         // Auth via Assessment usually, but mapping directly to class
-        $this->authorize('update', AssessmentBlueprint::class); 
+        $this->authorize('create', AssessmentBlueprint::class); 
         
         $this->blueprintService->createBlueprint(auth()->user()->organization_id, $request->toDto());
         

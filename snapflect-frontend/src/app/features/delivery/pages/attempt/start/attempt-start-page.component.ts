@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AssessmentRunnerService } from '../../../services/assessment-runner.service';
+import { DeliveryFacade } from '../../../facades/delivery.facade';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../environments/environment';
 
@@ -115,7 +115,7 @@ import { environment } from '../../../../../../environments/environment';
 export class AttemptStartPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private runner = inject(AssessmentRunnerService);
+  private runner = inject(DeliveryFacade);
   private http = inject(HttpClient);
 
   sessionUuid: string | null = null;
@@ -160,7 +160,8 @@ export class AttemptStartPageComponent implements OnInit {
     this.runner.launchSession(this.sessionUuid).subscribe({
       next: (attempt) => {
         // Attempt created successfully, navigate to the first question
-        this.router.navigate(['/delivery/attempts', attempt.uuid]);
+        const uuid = attempt.data?.uuid || attempt.uuid;
+        this.router.navigate(['/delivery/attempts', uuid]);
       },
       error: (err) => {
         console.error(err);

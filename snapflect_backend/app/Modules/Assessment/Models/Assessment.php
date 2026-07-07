@@ -7,6 +7,7 @@ namespace App\Modules\Assessment\Models;
 use App\Shared\Traits\HasUuid;
 use App\Shared\Traits\BelongsToOrganization;
 use App\Shared\Traits\HasAuditFields;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,9 +16,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Assessment extends Model
 {
-    use HasUuid;
-    use BelongsToOrganization;
-    use HasAuditFields;
+    use HasFactory, HasUuid, BelongsToOrganization, HasAuditFields;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\AssessmentFactory::new();
+    }
 
     public const CREATED_AT = 'created_date';
     public const UPDATED_AT = 'modified_date';
@@ -95,5 +99,11 @@ class Assessment extends Model
     public function blueprint(): HasOne
     {
         return $this->hasOne(AssessmentBlueprint::class);
+    }
+
+    public function competencies(): BelongsToMany
+    {
+        return $this->belongsToMany(Competency::class, 'assessment_competencies', 'assessment_id', 'competency_id')
+                    ->withPivot(['uuid', 'target_percentage']);
     }
 }

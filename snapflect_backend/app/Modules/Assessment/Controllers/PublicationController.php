@@ -20,11 +20,21 @@ class PublicationController extends Controller
         private AssessmentPublicationService $publicationService
     ) {}
 
-    public function index(): JsonResponse
+    public function index(\Illuminate\Http\Request $request): JsonResponse
     {
         $this->authorize('viewAny', AssessmentPublication::class);
         
-        $publications = $this->publicationRepo->query()->with('assessment')->paginate();
+        $user = $request->user();
+        $organizationId = $user ? $user->organization_id : 1;
+        $perPage = (int) $request->input('per_page', 15);
+        
+        $publications = $this->publicationRepo->query()
+            ->whereHas('assessment', function($q) use ($organizationId) {
+                $q->where('organization_id', $organizationId);
+            })
+            ->with('assessment')
+            ->orderBy('created_date', 'desc')
+            ->paginate($perPage);
         
         return response()->json([
             'success' => true,

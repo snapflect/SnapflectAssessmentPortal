@@ -42,7 +42,7 @@ interface Organization {
           <h2 class="text-2xl font-bold text-main">Users &amp; Roles</h2>
           <p class="text-muted text-sm mt-1">Manage platform access, identities, and RBAC permissions.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Security.Users.Manage'])) && userStore.hasAnyPermission(['Security.Users.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -105,11 +105,10 @@ interface Organization {
                     </div>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <!-- Fix 7: Manage Roles only visible to PLATFORM_ADMIN -->
-                    <button *ngIf="isPlatformAdmin"
-                            class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase"
+                    <!-- Fix 7: Manage Roles visible to all authorized users -->
+                    <button *ngIf="(userStore.hasAnyPermission(['Security.Users.Manage'])) && userStore.hasAnyPermission(['Security.Users.Manage'])"  class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase"
                             (click)="openRoleModal(user)">Manage Roles</button>
-                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(user)">Edit</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Security.Users.Manage'])) && userStore.hasAnyPermission(['Security.Users.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(user)">Edit</button>
                   </td>
                 </tr>
               </ng-container>
@@ -125,7 +124,7 @@ interface Organization {
                       (closeEvent)="closeForm()">
         <form [formGroup]="userForm" (ngSubmit)="submitForm()" class="space-y-6">
 
-          <div>
+          <div *ngIf="isPlatformAdmin">
             <label class="block text-sm font-medium text-muted mb-1">Organization *</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null" disabled>Select an Organization</option>
@@ -156,7 +155,7 @@ interface Organization {
           </div>
 
           <!-- Fix 8: Optional initial role assignment during user creation -->
-          <div *ngIf="!isEditing && isPlatformAdmin" class="border-t border-border-light pt-4">
+          <div *ngIf="!isEditing" class="border-t border-border-light pt-4">
             <label class="block text-sm font-medium text-muted mb-1">Initial Role <span class="text-slate-500 font-normal">(optional)</span></label>
             <select formControlName="initial_role_uuid" class="input-field">
               <option [ngValue]="null">No role — assign later via Manage Roles</option>
@@ -204,7 +203,7 @@ interface Organization {
                   <span class="block text-xs text-slate-500">{{ role.attributes.role_code }}</span>
                 </div>
               </div>
-              <button (click)="revokeRole(role)"
+              <button *ngIf="(userStore.hasAnyPermission(['Security.Users.Manage'])) && userStore.hasAnyPermission(['Security.Users.Manage'])"  (click)="revokeRole(role)"
                       [disabled]="role._revoking"
                       class="text-xs text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-400/50 px-2.5 py-1 rounded transition-colors disabled:opacity-50">
                 {{ role._revoking ? 'Revoking...' : 'Revoke' }}
@@ -223,7 +222,7 @@ interface Organization {
                 <span class="block text-sm font-medium text-main">{{ role.attributes.role_name }}</span>
                 <span class="block text-xs text-slate-500">{{ role.attributes.role_code }}</span>
               </div>
-              <button (click)="assignRole(role)"
+              <button *ngIf="(userStore.hasAnyPermission(['Security.Users.Manage'])) && userStore.hasAnyPermission(['Security.Users.Manage'])"  (click)="assignRole(role)"
                       [disabled]="role._assigning"
                       class="text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:border-emerald-400/50 px-2.5 py-1 rounded transition-colors disabled:opacity-50">
                 {{ role._assigning ? 'Assigning...' : '+ Assign' }}
@@ -268,7 +267,7 @@ export class UserListPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
-  private userStore = inject(UserStore);
+  public userStore = inject(UserStore);
 
   constructor() {
     this.userForm = this.fb.group({
@@ -343,9 +342,7 @@ export class UserListPageComponent implements OnInit {
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(12)]);
     this.userForm.get('password')?.updateValueAndValidity();
     // Pre-fetch roles for the optional initial role dropdown
-    if (this.isPlatformAdmin) {
-      this.fetchAllRoles();
-    }
+    this.fetchAllRoles();
     this.isSlideOverOpen = true;
   }
 

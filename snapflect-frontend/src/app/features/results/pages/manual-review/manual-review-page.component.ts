@@ -142,21 +142,23 @@ interface PendingReview {
               </div>
 
               <!-- Right: Grading Panel -->
-              <div class="flex flex-col gap-3 overflow-hidden">
+              <div class="flex flex-col gap-3 overflow-y-auto pr-1">
                 <div class="glass-card p-5 flex-shrink-0">
                   <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-4">Scoring Panel</h4>
 
                   <form [formGroup]="scoreForm" (ngSubmit)="submitScore()" class="space-y-4">
 
-                    <!-- Score Slider + Input -->
+                    <!-- Score Slider -->
                     <div>
-                      <label class="block text-sm text-muted mb-2">
-                        Awarded Score
-                        <span class="text-brand-light font-bold ml-2">{{ scoreForm.get('awarded_score')?.value }} / {{ activeReview.attributes.max_score }}</span>
-                      </label>
+                      <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm text-muted">Awarded Score</label>
+                        <span class="text-brand-light font-bold bg-input-bg border border-border-light rounded px-3 py-1">
+                          {{ scoreForm.get('awarded_score')?.value | number:'1.1-2' }} <span class="text-muted ml-1">/ {{ activeReview.attributes.max_score }}</span>
+                        </span>
+                      </div>
                       <input type="range"
                              formControlName="awarded_score"
-                             [min]="0" [max]="activeReview.attributes.max_score" step="0.5"
+                             [min]="0" [max]="activeReview.attributes.max_score" [step]="getStepSize()"
                              class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand">
 
                       <!-- Visual score bar -->
@@ -182,12 +184,15 @@ interface PendingReview {
                 </div>
 
                 <!-- Scoring Guide -->
-                <div class="glass-card p-4 flex-1">
+                <div class="glass-card p-4 flex-shrink-0">
                   <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Grading Guide</h4>
-                  <div class="space-y-2">
-                    <div *ngFor="let guide of gradingGuide" class="flex items-start gap-2">
-                      <span class="text-brand-light text-xs font-bold flex-shrink-0 w-12">{{ guide.range }}</span>
-                      <span class="text-slate-500 text-xs">{{ guide.description }}</span>
+                  <div class="space-y-3">
+                    <div *ngFor="let guide of gradingGuide" class="flex items-start gap-3">
+                      <div class="flex flex-col flex-shrink-0 w-20">
+                        <span class="text-brand-light text-xs font-bold">{{ getPointRange(guide) }}</span>
+                        <span class="text-slate-500 text-[10px]">{{ guide.pct }}</span>
+                      </div>
+                      <span class="text-slate-400 text-xs leading-relaxed">{{ guide.description }}</span>
                     </div>
                   </div>
                 </div>
@@ -211,11 +216,11 @@ export class ManualReviewPageComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   gradingGuide = [
-    { range: '90-100%', description: 'Exceptional — comprehensive, accurate, well-structured answer.' },
-    { range: '70-89%', description: 'Good — covers main points with minor gaps.' },
-    { range: '50-69%', description: 'Satisfactory — demonstrates basic understanding.' },
-    { range: '25-49%', description: 'Poor — significant gaps in knowledge.' },
-    { range: '0-24%', description: 'Failing — incorrect or largely incomplete.' },
+    { pct: '90-100%', min: 0.90, max: 1.00, description: 'Exceptional — comprehensive, accurate, well-structured answer.' },
+    { pct: '70-89%', min: 0.70, max: 0.89, description: 'Good — covers main points with minor gaps.' },
+    { pct: '50-69%', min: 0.50, max: 0.69, description: 'Satisfactory — demonstrates basic understanding.' },
+    { pct: '25-49%', min: 0.25, max: 0.49, description: 'Poor — significant gaps in knowledge.' },
+    { pct: '0-24%', min: 0.00, max: 0.24, description: 'Failing — incorrect or largely incomplete.' },
   ];
 
   constructor() {
@@ -226,6 +231,22 @@ export class ManualReviewPageComponent implements OnInit {
   }
 
   ngOnInit() { this.fetchPendingReviews(); }
+
+  getStepSize(): number {
+    if (!this.activeReview) return 1;
+    const max = this.activeReview.attributes.max_score;
+    if (max <= 5) return 0.1;
+    if (max <= 20) return 0.5;
+    return 1;
+  }
+
+  getPointRange(guide: any): string {
+    if (!this.activeReview) return guide.pct;
+    const max = this.activeReview.attributes.max_score;
+    const minPts = (max * guide.min).toFixed(1).replace(/\.0$/, '');
+    const maxPts = (max * guide.max).toFixed(1).replace(/\.0$/, '');
+    return `${minPts} - ${maxPts} pts`;
+  }
 
   fetchPendingReviews() {
     this.loading = true;
@@ -286,7 +307,13 @@ export class ManualReviewPageComponent implements OnInit {
     if (this.scoreForm.invalid || !this.activeReview) return;
     this.submitting = true;
 
-    this.http.patch(`${environment.apiUrl}/results/manual-reviews/${this.activeReview.uuid}`, this.scoreForm.value)
+    const payload = {
+      reviewed_score: this.scoreForm.value.awarded_score,
+      review_comments: this.scoreForm.value.notes,
+      review_status: 'COMPLETED'
+    };
+
+    this.http.patch(`${environment.apiUrl}/results/manual-reviews/${this.activeReview.uuid}`, payload)
       .subscribe({
         next: () => {
           this.submitting = false;

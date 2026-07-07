@@ -1,3 +1,4 @@
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -30,7 +31,7 @@ interface AssessmentType {
           <p class="text-muted text-sm mt-1">Manage types used to define the nature of assessments.</p>
         </div>
         <div>
-          <button (click)="openForm()" class="btn-primary flex items-center">
+          <button *ngIf="userStore.hasAnyPermission(['Assessment.Metadata.Manage'])" (click)="openForm()" class="btn-primary flex items-center">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Add Type
           </button>
@@ -84,8 +85,8 @@ interface AssessmentType {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-muted hover:text-main transition-colors" (click)="openEdit(t)">Edit</button>
-                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteType(t.uuid)">Delete</button>
+                    <button *ngIf="userStore.hasAnyPermission(['Assessment.Metadata.Manage'])" class="text-muted hover:text-main transition-colors" (click)="openEdit(t)">Edit</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Assessment.Metadata.Manage'])) && userStore.hasAnyPermission(['Assessment.Metadata.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteType(t.uuid)">Delete</button>
                   </td>
                 </tr>
               </tbody>
@@ -138,6 +139,8 @@ export class TypeListPageComponent implements OnInit {
   submitting = false;
 
   form: FormGroup;
+  userStore = inject(UserStore);
+
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);

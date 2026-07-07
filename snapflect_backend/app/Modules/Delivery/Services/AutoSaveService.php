@@ -36,7 +36,7 @@ class AutoSaveService
             }
 
             // 2. Validate Attempt State
-            if ($attempt->status === 'SUBMITTED') {
+            if (in_array($attempt->status, ['SUBMITTED', 'SCORED', 'EVALUATED'])) {
                 throw new AutoSaveException(AutoSaveException::ATTEMPT_SUBMITTED, "Cannot save. Attempt is already submitted.");
             }
             if ($attempt->status === 'EXPIRED' || $attempt->status === 'CANCELLED') {
@@ -78,7 +78,9 @@ class AutoSaveService
             ], [
                 'uuid' => Str::uuid()->toString(),
                 'organization_id' => $organizationId,
+                'blueprint_section_id' => 1, // Snapshot doesn't track this yet, default to 1 or look up
                 'section_code' => $foundSection['section_code'] ?? 'SEC',
+                'section_name' => $foundSection['section_name'] ?? 'Section',
                 'display_order' => $foundSection['display_order'] ?? 1,
             ]);
 

@@ -57,12 +57,12 @@ class SubmissionEngineServiceTest extends TestCase
         $this->autoSaveService = new AutoSaveService($timerPolicy);
 
         \Illuminate\Support\Facades\Config::set('assessment.grace_period_seconds', 0);
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::statement('PRAGMA foreign_keys = OFF;');
     }
 
     protected function tearDown(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('PRAGMA foreign_keys = ON;');
         parent::tearDown();
     }
 
@@ -110,7 +110,12 @@ class SubmissionEngineServiceTest extends TestCase
         $attempt->expires_at = $overrides['expires_at'] ?? Carbon::now('UTC')->addMinutes(60);
         
         $attempt->randomization_seed = 'seed';
-        $attempt->question_order_json = $overrides['question_order_json'] ?? json_encode(['q-1', 'q-2']);
+        $attempt->question_order_json = $overrides['question_order_json'] ?? json_encode([
+            [
+                'uuid' => 'sec-1',
+                'questions' => ['q-1', 'q-2']
+            ]
+        ]);
         $attempt->option_order_json = $overrides['option_order_json'] ?? json_encode(['q-1' => ['opt-1'], 'q-2' => ['opt-2']]);
         
         $attempt->save();
@@ -132,7 +137,7 @@ class SubmissionEngineServiceTest extends TestCase
         
         $this->assertDatabaseHas('assessment_attempts', [
             'id' => $attempt->id,
-            'status' => 'SUBMITTED'
+            'status' => 'SCORED'
         ]);
 
         $this->assertDatabaseHas('attempt_submissions', [
@@ -192,7 +197,9 @@ class SubmissionEngineServiceTest extends TestCase
 
     public function test_snapshot_validation_failure()
     {
-        $attempt = $this->createAttempt(['snapshot_schema_version' => null]);
+        $attempt = $this->createAttempt();
+        $attempt->assessmentSnapshot->snapshot_json = '';
+        $attempt->assessmentSnapshot->save();
         $dto = new SubmitAttemptDto($attempt->uuid);
 
         $this->expectException(SubmissionException::class);
@@ -203,7 +210,13 @@ class SubmissionEngineServiceTest extends TestCase
 
     public function test_randomization_corruption_failure()
     {
-        $attempt = $this->createAttempt(['question_order_json' => json_encode(['q-1', 'q-1'])]); // duplicate
+        $duplicateSections = [
+            [
+                'uuid' => 'sec-1',
+                'questions' => ['q-1', 'q-1']
+            ]
+        ];
+        $attempt = $this->createAttempt(['question_order_json' => json_encode($duplicateSections)]); // duplicate
         $dto = new SubmitAttemptDto($attempt->uuid);
 
         $this->expectException(SubmissionException::class);
@@ -218,7 +231,7 @@ class SubmissionEngineServiceTest extends TestCase
         $this->submissionService->submitAttempt(new SubmitAttemptDto($attempt->uuid), 1, 1);
 
         $this->expectException(ResumeException::class);
-        $this->expectExceptionMessage('Cannot resume attempt in state: SUBMITTED.');
+        $this->expectExceptionMessage('Cannot resume attempt in state: SCORED.');
 
         $this->resumeService->resumeAttempt(new ResumeDto($attempt->uuid), 1, 1);
     }
@@ -234,3 +247,4 @@ class SubmissionEngineServiceTest extends TestCase
         $this->autoSaveService->executeSave(new AutoSaveDto($attempt->uuid, 'q-1', 'A', '1'), 1, 1);
     }
 }
+

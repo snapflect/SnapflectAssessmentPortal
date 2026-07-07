@@ -10,7 +10,7 @@ describe('RoleGuard', () => {
   let userStore: jasmine.SpyObj<UserStore>;
 
   beforeEach(() => {
-    router = jasmine.createSpyObj('Router', ['navigate']);
+    router = jasmine.createSpyObj('Router', ['navigate', 'parseUrl']);
     authStore = jasmine.createSpyObj('AuthStore', ['isAuthenticated']);
     userStore = jasmine.createSpyObj('UserStore', ['profile', 'hasAnyRole']);
 
@@ -34,7 +34,7 @@ describe('RoleGuard', () => {
       roleGuard(mockRoute, mockState);
     });
 
-    expect(router.navigate).toHaveBeenCalledWith(['/auth/login']);
+    expect(router.parseUrl).toHaveBeenCalledWith('/auth/login');
   });
 
   it('should allow access if user has required role', () => {
@@ -65,6 +65,6 @@ describe('RoleGuard', () => {
       roleGuard(mockRoute, mockState);
     });
 
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(router.parseUrl).toHaveBeenCalledWith('/dashboard');
   });
 });

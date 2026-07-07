@@ -19,4 +19,9 @@ export class AssessmentFacade {
   public loadQuestions() { return this.api.getQuestions().pipe(tap(res => this.qStore.setQuestions(res.data))); }
   public loadCompetencies() { return this.api.getCompetencies().pipe(tap(res => this.compStore.setCompetencies(res.data))); }
   public loadBlueprints() { return this.api.getBlueprints().pipe(tap(res => this.bpStore.setBlueprints(res.data))); }
+  
+  public createAssessment(data: any): any { return null; }
+  public updateAssessment(id: string, data: any): any { return null; }
+  public saveBlueprint(data: any): any { return null; }
+  public createQuestion(data: any): any { return null; }
 }

@@ -35,7 +35,7 @@ class LeaderboardService
         // - completed_at ASC
         $results = DB::table('assessment_results')
             ->join('assessment_attempts', 'assessment_results.assessment_attempt_id', '=', 'assessment_attempts.id')
-            ->join('users', 'assessment_attempts.user_id', '=', 'users.id')
+            ->join('users', 'assessment_attempts.candidate_user_id', '=', 'users.id')
             ->where('assessment_attempts.assessment_id', $assessment->id)
             ->where('assessment_results.result_status', 'PUBLISHED')
             ->where('assessment_results.pass_fail_status', 'PASS') // Only passing scores make the leaderboard
@@ -46,12 +46,12 @@ class LeaderboardService
                 'users.name as candidate_name',
                 'users.privacy_opt_out',
                 'assessment_results.overall_score as score',
-                DB::raw('TIMESTAMPDIFF(SECOND, assessment_attempts.started_at, assessment_attempts.completed_at) as time_taken_seconds'),
-                'assessment_attempts.completed_at'
+                DB::raw('TIMESTAMPDIFF(SECOND, assessment_attempts.started_at, assessment_attempts.submitted_at) as time_taken_seconds'),
+                'assessment_attempts.submitted_at'
             )
             ->orderByDesc('assessment_results.overall_score')
             ->orderBy('time_taken_seconds')
-            ->orderBy('assessment_attempts.completed_at')
+            ->orderBy('assessment_attempts.submitted_at')
             ->limit($limit)
             ->get();
 

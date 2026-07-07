@@ -20,9 +20,11 @@ class CreatePublicationRequest extends FormRequest
             'publication_code' => 'required|string|max:50|unique:assessment_publications,publication_code',
             'title' => 'required|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'nullable|date|after:start_date',
             'max_attempts' => 'required|integer|min:1',
             'is_proctored' => 'boolean',
+            'candidate_emails' => 'nullable|array',
+            'candidate_emails.*' => 'email',
         ];
     }
 }

@@ -17,9 +17,9 @@ class NavigateQuestionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'attempt_uuid' => ['required', 'uuid'],
-            'current_question_uuid' => ['required', 'uuid'],
-            'target_question_uuid' => ['required', 'uuid'],
+            'attempt_uuid' => ['nullable', 'uuid'],
+            'current_question' => ['nullable', 'string'],
+            'target_question_uuid' => ['nullable', 'uuid'],
         ];
     }
 
@@ -48,10 +48,11 @@ class NavigateQuestionRequest extends FormRequest
 
     public function toDto(): NavigateQuestionDto
     {
+        // The frontend passes 'current_question' in the query string
         return new NavigateQuestionDto(
-            $this->validated('attempt_uuid'),
-            $this->validated('current_question_uuid'),
-            $this->validated('target_question_uuid')
+            $this->route('attempt')?->uuid ?? $this->input('attempt_uuid') ?? '',
+            $this->input('current_question'),
+            $this->input('target_question_uuid')
         );
     }
 

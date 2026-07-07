@@ -32,7 +32,7 @@ class AssessmentSessionPolicy
             return $user->id === $session->candidate_user_id;
         }
 
-        if ($user->hasRole('ORGANIZATION_ADMIN')) {
+        if ($user->hasPermission('Delivery.Sessions.View') || $user->hasPermission('Delivery.Sessions.Proctor') || $user->hasRole('ORGANIZATION_ADMIN') || $user->hasRole('CLIENT_ADMIN')) {
             return true;
         }
 
@@ -49,6 +49,10 @@ class AssessmentSessionPolicy
             return $user->id === $session->candidate_user_id;
         }
 
+        if ($user->hasPermission('Delivery.Sessions.Proctor') || $user->hasRole('PROCTOR') || $user->hasRole('ASSESSMENT_MANAGER') || $user->hasRole('SUPPORT') || $user->hasRole('CLIENT_ADMIN')) {
+            return true;
+        }
+
         return false;
     }
 
@@ -58,7 +62,7 @@ class AssessmentSessionPolicy
             return false;
         }
 
-        if ($user->hasRole('ORGANIZATION_ADMIN')) {
+        if ($user->hasPermission('Delivery.Sessions.Proctor') || $user->hasPermission('Delivery.Sessions.Terminate') || $user->hasRole('ORGANIZATION_ADMIN') || $user->hasRole('PROCTOR') || $user->hasRole('ASSESSMENT_MANAGER') || $user->hasRole('SUPPORT') || $user->hasRole('CLIENT_ADMIN')) {
             return true;
         }
 

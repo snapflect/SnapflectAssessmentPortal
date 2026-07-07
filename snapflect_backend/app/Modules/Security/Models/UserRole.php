@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Modules\Security\Models;
 
 use App\Shared\Traits\HasUuid;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class UserRole extends Model
+class UserRole extends Pivot
 {
     use HasUuid;
 

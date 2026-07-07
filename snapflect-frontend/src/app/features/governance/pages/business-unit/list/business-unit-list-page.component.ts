@@ -7,6 +7,7 @@ import { SlideOverComponent } from '../../../../../shared/components/slide-over/
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 import { GlobalSearchPipe } from '../../../../../shared/pipes/global-search.pipe';
+import { UserStore } from '../../../../../shared/stores/user.store';
 
 interface BusinessUnit {
   id: number;
@@ -38,7 +39,7 @@ interface Organization {
           <h2 class="text-2xl font-bold text-main">Business Units</h2>
           <p class="text-muted text-sm mt-1">Manage broad organizational groups and cost centers.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Governance.BusinessUnits.Manage'])) && userStore.hasAnyPermission(['Governance.BusinessUnits.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -93,8 +94,8 @@ interface Organization {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(bu)">Edit</button>
-                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteBU(bu.uuid)">Delete</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Governance.BusinessUnits.Manage'])) && userStore.hasAnyPermission(['Governance.BusinessUnits.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(bu)">Edit</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Governance.BusinessUnits.Manage'])) && userStore.hasAnyPermission(['Governance.BusinessUnits.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteBU(bu.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -110,7 +111,7 @@ interface Organization {
                       (closeEvent)="closeForm()">
         <form [formGroup]="buForm" (ngSubmit)="submitForm()" class="space-y-6">
           
-          <div>
+          <div *ngIf="isPlatformAdmin">
             <label class="block text-sm font-medium text-muted mb-1">Organization *</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null" disabled>Select an Organization</option>
@@ -158,6 +159,9 @@ export class BusinessUnitListPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
+  public userStore = inject(UserStore);
+
+  isPlatformAdmin = false;
 
   constructor() {
     this.buForm = this.fb.group({
@@ -170,6 +174,7 @@ export class BusinessUnitListPageComponent implements OnInit {
   ngOnInit() {
     this.fetchBUs();
     this.fetchOrganizations();
+    this.isPlatformAdmin = this.userStore.hasAnyRole(['PLATFORM_ADMIN']);
   }
 
   fetchOrganizations() {

@@ -15,11 +15,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasUuid, HasAuditFields, BelongsToOrganization, Notifiable;
+    use HasFactory, HasUuid, HasAuditFields, BelongsToOrganization, Notifiable;
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
+    }
 
     public const DELETED_AT = 'deleted_date';
     public const CREATED_AT = 'created_date';
@@ -36,6 +42,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'token_version',
         'status',
         'last_login_at',
         'is_deleted',
@@ -50,6 +57,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
+        'password' => 'hashed',
         'last_login_at' => 'datetime',
         'is_deleted' => 'boolean',
         'created_date' => 'datetime',
@@ -89,7 +97,8 @@ class User extends Authenticatable
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')
+                    ->using(UserRole::class);
     }
 
     public function hasRole($roles): bool
@@ -98,8 +107,10 @@ class User extends Authenticatable
             $roles = [$roles];
         }
         return $this->roles()
-            ->whereIn('role_name', $roles)
-            ->orWhereIn('role_code', $roles)
+            ->where(function ($query) use ($roles) {
+                $query->whereIn('role_name', $roles)
+                      ->orWhereIn('role_code', $roles);
+            })
             ->exists();
     }
 
@@ -109,5 +120,10 @@ class User extends Authenticatable
         return $this->roles()->whereHas('permissions', function ($query) use ($permissionCode) {
             $query->where('permission_code', $permissionCode);
         })->exists();
+    }
+
+    public function manualScoreReviews(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Results\Models\ManualScoreReview::class, 'reviewed_by', 'id');
     }
 }

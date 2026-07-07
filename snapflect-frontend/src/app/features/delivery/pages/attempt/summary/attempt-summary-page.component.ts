@@ -1,12 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AssessmentRunnerService } from '../../../services/assessment-runner.service';
+import { DeliveryFacade } from '../../../facades/delivery.facade';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { FormatTimePipe } from '../../../../../shared/pipes/format-time.pipe';
 
 @Component({
   selector: 'app-attempt-summary-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormatTimePipe],
   template: `
     <div class="h-full flex flex-col bg-slate-900/50 p-6 overflow-y-auto">
       
@@ -21,13 +23,20 @@ import { AssessmentRunnerService } from '../../../services/assessment-runner.ser
           
           <!-- Timer -->
           <div class="bg-input-bg border border-slate-700 px-5 py-2.5 rounded-xl flex items-center gap-3"
-               [ngClass]="{'border-red-500/50 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]': timeRemaining() !== null && timeRemaining()! < 300, 'text-emerald-400': timeRemaining() === null || timeRemaining()! >= 300}">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               [ngClass]="{'border-red-500/50 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]': timeRemaining() !== null && timeRemaining()! < 300, 'text-emerald-400': timeRemaining() !== null && timeRemaining()! >= 300, 'text-slate-400': timeRemaining() === null}">
+            <!-- Countdown icon -->
+            <svg *ngIf="timeRemaining() !== null" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
+            <!-- Stopwatch icon (untimed) -->
+            <svg *ngIf="timeRemaining() === null" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"></path>
+            </svg>
             <div class="flex flex-col">
-              <span class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold leading-none mb-1">Time Left</span>
-              <span class="font-mono font-bold text-xl leading-none">{{ formattedTime }}</span>
+              <span class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold leading-none mb-1">
+                {{ timeRemaining() !== null ? 'Time Left' : 'Elapsed' }}
+              </span>
+              <span class="font-mono font-bold text-xl leading-none">{{ (timeRemaining() !== null ? timeRemaining() : facade.attemptStore.elapsedSeconds()) | formatTime }}</span>
             </div>
           </div>
         </div>
@@ -175,47 +184,36 @@ import { AssessmentRunnerService } from '../../../services/assessment-runner.ser
 export class AttemptSummaryPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  public runner = inject(AssessmentRunnerService);
+  public facade = inject(DeliveryFacade);
+  private toastService = inject(ToastService);
 
   attemptUuid = '';
   loading = true;
   showModal = false;
   submitting = false;
 
-  get questions() { return this.runner.questionMap(); }
+  get questions() { return this.facade.attemptStore.questionMap(); }
   get answeredCount() { return this.questions.filter(q => q.is_answered).length; }
   get unansweredCount() { return this.questions.filter(q => !q.is_answered).length; }
   get flaggedCount() { return this.questions.filter(q => q.is_flagged).length; }
 
-  get formattedTime(): string {
-    const s = this.runner.timeRemainingSeconds();
-    if (s === null) return '--:--';
-    const hrs = Math.floor(s / 3600);
-    const mins = Math.floor((s % 3600) / 60);
-    const secs = s % 60;
-    if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-
   timeRemaining() {
-    return this.runner.timeRemainingSeconds();
+    return this.facade.attemptStore.timeRemainingSeconds();
   }
 
   ngOnInit() {
     this.attemptUuid = this.route.snapshot.paramMap.get('uuid') || '';
 
     // Load state if not loaded
-    if (!this.runner.attempt() || this.runner.attempt()?.uuid !== this.attemptUuid) {
-      this.runner.loadAttempt(this.attemptUuid).subscribe(() => this.loadQuestions());
+    if (!this.facade.attemptStore.currentAttempt() || this.facade.attemptStore.currentAttempt()?.uuid !== this.attemptUuid) {
+      this.facade.loadAttempt(this.attemptUuid).subscribe(() => this.loadQuestions());
     } else {
       this.loadQuestions();
     }
   }
 
   loadQuestions() {
-    this.runner.loadQuestions(this.attemptUuid).subscribe({
+    this.facade.loadQuestions(this.attemptUuid).subscribe({
       next: () => { this.loading = false; },
       error: () => { this.loading = false; }
     });
@@ -241,7 +239,7 @@ export class AttemptSummaryPageComponent implements OnInit {
 
   confirmSubmit() {
     this.submitting = true;
-    this.runner.submitAttempt(this.attemptUuid).subscribe({
+    this.facade.submitAttempt(this.attemptUuid).subscribe({
       next: () => {
         this.submitting = false;
         this.showModal = false;
@@ -250,8 +248,8 @@ export class AttemptSummaryPageComponent implements OnInit {
       error: (err) => {
         console.error('Submit failed', err);
         this.submitting = false;
-        // Should probably show an error toast here
-        alert('Failed to submit. Please try again.');
+        this.showModal = false;
+        this.toastService.error('Submission Failed', 'Failed to submit assessment. Please try again.');
       }
     });
   }

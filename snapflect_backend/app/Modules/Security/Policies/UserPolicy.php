@@ -30,7 +30,7 @@ class UserPolicy
             return true;
         }
 
-        if ($user->roles->contains('role_code', 'ORG_ADMIN')) {
+        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
             return $user->organization_id === $model->organization_id;
         }
 
@@ -43,7 +43,7 @@ class UserPolicy
 
     public function create(User $user): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') || $user->roles->contains('role_code', 'DEPT_MANAGER');
+        return $user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN') || $user->roles->contains('role_code', 'DEPT_MANAGER');
     }
 
     public function update(User $user, User $model): bool
@@ -52,7 +52,7 @@ class UserPolicy
             return true;
         }
 
-        if ($user->roles->contains('role_code', 'ORG_ADMIN')) {
+        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
             return $user->organization_id === $model->organization_id;
         }
 
@@ -65,7 +65,7 @@ class UserPolicy
 
     public function delete(User $user, User $model): bool
     {
-        if ($user->roles->contains('role_code', 'ORG_ADMIN')) {
+        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
             return $user->organization_id === $model->organization_id;
         }
 
@@ -87,20 +87,26 @@ class UserPolicy
     }
 
     /**
-     * Only PLATFORM_ADMIN may assign roles.
-     * The before() hook short-circuits and returns true for PLATFORM_ADMIN
-     * before this method is reached, so returning false here denies everyone else.
+     * PLATFORM_ADMIN is allowed by the before() hook.
+     * CLIENT_ADMIN can assign roles to users in their own organization.
      */
     public function assignRole(User $user, User $model): bool
     {
+        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
+            return $user->organization_id === $model->organization_id;
+        }
         return false;
     }
 
     /**
-     * Only PLATFORM_ADMIN may revoke roles.
+     * PLATFORM_ADMIN is allowed by the before() hook.
+     * CLIENT_ADMIN can revoke roles from users in their own organization.
      */
     public function revokeRole(User $user, User $model): bool
     {
+        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
+            return $user->organization_id === $model->organization_id;
+        }
         return false;
     }
 }

@@ -28,7 +28,7 @@ class RoleRepository implements RoleRepositoryInterface
         return Role::where(function ($query) use ($organizationId) {
             $query->where('organization_id', $organizationId)
                   ->orWhereNull('organization_id');
-        })->get();
+        })->where('role_code', '!=', 'PLATFORM_ADMIN')->get();
     }
     public function findSystemRoles(): Collection { return Role::where('is_system_role', true)->get(); }
     public function search(string $term): Collection { return Role::where('role_name', 'like', "%{$term}%")->get(); }
@@ -36,7 +36,8 @@ class RoleRepository implements RoleRepositoryInterface
         return Role::where(function ($query) use ($organizationId) {
             $query->where('organization_id', $organizationId)
                   ->orWhereNull('organization_id');
-        })->where('role_name', 'like', "%{$term}%")->get();
+        })->where('role_code', '!=', 'PLATFORM_ADMIN')
+          ->where('role_name', 'like', "%{$term}%")->get();
     }
     public function query(): Builder { return Role::query(); }
     public function paginate(int $perPage = 15, array $relations = []): LengthAwarePaginator { return Role::with($relations)->paginate($perPage); }
@@ -44,7 +45,8 @@ class RoleRepository implements RoleRepositoryInterface
         return Role::where(function ($query) use ($organizationId) {
             $query->where('organization_id', $organizationId)
                   ->orWhereNull('organization_id');
-        })->with($relations)->paginate($perPage);
+        })->where('role_code', '!=', 'PLATFORM_ADMIN')
+          ->with($relations)->paginate($perPage);
     }
     public function create(array $data): Role { return Role::create($data); }
     public function update(Role $role, array $data): bool { return $role->update($data); }

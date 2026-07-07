@@ -16,7 +16,7 @@ class CompetencyScoringService
      */
     public function evaluateCompetencies(array $blueprint, array $questionScores): array
     {
-        $competenciesConfig = $blueprint['competencies'] ?? [];
+        $competenciesConfig = $blueprint['blueprint']['competencies'] ?? $blueprint['competencies'] ?? [];
         if (empty($competenciesConfig)) {
             return []; // No competencies to score
         }
@@ -44,10 +44,19 @@ class CompetencyScoringService
         }
 
         // Iterate through all sections and questions in blueprint to find mapping
-        foreach ($blueprint['sections'] ?? [] as $section) {
+        $sections = $blueprint['blueprint']['sections'] ?? $blueprint['sections'] ?? [];
+        foreach ($sections as $section) {
             foreach ($section['questions'] ?? [] as $question) {
                 $qUuid = $question['uuid'] ?? null;
+                
                 $mappedCompetencyUuids = $question['competency_uuids'] ?? [];
+                if (empty($mappedCompetencyUuids) && !empty($question['competencies'])) {
+                    foreach ($question['competencies'] as $comp) {
+                        if (isset($comp['uuid'])) {
+                            $mappedCompetencyUuids[] = $comp['uuid'];
+                        }
+                    }
+                }
 
                 if (!$qUuid || empty($mappedCompetencyUuids) || !isset($scoresByQuestionUuid[$qUuid])) {
                     continue;

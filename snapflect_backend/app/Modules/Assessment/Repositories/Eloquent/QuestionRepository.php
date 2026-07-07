@@ -100,12 +100,12 @@ class QuestionRepository implements QuestionRepositoryInterface
 
     public function findWithTrashed(int $id): ?\Illuminate\Database\Eloquent\Model
     {
-        return $this->model->newQuery()->find($id);
+        return $this->model->withTrashed()->find($id);
     }
 
     public function findOnlyTrashed(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->newQuery()->where('is_deleted', true)->get();
+        return $this->model->onlyTrashed()->where('is_deleted', true)->get();
     }
 
     public function findByQuestionBank(int $questionBankId): \Illuminate\Database\Eloquent\Collection

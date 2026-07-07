@@ -34,7 +34,7 @@ interface QuestionBank {
           <h2 class="text-2xl font-bold text-main">Question Banks</h2>
           <p class="text-muted text-sm mt-1">Organize and manage your assessment questions into distinct banks.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Assessment.QuestionBanks.Manage'])) && userStore.hasAnyPermission(['Assessment.QuestionBanks.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -97,8 +97,8 @@ interface QuestionBank {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(bank)">Edit</button>
-                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteBank(bank.uuid)">Delete</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Assessment.QuestionBanks.Manage'])) && userStore.hasAnyPermission(['Assessment.QuestionBanks.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(bank)">Edit</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Assessment.QuestionBanks.Manage'])) && userStore.hasAnyPermission(['Assessment.QuestionBanks.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteBank(bank.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -164,7 +164,7 @@ export class QuestionBankListPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
-  private userStore = inject(UserStore);
+  public userStore = inject(UserStore);
 
   constructor() {
     this.bankForm = this.fb.group({

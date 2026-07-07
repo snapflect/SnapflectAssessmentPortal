@@ -121,7 +121,11 @@ class AssessmentService
             $validationResult = $this->validationService->validate($assessment->uuid, $assessment->organization_id, auth()->id());
             if (!$validationResult->readyForPublication) {
                 $errorMessages = array_map(fn($e) => $e->message, $validationResult->validationErrors);
-                throw new \Exception("Assessment validation failed. Please fix the following errors before submitting: \n" . implode("\n", $errorMessages));
+                throw new \App\Modules\Assessment\Exceptions\AssessmentPublicationException(
+                    \App\Modules\Assessment\Exceptions\AssessmentPublicationException::ASSESSMENT_NOT_READY, 
+                    "Assessment validation failed. Please fix the following errors before submitting: \n" . implode("\n", $errorMessages), 
+                    $validationResult->validationErrors
+                );
             }
             
             return $this->assessmentRepo->update($id, ['current_state' => PublicationStateMachine::STATE_IN_REVIEW]);

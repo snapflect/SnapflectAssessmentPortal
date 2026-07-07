@@ -14,12 +14,26 @@ class CreateAnswerRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        \Log::info('Incoming CreateAnswerRequest data:', $this->all());
+    }
+
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        \Log::error('Validation failed for CreateAnswerRequest', [
+            'request_all' => $this->all(),
+            'errors' => $validator->errors()->toArray()
+        ]);
+        parent::failedValidation($validator);
+    }
+
     public function rules(): array
     {
         return [
             'attempt_uuid' => ['required', 'uuid'],
             'attempt_question_uuid' => ['required', 'uuid'],
-            'answer_type' => ['required', 'string', 'in:SINGLE_CHOICE,MULTIPLE_CHOICE,TRUE_FALSE,SHORT_TEXT,LONG_TEXT,NUMERIC'],
+            'answer_type' => ['required', 'string', 'in:SINGLE_CHOICE,MULTIPLE_CHOICE,TRUE_FALSE,SHORT_TEXT,LONG_TEXT,ESSAY,NUMERIC,MCQ,MRQ'],
             'selected_option_uuid' => ['nullable', 'uuid'],
             'selected_option_uuids_json' => ['nullable', 'array'],
             'text_answer' => ['nullable', 'string'],

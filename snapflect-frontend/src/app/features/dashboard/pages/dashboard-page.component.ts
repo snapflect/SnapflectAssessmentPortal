@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { UserStore } from '../../../shared/stores/user.store';
+import ApexCharts from 'apexcharts';
 
 interface DashboardMetrics {
   roleContext?: string;
@@ -29,8 +30,15 @@ interface DashboardMetrics {
   terminated_sessions?: number;
   active_subscriptions?: number;
   pending_invoices?: number;
+  is_platform_billing_admin?: boolean;
   open_tickets?: number;
   upcoming_sessions?: { assessment_name: string; scheduled_date: string; status: string }[];
+  turnaround_time?: string;
+  priority_queue?: { uuid: string; candidate_name: string; assessment_name: string; date_submitted: string; status: string }[];
+  reviewer_chart?: {
+    categories: string[];
+    series: { name: string, data: number[] }[];
+  };
   charts?: {
     userGrowth: {
       categories: string[];
@@ -219,13 +227,29 @@ interface DashboardMetrics {
 
         <!-- REVIEWER -->
         <ng-container *ngSwitchCase="'REVIEWER'">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Welcome Banner -->
+          <div class="glass-card p-6 mb-6 flex items-center justify-between relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-brand/5 pointer-events-none"></div>
+            <div class="z-10">
+              <h3 class="text-2xl font-bold text-main">Welcome back, {{ userStore.profile()?.first_name || 'Reviewer' }}! 👋</h3>
+              <p class="text-muted text-sm mt-1">You have <span class="font-semibold text-amber-500">{{ metrics?.pending_reviews || 0 }} pending manual reviews</span> in your queue.</p>
+            </div>
+            <a routerLink="/scoring/manual"
+               class="z-10 flex-shrink-0 ml-6 px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 hover:opacity-90 transition-opacity flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              Start Reviewing
+            </a>
+          </div>
+
+          <!-- Stat Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="glass-card p-6 flex flex-col relative overflow-hidden group border border-amber-500/20">
               <div class="p-3 bg-amber-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
                 <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               </div>
-              <p class="text-muted text-sm font-medium z-10">Pending Manual Reviews</p>
+              <p class="text-muted text-sm font-medium z-10">Pending Reviews</p>
               <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics?.pending_reviews || 0 }}</h3>
+              <a routerLink="/scoring/manual" class="mt-3 text-xs text-amber-400 hover:underline z-10">View queue →</a>
             </div>
             <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
               <div class="p-3 bg-emerald-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
@@ -233,13 +257,73 @@ interface DashboardMetrics {
               </div>
               <p class="text-muted text-sm font-medium z-10">Completed Reviews</p>
               <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics?.completed_reviews || 0 }}</h3>
+              <span class="mt-3 text-xs text-muted z-10">All time</span>
             </div>
             <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
               <div class="p-3 bg-brand/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
                 <svg class="w-6 h-6 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
               </div>
-              <p class="text-muted text-sm font-medium z-10">Average Score Awarded</p>
+              <p class="text-muted text-sm font-medium z-10">Avg Score Awarded</p>
               <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics?.average_score_awarded || 0 }}%</h3>
+              <span class="mt-3 text-xs text-muted z-10">Scoring consistency</span>
+            </div>
+            <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
+              <div class="p-3 bg-indigo-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
+                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <p class="text-muted text-sm font-medium z-10">Avg Turnaround</p>
+              <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics?.turnaround_time || 'N/A' }}</h3>
+              <span class="mt-3 text-xs text-muted z-10">Based on last 7 days</span>
+            </div>
+          </div>
+
+          <!-- Main Content Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Productivity Chart -->
+            <div class="glass-card p-6 lg:col-span-2 flex flex-col">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-main">Productivity (Last 7 Days)</h3>
+              </div>
+              <div id="reviewer-productivity-chart" class="w-full flex-1 min-h-[300px]"></div>
+            </div>
+
+            <!-- Priority Queue -->
+            <div class="glass-card p-0 flex flex-col overflow-hidden">
+              <div class="p-6 border-b border-surface-darker flex items-center justify-between">
+                <h3 class="text-lg font-bold text-main">Next Up</h3>
+                <a routerLink="/scoring/manual" class="text-xs text-brand-light hover:underline">View all</a>
+              </div>
+              <div class="flex-1 overflow-y-auto custom-scrollbar p-2">
+                <div *ngIf="metrics?.priority_queue && metrics!.priority_queue!.length > 0" class="space-y-2">
+                  <div *ngFor="let item of metrics!.priority_queue" class="p-4 rounded-lg bg-surface/50 border border-surface-darker hover:bg-surface transition-colors group relative">
+                    <div class="flex justify-between items-start mb-2">
+                      <div>
+                        <p class="text-sm font-bold text-main">{{ item.candidate_name }}</p>
+                        <p class="text-xs text-muted truncate max-w-[180px]">{{ item.assessment_name }}</p>
+                      </div>
+                      <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500">
+                        {{ item.status }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-surface-darker/50">
+                      <p class="text-xs text-slate-500 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {{ item.date_submitted }}
+                      </p>
+                      <a routerLink="/scoring/manual" [queryParams]="{ highlight: item.uuid }" class="text-xs font-semibold text-brand-light hover:text-brand transition-colors flex items-center gap-1">
+                        Grade <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="!metrics?.priority_queue || metrics!.priority_queue!.length === 0" class="text-center py-10 px-4">
+                  <div class="w-12 h-12 rounded-full bg-surface-darker/50 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                  </div>
+                  <p class="text-sm font-medium text-main">You're all caught up!</p>
+                  <p class="text-xs text-muted mt-1">No pending reviews at the moment.</p>
+                </div>
+              </div>
             </div>
           </div>
         </ng-container>
@@ -353,8 +437,8 @@ interface DashboardMetrics {
 
         <!-- BILLING_ADMIN -->
         <ng-container *ngSwitchCase="'BILLING_ADMIN'">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
+          <div class="grid grid-cols-1 gap-6 mb-8" [ngClass]="metrics?.is_platform_billing_admin ? 'md:grid-cols-3' : 'md:grid-cols-2'">
+            <div *ngIf="metrics?.is_platform_billing_admin" class="glass-card p-6 flex flex-col relative overflow-hidden group">
               <div class="p-3 bg-brand/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
                 <svg class="w-6 h-6 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
               </div>
@@ -380,8 +464,8 @@ interface DashboardMetrics {
 
         <!-- READ_ONLY -->
         <ng-container *ngSwitchCase="'READ_ONLY'">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
+          <div class="grid grid-cols-1 gap-6 mb-8" [ngClass]="(metrics?.organizations_count || 0) === 1 ? 'md:grid-cols-2' : 'md:grid-cols-3'">
+            <div *ngIf="(metrics?.organizations_count || 0) !== 1" class="glass-card p-6 flex flex-col relative overflow-hidden group">
               <div class="p-3 bg-brand/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
                 <svg class="w-6 h-6 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
               </div>
@@ -521,6 +605,7 @@ export class DashboardPageComponent implements OnInit {
   loading = true;
   availableRoles: string[] = [];
   showRoleModal = false;
+  chartInstance: any;
 
   public userStore = inject(UserStore);
   private http = inject(HttpClient);
@@ -559,6 +644,10 @@ export class DashboardPageComponent implements OnInit {
           }
           this.availableRoles = (this.metrics?.availableRoles || []).filter(r => profileRoles.includes(r));
           
+          if (this.metrics.roleContext === 'REVIEWER') {
+            this.initReviewerChart();
+          }
+
           // Optionally auto-show modal on first load if they have multiple roles
           // We can skip auto-show to avoid annoyance, and just let them use the beautiful button
           this.loading = false;
@@ -587,7 +676,55 @@ export class DashboardPageComponent implements OnInit {
 
   /** True for roles that see trend charts (admin-level analytics) */
   isAdminRole(roleCode?: string): boolean {
-    return ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER'].includes(roleCode || '');
+    return ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'READ_ONLY'].includes(roleCode || '');
+  }
+
+  initReviewerChart() {
+    if (!this.metrics || !this.metrics.reviewer_chart) return;
+
+    const options: any = {
+      series: this.metrics.reviewer_chart.series,
+      chart: {
+        type: 'area',
+        height: 300,
+        background: 'transparent',
+        toolbar: { show: false },
+        fontFamily: 'inherit'
+      },
+      colors: ['#f59e0b', '#10b981'], // amber-500, emerald-500
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.4,
+          opacityTo: 0.05,
+          stops: [0, 100]
+        }
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
+      xaxis: {
+        categories: this.metrics.reviewer_chart.categories,
+        labels: { style: { colors: '#94a3b8' } },
+        axisBorder: { show: false },
+        axisTicks: { show: false }
+      },
+      yaxis: { labels: { style: { colors: '#94a3b8' } } },
+      legend: { position: 'top', labels: { colors: '#cbd5e1' } },
+      tooltip: { theme: 'dark' },
+      grid: { borderColor: '#334155', strokeDashArray: 4 }
+    };
+
+    setTimeout(() => {
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+      }
+      const chartEl = document.querySelector('#reviewer-productivity-chart') as HTMLElement;
+      if (chartEl) {
+        this.chartInstance = new ApexCharts(chartEl, options);
+        this.chartInstance.render();
+      }
+    }, 0);
   }
 
   getRoleName(roleCode: string): string {

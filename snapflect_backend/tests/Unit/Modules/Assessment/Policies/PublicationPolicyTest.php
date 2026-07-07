@@ -20,9 +20,22 @@ class PublicationPolicyTest extends TestCase
 
     public function test_organization_admin_can_publish()
     {
-        $this->markTestIncomplete('Test generated for architecture review.');
-    }\n\n    public function test_department_manager_cannot_publish()
+        $orgAdmin = \App\Modules\Security\Models\User::factory()->create();
+        $orgAdmin->roles()->attach(\App\Modules\Security\Models\Role::factory()->create(['role_code' => 'ORG_ADMIN', 'role_name' => 'ORG_ADMIN']));
+
+        $policy = new \App\Modules\Assessment\Policies\AssessmentPublicationPolicy();
+
+        $this->assertTrue($policy->create($orgAdmin));
+    }
+
+    public function test_department_manager_cannot_publish()
     {
-        $this->markTestIncomplete('Test generated for architecture review.');
+        $deptManager = \App\Modules\Security\Models\User::factory()->create();
+        $deptManager->roles()->attach(\App\Modules\Security\Models\Role::factory()->create(['role_code' => 'DEPT_MANAGER', 'role_name' => 'DEPT_MANAGER']));
+
+        $policy = new \App\Modules\Assessment\Policies\AssessmentPublicationPolicy();
+
+        $this->assertFalse($policy->create($deptManager));
     }
 }
+

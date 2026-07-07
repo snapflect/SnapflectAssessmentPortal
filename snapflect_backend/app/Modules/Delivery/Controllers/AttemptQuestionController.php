@@ -90,10 +90,8 @@ class AttemptQuestionController extends Controller
         ]);
     }
 
-    public function flag(FlagQuestionRequest $request, AttemptQuestion $question): JsonResponse
+    public function flag(FlagQuestionRequest $request, string $questionUuid): JsonResponse
     {
-        $this->authorize('flag', $question);
-
         $this->answerService->flagQuestion($request->toDto());
 
         return response()->json([
@@ -103,10 +101,8 @@ class AttemptQuestionController extends Controller
         ]);
     }
 
-    public function unflag(UnflagQuestionRequest $request, AttemptQuestion $question): JsonResponse
+    public function unflag(UnflagQuestionRequest $request, string $questionUuid): JsonResponse
     {
-        $this->authorize('unflag', $question);
-
         $this->answerService->unflagQuestion($request->toDto());
 
         return response()->json([

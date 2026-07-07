@@ -22,12 +22,12 @@ class QuestionPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER']);
+        return $user->hasPermission('Assessment.Questions.View') || $user->hasPermission('Assessment.Questions.Manage');
     }
 
     public function view(User $user, Question $question): bool
     {
-        if (!$user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER'])) {
+        if (!($user->hasPermission('Assessment.Questions.View') || $user->hasPermission('Assessment.Questions.Manage'))) {
             return false;
         }
         return $user->organization_id === $question->organization_id;
@@ -35,12 +35,12 @@ class QuestionPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER']);
+        return $user->hasPermission('Assessment.Questions.Create') || $user->hasPermission('Assessment.Questions.Manage');
     }
 
     public function update(User $user, Question $question): bool
     {
-        if (!$user->hasRole(['ORG_ADMIN', 'DEPT_MANAGER'])) {
+        if (!($user->hasPermission('Assessment.Questions.Manage') || $user->hasPermission('Assessment.Questions.Create') || $user->hasPermission('Assessment.Questions.Review'))) {
             return false;
         }
         return $user->organization_id === $question->organization_id;
@@ -48,7 +48,7 @@ class QuestionPolicy
 
     public function delete(User $user, Question $question): bool
     {
-        if (!$user->hasRole('ORG_ADMIN')) {
+        if (!$user->hasPermission('Assessment.Questions.Manage')) {
             return false;
         }
         return $user->organization_id === $question->organization_id;

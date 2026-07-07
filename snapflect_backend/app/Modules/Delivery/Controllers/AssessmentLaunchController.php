@@ -24,10 +24,15 @@ class AssessmentLaunchController extends Controller
     {
         $context = $this->contextResolver->resolve($request);
         
-        $dto = new SessionLaunchDto($assessment_uuid);
+        $sessionDto = $this->launchService->createSession(
+            $assessment_uuid,
+            $context->userId,
+            $context->organizationId,
+            $context->userId
+        );
         
         $result = $this->launchService->launchSession(
-            $dto, 
+            $sessionDto->sessionUuid, 
             $context->organizationId, 
             $context->userId
         );

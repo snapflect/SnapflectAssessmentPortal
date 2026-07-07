@@ -15,6 +15,7 @@ class AssessmentAttemptResource extends JsonResource
             'uuid' => $this->uuid,
             'attributes' => [
                 'status' => $this->status,
+                'session_status' => $this->session?->session_status,
                 'completion_percentage' => $this->completion_percentage,
                 'total_questions' => $this->total_questions,
                 'answered_questions' => $this->answered_questions,

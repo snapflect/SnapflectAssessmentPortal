@@ -40,8 +40,30 @@ export class UserStore {
   }
 
   public getDefaultRoute(): string {
-    if (!this._profile()) {
+    const profile = this._profile();
+    if (!profile) {
       return '/auth/login';
+    }
+    const isOnlyContentCreator = profile.roles?.length === 1 && profile.roles[0] === 'CONTENT_CREATOR';
+    if (isOnlyContentCreator) {
+      return '/authoring/dashboard';
+    }
+    const isOnlyCandidate = profile.roles?.length === 1 && profile.roles[0] === 'CANDIDATE';
+    if (isOnlyCandidate) {
+      return '/delivery/dashboard';
+    }
+
+    const isOnlyProctor = profile.roles?.length === 1 && profile.roles[0] === 'PROCTOR';
+    if (isOnlyProctor) {
+      return '/delivery/proctoring';
+    }
+    const isOnlyReviewer = profile.roles?.length === 1 && profile.roles[0] === 'REVIEWER';
+    if (isOnlyReviewer) {
+      return '/results/reviewer-dashboard';
+    }
+    const isOnlyAssessmentManager = profile.roles?.length === 1 && profile.roles[0] === 'ASSESSMENT_MANAGER';
+    if (isOnlyAssessmentManager) {
+      return '/authoring/dashboard'; // AM's home domain is Authoring — same pattern as Content Creator → /authoring/dashboard
     }
     // All roles land on /dashboard — the dashboard page renders role-specific content
     return '/dashboard';

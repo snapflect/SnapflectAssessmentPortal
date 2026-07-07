@@ -33,6 +33,8 @@ class AssessmentResultResource extends JsonResource
                 'is_passed' => $this->pass_fail_status === 'PASS',
                 'status' => $this->result_status,
                 'scored_at' => $this->calculated_at ?? $this->created_date,
+                'selection_status' => $this->whenLoaded('assessmentAttempt', fn() => $this->assessmentAttempt->selection_status ?? 'PENDING'),
+                'attempt_uuid' => $this->whenLoaded('assessmentAttempt', fn() => $this->assessmentAttempt->uuid),
             ],
             'relationships' => [
                 'question_scores' => QuestionScoreResource::collection($this->whenLoaded('questionScores')),
@@ -50,7 +52,7 @@ class AssessmentResultResource extends JsonResource
                 'assessment' => $this->whenLoaded('assessment', function () {
                     return [
                         'attributes' => [
-                            'title' => $this->assessment->title ?? 'Unknown Assessment'
+                            'title' => $this->assessment->assessment_name ?? 'Unknown Assessment'
                         ]
                     ];
                 })

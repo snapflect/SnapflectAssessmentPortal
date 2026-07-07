@@ -37,8 +37,8 @@ class AssessmentPublicationController extends Controller
         $user = $request->user();
         $organizationId = $user ? $user->organization_id : 1; 
         $userId = $user ? $user->id : 1;
-
-        $result = $this->publicationService->publish($uuid, $organizationId, $userId);
+        $schedulingData = $request->input('scheduling', []);
+        $result = $this->publicationService->publish($uuid, $schedulingData, $organizationId, $userId);
 
         return response()->json([
             'success' => true,

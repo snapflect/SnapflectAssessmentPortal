@@ -27,7 +27,7 @@ class AssessmentResultPolicy
     public function viewAny(User $user): bool
     {
         // Platform Admin overrides this. Others evaluate conditionally.
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'REVIEWER', 'READ_ONLY']);
     }
 
     public function view(User $user, AssessmentResult $result): bool
@@ -43,7 +43,7 @@ class AssessmentResultPolicy
         }
 
         // ORGANIZATION ADMIN ACCESS
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'REVIEWER']);
     }
 
     public function calculate(User $user, AssessmentResult $result): bool
@@ -57,7 +57,7 @@ class AssessmentResultPolicy
             return false;
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER']);
     }
 
     public function recalculate(User $user, AssessmentResult $result): bool
@@ -71,7 +71,7 @@ class AssessmentResultPolicy
             return false;
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER']);
     }
 
     public function publish(User $user, AssessmentResult $result): bool
@@ -85,7 +85,7 @@ class AssessmentResultPolicy
             return false;
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER']);
     }
 
     public function archive(User $user, AssessmentResult $result): bool
@@ -94,7 +94,7 @@ class AssessmentResultPolicy
             return false;
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER']);
     }
 
     public function viewAudit(User $user, AssessmentResult $result): bool
@@ -103,7 +103,7 @@ class AssessmentResultPolicy
             return false;
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER']);
     }
 
     public function viewSnapshot(User $user, AssessmentResult $result): bool
@@ -112,6 +112,6 @@ class AssessmentResultPolicy
             return false;
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN');
+        return $user->hasRole(['ORGANIZATION_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER']);
     }
 }

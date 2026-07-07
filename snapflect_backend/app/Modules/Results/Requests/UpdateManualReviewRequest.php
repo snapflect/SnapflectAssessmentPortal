@@ -19,6 +19,18 @@ class UpdateManualReviewRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->route('review')) {
+            $this->merge([
+                'manual_review_uuid' => $this->route('review')->uuid,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array

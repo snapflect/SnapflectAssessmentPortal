@@ -19,7 +19,7 @@ class ReportingController extends Controller
 
     public function assessmentReport(Request $request): JsonResponse
     {
-        // $this->authorize('viewReports', AssessmentResult::class);
+        $this->authorize('viewAny', \App\Modules\Results\Models\AssessmentResult::class);
         $dto = ResultFilterDto::fromArray($request->all());
 
         $report = $this->reportingService->assessmentReport(
@@ -37,6 +37,7 @@ class ReportingController extends Controller
 
     public function competencyReport(Request $request): JsonResponse
     {
+        $this->authorize('viewAny', \App\Modules\Results\Models\AssessmentResult::class);
         $dto = ResultFilterDto::fromArray($request->all());
 
         $report = $this->reportingService->competencyReport(
@@ -54,6 +55,7 @@ class ReportingController extends Controller
 
     public function passFailReport(Request $request): JsonResponse
     {
+        $this->authorize('viewAny', \App\Modules\Results\Models\AssessmentResult::class);
         $dto = ResultFilterDto::fromArray($request->all());
 
         $report = $this->reportingService->passFailReport(
@@ -71,6 +73,7 @@ class ReportingController extends Controller
 
     public function candidateReport(Request $request): JsonResponse
     {
+        $this->authorize('viewAny', \App\Modules\Results\Models\AssessmentResult::class);
         $dto = ResultFilterDto::fromArray($request->all());
 
         $report = $this->reportingService->candidateReport(

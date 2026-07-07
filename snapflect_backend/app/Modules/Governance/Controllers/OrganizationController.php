@@ -30,9 +30,11 @@ class OrganizationController extends Controller
         
         if ($request->user()->roles->contains('role_code', 'PLATFORM_ADMIN')) {
             $organizations = $this->organizationService->paginate($perPage);
+            $organizations->load('currentSubscription.plan');
         } else {
             // For ORG_ADMIN, only return their own organization.
             $organization = $this->organizationService->findByUuid($request->user()->organization->uuid ?? '');
+            $organization->load('currentSubscription.plan');
             // Wrap it in a LengthAwarePaginator to match the paginate return type
             $organizations = new \Illuminate\Pagination\LengthAwarePaginator([$organization], 1, $perPage, 1);
         }
@@ -49,6 +51,8 @@ class OrganizationController extends Controller
     {
         $organization = $this->organizationService->findByUuid($uuid);
         $this->authorize('view', $organization);
+        
+        $organization->load('currentSubscription.plan');
 
         return response()->json(
             (new OrganizationResource($organization))->additional([
@@ -98,6 +102,30 @@ class OrganizationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Deleted successfully'
+        ]);
+    }
+
+    public function billing(string $uuid, Request $request): JsonResponse
+    {
+        $organization = $this->organizationService->findByUuid($uuid);
+        $this->authorize('view', $organization);
+
+        $subscription = \App\Modules\Billing\Models\TenantSubscription::with('plan')
+            ->where('organization_id', $organization->id)
+            ->whereIn('status', ['ACTIVE', 'TRIALING', 'PAST_DUE'])
+            ->orderBy('created_date', 'desc')
+            ->first();
+
+        $invoices = \App\Modules\Billing\Models\Invoice::where('organization_id', $organization->id)
+            ->orderBy('created_date', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'subscription' => $subscription,
+                'invoices' => $invoices
+            ],
+            'success' => true
         ]);
     }
 }

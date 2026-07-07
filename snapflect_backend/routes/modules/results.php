@@ -20,6 +20,9 @@ use App\Modules\Results\Controllers\ReportingController;
 
 // --- Assessment Results ---
 Route::get('/', [AssessmentResultController::class, 'index']);
+Route::get('/assessments-summary', [AssessmentResultController::class, 'assessmentsSummary']);
+Route::get('/assessments/{assessment_uuid}/selected-candidates/export', [AssessmentResultController::class, 'exportSelectedCandidates']);
+Route::patch('/attempts/{attempt_uuid}/selection', [AssessmentResultController::class, 'updateSelectionStatus']);
 Route::get('/{result:uuid}', [AssessmentResultController::class, 'show']);
 Route::post('/calculate', [AssessmentResultController::class, 'calculate']);
 Route::post('/{result:uuid}/recalculate', [AssessmentResultController::class, 'recalculate']);

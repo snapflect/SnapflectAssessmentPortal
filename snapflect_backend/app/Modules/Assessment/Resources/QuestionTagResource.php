@@ -16,7 +16,7 @@ class QuestionTagResource extends JsonResource
             'uuid' => $this->uuid,
             'attributes' => [
                 'tag_name' => $this->tag_name,
-                'description' => $this->description,
+                'status' => $this->status,
             ],
             'timestamps' => [
                 'created_date' => $this->created_date,

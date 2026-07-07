@@ -26,6 +26,7 @@ class AssessmentResource extends JsonResource
                 'description' => $this->description,
                 'is_published' => $this->is_published,
                 'status' => $this->status,
+                'created_by' => $this->created_by,
             ],
 
             'relationships' => [

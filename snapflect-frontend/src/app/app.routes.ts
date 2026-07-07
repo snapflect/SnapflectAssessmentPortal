@@ -11,6 +11,10 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
+  {
+    path: 'delivery/register/:publication_code',
+    loadComponent: () => import('./features/delivery/pages/public-registration/public-registration-page.component').then(m => m.PublicRegistrationPageComponent)
+  },
 
   // ─── Authenticated App Shell ─────────────────────────────────────────────────
   // All authenticated routes live as children of AppShellComponent.
@@ -45,7 +49,7 @@ export const routes: Routes = [
         path: 'authoring',
         loadChildren: () => import('./features/assessment/assessment.routes').then(m => m.ASSESSMENT_ROUTES),
         canActivate: [roleGuard],
-        data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'REVIEWER'] }
+        data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'REVIEWER', 'READ_ONLY'] }
       },
 
       // Delivery: Candidate Dashboard, Sessions/Proctoring, Attempt runner
@@ -53,7 +57,7 @@ export const routes: Routes = [
         path: 'delivery',
         loadChildren: () => import('./features/delivery/delivery.routes').then(m => m.DELIVERY_ROUTES),
         canActivate: [roleGuard],
-        data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'PROCTOR', 'SUPPORT', 'CANDIDATE'] }
+        data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'PROCTOR', 'SUPPORT', 'CANDIDATE', 'ASSESSMENT_MANAGER', 'READ_ONLY'] }
       },
 
       // Results & Analytics: Dashboard, Manual Scoring
@@ -68,7 +72,7 @@ export const routes: Routes = [
         path: 'scoring',
         loadChildren: () => import('./features/results/results.routes').then(m => m.RESULTS_ROUTES),
         canActivate: [roleGuard],
-        data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'REVIEWER'] }
+        data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'REVIEWER', 'READ_ONLY'] }
       },
 
       // Reporting
@@ -89,6 +93,13 @@ export const routes: Routes = [
         loadChildren: () => import('./features/certificates/certificates.routes').then(m => m.CERTIFICATES_ROUTES),
         canActivate: [roleGuard],
         data: { roles: ['PLATFORM_ADMIN', 'CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'CANDIDATE'] }
+      },
+
+      // Support / Helpdesk
+      {
+        path: 'support',
+        loadChildren: () => import('./features/support/support.routes').then(m => m.SUPPORT_ROUTES),
+        canActivate: [roleGuard]
       },
 
       // Legacy redirects

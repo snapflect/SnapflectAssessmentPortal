@@ -27,7 +27,9 @@ class ManualScoreReviewResource extends JsonResource
                     return $this->questionScore->question->question_text ?? '';
                 }),
                 'candidate_answer' => $this->whenLoaded('questionScore', function () {
-                    return $this->questionScore->candidate_answer ?? '';
+                    $answer = $this->questionScore->attemptQuestion->answers->first();
+                    if (!$answer) return 'No answer provided.';
+                    return $answer->text_answer ?? $answer->answer_json ?? $answer->selected_option_uuids_json ?? $answer->selected_option_uuid ?? $answer->numeric_answer ?? 'No answer provided.';
                 }),
                 'max_score' => $this->whenLoaded('questionScore', function () {
                     return $this->questionScore->max_score ?? 10;
@@ -46,7 +48,7 @@ class ManualScoreReviewResource extends JsonResource
                             ],
                             'assessment' => [
                                 'attributes' => [
-                                    'title' => $this->assessmentResult->assessment->title ?? 'Unknown Assessment'
+                                    'title' => $this->assessmentResult->assessment->assessment_name ?? 'Unknown Assessment'
                                 ]
                             ]
                         ]

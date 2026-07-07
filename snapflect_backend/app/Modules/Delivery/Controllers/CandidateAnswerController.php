@@ -23,7 +23,8 @@ class CandidateAnswerController extends Controller
 
     public function store(CreateAnswerRequest $request, AssessmentAttempt $attempt): JsonResponse
     {
-        $this->authorize('create', $attempt);
+        \Log::info('Store answer request:', $request->all());
+        $this->authorize('create', [CandidateAnswer::class, $attempt]);
 
         $answerData = $this->answerService->createAnswer($request->toDto());
 
@@ -49,7 +50,7 @@ class CandidateAnswerController extends Controller
 
     public function autoSave(AutoSaveAnswerRequest $request, AssessmentAttempt $attempt): JsonResponse
     {
-        $this->authorize('autoSave', $attempt);
+        $this->authorize('autoSave', [CandidateAnswer::class, $attempt]);
 
         $this->answerService->autoSaveAnswer($request->toDto());
 

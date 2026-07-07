@@ -23,7 +23,7 @@ class ManualScoreReviewPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('ORGANIZATION_ADMIN') || $user->hasRole('EVALUATOR');
+        return $user->hasRole('CLIENT_ADMIN') || $user->hasRole('REVIEWER') || $user->hasRole('ASSESSMENT_MANAGER');
     }
 
     public function view(User $user, ManualScoreReview $review): bool
@@ -32,7 +32,7 @@ class ManualScoreReviewPolicy
             return false;
         }
 
-        if ($user->hasRole('ORGANIZATION_ADMIN') || $user->hasRole('EVALUATOR')) {
+        if ($user->hasRole('CLIENT_ADMIN') || $user->hasRole('REVIEWER') || $user->hasRole('ASSESSMENT_MANAGER')) {
             return true;
         }
 
@@ -58,7 +58,7 @@ class ManualScoreReviewPolicy
             return false; // Immutability Rule
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN') || $user->hasRole('EVALUATOR');
+        return $user->hasRole('CLIENT_ADMIN') || $user->hasRole('REVIEWER') || $user->hasRole('ASSESSMENT_MANAGER');
     }
 
     public function update(User $user, ManualScoreReview $review): bool
@@ -72,6 +72,6 @@ class ManualScoreReviewPolicy
             return false; // Immutability Rule
         }
 
-        return $user->hasRole('ORGANIZATION_ADMIN') || $user->hasRole('EVALUATOR');
+        return $user->hasRole('CLIENT_ADMIN') || $user->hasRole('REVIEWER') || $user->hasRole('ASSESSMENT_MANAGER');
     }
 }

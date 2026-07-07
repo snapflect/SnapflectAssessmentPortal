@@ -1,9 +1,12 @@
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../../environments/environment';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { ConfirmService } from '../../../../../core/services/confirm.service';
+import { ToastService } from '../../../../../core/services/toast.service';
 
 interface Session {
   uuid: string;
@@ -129,10 +132,13 @@ interface Session {
                   </span>
                 </div>
                 <div class="flex gap-2">
-                  <button class="text-xs px-2 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded hover:bg-amber-500/20 transition-colors">
-                    Pause
+                  <button *ngIf="session.session_status !== 'TERMINATED' && session.session_status !== 'EXPIRED' && session.session_status !== 'COMPLETED'" 
+                          (click)="togglePause(session)" 
+                          class="text-xs px-2 py-1 border rounded transition-colors"
+                          [ngClass]="session.session_status === 'PAUSED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'">
+                    {{ session.session_status === 'PAUSED' ? 'Resume' : 'Pause' }}
                   </button>
-                  <button class="text-xs px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/20 transition-colors">
+                  <button *ngIf="(userStore.hasAnyPermission(['Delivery.Sessions.Terminate'])) && userStore.hasAnyPermission(['Delivery.Sessions.Terminate'])"  (click)="terminateSession(session.uuid)" class="text-xs px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/20 transition-colors">
                     Terminate
                   </button>
                 </div>
@@ -150,12 +156,16 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
   lastUpdated = new Date();
   private refreshSub?: Subscription;
 
-  get activeSessions() { return this.sessions.filter(s => s.session_status === 'ACTIVE').length; }
+  get activeSessions() { return this.sessions.filter(s => s.session_status === 'LAUNCHED').length; }
   get pausedSessions() { return this.sessions.filter(s => s.session_status === 'PAUSED').length; }
   get completedToday() { return this.sessions.filter(s => s.session_status === 'COMPLETED').length; }
   get expiredSessions() { return this.sessions.filter(s => s.session_status === 'EXPIRED').length; }
+  userStore = inject(UserStore);
+
 
   private http = inject(HttpClient);
+  private confirmService = inject(ConfirmService);
+  private toast = inject(ToastService);
 
   ngOnInit() {
     this.fetchSessions(true);
@@ -185,6 +195,48 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  async togglePause(session: Session) {
+    const isPaused = session.session_status === 'PAUSED';
+    const action = isPaused ? 'Resume' : 'Pause';
+    
+    const confirmed = await this.confirmService.confirm({
+      title: `${action} Session`,
+      message: `Are you sure you want to ${action.toLowerCase()} this session?`,
+      confirmText: action,
+      variant: isPaused ? 'info' : 'warning'
+    });
+    
+    if (confirmed) {
+      // The backend 'resume' endpoint acts as a toggle between PAUSED and LAUNCHED
+      this.http.post(`${environment.apiUrl}/delivery/sessions/${session.uuid}/resume`, { session_uuid: session.uuid }).subscribe({
+        next: () => {
+          this.toast.success(`Session ${action}d`, `The session was ${action.toLowerCase()}d successfully.`);
+          this.fetchSessions();
+        },
+        error: (err) => this.toast.error('Action Failed', `Failed to ${action.toLowerCase()} session`)
+      });
+    }
+  }
+
+  async terminateSession(uuid: string) {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Terminate Session',
+      message: 'Are you sure you want to terminate this session? The candidate will be immediately disconnected.',
+      confirmText: 'Terminate',
+      variant: 'danger'
+    });
+    
+    if (confirmed) {
+      this.http.post(`${environment.apiUrl}/delivery/sessions/${uuid}/terminate`, { session_uuid: uuid, reason: 'Proctor terminated' }).subscribe({
+        next: () => {
+          this.toast.success('Session Terminated', 'The candidate has been disconnected.');
+          this.fetchSessions();
+        },
+        error: (err) => this.toast.error('Action Failed', 'Failed to terminate session')
+      });
+    }
+  }
+
   getCandidateName(s: Session): string {
     if (s.candidate) {
       return `${s.candidate.first_name} ${s.candidate.last_name}`;
@@ -209,7 +261,7 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
 
   getStripeClass(status: string): string {
     const map: Record<string, string> = {
-      'ACTIVE': 'bg-emerald-500',
+      'LAUNCHED': 'bg-emerald-500',
       'PAUSED': 'bg-amber-500',
       'COMPLETED': 'bg-blue-500',
       'EXPIRED': 'bg-red-500',
@@ -220,7 +272,7 @@ export class SessionListPageComponent implements OnInit, OnDestroy {
 
   getDotClass(status: string): string {
     const map: Record<string, string> = {
-      'ACTIVE': 'bg-emerald-500 animate-pulse',
+      'LAUNCHED': 'bg-emerald-500 animate-pulse',
       'PAUSED': 'bg-amber-500',
       'COMPLETED': 'bg-blue-500',
       'EXPIRED': 'bg-red-500',

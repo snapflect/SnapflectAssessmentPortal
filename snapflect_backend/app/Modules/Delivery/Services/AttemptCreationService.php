@@ -26,8 +26,8 @@ class AttemptCreationService
         $attempt->assessment_version_id = $session->assessment_version_id;
         $attempt->assessment_snapshot_id = $snapshot->id;
         $attempt->candidate_user_id = $session->candidate_user_id;
-        $attempt->attempt_number = 1; // Real logic would query previous attempts count
-        $attempt->status = 'CREATED'; // STRICTLY ONLY CREATED
+        $attempt->attempt_number = $session->attempts()->count() + 1;
+        $attempt->status = 'IN_PROGRESS';
         
         // Randomization bindings
         $attempt->randomization_seed = $randomizationData['seed'];
@@ -35,6 +35,12 @@ class AttemptCreationService
         $attempt->option_order_json = $randomizationData['option_order_json'];
 
         $snapshotPayload = json_decode($snapshot->snapshot_json, true);
+        $timeLimitMinutes = $snapshotPayload['blueprint']['time_limit_minutes'] ?? 0;
+        
+        $attempt->started_at = now();
+        if ($timeLimitMinutes > 0) {
+            $attempt->expires_at = now()->addMinutes((int)$timeLimitMinutes);
+        }
         
         // Calculate total questions from snapshot
         $totalQuestions = 0;

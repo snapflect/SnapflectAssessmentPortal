@@ -15,9 +15,9 @@ class LaunchAttemptResource extends JsonResource
         return [
             'attemptUuid' => $this->resource->attemptUuid,
             'snapshotUuid' => $this->resource->snapshotUuid,
-            'randomizationSeed' => $this->resource->randomizationSeed,
-            'questionOrder' => $this->resource->questionOrder,
-            'optionOrder' => $this->resource->optionOrder,
+            'randomizationSeed' => $this->resource->seed,
+            'questionOrder' => $this->resource->questionRandomized,
+            'optionOrder' => $this->resource->optionRandomized,
             'startedAt' => $this->resource->startedAt,
             'expiresAt' => $this->resource->expiresAt,
             'snapshotMap' => $this->resource->snapshotJson

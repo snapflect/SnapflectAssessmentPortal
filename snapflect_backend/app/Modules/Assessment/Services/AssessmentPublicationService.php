@@ -70,23 +70,21 @@ class AssessmentPublicationService
             $currentStatus = $assessment->current_state ?? PublicationStateMachine::STATE_DRAFT;
             $targetStatus = PublicationStateMachine::STATE_PUBLISHED;
 
-            if ($currentStatus === $targetStatus) {
-                return $this->createResultDto($assessmentUuid, $currentStatus, $targetStatus, $userId);
+            if ($currentStatus !== $targetStatus) {
+                $this->stateMachine->transition($currentStatus, $targetStatus);
+
+                // Revalidate before publish (Correction 4)
+                $validationResult = $this->validationService->validate($assessmentUuid, $organizationId, $userId);
+                if (!$validationResult->readyForPublication) {
+                    $errorMessages = array_map(fn($e) => $e->message, $validationResult->validationErrors);
+                    throw new AssessmentPublicationException(AssessmentPublicationException::ASSESSMENT_NOT_READY, "Assessment validation failed. Please fix the following errors before publishing: \n" . implode("\n", $errorMessages), $validationResult->validationErrors);
+                }
+
+                $this->assessmentRepository->update($assessment->id, [
+                    'current_state' => $targetStatus,
+                    'is_published' => true
+                ]);
             }
-
-            $this->stateMachine->transition($currentStatus, $targetStatus);
-
-            // Revalidate before publish (Correction 4)
-            $validationResult = $this->validationService->validate($assessmentUuid, $organizationId, $userId);
-            if (!$validationResult->readyForPublication) {
-                $errorMessages = array_map(fn($e) => $e->message, $validationResult->validationErrors);
-                throw new AssessmentPublicationException(AssessmentPublicationException::ASSESSMENT_NOT_READY, "Assessment validation failed. Please fix the following errors before publishing: \n" . implode("\n", $errorMessages), $validationResult->validationErrors);
-            }
-
-            $this->assessmentRepository->update($assessment->id, [
-                'current_state' => $targetStatus,
-                'is_published' => true
-            ]);
 
             // For MVP, we mock the creation of snapshot/version here if the logic wasn't fully built yet.
             // Ideally this would call a SnapshotService.
@@ -125,21 +123,59 @@ class AssessmentPublicationService
             }
 
             $pubRepo = app(\App\Modules\Assessment\Repositories\Interfaces\PublicationRepositoryInterface::class);
-            $pubRepo->create([
+            $publication = $pubRepo->create([
                 'assessment_id' => $assessment->id,
                 'assessment_version_id' => $versionId,
                 'assessment_snapshot_id' => $snapshotId,
-                'publication_code' => $schedulingData['publication_code'],
-                'title' => $schedulingData['title'],
-                'start_date' => $schedulingData['start_date'],
-                'end_date' => $schedulingData['end_date'],
-                'max_attempts' => $schedulingData['max_attempts'],
-                'is_proctored' => $schedulingData['is_proctored'],
+                'publication_code' => $schedulingData['publication_code'] ?? 'PUB-' . strtoupper(\Illuminate\Support\Str::random(6)),
+                'title' => $schedulingData['title'] ?? $assessment->assessment_name . ' Publication',
+                'start_date' => $schedulingData['start_date'] ?? \Carbon\Carbon::now(),
+                'end_date' => $schedulingData['end_date'] ?? null,
+                'max_attempts' => $schedulingData['max_attempts'] ?? 1,
+                'is_proctored' => $schedulingData['is_proctored'] ?? false,
                 'published_by' => $userId,
                 'published_date' => Carbon::now(),
                 'status' => 'SCHEDULED', // Simple logic for MVP
                 'created_by' => $userId
             ]);
+
+            // Assign Candidates
+            if (isset($schedulingData['candidate_emails']) && is_array($schedulingData['candidate_emails'])) {
+                $candidateEmails = array_unique(array_filter($schedulingData['candidate_emails']));
+                $candidateRole = \DB::table('roles')->where('role_code', 'CANDIDATE')->first();
+                $roleId = $candidateRole ? $candidateRole->id : 5; // fallback to 5 (Candidate)
+
+                foreach ($candidateEmails as $email) {
+                    $email = strtolower(trim($email));
+                    $user = \App\Models\User::where('email', $email)->first();
+                    if (!$user) {
+                        $user = \App\Models\User::create([
+                            'email' => $email,
+                            'first_name' => explode('@', $email)[0],
+                            'last_name' => 'Candidate',
+                            'password' => \Hash::make(\Illuminate\Support\Str::random(12)),
+                            'organization_id' => $organizationId
+                        ]);
+
+                        \DB::table('user_roles')->insert([
+                            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                            'user_id' => $user->id,
+                            'role_id' => $roleId,
+                            'created_by' => $userId,
+                            'created_date' => \Carbon\Carbon::now()
+                        ]);
+                    }
+
+                    \DB::table('publication_candidates')->insert([
+                        'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                        'publication_id' => $publication->id,
+                        'candidate_id' => $user->id,
+                        'status' => 'ASSIGNED',
+                        'created_by' => $userId,
+                        'created_date' => Carbon::now()
+                    ]);
+                }
+            }
 
             return $this->createResultDto($assessmentUuid, $currentStatus, $targetStatus, $userId);
         });

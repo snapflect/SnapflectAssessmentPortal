@@ -8,6 +8,7 @@ use App\Modules\Governance\Controllers\LocationController;
 
 // All routes are inherently prefixed with /api/v1/governance and protected by auth:sanctum + throttle:api
 
+Route::get('organizations/{uuid}/billing', [OrganizationController::class, 'billing']);
 Route::apiResource('organizations', OrganizationController::class)->parameters([
     'organizations' => 'uuid'
 ]);

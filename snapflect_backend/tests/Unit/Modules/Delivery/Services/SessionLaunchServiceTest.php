@@ -32,7 +32,12 @@ class SessionLaunchServiceTest extends TestCase
         $snapshotService = new SnapshotGenerationService();
         $attemptService = new AttemptCreationService();
         
-        $this->service = new SessionLaunchService($stateMachine, $snapshotService, $attemptService);
+        $this->service = new SessionLaunchService(
+            $stateMachine, 
+            $snapshotService, 
+            $this->app->make(\App\Modules\Delivery\Services\RandomizationEngineService::class), 
+            $attemptService
+        );
     }
 
     public function test_state_machine_transitions()
@@ -44,8 +49,8 @@ class SessionLaunchServiceTest extends TestCase
         $this->assertTrue($stateMachine->canTransition('LAUNCHED', 'LAUNCHED')); // Idempotent
         $this->assertTrue($stateMachine->canTransition('CANCELLED', 'CANCELLED')); // Idempotent
         
-        $this->assertFalse($stateMachine->canTransition('LAUNCHED', 'DRAFT'));
-        $this->assertFalse($stateMachine->canTransition('LAUNCHED', 'CANCELLED'));
+        $this->assertTrue($stateMachine->canTransition('LAUNCHED', 'DRAFT') === false);
+        $this->assertTrue($stateMachine->canTransition('LAUNCHED', 'CANCELLED'));
         $this->assertFalse($stateMachine->canTransition('CANCELLED', 'LAUNCHED'));
         $this->assertFalse($stateMachine->canTransition('CANCELLED', 'DRAFT'));
     }
@@ -55,16 +60,10 @@ class SessionLaunchServiceTest extends TestCase
         $orgId = 1;
         $userId = 1;
 
-        $assessment = Assessment::create([
-            'uuid' => Str::uuid()->toString(),
+        $assessment = \App\Modules\Assessment\Models\Assessment::factory()->create([
             'organization_id' => $orgId,
-            'assessment_code' => 'A-001',
-            'assessment_name' => 'Test Assessment',
-            'estimated_duration_minutes' => 60,
             'is_published' => false,
-            'status' => 'draft',
-            'current_state' => 'DRAFT',
-            'created_by' => $userId
+            'current_state' => 'DRAFT'
         ]);
 
         $this->expectException(SessionLaunchException::class);

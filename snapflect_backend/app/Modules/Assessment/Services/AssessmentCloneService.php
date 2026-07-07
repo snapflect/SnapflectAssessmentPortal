@@ -29,7 +29,7 @@ class AssessmentCloneService
             // 1. Clone Assessment Root
             $newAssessmentData = $sourceAssessment->toArray();
             unset($newAssessmentData['id'], $newAssessmentData['uuid']);
-            $newAssessmentData['assessment_code'] = $sourceAssessment->assessment_code . '-V2'; // Custom logic
+            $newAssessmentData['assessment_code'] = $sourceAssessment->assessment_code . '-COPY-' . strtoupper(\Illuminate\Support\Str::random(4));
             $newAssessmentData['current_state'] = 'DRAFT';
             $newAssessmentData['is_published'] = false;
             $newAssessmentData['created_by'] = $clonedBy;
@@ -37,7 +37,7 @@ class AssessmentCloneService
             $newAssessment = $this->assessmentRepo->create($newAssessmentData);
 
             // 2. Deep Clone Blueprint & Competencies
-            // $this->blueprintService->cloneBlueprint($sourceAssessment->id, $newAssessment->id);
+            $this->blueprintService->cloneBlueprint($sourceAssessment->id, $newAssessment->id, $clonedBy);
 
             // 3. Create initial version record linking to parent
             // $this->versionService->createDraftVersion($newAssessment->id, $sourceAssessment->latest_version_id);

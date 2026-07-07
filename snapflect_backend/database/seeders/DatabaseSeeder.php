@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             OrganizationSeeder::class,
             CustomRbacSeeder::class,
             UserSeeder::class,
+            CandidateDemoSeeder::class,
         ]);
     }
 }

@@ -16,8 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('assessment_version_id');
             $table->longText('snapshot_json');
             $table->string('snapshot_hash', 255);
-            $table->unsignedBigInteger('published_by');
-            $table->timestamp('published_date');
+            $table->unsignedBigInteger('published_by')->nullable();
+            $table->timestamp('published_date')->nullable();
             $table->string('status', 30)->default('ACTIVE');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamp('created_date')->useCurrent();

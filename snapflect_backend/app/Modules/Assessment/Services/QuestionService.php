@@ -7,6 +7,8 @@ namespace App\Modules\Assessment\Services;
 use App\Modules\Assessment\DTOs\CreateQuestionDto;
 use App\Modules\Assessment\DTOs\UpdateQuestionDto;
 use App\Modules\Assessment\Models\Question;
+use App\Modules\Assessment\Models\Competency;
+use App\Modules\Assessment\Models\QuestionTag;
 use App\Modules\Assessment\Repositories\Interfaces\QuestionRepositoryInterface;
 use App\Modules\Assessment\Repositories\Interfaces\QuestionBankRepositoryInterface;
 use Illuminate\Support\Facades\DB;
@@ -54,6 +56,28 @@ class QuestionService
                 }
             }
 
+            if (!empty($dto->competency_uuids)) {
+                $competencyIds = Competency::whereIn('uuid', $dto->competency_uuids)->pluck('id')->toArray();
+                // Assign a default weight of 100 since we don't have a UI for weights yet
+                $syncData = [];
+                foreach ($competencyIds as $cId) {
+                    $syncData[$cId] = [
+                        'uuid' => (string) Str::uuid(),
+                        'weight_percentage' => 100
+                    ];
+                }
+                $question->competencies()->sync($syncData);
+            }
+
+            if (!empty($dto->tag_uuids)) {
+                $tagIds = QuestionTag::whereIn('uuid', $dto->tag_uuids)->pluck('id')->toArray();
+                $syncData = [];
+                foreach ($tagIds as $tId) {
+                    $syncData[$tId] = ['uuid' => (string) Str::uuid()];
+                }
+                $question->tags()->sync($syncData);
+            }
+
             return $question;
         });
     }
@@ -70,7 +94,12 @@ class QuestionService
             $data['modified_by'] = $userId;
             
             $options = $data['options'] ?? null;
+            $competencyUuids = $data['competency_uuids'] ?? null;
+            $tagUuids = $data['tag_uuids'] ?? null;
+            
             unset($data['options']);
+            unset($data['competency_uuids']);
+            unset($data['tag_uuids']);
 
             $this->questionRepo->update($id, $data);
 
@@ -91,6 +120,27 @@ class QuestionService
                 }
             } else if ($question->question_type === 'ESSAY') {
                 $question->options()->delete();
+            }
+
+            if ($competencyUuids !== null) {
+                $competencyIds = Competency::whereIn('uuid', $competencyUuids)->pluck('id')->toArray();
+                $syncData = [];
+                foreach ($competencyIds as $cId) {
+                    $syncData[$cId] = [
+                        'uuid' => (string) Str::uuid(),
+                        'weight_percentage' => 100
+                    ];
+                }
+                $question->competencies()->sync($syncData);
+            }
+
+            if ($tagUuids !== null) {
+                $tagIds = QuestionTag::whereIn('uuid', $tagUuids)->pluck('id')->toArray();
+                $syncData = [];
+                foreach ($tagIds as $tId) {
+                    $syncData[$tId] = ['uuid' => (string) Str::uuid()];
+                }
+                $question->tags()->sync($syncData);
             }
 
             return true;
@@ -149,6 +199,25 @@ class QuestionService
                     'created_by' => $userId,
                     'modified_by' => $userId
                 ]);
+            }
+            
+            if ($question->competencies->isNotEmpty()) {
+                $syncData = [];
+                foreach ($question->competencies as $competency) {
+                    $syncData[$competency->id] = [
+                        'uuid' => (string) Str::uuid(),
+                        'weight_percentage' => $competency->pivot ? $competency->pivot->weight_percentage : 100
+                    ];
+                }
+                $newQuestion->competencies()->sync($syncData);
+            }
+
+            if ($question->tags->isNotEmpty()) {
+                $syncData = [];
+                foreach ($question->tags as $tag) {
+                    $syncData[$tag->id] = ['uuid' => (string) Str::uuid()];
+                }
+                $newQuestion->tags()->sync($syncData);
             }
             
             return $newQuestion;

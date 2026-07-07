@@ -23,7 +23,10 @@ class ManualReviewController extends Controller
     {
         $this->authorize('viewAny', ManualScoreReview::class);
 
-        $reviews = $this->manualReviewService->getPendingQueue($request->user()->organization_id);
+        $reviews = $this->manualReviewService->getPendingQueue(
+            $request->user()->organization_id,
+            $request->user()->id
+        );
 
         return response()->json([
             'success' => true,
@@ -42,6 +45,13 @@ class ManualReviewController extends Controller
                 $request->user()->organization_id,
                 $request->user()->id
             );
+            
+            $lockedReview->load([
+                'assessmentResult.candidate', 
+                'assessmentResult.assessment',
+                'questionScore.question',
+                'questionScore.attemptQuestion.answers'
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -75,14 +85,21 @@ class ManualReviewController extends Controller
         ]);
     }
 
-    public function show(ManualScoreReview $manualReview): JsonResponse
+    public function show(ManualScoreReview $review): JsonResponse
     {
-        $this->authorize('view', $manualReview);
+        $this->authorize('view', $review);
+        
+        $review->load([
+            'assessmentResult.candidate', 
+            'assessmentResult.assessment',
+            'questionScore.question',
+            'questionScore.attemptQuestion.answers'
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Manual review retrieved successfully.',
-            'data' => new ManualScoreReviewResource($manualReview)
+            'data' => new ManualScoreReviewResource($review)
         ]);
     }
 
@@ -103,16 +120,23 @@ class ManualReviewController extends Controller
         ], 201);
     }
 
-    public function update(UpdateManualReviewRequest $request, ManualScoreReview $manualReview): JsonResponse
+    public function update(UpdateManualReviewRequest $request, ManualScoreReview $review): JsonResponse
     {
-        $this->authorize('update', $manualReview);
+        $this->authorize('update', $review);
 
         $updatedReview = $this->manualReviewService->updateReview(
             $request->toDto(),
-            $manualReview->uuid,
+            $review->uuid,
             $request->user()->organization_id,
             $request->user()->id
         );
+        
+        $updatedReview->load([
+            'assessmentResult.candidate', 
+            'assessmentResult.assessment',
+            'questionScore.question',
+            'questionScore.attemptQuestion.answers'
+        ]);
 
         return response()->json([
             'success' => true,

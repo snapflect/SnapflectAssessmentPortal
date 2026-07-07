@@ -63,6 +63,6 @@ class Question extends Model
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(QuestionTag::class, 'question_tag_mappings');
+        return $this->belongsToMany(QuestionTag::class, 'question_tag_mappings', 'question_id', 'tag_id');
     }
 }

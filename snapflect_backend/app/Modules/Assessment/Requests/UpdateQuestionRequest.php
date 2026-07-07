@@ -32,7 +32,11 @@ class UpdateQuestionRequest extends FormRequest
             'options.*.option_text' => ['required_with:options', 'string'],
             'options.*.display_order' => ['required_with:options', 'integer'],
             'options.*.is_correct' => ['required_with:options', 'boolean'],
-            'status' => ['sometimes', 'string']
+            'status' => ['sometimes', 'string'],
+            'competency_uuids' => ['nullable', 'array'],
+            'competency_uuids.*' => ['uuid'],
+            'tag_uuids' => ['nullable', 'array'],
+            'tag_uuids.*' => ['uuid']
         ];
     }
 

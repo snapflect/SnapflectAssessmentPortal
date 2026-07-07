@@ -31,11 +31,10 @@ class CandidateResultsController extends Controller
             ->where('assessment_results.uuid', $resultUuid)
             // Ensure candidate owns this result
             ->where('assessment_attempts.candidate_user_id', $user->id) 
-            ->where('assessment_results.result_status', 'PUBLISHED')
+            ->whereIn('assessment_results.result_status', ['READY', 'CALCULATED', 'PUBLISHED'])
             ->select(
                 'assessment_results.*',
-                'assessments.title as assessment_name',
-                'assessments.snapshot_json' // Contains blueprint settings
+                'assessments.assessment_name'
             )
             ->first();
 
@@ -49,7 +48,7 @@ class CandidateResultsController extends Controller
         }
 
         // Mock blueprint resolution from snapshot_json for resource
-        $result->blueprint = json_decode($result->snapshot_json, true)['visibility_rules'] ?? [
+        $result->blueprint = json_decode($result->snapshot_json ?? 'null', true)['visibility_rules'] ?? [
             'score_visibility' => true,
             'pass_fail_visibility' => true,
             'show_competencies' => true
@@ -70,15 +69,16 @@ class CandidateResultsController extends Controller
             ->join('assessment_attempts', 'assessment_results.assessment_attempt_id', '=', 'assessment_attempts.id')
             ->join('assessments', 'assessment_attempts.assessment_id', '=', 'assessments.id')
             ->where('assessment_results.uuid', $resultUuid)
-            ->where('assessment_results.result_status', 'PUBLISHED')
-            ->select('assessments.snapshot_json')
+            ->where('assessment_attempts.candidate_user_id', $request->user()->id)
+            ->whereIn('assessment_results.result_status', ['READY', 'CALCULATED', 'PUBLISHED'])
+            ->select('assessments.id')
             ->first();
 
         if (!$result) {
             return response()->json(['status' => 404, 'detail' => 'Not Found'], 404);
         }
 
-        $blueprint = json_decode($result->snapshot_json, true)['visibility_rules'] ?? [];
+        $blueprint = json_decode($result->snapshot_json ?? 'null', true)['visibility_rules'] ?? [];
         if (!($blueprint['show_competencies'] ?? true)) {
             // Rule: 403 Forbidden if visibility is restricted
             return response()->json([
@@ -110,18 +110,22 @@ class CandidateResultsController extends Controller
             ->join('assessment_attempts', 'assessment_results.assessment_attempt_id', '=', 'assessment_attempts.id')
             ->join('assessments', 'assessment_attempts.assessment_id', '=', 'assessments.id')
             ->where('assessment_attempts.candidate_user_id', $user->id)
-            ->where('assessment_results.result_status', 'PUBLISHED')
+            ->whereIn('assessment_results.id', function ($query) {
+                $query->select(\Illuminate\Support\Facades\DB::raw('MAX(id)'))
+                    ->from('assessment_results')
+                    ->groupBy('assessment_attempt_id');
+            })
+            ->whereIn('assessment_results.result_status', ['READY', 'CALCULATED', 'PUBLISHED'])
             ->select(
                 'assessment_results.*',
-                'assessments.title as assessment_name',
-                'assessments.snapshot_json' // Contains blueprint settings
+                'assessments.assessment_name'
             )
-            ->orderBy('assessment_results.published_at', 'desc')
+            ->orderBy('assessment_results.calculated_at', 'desc')
             ->paginate($perPage);
 
         // Map blueprint onto each item for CandidateResultResource
         $results->getCollection()->transform(function ($result) {
-            $result->blueprint = json_decode($result->snapshot_json, true)['visibility_rules'] ?? [
+            $result->blueprint = json_decode($result->snapshot_json ?? 'null', true)['visibility_rules'] ?? [
                 'score_visibility' => true,
                 'pass_fail_visibility' => true,
                 'show_competencies' => true

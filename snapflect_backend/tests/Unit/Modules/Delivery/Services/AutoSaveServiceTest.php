@@ -30,12 +30,12 @@ class AutoSaveServiceTest extends TestCase
         parent::setUp();
         $this->service = new AutoSaveService(new TimerPolicyHelper());
         \Illuminate\Support\Facades\Config::set('assessment.grace_period_seconds', 0);
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = OFF;');
     }
 
     protected function tearDown(): void
     {
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = ON;');
         parent::tearDown();
     }
 
@@ -60,6 +60,8 @@ class AutoSaveServiceTest extends TestCase
 
     private function createAttempt(string $status = 'STARTED', ?Carbon $expiresAt = null): AssessmentAttempt
     {
+        \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = OFF;');
+
         $snapshot = new AssessmentSnapshot();
         $snapshot->id = 1;
         $snapshot->uuid = Str::uuid()->toString();
@@ -83,15 +85,22 @@ class AutoSaveServiceTest extends TestCase
         $attempt->started_at = Carbon::now()->subMinutes(10);
         $attempt->expires_at = $expiresAt ?? Carbon::now()->addMinutes(60);
         $attempt->save();
-        
+
+        \Illuminate\Support\Facades\DB::statement('PRAGMA foreign_keys = ON;');
+
         return $attempt;
     }
 
     public function test_answer_saved_successfully_lazy_materialization()
     {
         $attempt = $this->createAttempt();
-        $dto = new AutoSaveDto($attempt->uuid, 'q-1', 'opt-1', '1');
-
+        $optUuid = Str::uuid()->toString();
+        $dto = new AutoSaveDto(
+            $attempt->uuid,
+            'q-1',
+            $optUuid,
+            '1'
+        );
         $result = $this->service->executeSave($dto, 1, 1);
 
         $this->assertTrue($result->success);
@@ -100,7 +109,7 @@ class AutoSaveServiceTest extends TestCase
         $this->assertDatabaseHas('candidate_answers', [
             'uuid' => $result->answerUuid,
             'answer_version' => 1,
-            'selected_option_uuid' => 'opt-1' // since it's string and UUID-like
+            'selected_option_uuid' => $optUuid
         ]);
 
         // Assert attempt_questions and attempt_sections were lazy materialized
@@ -232,3 +241,4 @@ class AutoSaveServiceTest extends TestCase
         $this->service->executeSave($dto, 2, 1); // Wrong org ID
     }
 }
+

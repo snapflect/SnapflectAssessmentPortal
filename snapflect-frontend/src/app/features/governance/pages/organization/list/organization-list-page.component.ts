@@ -1,3 +1,4 @@
+import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -17,7 +18,18 @@ interface Organization {
     contact_email: string;
     country: string;
     status: string;
+    current_subscription?: {
+      status: string;
+      plan_name: string;
+    };
   };
+}
+
+interface SubscriptionPlan {
+  id: number;
+  plan_code: string;
+  plan_name: string;
+  price: number;
 }
 
 @Component({
@@ -32,7 +44,7 @@ interface Organization {
           <h2 class="text-2xl font-bold text-main">Organizations</h2>
           <p class="text-muted text-sm mt-1">Manage tenants and their settings across the platform.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Governance.Organizations.Manage'])) && userStore.hasAnyPermission(['Governance.Organizations.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -57,6 +69,7 @@ interface Organization {
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
+                <th scope="col" class="px-6 py-4 font-medium">Plan</th>
                 <th scope="col" class="px-6 py-4 font-medium">Contact Email</th>
                 <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
@@ -73,17 +86,25 @@ interface Organization {
               </tr>
               <ng-container *ngIf="organizations | globalSearch: searchTerm as filteredOrgs">
                 <tr *ngIf="!loading && filteredOrgs.length === 0">
-                  <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                  <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                     No organizations found matching your search.
                   </td>
                 </tr>
                 <tr *ngFor="let org of filteredOrgs" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ org.attributes.organization_code }}</td>
                   <td class="px-6 py-4 text-main font-medium">{{ org.attributes.organization_name }}</td>
+                  <td class="px-6 py-4">
+                    <span *ngIf="org.attributes.current_subscription" class="px-2 py-1 rounded text-xs font-medium" 
+                          [ngClass]="{'bg-green-500/10 text-green-400': org.attributes.current_subscription.status === 'ACTIVE', 'bg-blue-500/10 text-blue-400': org.attributes.current_subscription.status === 'TRIALING', 'bg-red-500/10 text-red-400': org.attributes.current_subscription.status === 'PAST_DUE'}">
+                      {{ org.attributes.current_subscription.plan_name }} ({{ org.attributes.current_subscription.status }})
+                    </span>
+                    <span *ngIf="!org.attributes.current_subscription" class="text-xs text-muted">No Plan</span>
+                  </td>
                   <td class="px-6 py-4">{{ org.attributes.contact_email || 'N/A' }}</td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(org)">Edit</button>
-                    <button class="text-muted hover:text-red-400 transition-colors" (click)="deleteOrg(org.uuid)">Delete</button>
+                    <button class="text-muted hover:text-brand transition-colors" (click)="openBillingView(org)">Billing</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Governance.Organizations.Manage'])) && userStore.hasAnyPermission(['Governance.Organizations.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(org)">Edit</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Governance.Organizations.Manage'])) && userStore.hasAnyPermission(['Governance.Organizations.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteOrg(org.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -118,6 +139,23 @@ interface Organization {
               Name is required.
             </p>
           </div>
+          
+          <div *ngIf="!isEditing">
+            <label class="block text-sm font-medium text-muted mb-1">Subscription Plan</label>
+            <select formControlName="plan_code" class="input-field">
+              <option value="">Select a plan (defaults to 14-Day Free Demo)</option>
+              <option *ngFor="let plan of subscriptionPlans" [value]="plan.plan_code">
+                {{ plan.plan_name }} (₹{{ plan.price }})
+              </option>
+            </select>
+          </div>
+
+          <div *ngIf="!isEditing">
+            <label class="block text-sm font-medium text-muted mb-1">Payment Reference (Optional)</label>
+            <input type="text" formControlName="payment_reference" 
+                   class="input-field" 
+                   placeholder="e.g. PO-12345">
+          </div>
 
           <div>
             <label class="block text-sm font-medium text-muted mb-1">Contact Email</label>
@@ -136,20 +174,77 @@ interface Organization {
         </form>
       </app-slide-over>
 
+      <!-- Billing SlideOver -->
+      <app-slide-over [isOpen]="isBillingSlideOverOpen" 
+                      [title]="'Billing Details: ' + selectedOrgName" 
+                      description="View subscription and invoice history for this organization."
+                      (closeEvent)="closeBillingView()">
+        <div class="space-y-6">
+          <div *ngIf="loadingBilling" class="animate-pulse space-y-4">
+            <div class="h-10 bg-slate-700/50 rounded w-full"></div>
+            <div class="h-32 bg-slate-700/50 rounded w-full"></div>
+          </div>
+          
+          <div *ngIf="!loadingBilling && selectedOrgBilling">
+            <h3 class="text-lg font-medium text-main mb-3">Current Subscription</h3>
+            <div *ngIf="selectedOrgBilling.subscription" class="p-4 bg-white/5 border border-white/10 rounded-lg mb-6">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-medium text-brand-light">{{ selectedOrgBilling.subscription.plan?.plan_name }}</span>
+                <span class="px-2 py-0.5 rounded text-xs" [ngClass]="{'bg-green-500/10 text-green-400': selectedOrgBilling.subscription.status === 'ACTIVE', 'bg-blue-500/10 text-blue-400': selectedOrgBilling.subscription.status === 'TRIALING', 'bg-red-500/10 text-red-400': selectedOrgBilling.subscription.status === 'PAST_DUE'}">{{ selectedOrgBilling.subscription.status }}</span>
+              </div>
+              <p class="text-sm text-muted">Assessments Used: <span class="text-main">{{ selectedOrgBilling.subscription.assessments_used }} / {{ selectedOrgBilling.subscription.plan?.max_assessments || 'Unlimited' }}</span></p>
+            </div>
+            <div *ngIf="!selectedOrgBilling.subscription" class="text-muted italic mb-6">
+              No active subscription.
+            </div>
+
+            <h3 class="text-lg font-medium text-main mb-3">Invoice History</h3>
+            <div class="overflow-auto border border-white/10 rounded-lg">
+              <table class="w-full text-left text-sm text-muted">
+                <thead class="text-xs bg-white/5 uppercase">
+                  <tr>
+                    <th class="px-4 py-3 font-medium">Invoice #</th>
+                    <th class="px-4 py-3 font-medium">Date</th>
+                    <th class="px-4 py-3 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="selectedOrgBilling.invoices.length === 0">
+                    <td colspan="3" class="px-4 py-6 text-center italic">No invoices found.</td>
+                  </tr>
+                  <tr *ngFor="let invoice of selectedOrgBilling.invoices" class="border-t border-white/5">
+                    <td class="px-4 py-3">{{ invoice.invoice_number }}</td>
+                    <td class="px-4 py-3">{{ invoice.billing_period_start | date:'shortDate' }}</td>
+                    <td class="px-4 py-3">{{ invoice.status }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </app-slide-over>
     </div>
   `
 })
 export class OrganizationListPageComponent implements OnInit {
   organizations: Organization[] = [];
+  subscriptionPlans: SubscriptionPlan[] = [];
   loading = true;
   searchTerm = '';
   
   isSlideOverOpen = false;
+  isBillingSlideOverOpen = false;
   isEditing = false;
   submitting = false;
   currentEditUuid: string | null = null;
   
+  loadingBilling = false;
+  selectedOrgBilling: any = null;
+  selectedOrgName = '';
+  
   orgForm: FormGroup;
+  userStore = inject(UserStore);
+
   
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
@@ -160,12 +255,27 @@ export class OrganizationListPageComponent implements OnInit {
     this.orgForm = this.fb.group({
       organization_code: ['', Validators.required],
       organization_name: ['', Validators.required],
-      contact_email: ['', Validators.email]
+      contact_email: ['', Validators.email],
+      plan_code: [''],
+      payment_reference: ['']
     });
   }
 
   ngOnInit() {
     this.fetchOrganizations();
+    this.fetchSubscriptionPlans();
+  }
+
+  fetchSubscriptionPlans() {
+    this.http.get<any>(`${environment.apiUrl}/billing/plans`)
+      .subscribe({
+        next: (response) => {
+          this.subscriptionPlans = response.data ? response.data : response;
+        },
+        error: (err) => {
+          console.error('Error fetching subscription plans', err);
+        }
+      });
   }
 
   fetchOrganizations() {
@@ -203,6 +313,29 @@ export class OrganizationListPageComponent implements OnInit {
     // Intentionally restrict changing the organization code for existing tenants
     this.orgForm.get('organization_code')?.disable();
     this.isSlideOverOpen = true;
+  }
+
+  openBillingView(org: Organization) {
+    this.selectedOrgName = org.attributes.organization_name;
+    this.isBillingSlideOverOpen = true;
+    this.loadingBilling = true;
+    this.selectedOrgBilling = null;
+
+    this.http.get<any>(`${environment.apiUrl}/governance/organizations/${org.uuid}/billing`)
+      .subscribe({
+        next: (res) => {
+          this.selectedOrgBilling = res.data;
+          this.loadingBilling = false;
+        },
+        error: (err) => {
+          this.toastService.error('Error', 'Failed to load billing details.');
+          this.loadingBilling = false;
+        }
+      });
+  }
+
+  closeBillingView() {
+    this.isBillingSlideOverOpen = false;
   }
 
   async closeForm(force: boolean = false) {

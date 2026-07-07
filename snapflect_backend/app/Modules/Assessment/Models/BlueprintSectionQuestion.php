@@ -15,6 +15,7 @@ class BlueprintSectionQuestion extends Pivot
     protected $table = 'blueprint_section_questions';
 
     public $incrementing = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'uuid',

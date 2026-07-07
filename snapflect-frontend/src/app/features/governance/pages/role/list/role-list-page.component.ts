@@ -7,6 +7,7 @@ import { SlideOverComponent } from '../../../../../shared/components/slide-over/
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 import { GlobalSearchPipe } from '../../../../../shared/pipes/global-search.pipe';
+import { UserStore } from '../../../../../shared/stores/user.store';
 
 interface Role {
   id: number;
@@ -52,7 +53,7 @@ interface Permission {
           <h2 class="text-2xl font-bold text-main">Roles</h2>
           <p class="text-muted text-sm mt-1">Manage RBAC roles and assign permissions via the matrix.</p>
         </div>
-        <button (click)="openCreateForm()" class="btn-primary flex items-center">
+        <button *ngIf="(userStore.hasAnyPermission(['Security.Roles.Manage'])) && userStore.hasAnyPermission(['Security.Roles.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
@@ -114,9 +115,9 @@ interface Permission {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase" (click)="openPermissionsModal(role)">Permissions</button>
-                    <button class="text-muted hover:text-main transition-colors" (click)="openEditForm(role)">Edit</button>
-                    <button *ngIf="!role.attributes.is_system_role" class="text-muted hover:text-red-400 transition-colors" (click)="deleteRole(role.uuid)">Delete</button>
+                    <button *ngIf="userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase" (click)="openPermissionsModal(role)">Permissions</button>
+                    <button *ngIf="(userStore.hasAnyPermission(['Security.Roles.Manage'])) && userStore.hasAnyPermission(['Security.Roles.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(role)">Edit</button>
+                    <button *ngIf="(!role.attributes.is_system_role) && userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-muted hover:text-red-400 transition-colors" (click)="deleteRole(role.uuid)">Delete</button>
                   </td>
                 </tr>
               </ng-container>
@@ -132,7 +133,7 @@ interface Permission {
                       (closeEvent)="closeForm()">
         <form [formGroup]="roleForm" (ngSubmit)="submitForm()" class="space-y-6">
           
-          <div>
+          <div *ngIf="isPlatformAdmin">
             <label class="block text-sm font-medium text-muted mb-1">Organization (Optional)</label>
             <select formControlName="organization_id" class="input-field">
               <option [ngValue]="null">Global (System-wide)</option>
@@ -261,6 +262,9 @@ export class RoleListPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
+  public userStore = inject(UserStore);
+
+  isPlatformAdmin = false;
 
   constructor() {
     this.roleForm = this.fb.group({
@@ -275,6 +279,7 @@ export class RoleListPageComponent implements OnInit {
     this.fetchRoles();
     this.fetchAllPermissions(); // Pre-load permissions for matrix
     this.fetchOrganizations();
+    this.isPlatformAdmin = this.userStore.hasAnyRole(['PLATFORM_ADMIN']);
   }
 
   fetchOrganizations() {

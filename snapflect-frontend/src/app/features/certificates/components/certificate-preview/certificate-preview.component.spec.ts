@@ -1,11 +1,21 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CertificatePreviewComponent } from './certificate-preview.component';
 
-describe('certificate-preview.component', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
+describe('CertificatePreviewComponent', () => {
+  let component: CertificatePreviewComponent;
+  let fixture: ComponentFixture<CertificatePreviewComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CertificatePreviewComponent]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CertificatePreviewComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  it('should be created', () => {
-    expect(true).toBeTruthy();
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

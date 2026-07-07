@@ -181,7 +181,21 @@ export class CertificateListPageComponent implements OnInit {
   }
 
   downloadCertificate(cert: Certificate) {
-    // In production this would call a PDF generation endpoint
-    window.open(`${environment.apiUrl}/certificates/${cert.uuid}/download`, '_blank');
+    this.http.get<any>(`${environment.apiUrl}/certificates/${cert.uuid}/download`)
+      .subscribe({
+        next: (res) => {
+          if (res.data && res.data.html) {
+            const newWindow = window.open('', '_blank');
+            if (newWindow) {
+              newWindow.document.open();
+              newWindow.document.write(res.data.html);
+              newWindow.document.close();
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Error downloading certificate', err);
+        }
+      });
   }
 }
