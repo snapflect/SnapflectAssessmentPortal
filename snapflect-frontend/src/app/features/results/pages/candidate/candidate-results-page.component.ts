@@ -19,7 +19,7 @@ interface CandidateResult {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="h-full flex flex-col relative overflow-y-auto custom-scrollbar p-6">
+    <div class="dark-theme h-full flex flex-col bg-page text-main relative overflow-y-auto custom-scrollbar p-6">
       <!-- Header -->
       <div class="mb-8">
         <h2 class="text-2xl font-bold text-main">Completed Assessments</h2>
@@ -75,7 +75,7 @@ interface CandidateResult {
                 <span *ngIf="result.passFailStatus" class="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border shadow-sm" [ngClass]="getBadgeClass(result.passFailStatus)">
                   {{ result.passFailStatus === 'PASS' ? 'Passed' : 'Failed' }}
                 </span>
-                <span *ngIf="!result.passFailStatus" class="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border bg-slate-500/10 text-slate-400 border-slate-500/20">
+                <span *ngIf="!result.passFailStatus" class="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border bg-surface-light text-muted border-border">
                   Completed
                 </span>
               </div>
@@ -144,20 +144,20 @@ export class CandidateResultsPageComponent implements OnInit {
   }
 
   getStatusBarClass(status: string | null): string {
-    if (status === 'PASS') return 'bg-emerald-500';
-    if (status === 'FAIL') return 'bg-red-500';
+    if (status === 'PASS') return 'bg-success';
+    if (status === 'FAIL') return 'bg-danger';
     return 'bg-brand';
   }
 
   getBadgeClass(status: string | null): string {
-    if (status === 'PASS') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-    if (status === 'FAIL') return 'bg-red-500/10 text-red-400 border-red-500/20';
-    return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+    if (status === 'PASS') return 'bg-success/10 text-success border-success/20';
+    if (status === 'FAIL') return 'bg-danger/10 text-danger border-danger/20';
+    return 'bg-surface-light text-muted border-border';
   }
 
   getCircleClass(status: string | null): string {
-    if (status === 'PASS') return 'border-emerald-500/20 shadow-emerald-500/10 text-emerald-500';
-    if (status === 'FAIL') return 'border-red-500/20 shadow-red-500/10 text-red-500';
+    if (status === 'PASS') return 'border-success/20 shadow-success/10 text-success';
+    if (status === 'FAIL') return 'border-danger/20 shadow-danger/10 text-danger';
     return 'border-brand/20 shadow-brand/10 text-brand';
   }
 }

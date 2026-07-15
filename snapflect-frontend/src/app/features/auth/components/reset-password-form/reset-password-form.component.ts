@@ -18,10 +18,10 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, Validati
           </div>
           <input id="password" type="password" formControlName="password" class="input-field pl-10" placeholder="••••••••" />
         </div>
-        <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')" class="mt-2 text-sm text-red-400">
+        <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('required')" class="mt-2 text-sm text-danger">
           Password is required.
         </p>
-        <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('minlength')" class="mt-2 text-sm text-red-400">
+        <p *ngIf="form.get('password')?.touched && form.get('password')?.hasError('minlength')" class="mt-2 text-sm text-danger">
           Password must be at least 8 characters long.
         </p>
       </div>
@@ -35,12 +35,12 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, Validati
           </div>
           <input id="password_confirmation" type="password" formControlName="password_confirmation" class="input-field pl-10" placeholder="••••••••" />
         </div>
-        <p *ngIf="form.get('password_confirmation')?.touched && form.hasError('mismatch')" class="mt-2 text-sm text-red-400">
+        <p *ngIf="form.get('password_confirmation')?.touched && form.hasError('mismatch')" class="mt-2 text-sm text-danger">
           Passwords do not match.
         </p>
       </div>
       
-      <div *ngIf="errorMessage()" class="mb-6 bg-red-50 text-red-600 p-3 rounded-md text-sm">
+      <div *ngIf="errorMessage()" class="mb-6 bg-danger/10 text-danger border border-danger/20 p-3 rounded-md text-sm">
         {{ errorMessage() }}
       </div>
 

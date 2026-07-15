@@ -17,7 +17,7 @@ import { RouterModule } from '@angular/router';
           </div>
           <input id="email" type="email" formControlName="email" class="input-field pl-10" placeholder="you@example.com" />
         </div>
-        <p *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="mt-2 text-sm text-red-400">
+        <p *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="mt-2 text-sm text-danger">
           Please enter a valid email address.
         </p>
       </div>

@@ -11,7 +11,7 @@ import { environment } from '../../../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="h-full flex flex-col items-center justify-center p-6 bg-slate-900/50">
+    <div class="dark-theme h-full flex flex-col items-center justify-center p-6 bg-page text-main">
       
       <!-- Loading State -->
       <div *ngIf="loading" class="flex flex-col items-center">
@@ -40,19 +40,19 @@ import { environment } from '../../../../../../environments/environment';
           <!-- Info Grid -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
-              <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Time Limit</div>
+              <div class="text-muted text-xs uppercase tracking-wider mb-1">Time Limit</div>
               <div class="text-main font-bold text-lg">{{ sessionDetails.attributes?.time_limit_minutes || 'Unlimited' }} <span *ngIf="sessionDetails.attributes?.time_limit_minutes" class="text-sm text-muted font-normal">min</span></div>
             </div>
             <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
-              <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Questions</div>
+              <div class="text-muted text-xs uppercase tracking-wider mb-1">Questions</div>
               <div class="text-main font-bold text-lg">{{ sessionDetails.relationships?.assessment?.attributes?.total_questions || '?' }}</div>
             </div>
             <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
-              <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Passing Score</div>
-              <div class="text-emerald-400 font-bold text-lg">{{ sessionDetails.relationships?.assessment?.attributes?.passing_score || 'N/A' }}%</div>
+              <div class="text-muted text-xs uppercase tracking-wider mb-1">Passing Score</div>
+              <div class="text-success font-bold text-lg">{{ sessionDetails.relationships?.assessment?.attributes?.passing_score || 'N/A' }}%</div>
             </div>
             <div class="bg-input-bg rounded-lg p-4 text-center border border-white/5">
-              <div class="text-slate-500 text-xs uppercase tracking-wider mb-1">Proctoring</div>
+              <div class="text-muted text-xs uppercase tracking-wider mb-1">Proctoring</div>
               <div class="text-main font-bold text-lg">{{ sessionDetails.attributes?.proctoring_type === 'NONE' ? 'Standard' : 'Proctored' }}</div>
             </div>
           </div>
@@ -76,7 +76,7 @@ import { environment } from '../../../../../../environments/environment';
           <div class="flex flex-col items-center">
             <label class="flex items-center gap-3 cursor-pointer mb-6 group">
               <div class="relative flex items-center justify-center">
-                <input type="checkbox" [(ngModel)]="agreed" class="peer appearance-none w-5 h-5 border-2 border-slate-600 rounded cursor-pointer checked:border-brand checked:bg-brand transition-colors">
+                <input type="checkbox" [(ngModel)]="agreed" class="peer appearance-none w-5 h-5 border-2 border-border-dark rounded cursor-pointer checked:border-brand checked:bg-brand transition-colors">
                 <svg class="absolute w-3 h-3 text-main opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                 </svg>
@@ -106,7 +106,7 @@ import { environment } from '../../../../../../environments/environment';
       </div>
       
       <!-- Error State -->
-      <div *ngIf="error" class="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mt-4 max-w-lg text-center">
+      <div *ngIf="error" class="bg-danger/10 border border-danger/20 text-danger p-4 rounded-lg mt-4 max-w-lg text-center">
         {{ error }}
       </div>
     </div>

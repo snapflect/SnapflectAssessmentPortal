@@ -11,23 +11,23 @@ import { switchMap, catchError, filter, takeWhile, take, tap } from 'rxjs/operat
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="h-full flex flex-col items-center justify-center bg-slate-900/50 p-6 overflow-y-auto">
+    <div class="dark-theme h-full flex flex-col items-center justify-center bg-page text-main p-6 overflow-y-auto">
       
-      <div class="glass-card max-w-2xl w-full border-t-4 border-t-emerald-500 rounded-xl overflow-hidden shadow-2xl relative">
+      <div class="glass-card max-w-2xl w-full border-t-4 border-t-success rounded-xl overflow-hidden shadow-2xl relative">
         
         <!-- Background Pattern -->
         <div class="absolute inset-0 opacity-5 pointer-events-none" 
              style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;">
         </div>
 
-        <div class="p-10 relative z-10 text-center border-b border-slate-700/50">
-          <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/20 relative">
-            <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-10 relative z-10 text-center border-b border-border">
+          <div class="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-success/20 relative">
+            <svg class="w-10 h-10 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <!-- Confetti dots -->
-            <div class="absolute -top-4 -left-4 w-2 h-2 bg-rose-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-            <div class="absolute top-8 -right-6 w-2.5 h-2.5 bg-amber-400 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+            <div class="absolute -top-4 -left-4 w-2 h-2 bg-danger rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+            <div class="absolute top-8 -right-6 w-2.5 h-2.5 bg-warning rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
             <div class="absolute -bottom-2 -left-2 w-1.5 h-1.5 bg-brand-light rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
           </div>
           
@@ -38,20 +38,20 @@ import { switchMap, catchError, filter, takeWhile, take, tap } from 'rxjs/operat
         </div>
         
         <!-- Score Preview Panel -->
-        <div class="bg-slate-800/50 p-8">
-           <h3 class="text-center text-sm font-semibold text-slate-400 uppercase tracking-wider mb-6">Submission Details</h3>
+        <div class="bg-surface/50 p-8">
+           <h3 class="text-center text-sm font-semibold text-muted uppercase tracking-wider mb-6">Submission Details</h3>
            
            <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
               
               <!-- Circular Score -->
               <div class="relative w-32 h-32 flex items-center justify-center">
                  <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <path class="text-slate-700" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path class="text-emerald-500 drop-shadow-md" [attr.stroke-dasharray]="(isGradingComplete ? scorePercentage : completionPercentage) + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="text-surface-light" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="text-success drop-shadow-md" [attr.stroke-dasharray]="(isGradingComplete ? scorePercentage : completionPercentage) + ', 100'" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                  </svg>
                  <div class="absolute inset-0 flex flex-col items-center justify-center">
                     <span class="text-3xl font-bold text-white">{{ isGradingComplete ? scorePercentage : completionPercentage }}%</span>
-                    <span class="text-[10px] text-slate-400 uppercase">{{ isGradingComplete ? 'Final Score' : 'Completed' }}</span>
+                    <span class="text-[10px] text-muted uppercase">{{ isGradingComplete ? 'Final Score' : 'Completed' }}</span>
                  </div>
               </div>
               
@@ -59,20 +59,20 @@ import { switchMap, catchError, filter, takeWhile, take, tap } from 'rxjs/operat
               <div class="flex flex-col gap-4 w-full md:w-auto min-w-[200px]">
                  <div>
                     <div class="flex justify-between text-sm mb-1">
-                       <span class="text-slate-300">Answered Questions</span>
-                       <span class="text-emerald-400 font-bold">{{ answeredQuestions }} / {{ totalQuestions }}</span>
+                       <span class="text-main/80">Answered Questions</span>
+                       <span class="text-success font-bold">{{ answeredQuestions }} / {{ totalQuestions }}</span>
                     </div>
-                    <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                       <div class="bg-emerald-500 h-full" [style.width]="completionPercentage + '%'"></div>
+                    <div class="w-full h-1.5 bg-surface-light rounded-full overflow-hidden">
+                       <div class="bg-success h-full" [style.width]="completionPercentage + '%'"></div>
                     </div>
                  </div>
                  
-                 <div *ngIf="isConnectionError" class="mt-2 text-xs text-red-400 flex items-start gap-2 bg-red-500/10 p-3 rounded border border-red-500/20">
+                 <div *ngIf="isConnectionError" class="mt-2 text-xs text-danger flex items-start gap-2 bg-danger/10 p-3 rounded border border-danger/20">
                     <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>Connection lost. Trying to reconnect...</span>
                  </div>
                  
-                 <div *ngIf="!isGradingComplete && !isGradingDelayed && !isConnectionError" class="mt-2 text-xs text-amber-500 flex items-start gap-2 bg-amber-500/10 p-3 rounded border border-amber-500/20">
+                 <div *ngIf="!isGradingComplete && !isGradingDelayed && !isConnectionError" class="mt-2 text-xs text-warning flex items-start gap-2 bg-warning/10 p-3 rounded border border-warning/20">
                     <svg class="w-4 h-4 shrink-0 mt-0.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     <span>Calculating your final score in the background...</span>
                  </div>
@@ -82,7 +82,7 @@ import { switchMap, catchError, filter, takeWhile, take, tap } from 'rxjs/operat
                     <span>Grading is taking longer than expected. You will be notified when results are ready.</span>
                  </div>
 
-                 <div *ngIf="isGradingComplete" class="mt-2 text-xs text-emerald-400 flex items-start gap-2 bg-emerald-500/10 p-3 rounded border border-emerald-500/20">
+                 <div *ngIf="isGradingComplete" class="mt-2 text-xs text-success flex items-start gap-2 bg-success/10 p-3 rounded border border-success/20">
                     <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     <span>Grading complete! You achieved {{ scorePercentage }}%. Status: <span class="font-bold">{{ passFailStatus }}</span></span>
                  </div>
@@ -91,9 +91,9 @@ import { switchMap, catchError, filter, takeWhile, take, tap } from 'rxjs/operat
         </div>
 
         <!-- Actions -->
-        <div class="p-6 bg-slate-900 border-t border-slate-700/50 flex flex-col sm:flex-row gap-4 justify-center">
+        <div class="p-6 bg-page border-t border-border flex flex-col sm:flex-row gap-4 justify-center">
           <button (click)="returnToDashboard()" 
-                  class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-main font-medium rounded-lg transition-colors flex items-center justify-center gap-2 border border-slate-700">
+                  class="btn-secondary flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             Candidate Dashboard
           </button>

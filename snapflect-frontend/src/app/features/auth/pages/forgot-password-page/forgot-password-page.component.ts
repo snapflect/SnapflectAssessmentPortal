@@ -20,7 +20,7 @@ import { ToastService } from '../../../../core/services/toast.service';
         </div>
         
         <div *ngIf="successMessage" class="glass-card p-8 text-center">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-500 mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 text-success mb-6 border border-success/20">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
           </div>
           <h2 class="text-xl font-semibold mb-2">Check your email</h2>

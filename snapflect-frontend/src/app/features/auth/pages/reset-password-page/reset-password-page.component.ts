@@ -21,7 +21,7 @@ import { ResetPasswordRequestModel } from '../../../../shared/models/auth.models
           <p class="text-muted">Enter your new password below</p>
         </div>
         
-        <div *ngIf="missingParams" class="glass-card p-8 text-center text-red-500">
+        <div *ngIf="missingParams" class="glass-card p-8 text-center text-danger">
           <p>Invalid password reset link. Please request a new one.</p>
           <a href="/auth/forgot-password" class="btn-primary inline-flex justify-center items-center h-11 px-8 mt-4 text-white">Go to Forgot Password</a>
         </div>

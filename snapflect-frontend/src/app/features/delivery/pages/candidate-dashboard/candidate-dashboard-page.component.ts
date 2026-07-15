@@ -86,10 +86,10 @@ interface MyPublication {
             <div class="absolute top-0 left-0 w-full h-1 z-10" [ngClass]="getStatusBarClass(pub)"></div>
 
             <!-- Due Soon Warning -->
-            <div *ngIf="isDueSoon(pub)" class="absolute top-3 right-3 z-10 flex items-center bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full">
+            <div *ngIf="isDueSoon(pub)" class="absolute top-3 right-3 z-10 flex items-center bg-danger/10 border border-danger/20 text-danger text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full">
               <span class="flex h-2 w-2 relative mr-1.5">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-danger"></span>
               </span>
               Due Soon
             </div>
@@ -109,7 +109,7 @@ interface MyPublication {
                   <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" [ngClass]="getBadgeClass(pub)">
                     {{ pub.attributes.status }}
                   </span>
-                  <span *ngIf="pub.attributes.is_proctored" class="mt-1 text-[9px] bg-red-500/10 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold">Proctored</span>
+                  <span *ngIf="pub.attributes.is_proctored" class="mt-1 text-[9px] bg-danger/10 text-danger border border-danger/20 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold">Proctored</span>
                 </div>
               </div>
 
@@ -124,10 +124,10 @@ interface MyPublication {
                 </div>
                 <div>
                   <span class="block text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">Attempts</span>
-                  <span class="text-sm font-medium" [ngClass]="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) <= 0 ? 'text-red-400' : 'text-main'">
+                  <span class="text-sm font-medium" [ngClass]="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) <= 0 ? 'text-danger' : 'text-main'">
                     {{ pub.meta?.attempts_used || 0 }} / {{ pub.attributes.max_attempts }}
-                    <span *ngIf="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) > 0" class="text-[10px] text-emerald-400 ml-1">({{ pub.meta?.attempts_remaining ?? pub.attributes.max_attempts }} left)</span>
-                    <span *ngIf="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) <= 0" class="text-[10px] text-red-400 ml-1">(None left)</span>
+                    <span *ngIf="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) > 0" class="text-[10px] text-success ml-1">({{ pub.meta?.attempts_remaining ?? pub.attributes.max_attempts }} left)</span>
+                    <span *ngIf="(pub.meta?.attempts_remaining ?? pub.attributes.max_attempts) <= 0" class="text-[10px] text-danger ml-1">(None left)</span>
                   </span>
                 </div>
                 <div class="col-span-2 pt-2 border-t border-border-light/50">
@@ -167,11 +167,11 @@ interface MyPublication {
                 <div *ngIf="isCompleted(pub)" class="flex items-center justify-between bg-surface/50 p-1 rounded-xl border border-border-light">
                   <div class="px-4 py-2 flex items-center gap-3">
                     <div class="relative w-10 h-10 flex items-center justify-center rounded-full"
-                         [ngClass]="pub.meta?.is_passed ? 'bg-emerald-500/10' : 'bg-red-500/10'">
-                      <span class="text-sm font-bold" [ngClass]="pub.meta?.is_passed ? 'text-emerald-500' : 'text-red-500'">{{ pub.meta?.best_score }}%</span>
+                         [ngClass]="pub.meta?.is_passed ? 'bg-success/10' : 'bg-danger/10'">
+                      <span class="text-sm font-bold" [ngClass]="pub.meta?.is_passed ? 'text-success' : 'text-danger'">{{ pub.meta?.best_score }}%</span>
                     </div>
                     <div>
-                      <p class="text-xs font-bold uppercase tracking-wider" [ngClass]="pub.meta?.is_passed ? 'text-emerald-500' : 'text-red-500'">
+                      <p class="text-xs font-bold uppercase tracking-wider" [ngClass]="pub.meta?.is_passed ? 'text-success' : 'text-danger'">
                         {{ pub.meta?.is_passed ? 'Passed' : 'Failed' }}
                       </p>
                       <p class="text-[10px] text-muted">Final Score</p>
@@ -304,24 +304,24 @@ export class CandidateDashboardPageComponent implements OnInit {
   }
 
   getStatusBarClass(pub: MyPublication): string {
-    if (this.isCompleted(pub)) return pub.meta?.is_passed ? 'bg-emerald-500' : 'bg-red-500';
+    if (this.isCompleted(pub)) return pub.meta?.is_passed ? 'bg-success' : 'bg-danger';
     if (this.canStart(pub)) return 'bg-brand';
-    return 'bg-slate-600';
+    return 'bg-surface-dark';
   }
 
   getIconBoxClass(pub: MyPublication): string {
-    if (this.isCompleted(pub)) return pub.meta?.is_passed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400';
+    if (this.isCompleted(pub)) return pub.meta?.is_passed ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger';
     if (this.canStart(pub)) return 'bg-brand/20 text-brand-light';
-    return 'bg-slate-600/20 text-slate-400';
+    return 'bg-surface-light text-muted';
   }
 
   getBadgeClass(pub: MyPublication): string {
     const map: Record<string, string> = {
-      'ACTIVE': 'bg-emerald-500/20 text-emerald-400',
-      'SCHEDULED': 'bg-blue-500/20 text-blue-400',
-      'COMPLETED': 'bg-slate-500/20 text-slate-400',
-      'CANCELLED': 'bg-red-500/20 text-red-400',
+      'ACTIVE': 'bg-success/20 text-success',
+      'SCHEDULED': 'bg-info/20 text-info',
+      'COMPLETED': 'bg-surface-light text-muted',
+      'CANCELLED': 'bg-danger/20 text-danger',
     };
-    return map[pub.attributes.status] || 'bg-slate-600/20 text-slate-400';
+    return map[pub.attributes.status] || 'bg-surface-light text-muted';
   }
 }

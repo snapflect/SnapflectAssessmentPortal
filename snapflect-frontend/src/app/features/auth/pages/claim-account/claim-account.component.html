@@ -1,71 +1,67 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-    <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Claim Your Account
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
-        Set your password to activate your Enterprise Portal
-      </p>
+<div class="min-h-screen flex items-center justify-center bg-page text-main p-4">
+  <div class="w-full max-w-md">
+    <!-- Logo Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-light to-accent-light mb-2">
+        Snapflect
+      </h1>
+      <p class="text-muted">Set your password to activate your Enterprise Portal</p>
     </div>
     
-    <div *ngIf="!token || !email" class="rounded-md bg-red-50 p-4">
+    <div *ngIf="!token || !email" class="glass-card p-6 border-danger/20 bg-danger/5">
       <div class="flex">
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800">Invalid Invite Link</h3>
-          <div class="mt-2 text-sm text-red-700">
+          <h3 class="text-sm font-medium text-danger">Invalid Invite Link</h3>
+          <div class="mt-2 text-sm text-danger/80">
             <p>The invitation link appears to be invalid or missing the required secure token.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <form *ngIf="token && email" class="mt-8 space-y-6" [formGroup]="claimForm" (ngSubmit)="onSubmit()">
-      <div class="rounded-md shadow-sm -space-y-px">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700">Email Address</label>
-          <input type="text" disabled [value]="email" class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 bg-gray-100 text-gray-500 rounded-md focus:outline-none sm:text-sm">
-        </div>
-
-        <div class="mb-4 flex space-x-4">
-          <div class="w-1/2">
-            <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
-            <input id="first_name" type="text" formControlName="first_name" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="First Name">
-          </div>
-          <div class="w-1/2">
-            <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-            <input id="last_name" type="text" formControlName="last_name" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Last Name">
-          </div>
-        </div>
-        
-        <div class="mb-4">
-          <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
-          <input id="password" type="password" formControlName="password" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Password (minimum 8 characters)">
-        </div>
-
-        <div>
-          <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-          <input id="password_confirmation" type="password" formControlName="password_confirmation" required class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Confirm Password">
-          <p *ngIf="claimForm.hasError('mismatch') && claimForm.get('password_confirmation')?.touched" class="mt-2 text-sm text-red-600">Passwords do not match.</p>
-        </div>
+    <form *ngIf="token && email" class="glass-card p-8" [formGroup]="claimForm" (ngSubmit)="onSubmit()">
+      
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-muted mb-2">Email Address</label>
+        <input type="text" disabled [value]="email" class="input-field opacity-60 cursor-not-allowed">
       </div>
 
-      <div *ngIf="errorMessage" class="text-sm text-red-600 text-center">
+      <div class="mb-6 flex space-x-4">
+        <div class="w-1/2">
+          <label for="first_name" class="block text-sm font-medium text-muted mb-2">First Name</label>
+          <input id="first_name" type="text" formControlName="first_name" required class="input-field" placeholder="First Name">
+        </div>
+        <div class="w-1/2">
+          <label for="last_name" class="block text-sm font-medium text-muted mb-2">Last Name</label>
+          <input id="last_name" type="text" formControlName="last_name" required class="input-field" placeholder="Last Name">
+        </div>
+      </div>
+      
+      <div class="mb-6">
+        <label for="password" class="block text-sm font-medium text-muted mb-2">New Password</label>
+        <input id="password" type="password" formControlName="password" required class="input-field" placeholder="Minimum 8 characters">
+      </div>
+
+      <div class="mb-8">
+        <label for="password_confirmation" class="block text-sm font-medium text-muted mb-2">Confirm Password</label>
+        <input id="password_confirmation" type="password" formControlName="password_confirmation" required class="input-field" placeholder="Confirm Password">
+        <p *ngIf="claimForm.hasError('mismatch') && claimForm.get('password_confirmation')?.touched" class="mt-2 text-sm text-danger">Passwords do not match.</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="mb-6 bg-danger/10 text-danger p-3 rounded-md text-sm border border-danger/20 text-center">
         {{ errorMessage }}
       </div>
 
-      <div>
-        <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300">
-          <span *ngIf="isSubmitting" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Activating...
-          </span>
-          <span *ngIf="!isSubmitting">Set Password & Continue</span>
-        </button>
-      </div>
+      <button type="submit" [disabled]="claimForm.invalid || isSubmitting" class="w-full btn-primary flex justify-center items-center h-11">
+        <span *ngIf="isSubmitting" class="flex items-center">
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Activating...
+        </span>
+        <span *ngIf="!isSubmitting">Set Password & Continue</span>
+      </button>
     </form>
   </div>
 </div>

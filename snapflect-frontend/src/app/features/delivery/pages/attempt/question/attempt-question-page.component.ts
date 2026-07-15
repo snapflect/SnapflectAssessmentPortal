@@ -19,21 +19,21 @@ import { interval } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule, FormatTimePipe],
   template: `
-    <div class="h-full flex flex-col bg-slate-900">
+    <div class="dark-theme h-full flex flex-col bg-page text-main">
       
       <!-- Paused Overlay -->
-      <div *ngIf="sessionPaused" class="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
-        <div class="w-24 h-24 bg-amber-500/20 rounded-full flex items-center justify-center mb-6 border border-amber-500/30">
-          <svg class="w-12 h-12 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      <div *ngIf="sessionPaused" class="fixed inset-0 z-[9999] bg-page/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-24 h-24 bg-warning/20 rounded-full flex items-center justify-center mb-6 border border-warning/30">
+          <svg class="w-12 h-12 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         </div>
-        <h2 class="text-3xl font-bold text-white mb-4">Session Paused</h2>
-        <p class="text-slate-300 text-lg max-w-md">Your assessment has been temporarily paused by the Proctor. Please wait for further instructions.</p>
+        <h2 class="text-3xl font-bold text-main mb-4">Session Paused</h2>
+        <p class="text-muted text-lg max-w-md">Your assessment has been temporarily paused by the Proctor. Please wait for further instructions.</p>
       </div>
 
       <!-- Top Bar -->
-      <header class="flex-none bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center z-10 shadow-md">
+      <header class="flex-none bg-surface border-b border-border p-4 flex justify-between items-center z-10 shadow-md">
         <div class="flex items-center gap-3">
-          <button (click)="goBack()" class="btn-ghost !p-2 text-slate-400 hover:text-white" title="Back to Assessments">
+          <button (click)="goBack()" class="btn-ghost !p-2 text-muted hover:text-main" title="Back to Assessments">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
           </button>
           <div>
@@ -44,8 +44,8 @@ import { interval } from 'rxjs';
         
         <!-- Timer -->
         <div class="flex items-center gap-3">
-          <div class="bg-input-bg border border-slate-700 px-4 py-2 rounded-lg flex items-center gap-2"
-               [ngClass]="{'border-red-500/50 text-red-400': timeRemaining() !== null && timeRemaining()! < 300, 'text-emerald-400': timeRemaining() !== null && timeRemaining()! >= 300, 'text-slate-400': timeRemaining() === null}">
+          <div class="bg-input-bg border border-border px-4 py-2 rounded-lg flex items-center gap-2"
+               [ngClass]="{'border-danger/50 text-danger': timeRemaining() !== null && timeRemaining()! < 300, 'text-success': timeRemaining() !== null && timeRemaining()! >= 300, 'text-muted': timeRemaining() === null}">
             <!-- Countdown icon -->
             <svg *ngIf="timeRemaining() !== null" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -55,10 +55,10 @@ import { interval } from 'rxjs';
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"></path>
             </svg>
             <span class="font-mono font-bold text-lg tracking-wider">{{ (timeRemaining() !== null ? timeRemaining() : facade.attemptStore.elapsedSeconds()) | formatTime }}</span>
-            <span *ngIf="timeRemaining() === null" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Elapsed</span>
+            <span *ngIf="timeRemaining() === null" class="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">Elapsed</span>
           </div>
           
-          <button (click)="goToSummary()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-main text-sm font-medium rounded-lg transition-colors border border-slate-600 flex items-center gap-2">
+          <button (click)="goToSummary()" class="btn-secondary flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             Overview
           </button>
@@ -76,18 +76,18 @@ import { interval } from 'rxjs';
             </svg>
           </div>
 
-          <div *ngIf="error" class="bg-red-500/10 border border-red-500/20 text-red-400 p-6 rounded-xl mt-4 max-w-2xl mx-auto text-center shadow-lg">
-            <svg class="w-12 h-12 mx-auto mb-4 text-red-400 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <div *ngIf="error" class="bg-danger/10 border border-danger/20 text-danger p-6 rounded-xl mt-4 max-w-2xl mx-auto text-center shadow-lg">
+            <svg class="w-12 h-12 mx-auto mb-4 text-danger opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             <h3 class="text-xl font-bold mb-2">Something went wrong</h3>
             <p>{{ error }}</p>
-            <button (click)="loadQuestion()" class="mt-6 px-6 py-2 bg-slate-800 hover:bg-slate-700 text-main rounded-lg border border-slate-600 transition-colors">
+            <button (click)="loadQuestion()" class="mt-6 btn-secondary">
               Try Again
             </button>
           </div>
 
-          <div *ngIf="!loading && question" class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
+          <div *ngIf="!loading && question" class="glass-card overflow-hidden">
             <!-- Question Header -->
-            <div class="bg-slate-800/50 border-b border-slate-700 p-6 flex justify-between items-start">
+            <div class="bg-surface/50 border-b border-border p-6 flex justify-between items-start">
               <div class="flex gap-4">
                 <div class="w-10 h-10 bg-brand/20 border border-brand/30 rounded-lg flex items-center justify-center text-brand-light font-bold flex-none">
                   {{ currentSequenceNumber }}
@@ -95,20 +95,20 @@ import { interval } from 'rxjs';
                 <div class="mt-2 text-lg text-main font-medium quill-content" [innerHTML]="question.attributes?.stem_text"></div>
               </div>
               <div class="flex-none">
-                <span class="px-2.5 py-1 bg-slate-700/50 text-muted text-xs font-semibold rounded-md border border-slate-600">
+                <span class="px-2.5 py-1 bg-surface-light text-muted text-xs font-semibold rounded-md border border-border">
                   {{ question.attributes?.type }}
                 </span>
               </div>
             </div>
 
             <!-- Answer Area -->
-            <div class="p-6 bg-input-bg">
+            <div class="p-6 bg-page/50">
               
               <!-- Multiple Choice / Single Choice -->
               <div *ngIf="question.attributes?.type === 'MULTIPLE_CHOICE' || question.attributes?.type === 'SINGLE_CHOICE' || question.attributes?.type === 'TRUE_FALSE'" class="space-y-3">
                 <label *ngFor="let opt of question.relationships?.options" 
                        class="relative flex items-center p-4 border rounded-xl cursor-pointer transition-all"
-                       [ngClass]="isOptionSelected(opt.uuid) ? 'border-brand bg-brand/10' : 'border-slate-700 bg-slate-800 hover:border-slate-500'">
+                       [ngClass]="isOptionSelected(opt.uuid) ? 'border-brand bg-brand/10' : 'border-border bg-surface hover:border-border-dark'">
                   
                   <div class="flex items-center h-5 mr-4">
                     <input *ngIf="question.attributes?.type === 'SINGLE_CHOICE' || question.attributes?.type === 'TRUE_FALSE'" 
@@ -117,14 +117,14 @@ import { interval } from 'rxjs';
                            [value]="opt.uuid"
                            [checked]="isOptionSelected(opt.uuid)"
                            (change)="toggleOption(opt.uuid, false)"
-                           class="w-5 h-5 border-slate-500 text-brand bg-slate-900 focus:ring-brand focus:ring-offset-slate-900">
+                           class="w-5 h-5 border-border text-brand bg-page focus:ring-brand focus:ring-offset-page">
                            
                     <input *ngIf="question.attributes?.type === 'MULTIPLE_CHOICE'" 
                            type="checkbox" 
                            [value]="opt.uuid"
                            [checked]="isOptionSelected(opt.uuid)"
                            (change)="toggleOption(opt.uuid, true)"
-                           class="w-5 h-5 rounded border-slate-500 text-brand bg-slate-900 focus:ring-brand focus:ring-offset-slate-900">
+                           class="w-5 h-5 rounded border-border text-brand bg-page focus:ring-brand focus:ring-offset-page">
                   </div>
                   
                   <div class="text-muted" [innerHTML]="opt.attributes?.option_text"></div>
@@ -137,7 +137,7 @@ import { interval } from 'rxjs';
                   [(ngModel)]="essayAnswer" 
                   (ngModelChange)="onEssayChange($event)"
                   rows="10"
-                  class="w-full bg-slate-900 border border-slate-700 text-main rounded-xl p-4 focus:ring-2 focus:ring-brand focus:border-brand placeholder-slate-500 resize-y transition-all"
+                  class="input-field resize-y"
                   placeholder="Type your essay answer here...">
                 </textarea>
               </div>
@@ -149,10 +149,10 @@ import { interval } from 'rxjs';
       </div>
 
       <!-- Footer Bar -->
-      <footer class="flex-none bg-slate-800 border-t border-slate-700 p-4 flex justify-between items-center z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+      <footer class="flex-none bg-surface border-t border-border p-4 flex justify-between items-center z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         
         <div class="flex items-center gap-4">
-          <button *ngIf="currentSequenceNumber > 1" (click)="navigate('previous')" [disabled]="navigating || loading" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-main font-medium rounded-lg transition-colors border border-slate-600 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button *ngIf="currentSequenceNumber > 1" (click)="navigate('previous')" [disabled]="navigating || loading" class="btn-secondary flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             Previous
           </button>
@@ -164,15 +164,15 @@ import { interval } from 'rxjs';
             <span class="text-xs text-muted">Saving...</span>
           </div>
         
-          <button (click)="toggleFlag()" [disabled]="!question" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-muted font-medium rounded-lg transition-colors border flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  [ngClass]="isFlagged ? 'border-amber-500/50 text-amber-400 bg-amber-500/10' : 'border-slate-600'">
+          <button (click)="toggleFlag()" [disabled]="!question" class="btn-secondary flex items-center gap-2"
+                  [ngClass]="isFlagged ? '!border-warning/50 !text-warning !bg-warning/10' : ''">
             <svg class="w-4 h-4" [attr.fill]="isFlagged ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path>
             </svg>
             {{ isFlagged ? 'Flagged' : 'Flag for Review' }}
           </button>
           
-          <button (click)="navigate('next')" [disabled]="navigating || loading" class="px-8 py-2.5 bg-brand hover:bg-brand-light text-main font-bold rounded-lg shadow-lg shadow-brand/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button (click)="navigate('next')" [disabled]="navigating || loading" class="btn-primary flex items-center gap-2">
             Next
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </button>

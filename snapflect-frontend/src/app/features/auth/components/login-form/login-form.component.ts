@@ -21,7 +21,7 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
           </div>
           <input id="email" type="email" formControlName="email" class="input-field pl-10" placeholder="you@example.com" />
         </div>
-        <p *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="mt-2 text-sm text-red-400">
+        <p *ngIf="form.get('email')?.touched && form.get('email')?.invalid" class="mt-2 text-sm text-danger">
           Please enter a valid email address.
         </p>
       </div>
@@ -37,12 +37,12 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
           </div>
           <input id="password" type="password" formControlName="password" class="input-field pl-10" placeholder="••••••••" />
         </div>
-        <p *ngIf="form.get('password')?.touched && form.get('password')?.invalid" class="mt-2 text-sm text-red-400">
+        <p *ngIf="form.get('password')?.touched && form.get('password')?.invalid" class="mt-2 text-sm text-danger">
           Password is required.
         </p>
       </div>
 
-      <div *ngIf="errorMessage()" class="mb-6 bg-red-50 text-red-600 p-3 rounded-md text-sm">
+      <div *ngIf="errorMessage()" class="mb-6 bg-danger/10 text-danger border border-danger/20 p-3 rounded-md text-sm">
         {{ errorMessage() }}
       </div>
 
