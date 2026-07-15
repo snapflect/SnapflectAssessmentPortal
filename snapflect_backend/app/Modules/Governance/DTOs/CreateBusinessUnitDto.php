@@ -10,7 +10,7 @@ readonly class CreateBusinessUnitDto extends BaseDto
 {
     public function __construct(
         public int $organization_id,
-        public string $business_unit_code,
+        public ?string $business_unit_code,
         public string $business_unit_name,
         public ?string $status = 'ACTIVE'
     ) {}
@@ -19,7 +19,7 @@ readonly class CreateBusinessUnitDto extends BaseDto
     {
         return new self(
             organization_id: (int) $data['organization_id'],
-            business_unit_code: $data['business_unit_code'],
+            business_unit_code: $data['business_unit_code'] ?? null,
             business_unit_name: $data['business_unit_name'],
             status: $data['status'] ?? 'ACTIVE'
         );

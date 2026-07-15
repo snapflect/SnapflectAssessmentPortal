@@ -48,6 +48,16 @@ class AssessmentTypeController extends Controller
         $this->authorize('create', AssessmentType::class);
         
         $data = $request->toDto()->toArray();
+        if (empty($data['type_code'])) {
+            $baseCode = \Illuminate\Support\Str::slug($data['type_name']);
+            $code = $baseCode;
+            $counter = 1;
+            while (\App\Modules\Assessment\Models\AssessmentType::where('type_code', $code)->whereNull('deleted_date')->exists()) {
+                $code = $baseCode . '-' . $counter;
+                $counter++;
+            }
+            $data['type_code'] = $code;
+        }
         $data['organization_id'] = auth()->user()->organization_id;
         $data['created_by'] = auth()->id();
         $data['uuid'] = (string) \Illuminate\Support\Str::uuid();

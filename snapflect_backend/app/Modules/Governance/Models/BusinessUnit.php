@@ -13,7 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BusinessUnit extends Model
 {
-    use HasUuid, HasAuditFields, BelongsToOrganization;
+    use HasUuid, HasAuditFields, BelongsToOrganization, \App\Traits\ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'business_unit_code';
+    }
 
     public const DELETED_AT = 'deleted_date';
     public const CREATED_AT = 'created_date';

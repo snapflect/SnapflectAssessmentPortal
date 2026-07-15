@@ -58,7 +58,7 @@ class DashboardController extends Controller
         // Safe helpers
         $orgCount = class_exists(\App\Modules\Governance\Models\Organization::class) ? \App\Modules\Governance\Models\Organization::where('is_deleted', false)->where('id', '!=', 1)->count() : 0;
         $userCount = class_exists(\App\Modules\Security\Models\User::class) ? \App\Modules\Security\Models\User::where('is_deleted', false)->count() : 0;
-        $tenantUserCount = class_exists(\App\Modules\Security\Models\User::class) ? \App\Modules\Security\Models\User::where('organization_id', $orgId)->where('is_deleted', false)->count() : 0;
+        $tenantUserCount = class_exists(\App\Modules\Security\Models\User::class) ? \App\Modules\Security\Models\User::forUser($user)->where('is_deleted', false)->count() : 0;
         
         $assessmentCount = class_exists(\App\Modules\Assessment\Models\Assessment::class) ? \App\Modules\Assessment\Models\Assessment::count() : 0;
         $tenantAssessmentCount = class_exists(\App\Modules\Assessment\Models\Assessment::class) ? \App\Modules\Assessment\Models\Assessment::where('organization_id', $orgId)->count() : 0;
@@ -108,7 +108,7 @@ class DashboardController extends Controller
 
             case 'ASSESSMENT_MANAGER':
                 $data['assessments_count'] = $tenantAssessmentCount;
-                $data['active_question_banks'] = class_exists(\App\Modules\Assessment\Models\QuestionBank::class) ? \App\Modules\Assessment\Models\QuestionBank::where('organization_id', $orgId)->count() : 0;
+                $data['active_question_banks'] = class_exists(\App\Modules\Assessment\Models\QuestionBank::class) ? \App\Modules\Assessment\Models\QuestionBank::forUser($user)->count() : 0;
                 $data['pending_reviews'] = $tenantPendingReviews;
                 $data['active_sessions'] = $tenantActiveSessions;
                 
@@ -133,7 +133,7 @@ class DashboardController extends Controller
                 break;
 
             case 'CONTENT_CREATOR':
-                $data['question_banks_count'] = class_exists(\App\Modules\Assessment\Models\QuestionBank::class) ? \App\Modules\Assessment\Models\QuestionBank::where('organization_id', $orgId)->count() : 0;
+                $data['question_banks_count'] = class_exists(\App\Modules\Assessment\Models\QuestionBank::class) ? \App\Modules\Assessment\Models\QuestionBank::forUser($user)->count() : 0;
                 $data['questions_created'] = class_exists(\App\Modules\Assessment\Models\Question::class) ? \App\Modules\Assessment\Models\Question::where('organization_id', $orgId)->count() : 0;
                 $data['published_assessments'] = class_exists(\App\Modules\Assessment\Models\Assessment::class) ? \App\Modules\Assessment\Models\Assessment::where('organization_id', $orgId)->where('status', 'PUBLISHED')->count() : 0;
                 $data['draft_assessments'] = class_exists(\App\Modules\Assessment\Models\Assessment::class) ? \App\Modules\Assessment\Models\Assessment::where('organization_id', $orgId)->where('status', 'DRAFT')->count() : 0;

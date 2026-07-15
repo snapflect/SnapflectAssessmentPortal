@@ -7,6 +7,7 @@ namespace App\Modules\Security\Models;
 use App\Shared\Traits\HasAuditFields;
 use App\Shared\Traits\HasUuid;
 use App\Modules\Governance\Models\Organization;
+use App\Traits\ArchivesCodesOnDelete;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,7 +16,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Role extends Model
 {
-    use HasFactory, HasUuid, HasAuditFields;
+    use HasFactory, HasUuid, HasAuditFields, ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'role_code';
+    }
 
     protected static function newFactory()
     {

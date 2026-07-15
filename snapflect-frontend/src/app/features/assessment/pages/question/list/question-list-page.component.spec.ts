@@ -1,3 +1,4 @@
+import { RouterTestingModule } from '@angular/router/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { QuestionListPageComponent } from './question-list-page.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -13,11 +14,11 @@ describe('QuestionListPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [QuestionListPageComponent, HttpClientTestingModule],
+      imports: [QuestionListPageComponent, HttpClientTestingModule, HttpClientTestingModule, RouterTestingModule],
       providers: [
         { provide: ToastService, useValue: { success: jasmine.createSpy(), error: jasmine.createSpy() } },
         { provide: ConfirmService, useValue: { confirm: jasmine.createSpy().and.returnValue(Promise.resolve(true)) } },
-        { provide: UserStore, useValue: { hasAnyRole: () => true } }
+        { provide: UserStore, useValue: { hasAnyRole: () => true, hasAnyPermission: () => true, hasPermission: () => true } }
       ]
     }).compileComponents();
   });
@@ -53,3 +54,5 @@ describe('QuestionListPageComponent', () => {
     expect(component.loading).toBeFalse();
   });
 });
+
+

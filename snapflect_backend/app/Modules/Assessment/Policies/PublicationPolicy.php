@@ -23,7 +23,7 @@ class PublicationPolicy
     public function publish(User $user, Assessment $assessment): bool
     {
         // AM owns the publication lifecycle for their assessments
-        if (!$user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'ASSESSMENT_MANAGER'])) {
+        if (!$user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER'])) {
             return false;
         }
         if ($user->organization_id !== $assessment->organization_id) {
@@ -38,7 +38,7 @@ class PublicationPolicy
     public function archive(User $user, Assessment $assessment): bool
     {
         // AM can archive publications they manage
-        if (!$user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'ASSESSMENT_MANAGER'])) {
+        if (!$user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER'])) {
             return false;
         }
         if ($user->organization_id !== $assessment->organization_id) {

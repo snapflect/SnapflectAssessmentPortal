@@ -20,7 +20,7 @@ import { NavigationStore } from '../../../../shared/stores/navigation.store';
           <p class="text-muted">Sign in to your assessment portal</p>
         </div>
         
-        <app-login-form (submitLogin)='onLogin($event)'></app-login-form>
+        <app-login-form (submitLogin)='onLogin($event)' [errorMessage]="loginError"></app-login-form>
         
         <div class="mt-8 text-center text-sm text-slate-500">
           <p>&copy; 2026 Snapflect Inc. All rights reserved.</p>
@@ -32,8 +32,10 @@ import { NavigationStore } from '../../../../shared/stores/navigation.store';
 export class LoginPageComponent {
   private authFacade = inject(AuthFacade);
   private navStore = inject(NavigationStore);
+  loginError: string | null = null;
 
   onLogin(credentials: LoginRequestModel) {
+    this.loginError = null;
     this.navStore.setLoading(true, 'Authenticating...');
     this.authFacade.login(credentials).subscribe({
       next: () => {
@@ -43,6 +45,22 @@ export class LoginPageComponent {
       error: (err) => {
         this.navStore.setLoading(false);
         console.error('Login failed', err);
+        
+        // Extract validation error message if present
+        if (err?.error?.detail) {
+          if (typeof err.error.detail === 'string') {
+            this.loginError = err.error.detail;
+          } else if (typeof err.error.detail === 'object') {
+            const keys = Object.keys(err.error.detail);
+            if (keys.length > 0) {
+              this.loginError = err.error.detail[keys[0]][0];
+            }
+          }
+        } else if (err?.error?.message) {
+          this.loginError = err.error.message;
+        } else {
+          this.loginError = 'Invalid email or password. Please try again.';
+        }
       }
     });
   }

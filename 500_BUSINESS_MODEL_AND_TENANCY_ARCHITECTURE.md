@@ -4,15 +4,23 @@ This document outlines how the SnapFlect Assessment Portal's hierarchical data s
 
 ## 1. Core Architectural Concepts
 
-SnapFlect is built on a **Multi-Tenant SaaS Architecture**. This means a single instance of the software serves multiple distinct customer organizations, keeping their data strictly isolated from one another. 
+SnapFlect is built on a **Database-per-Tenant SaaS Architecture**. This provides the highest level of security, data isolation, and enterprise compliance (e.g., GDPR, SOC2).
 
-To support complex corporate structures and agency relationships, the tenancy model is hierarchical:
+To support complex corporate structures and agency relationships, the tenancy model utilizes two distinct database layers:
 
-1. **Platform (SnapFlect)**: The absolute root. Managed by Super Admins.
-2. **Organizations (Tenants)**: The primary billing and isolation boundary (e.g., a direct client or a partner agency).
-3. **Business Units**: High-level segments within an organization. *Crucial for the Partner Model to represent their downstream clients.*
-4. **Departments / Locations**: Granular organizational segments.
-5. **Roles & Permissions**: Fine-grained access control bound to specific scopes (e.g., a manager who can only see data within their specific Business Unit).
+### A. The Central Database
+Managed by Super Admins, this database stores global routing and identity data.
+- **Organizations**: The root records for billing and routing (e.g., a direct client or a partner agency).
+- **Domains**: The custom subdomains mapped to each Organization.
+- **Global Users**: For Single Sign-On (SSO) routing to the correct tenant database.
+- **Subscriptions**: Billing data (consolidated at the Organization level).
+
+### B. The Tenant Databases (`snapflect_tenant_{id}`)
+Each Organization gets its own physically isolated database containing:
+- **Business Units**: High-level segments within an organization. *Crucial for the Partner Model to represent their downstream clients without spinning up infinite databases.*
+- **Departments / Locations**: Granular organizational segments.
+- **Roles & Permissions**: Fine-grained access control bound to specific scopes.
+- **Assessments & Candidate Data**: Highly sensitive PII and test results.
 
 ---
 
@@ -21,16 +29,16 @@ To support complex corporate structures and agency relationships, the tenancy mo
 In this model, an enterprise purchases SnapFlect to assess their own internal employees or direct hires.
 
 ### How it works:
-1. **Provisioning**: SnapFlect creates a new Organization tenant named **Hexaware**.
-2. **Tenant Isolation**: Hexaware's data (assessments, candidates, results, invoices) is securely walled off.
-3. **Internal Hierarchy**: Hexaware administrators can mirror their corporate structure by creating Departments (e.g., `Engineering`, `Human Resources`) and Locations (e.g., `Chennai`, `London`).
-4. **Self-Service**: Hexaware is assigned `Client Admin` roles, allowing them to manage their own users and assessments without SnapFlect's intervention.
+1. **Automated Provisioning**: The Tenant Orchestrator creates a new Organization record in the Central DB, dynamically creates a new `snapflect_tenant_hexaware` database, and migrates the schema.
+2. **Strict Data Isolation**: Hexaware's data is physically walled off in its own database.
+3. **Internal Hierarchy**: Hexaware administrators can mirror their corporate structure by creating Departments (e.g., `Engineering`, `Human Resources`).
+4. **Enterprise Identity**: Hexaware configures their native SAML/SSO. Employees log in, the Central DB identifies them, and routes them securely to their Tenant DB.
 
 ### Visual Architecture
 
 ```mermaid
 graph TD
-    S[SnapFlect Platform] -->|Creates Tenant| H[Organization: Hexaware]
+    S[(Central Database)] -->|Routes to| H[(Tenant DB: Hexaware)]
     
     H --> D1[Dept: Engineering]
     H --> D2[Dept: HR]
@@ -43,20 +51,20 @@ graph TD
 
 ## 3. The Partner / Reseller Model (Example: Virtusa)
 
-In this model, an agency or consultancy partners with SnapFlect to provide assessment services to *their* downstream clients.
+In this model, an agency or consultancy partners with SnapFlect to provide assessment services to *their* downstream clients. **Billing is consolidated to the Partner.**
 
 ### How it works:
-1. **Provisioning**: SnapFlect creates an Organization tenant for **Virtusa**.
-2. **Clients as Business Units**: Virtusa uses the "Business Units" tier to represent their individual clients. 
+1. **Provisioning**: The Tenant Orchestrator creates the `snapflect_tenant_virtusa` database.
+2. **Clients as Business Units**: Virtusa uses the "Business Units" tier inside their Tenant DB to represent their individual clients. 
 3. **Data Segmentation**: Using RBAC, Virtusa creates users (Assessment Managers) and restricts their scope strictly to a specific Business Unit.
    - *Example: John Doe is an Assessment Manager scoped ONLY to the "Client A" Business Unit. John cannot see Client B's data.*
-4. **Partner Oversight**: Virtusa's top-level leadership is granted organizational-wide access, allowing them to view aggregated telemetry, analytics, and billing across all their downstream clients simultaneously.
+4. **Partner Oversight**: Virtusa's top-level leadership is granted organizational-wide access, allowing them to view aggregated telemetry and analytics across all their downstream clients simultaneously.
 
 ### Visual Architecture
 
 ```mermaid
 graph TD
-    S[SnapFlect Platform] -->|Creates Partner Tenant| V[Organization: Virtusa]
+    S[(Central Database)] -->|Routes to| V[(Tenant DB: Virtusa)]
     
     V --> BU1[Business Unit: Client A]
     V --> BU2[Business Unit: Client B]
@@ -74,14 +82,13 @@ graph TD
 
 ## 4. The Platform Administrator Advantage (Super Admin)
 
-As the owner of the SnapFlect product, your internal team operates above all organizations.
+As the owner of the SnapFlect product, your internal team operates from the Central Platform.
 
 ### Global Capabilities:
-- **Universal Visibility**: You have the ability to oversee Hexaware, Virtusa, and Virtusa's sub-clients from a centralized administrative dashboard.
-- **Support & Troubleshooting**: Utilizing tools like the **Session Monitor** and **User Lookup**, your support engineers can drill down into any active session globally. 
-  - *Scenario: A candidate taking an assessment for Virtusa's "Client B" experiences a network drop. SnapFlect support can look up the user, verify the live telemetry latency, and resolve the issue directly from the Support Portal.*
-- **Global Feature Rollouts**: Because everyone is on the same multi-tenant codebase, when you deploy a new feature (like a new AI proctoring tool), it becomes immediately available to Hexaware, Virtusa, and all downstream clients simultaneously.
+- **Universal Visibility**: You have the ability to oversee Hexaware, Virtusa, and Virtusa's sub-clients from a centralized administrative dashboard connected to the Central DB.
+- **Tenant Management**: You can trigger cross-tenant schema migrations, backup individual tenant databases, or archive a tenant completely without affecting others.
+- **Support & Troubleshooting**: Utilizing tools like the **Session Monitor**, your support engineers can drill down into any active session globally by dynamically switching DB connections.
 
 > [!TIP]
-> **Scalability Note** 
-> By utilizing Business Units for downstream clients rather than spinning up entirely new database instances for every single sub-client, you drastically reduce server overhead while maintaining strict logical data isolation through RBAC.
+> **Scalability & Security Note** 
+> By utilizing a **Database-per-tenant** architecture for Organizations, you achieve enterprise-grade compliance (GDPR/SOC2). However, by using logical **Business Units** for downstream sub-clients (the Partner model), you drastically reduce server overhead compared to spinning up a new database instance for every single micro-client Virtusa adds.

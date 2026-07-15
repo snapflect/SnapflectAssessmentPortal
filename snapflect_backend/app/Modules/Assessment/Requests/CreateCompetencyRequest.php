@@ -6,6 +6,7 @@ namespace App\Modules\Assessment\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Modules\Assessment\DTOs\CreateCompetencyDto;
+use Illuminate\Validation\Rule;
 
 class CreateCompetencyRequest extends FormRequest
 {
@@ -19,7 +20,7 @@ class CreateCompetencyRequest extends FormRequest
     {
         return [
             'group_uuid' => ['nullable', 'uuid'],
-            'competency_code' => ['required', 'string', 'max:50'],
+            'competency_code' => ['nullable', 'string', 'max:50', Rule::unique('competencies')->whereNull('deleted_date')],
             'competency_name' => ['required', 'string', 'max:255'],
             'proficiency_level' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string', 'max:5000']

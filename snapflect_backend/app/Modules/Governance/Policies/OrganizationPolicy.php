@@ -37,7 +37,7 @@ class OrganizationPolicy
 
     public function update(User $user, Organization $organization): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') && $user->organization_id === $organization->id;
+        return $user->roles->contains('role_code', 'CLIENT_ADMIN') && $user->organization_id === $organization->id;
     }
 
     public function delete(User $user, Organization $organization): bool

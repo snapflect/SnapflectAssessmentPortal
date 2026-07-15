@@ -89,6 +89,6 @@ describe('UserStore', () => {
 
     // Test pure ASSESSMENT_MANAGER
     store.setProfile({ ...mockProfile, roles: ['ASSESSMENT_MANAGER'] });
-    expect(store.getDefaultRoute()).toEqual('/delivery/sessions');
+    expect(store.getDefaultRoute()).toEqual('/authoring/dashboard');
   });
 });

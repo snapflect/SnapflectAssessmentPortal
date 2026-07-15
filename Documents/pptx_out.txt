@@ -1,0 +1,560 @@
+--- ppt/slides/slide1.xml ---
+SNAPFLECT
+Assessment Portal
+Product Demo Deck
+Multi-Tenant B2B / B2B2B Assessment Platform  —  with an AI Enrichment Roadmap
+For Prospects & Customers  |  Live Product Walkthrough
+
+--- ppt/slides/slide2.xml ---
+WHAT WE'LL COVER
+Demo Agenda
+Platform Overview
+Who SnapFlect is for, and the problem we solve
+Multi-Tenant Architecture
+How B2B and B2B2B (partner) models both run on one platform
+Live Product Walkthrough
+Login through authoring, delivery, scoring, results & certificates
+AI Enrichment Vision
+Where generative AI accelerates your admin & reviewer workflows
+Engagement & Next Steps
+Pricing models and how to get started
+SESSION FORMAT
+~45 minutes, live in your browser
+Screens shown reflect the actual app modules
+Questions welcome any time — this is a conversation
+We'll flag where your team can configure or extend
+02
+
+--- ppt/slides/slide3.xml ---
+WHY SNAPFLECT EXISTS
+Assessment programs outgrow spreadsheets and static tools fast
+Fragmented tenant setup
+Separate instances or manual data walls per client and per partner sub-client
+Loose access control
+Hard to guarantee an Assessment Manager only sees their own Business Unit's candidates
+Slow, manual authoring & grading
+Blueprints built by hand; essays and code queued for slow manual review
+Shallow analytics
+Pass/fail counts, but little insight into competency gaps or question quality
+03
+
+--- ppt/slides/slide4.xml ---
+SNAPFLECT AT A GLANCE
+One platform, built for enterprises and the partners who serve them
+SnapFlect is a multi-tenant SaaS assessment portal covering the full lifecycle: authoring, publication, candidate delivery, scoring, results and certification — with strict tenant isolation from day one.
+5-Level
+Tenancy hierarchy: Platform → Org → Business Unit → Department → Location
+8
+Core modules: Governance, Assessment, Delivery, Results, Analytics, Reporting, Certificates, Billing
+State-Machine
+Governed publication lifecycle: Draft → Review → Approved → Published → Archived
+B2B + B2B2B
+Direct-enterprise and partner/reseller models on the same codebase
+Platform (SnapFlect)
+Organizations (Tenants)
+Business Units
+Departments / Locations
+Roles & Permissions
+04
+
+--- ppt/slides/slide5.xml ---
+ARCHITECTURE
+A hierarchical tenancy model — strict isolation, flexible structure
+One SnapFlect instance serves every customer. Organizations are the primary billing and data-isolation boundary; Business Units let a partner represent each of their own downstream clients underneath a single tenant.
+Platform
+SnapFlect — Super Admins
+Organization (Tenant)
+e.g., Hexaware, or a partner agency like Virtusa
+Business Unit
+A partner's downstream client, or an internal division
+Department / Location
+Granular org segments, e.g. Engineering — Chennai
+Roles & Permissions
+Scoped access, e.g. a Manager restricted to one Business Unit
+05
+
+--- ppt/slides/slide6.xml ---
+DEPLOYMENT MODELS
+Two ways to run on SnapFlect — same platform, same guardrails
+B2B — Direct Client
+Example: Hexaware
+SnapFlect provisions a dedicated Organization tenant
+Client Admins self-manage users, departments & locations
+Full data isolation — assessments, candidates, invoices
+B2B2B — Partner / Reseller
+Example: Virtusa
+Partner's Organization tenant hosts many Business Units
+Each Business Unit maps to one of the partner's clients
+Partner leadership sees aggregated analytics & billing; a scoped Manager sees only their assigned client
+06
+
+--- ppt/slides/slide7.xml ---
+ACCESS CONTROL
+Every action is governed by role, and scoped to a tenant
+Role
+Can do
+Cannot do
+Client Admin
+Full control within their Organization: users, roles, billing, assessments
+See another Organization's data
+Assessment Manager
+Create, publish, archive assessments within their scope
+Act outside their Business Unit (if scoped)
+Content Creator
+Author draft questions & assessments
+Publish directly — requires review
+Reviewer
+Approve/reject assessments; manually grade essay & file responses
+Publish an assessment
+Candidate
+Take assigned assessments, view own results & certificates
+See other candidates' data or question banks
+Super Admin (SnapFlect)
+Universal visibility & support tooling across all tenants
+— (platform-level oversight role)
+07
+
+--- ppt/slides/slide8.xml ---
+PART TWO
+Live Product Walkthrough
+Login → Authoring → Publication → Delivery → Scoring → Results → Certificates → Governance
+08
+
+--- ppt/slides/slide9.xml ---
+SCREEN 1 OF 12
+Login & Multi-Tenant Access
+Every session resolves to exactly one Organization — the tenant boundary starts at the login screen.
+SNAPFLECT
+hexaware.snapflect.io
+Work email
+Password
+Sign in
+Forgot password?     Need an account? Contact your Admin
+Tenant-aware routing
+The subdomain / org context on login resolves the correct Organization before any query touches the database.
+Role resolves on sign-in
+The same login screen serves Client Admins, Assessment Managers, Reviewers, and Candidates — each lands on a role-specific home.
+Guards enforce it end to end
+Angular auth/tenant/role guards plus Laravel policies both check identity — UI and API agree on who can see what.
+09
+
+--- ppt/slides/slide10.xml ---
+SCREEN 2 OF 12
+Admin Dashboard Home
+app.snapflect.io / dashboard
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+24
+Active Assessments
+1,284
+Candidates This Month
+91%
+Avg. Completion Rate
+412
+Certificates Issued
+Assessment Completions — Last 8 Weeks
+Recent Activity
+Java Fundamentals — Published
+Q3 Aptitude — In Review
+React Basics — 42 submissions
+SQL Advanced — Archived
+10
+
+--- ppt/slides/slide11.xml ---
+GOVERNED WORKFLOW
+The Assessment Lifecycle — a strict, auditable state machine
+DRAFT
+Author freely
+Content Creator
+→
+IN REVIEW
+Submit Review
+Assessment Manager
+→
+APPROVED
+Approve / Reject
+Reviewer
+→
+PUBLISHED
+Publish (live)
+Client Admin
+→
+ARCHIVED
+Retire
+Client Admin
+Why this matters for you
+Published and Archived assessments cannot be edited or deleted — protects the integrity of anything a candidate has already taken
+Publishing auto-validates the full blueprint before it can go live — no incomplete assessment reaches a candidate
+Every transition is checked against both role AND organization_id — no cross-tenant approvals
+11
+
+--- ppt/slides/slide12.xml ---
+SCREEN 3 OF 12
+Blueprint Designer — Assessment Authoring
+app.snapflect.io / assessment / blueprint-designer
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Blueprint Sections
+Section 1: Aptitude (10 Qs)
+Section 2: Technical MCQ (15 Qs)
+Section 3: Coding Challenge (2 Qs)
+Section 4: Essay Response (1 Q)
+Rule Configuration — Section 2
+Question Type: single_choice, multiple_choice
+Negative Marking: -0.25 per wrong answer
+Competency Mapping: React · System Design · API Design
+Randomization: Enabled (per-candidate shuffle)
+Submit Review
+12
+
+--- ppt/slides/slide13.xml ---
+SCREEN 4 OF 12
+Question Bank & Competency Mapping
+app.snapflect.io / assessment / question-bank
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Question
+Type
+Competency
+Difficulty
+What is the time complexity of binary search?
+single_choice
+Algorithms
+Medium
+Explain React's virtual DOM reconciliation.
+essay
+React
+Hard
+Select all valid HTTP idempotent methods.
+multiple_choice
+API Design
+Medium
+Implement a rate limiter (coding).
+code
+System Design
+Hard
+AI Auto-Tag suggests “Algorithms” and “System Design” with 92% confidence — covered in Part Three
+13
+
+--- ppt/slides/slide14.xml ---
+SCREEN 5 OF 12
+Candidate Delivery Experience
+React Developer Assessment — Section 2 of 4
+18 : 42
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+Q5. Which hook should you use to memoize an expensive computation between renders?
+useEffect
+useMemo
+useCallback
+useRef
+Save & Next
+14
+
+--- ppt/slides/slide15.xml ---
+SCREEN 6 OF 12
+Session Monitor — Live Delivery Oversight
+app.snapflect.io / delivery / session-monitor
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Candidate
+Assessment
+Progress
+Time Left
+Status
+Amit Kulkarni
+React Developer Assessment
+8 / 27
+18:42
+In Progress
+Priya Nair
+SQL Advanced
+27 / 27
+—
+Submitted
+Ravi Shankar
+Q3 Aptitude
+12 / 20
+02:15
+Time Low
+Fatima Sheikh
+Java Fundamentals
+0 / 30
+45:00
+Not Started
+15
+
+--- ppt/slides/slide16.xml ---
+SCREEN 7 OF 12
+Reviewer Dashboard & Manual Review
+app.snapflect.io / results / manual-review
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Pending Grading Queue (7)
+Amit K. — Essay Q4
+Priya N. — Code Q2
+Ravi S. — Essay Q1
+Fatima S. — Code Q1
+Amit K. — Essay Q4: “Explain reconciliation in React”
+Candidate response: “React compares the new virtual DOM tree with the previous one, diffing nodes...”
+Technical Accuracy
+Score: 4 / 5
+Clarity of Explanation
+Score: 4 / 5
+Use of Correct Terminology
+Score: 4 / 5
+Submit Score
+16
+
+--- ppt/slides/slide17.xml ---
+SCREEN 8 OF 12
+Results Dashboard & Candidate Score Card
+app.snapflect.io / results / dashboard
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Amit Kulkarni
+React Developer Assessment
+82%
+PASSED
+Competency Breakdown
+React
+System Design
+API Design
+Algorithms
+17
+
+--- ppt/slides/slide18.xml ---
+SCREEN 9 OF 12
+Analytics Dashboard — KPIs, Heatmaps & Trends
+app.snapflect.io / analytics / dashboard
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Score Trend — Last 6 Cohorts
+Competency Heatmap
+90%
+40%
+70%
+55%
+30%
+85%
+60%
+20%
+75%
+18
+
+--- ppt/slides/slide19.xml ---
+SCREEN 10 OF 12
+Reporting, Certificates & Public Verification
+Exportable Reports
+Assessment Report
+Export CSV / PDF
+Candidate Report
+Export CSV / PDF
+Competency Report
+Export CSV / PDF
+Pass / Fail Report
+Export CSV / PDF
+Certificate of Completion
+Amit Kulkarni
+has successfully completed
+React Developer Assessment — Score: 82%
+Certificate ID: SF-2026-88213
+Public Verification Portal
+Enter Certificate ID to verify…
+Verify
+Any employer or third party can independently confirm a certificate is genuine — no login required.
+19
+
+--- ppt/slides/slide20.xml ---
+SCREEN 11 OF 12
+Governance & Billing
+app.snapflect.io / governance / billing
+Dashboard
+Governance
+Assessment
+Delivery
+Results
+Analytics
+Reporting
+Certificates
+Support
+Organization Structure
+Virtusa (Organization)
+   ↳ Business Unit: Client A
+   ↳ Business Unit: Client B
+   ↳ Business Unit: Client C
+Users: 48   Roles: 6   Depts: 12
+Subscription & Usage
+Enterprise Tier
+Included Candidates: 5,000 / mo
+Used This Cycle: 3,214 (64%)
+Next Invoice: Aug 1, 2026 — $12,400
+Payment Method: Corporate card •••1187
+20
+
+--- ppt/slides/slide21.xml ---
+PART THREE
+The AI Enrichment Vision
+Where generative AI removes admin and reviewer busywork — without ever touching the candidate directly
+21
+
+--- ppt/slides/slide22.xml ---
+ROADMAP PRINCIPLES
+AI that assists your team — never a candidate-facing feature
+Admin & reviewer-facing only
+Every AI feature targets Assessment Managers, Reviewers, and Admins — no AI chatbot or AI-generated report ever reaches a candidate.
+Human-in-the-loop, always
+AI suggests a score, a tag, or a draft — a person confirms it before it counts.
+Tenant isolation by design
+One internal AI Gateway enforces that no prompt ever mixes data across Organizations or Business Units.
+Gemini, OpenAI, or Bring-Your-Own-Key
+Automatic failover between providers, or route candidate data through your own enterprise LLM contract.
+AI Gateway (Internal)
+Assessment
+Results
+Analytics
+Governance
+AI Gateway Service
+Tenant Scope Enforcer
+Rate Limit & Cost Meter
+AI Audit Log
+Multi-LLM Failover
+22
+
+--- ppt/slides/slide23.xml ---
+AI SPOTLIGHT 1 OF 3
+Smarter Authoring — minutes instead of hours per blueprint
+RAG Question Generation
+Upload a job description or HR manual — AI drafts a full blueprint of MCQ, multi-select and essay questions mapped to competencies.
+Competency Auto-Tagging
+Manually-written questions get suggested competency tags with a confidence score — low-confidence suggestions route for manual confirmation.
+Difficulty & Penalty Prediction
+AI recommends negative marking and weighting based on semantic complexity — always advisory, author confirms before it applies.
+Blueprint Balance Checker
+Before publication, AI flags coverage gaps — e.g. zero questions mapped to a stated competency — inside the existing publish workflow.
+23
+
+--- ppt/slides/slide24.xml ---
+AI SPOTLIGHT 2 OF 3
+Faster, Fairer Evaluation — AI drafts, your reviewers decide
+Reviewer Assist Mode
+AI pre-fills a draft rubric score per criterion right inside the Manual Review screen — reviewers edit instead of starting blank.
+Automated Essay Evaluation
+LLM scores open-text answers against your rubric (grammar, technical accuracy, tone) and shows its justification alongside the score.
+Code Evaluation Agent (via MCP)
+Candidate code runs in a secure sandbox against hidden test cases; an AI agent reviews quality, complexity and security — beyond pass/fail.
+Plagiarism & AI-Content Signal
+Flags likely copy-pasted or AI-generated responses as a reviewer signal, never an automatic fail — protects against false positives.
+24
+
+--- ppt/slides/slide25.xml ---
+AI SPOTLIGHT 3 OF 3
+Actionable Analytics — ask a question, get an answer
+Chat-with-Data
+Client Admins ask in plain English — “Show candidates who scored above 80% in React but failed API Design” — answered from a tenant-scoped, read-only query engine.
+Self-Healing Assessments
+AI scans telemetry to flag flawed questions — e.g. 95% of top performers answer incorrectly — and routes them to a human review queue.
+Cohort Comparison Narratives
+A plain-English summary paragraph on the analytics dashboard turns charts into something a non-technical admin can act on immediately.
+AI Cost Forecasting
+Projects next-cycle AI spend per tenant from current usage trends — no surprise Pay-As-You-Go invoices.
+25
+
+--- ppt/slides/slide26.xml ---
+ENGAGEMENT MODELS
+Flexible commercial models — for direct clients and partners alike
+Tiered Subscription
+A baseline number of AI-processed candidates and tokens bundled into Premium and Enterprise tiers.
+Best for: predictable monthly volume
+Pay-As-You-Go (Credits)
+Token usage (RAG, scoring) and session-minutes metered separately, billed at cycle end as credits.
+Best for: variable or seasonal hiring
+Bring Your Own Key (BYOK)
+Enterprise clients supply their own OpenAI / Gemini key — token cost passes to their cloud bill; we charge a flat platform fee.
+Best for: large enterprises with existing LLM contracts
+26
+
+--- ppt/slides/slide27.xml ---
+DIFFERENTIATORS
+Why SnapFlect
+One platform, two business models
+B2B and B2B2B run on the same codebase — no forked deployment for partners.
+Isolation enforced at the policy layer
+Not just hidden in the UI — cross-tenant access is denied server-side, every time.
+Governed, auditable lifecycle
+A real state machine protects published assessments from accidental change.
+AI roadmap with guardrails built in
+Admin/reviewer-facing only, human-in-the-loop, tenant-scoped by design — not bolted on after the fact.
+27
+
+--- ppt/slides/slide28.xml ---
+NEXT STEPS
+Let's scope your rollout
+Technical scoping call
+Confirm SSO needs, tenant structure, and which AI features matter most to you
+Sandbox pilot
+Your team runs a real assessment cycle in a dedicated Organization tenant
+Go live
+Production rollout with your chosen billing model — tiered, PAYG, or BYOK
+Thank you — questions welcome anytime.
+28
+

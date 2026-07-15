@@ -15,6 +15,11 @@ export const routes: Routes = [
     path: 'delivery/register/:publication_code',
     loadComponent: () => import('./features/delivery/pages/public-registration/public-registration-page.component').then(m => m.PublicRegistrationPageComponent)
   },
+  // Catch legacy/root claim-account links sent in emails
+  {
+    path: 'claim-account',
+    loadComponent: () => import('./features/auth/pages/claim-account/claim-account.component').then(m => m.ClaimAccountComponent)
+  },
 
   // ─── Authenticated App Shell ─────────────────────────────────────────────────
   // All authenticated routes live as children of AppShellComponent.

@@ -7,9 +7,9 @@ module.exports = {
     extend: {
       colors: {
         'brand': {
-          DEFAULT: '#3b82f6', // Electric Blue
-          dark: '#2563eb',
-          light: '#60a5fa',
+          DEFAULT: 'rgb(var(--color-brand) / <alpha-value>)',
+          dark: 'rgb(var(--color-brand-dark) / <alpha-value>)',
+          light: 'rgb(var(--color-brand-light) / <alpha-value>)',
         },
         'accent': {
           DEFAULT: '#8b5cf6', // Neon Purple

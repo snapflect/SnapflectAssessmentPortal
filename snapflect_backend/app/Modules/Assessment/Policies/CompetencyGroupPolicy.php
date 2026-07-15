@@ -22,12 +22,12 @@ class CompetencyGroupPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'READ_ONLY']);
+        return $user->hasRole(['CLIENT_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'READ_ONLY']);
     }
 
     public function view(User $user, CompetencyGroup $competencyGroup): bool
     {
-        if (!$user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'READ_ONLY'])) {
+        if (!$user->hasRole(['CLIENT_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR', 'READ_ONLY'])) {
             return false;
         }
         return $user->organization_id === $competencyGroup->organization_id;
@@ -35,12 +35,12 @@ class CompetencyGroupPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR']);
+        return $user->hasRole(['CLIENT_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR']);
     }
 
     public function update(User $user, CompetencyGroup $competencyGroup): bool
     {
-        if (!$user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR'])) {
+        if (!$user->hasRole(['CLIENT_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR'])) {
             return false;
         }
         return $user->organization_id === $competencyGroup->organization_id;
@@ -48,7 +48,7 @@ class CompetencyGroupPolicy
 
     public function delete(User $user, CompetencyGroup $competencyGroup): bool
     {
-        if (!$user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR'])) {
+        if (!$user->hasRole(['CLIENT_ADMIN', 'DEPT_MANAGER', 'ASSESSMENT_MANAGER', 'CONTENT_CREATOR'])) {
             return false;
         }
         return $user->organization_id === $competencyGroup->organization_id;

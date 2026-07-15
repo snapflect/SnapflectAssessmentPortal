@@ -48,6 +48,16 @@ class AssessmentCategoryController extends Controller
         $this->authorize('create', AssessmentCategory::class);
         
         $data = $request->toDto()->toArray();
+        if (empty($data['category_code'])) {
+            $baseCode = \Illuminate\Support\Str::slug($data['category_name']);
+            $code = $baseCode;
+            $counter = 1;
+            while (\App\Modules\Assessment\Models\AssessmentCategory::where('category_code', $code)->whereNull('deleted_date')->exists()) {
+                $code = $baseCode . '-' . $counter;
+                $counter++;
+            }
+            $data['category_code'] = $code;
+        }
         $data['organization_id'] = auth()->user()->organization_id;
         $data['created_by'] = auth()->id();
         $data['uuid'] = (string) \Illuminate\Support\Str::uuid();

@@ -8,7 +8,8 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.31",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "stancl/tenancy": "^3.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -65,7 +66,9 @@
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
         },
-        "disable-tls": true
+        "disable-tls": false,
+        "secure-http": true,
+        "cafile": "cacert.pem"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

@@ -34,9 +34,9 @@ class BusinessUnitPolicyTest extends TestCase
     public function test_org_admin_cannot_update_other_org_bu(): void
     {
         // Arrange
-        $user = new User(['organization_id' => 1]);
-        $role = new Role(['role_code' => 'ORG_ADMIN']);
-        $user->setRelation('roles', collect([$role]));
+        $user = \Mockery::mock(User::class)->makePartial();
+        $user->fill(['organization_id' => 1]);
+        $user->shouldReceive('hasRole')->with('CLIENT_ADMIN')->andReturn(true);
 
         $bu = new BusinessUnit(['organization_id' => 2]); // Different Org
 

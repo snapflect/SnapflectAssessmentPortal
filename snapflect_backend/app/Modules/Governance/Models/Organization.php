@@ -12,10 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Modules\Billing\Models\TenantSubscription;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\ArchivesCodesOnDelete;
+
+use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 class Organization extends Model
 {
-    use HasFactory, HasUuid, HasAuditFields;
+    use HasFactory, HasUuid, HasAuditFields, CentralConnection, ArchivesCodesOnDelete;
 
     protected static function newFactory()
     {
@@ -40,6 +43,18 @@ class Organization extends Model
         'created_by',
         'modified_by',
         'deleted_by',
+        'tenant_type',
+        'phone_number',
+        'it_escalation_email',
+        'plan_code',
+        'payment_reference',
+        'primary_color',
+        'theme_mode',
+        'enforce_mfa',
+        'enable_sso',
+        'session_timeout',
+        'logo_path',
+        'pending_invites'
     ];
 
     protected $hidden = [
@@ -48,9 +63,12 @@ class Organization extends Model
 
     protected $casts = [
         'is_deleted' => 'boolean',
+        'enforce_mfa' => 'boolean',
+        'enable_sso' => 'boolean',
         'created_date' => 'datetime',
         'modified_date' => 'datetime',
         'deleted_date' => 'datetime',
+        'pending_invites' => 'array',
     ];
 
     public function getRouteKeyName(): string
@@ -83,5 +101,10 @@ class Organization extends Model
         return $this->hasOne(TenantSubscription::class, 'organization_id', 'id')
                     ->whereIn('status', ['ACTIVE', 'TRIALING', 'PAST_DUE'])
                     ->latestOfMany('created_date');
+    }
+
+    public function getCodeField(): string
+    {
+        return 'organization_code';
     }
 }

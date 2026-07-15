@@ -29,7 +29,12 @@ class BusinessUnitController extends Controller
         $perPage = min(100, (int) $request->query('per_page', 15));
         
         if ($request->user()->roles->contains('role_code', 'PLATFORM_ADMIN')) {
-            $businessUnits = $this->businessUnitService->paginate($perPage);
+            if ($request->has('organization_id')) {
+                $organizationId = (int) $request->query('organization_id');
+                $businessUnits = $this->businessUnitService->paginateByOrganization($organizationId, $perPage);
+            } else {
+                $businessUnits = $this->businessUnitService->paginate($perPage);
+            }
         } else {
             $organizationId = $request->user()->organization_id;
             $businessUnits = $this->businessUnitService->paginateByOrganization($organizationId, $perPage);

@@ -20,6 +20,11 @@ class BillingFeatureTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Prevent Stancl/Tenancy from trying to create a physical database during tests.
+        \Illuminate\Support\Facades\Event::fake([
+            \Stancl\Tenancy\Events\TenantCreated::class,
+            \Stancl\Tenancy\Events\DomainCreated::class,
+        ]);
         $this->seed(\Database\Seeders\CustomRbacSeeder::class);
         $this->seed(BillingSeeder::class);
     }

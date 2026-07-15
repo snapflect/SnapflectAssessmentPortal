@@ -36,6 +36,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // If we are running tests in SQLite (in-memory), we want the central and tenant
+        // tables to be migrated into the single database so that cross-database 
+        // Eloquent queries work natively without SQLite 'no such table' errors.
+        if ($this->app->environment('testing') && config('database.default') === 'sqlite') {
+            $this->app->make('migrator')->path(database_path('migrations/tenant'));
+        }
+
         \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });

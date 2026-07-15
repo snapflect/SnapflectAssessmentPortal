@@ -24,7 +24,7 @@ class AssessmentPublicationPolicy
     {
         // AM must be able to list publications — it's a core part of their workflow
         return $user->hasPermission('Assessment.Publications.View')
-            || $user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN', 'READ_ONLY']);
+            || $user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN', 'READ_ONLY']);
     }
 
     public function view(User $user, AssessmentPublication $publication): bool
@@ -36,18 +36,18 @@ class AssessmentPublicationPolicy
     public function create(User $user): bool
     {
         return $user->hasPermission('Assessment.Publications.Manage')
-            || $user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN']);
+            || $user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN']);
     }
 
     public function update(User $user, AssessmentPublication $publication): bool
     {
         return $user->hasPermission('Assessment.Publications.Manage')
-            || $user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN']);
+            || $user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN']);
     }
 
     public function delete(User $user, AssessmentPublication $publication): bool
     {
         return $user->hasPermission('Assessment.Publications.Manage')
-            || $user->hasRole(['CLIENT_ADMIN', 'ORG_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN']);
+            || $user->hasRole(['CLIENT_ADMIN', 'ASSESSMENT_MANAGER', 'Platform Admin', 'PLATFORM_ADMIN']);
     }
 }

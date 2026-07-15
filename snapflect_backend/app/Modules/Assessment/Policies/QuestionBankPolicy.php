@@ -30,8 +30,7 @@ class QuestionBankPolicy
         if (!($user->hasPermission('Assessment.QuestionBanks.View') || $user->hasPermission('Assessment.QuestionBanks.Manage') || $user->hasPermission('Assessment.Questions.View'))) {
             return false;
         }
-        // Can view if it belongs to their org, OR if it's a platform system bank
-        return $user->organization_id === $questionBank->organization_id || $questionBank->is_system_bank;
+        return $user->canAccessPlacement($questionBank) || $questionBank->is_system_bank;
     }
 
     public function create(User $user): bool
@@ -44,7 +43,7 @@ class QuestionBankPolicy
         if (!$user->hasPermission('Assessment.QuestionBanks.Manage')) {
             return false;
         }
-        return $user->organization_id === $questionBank->organization_id;
+        return $user->canAccessPlacement($questionBank);
     }
 
     public function delete(User $user, QuestionBank $questionBank): bool
@@ -52,6 +51,6 @@ class QuestionBankPolicy
         if (!$user->hasPermission('Assessment.QuestionBanks.Manage')) {
             return false;
         }
-        return $user->organization_id === $questionBank->organization_id;
+        return $user->canAccessPlacement($questionBank);
     }
 }

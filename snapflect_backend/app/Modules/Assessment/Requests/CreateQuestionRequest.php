@@ -20,7 +20,7 @@ class CreateQuestionRequest extends FormRequest
     {
         return [
             'question_bank_uuid' => ['required', 'uuid'],
-            'question_code' => ['required', 'string', 'max:50'],
+            'question_code' => ['nullable', 'string', 'max:50', Rule::unique('questions')->whereNull('deleted_date')],
             'question_type' => ['required', 'string'],
             'difficulty_level' => ['required', 'string'],
             'question_text' => ['required', 'string', 'max:5000'],

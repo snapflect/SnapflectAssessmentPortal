@@ -18,6 +18,9 @@ interface BusinessUnit {
     business_unit_name: string;
     status: string;
   };
+  relationships?: {
+    users_count?: number;
+  };
 }
 
 interface Organization {
@@ -64,13 +67,14 @@ interface Organization {
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
+                <th scope="col" class="px-6 py-4 font-medium text-center">Headcount</th>
                 <th scope="col" class="px-6 py-4 font-medium">Status</th>
                 <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && businessUnits.length === 0">
-                <td colspan="4" class="px-6 py-12 text-center text-muted">
+                <td colspan="5" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -80,13 +84,18 @@ interface Organization {
               </tr>
               <ng-container *ngIf="businessUnits | globalSearch: searchTerm as filteredBUs">
                 <tr *ngIf="!loading && filteredBUs.length === 0">
-                  <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                  <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                     No business units found matching your search.
                   </td>
                 </tr>
                 <tr *ngFor="let bu of filteredBUs" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ bu.attributes.business_unit_code }}</td>
                   <td class="px-6 py-4 text-main font-medium">{{ bu.attributes.business_unit_name }}</td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="bg-brand/10 text-brand px-2 py-1 rounded text-xs font-medium border border-brand/20">
+                      {{ bu.relationships?.users_count || 0 }}
+                    </span>
+                  </td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full"
                           [ngClass]="bu.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
@@ -119,9 +128,9 @@ interface Organization {
             </select>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-muted mb-1">Business Unit Code *</label>
-            <input type="text" formControlName="business_unit_code" class="input-field" placeholder="e.g. SALES">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-main mb-1">Code (Optional)</label>
+            <input type="text" formControlName="business_unit_code" class="input-field" placeholder="Leave blank to auto-generate">
           </div>
 
           <div>
@@ -166,7 +175,7 @@ export class BusinessUnitListPageComponent implements OnInit {
   constructor() {
     this.buForm = this.fb.group({
       organization_id: [null, Validators.required],
-      business_unit_code: ['', Validators.required],
+      business_unit_code: [''],
       business_unit_name: ['', Validators.required]
     });
   }

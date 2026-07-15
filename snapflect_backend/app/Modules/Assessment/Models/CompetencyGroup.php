@@ -18,6 +18,12 @@ class CompetencyGroup extends Model
     use HasUuid;
     use BelongsToOrganization;
     use HasAuditFields;
+    use \App\Traits\ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'group_code';
+    }
 
     public const CREATED_AT = 'created_date';
     public const UPDATED_AT = 'modified_date';

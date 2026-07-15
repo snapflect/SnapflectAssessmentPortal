@@ -29,7 +29,12 @@ class DepartmentController extends Controller
         $perPage = min(100, (int) $request->query('per_page', 15));
         
         if ($request->user()->roles->contains('role_code', 'PLATFORM_ADMIN')) {
-            $departments = $this->departmentService->paginate($perPage);
+            if ($request->has('organization_id')) {
+                $organizationId = (int) $request->query('organization_id');
+                $departments = $this->departmentService->paginateByOrganization($organizationId, $perPage);
+            } else {
+                $departments = $this->departmentService->paginate($perPage);
+            }
         } else {
             $organizationId = $request->user()->organization_id;
             $departments = $this->departmentService->paginateByOrganization($organizationId, $perPage);

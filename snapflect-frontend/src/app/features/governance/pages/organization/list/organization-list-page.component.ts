@@ -1,5 +1,6 @@
 import { UserStore } from '../../../../../shared/stores/user.store';
 import { Component, inject, OnInit } from '@angular/core';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -35,7 +36,7 @@ interface SubscriptionPlan {
 @Component({
   selector: 'app-organization-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SlideOverComponent, GlobalSearchPipe],
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, SlideOverComponent, GlobalSearchPipe],
   template: `
     <div class="h-full flex flex-col relative">
       <!-- Page Header -->
@@ -48,7 +49,7 @@ interface SubscriptionPlan {
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
-          Add Organization
+          Provision Workspace
         </button>
       </div>
 
@@ -69,6 +70,7 @@ interface SubscriptionPlan {
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
+                <th scope="col" class="px-6 py-4 font-medium">Portal URL</th>
                 <th scope="col" class="px-6 py-4 font-medium">Plan</th>
                 <th scope="col" class="px-6 py-4 font-medium">Contact Email</th>
                 <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
@@ -86,13 +88,23 @@ interface SubscriptionPlan {
               </tr>
               <ng-container *ngIf="organizations | globalSearch: searchTerm as filteredOrgs">
                 <tr *ngIf="!loading && filteredOrgs.length === 0">
-                  <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                  <td colspan="6" class="px-6 py-12 text-center text-slate-500">
                     No organizations found matching your search.
                   </td>
                 </tr>
                 <tr *ngFor="let org of filteredOrgs" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ org.attributes.organization_code }}</td>
                   <td class="px-6 py-4 text-main font-medium">{{ org.attributes.organization_name }}</td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center space-x-2">
+                      <a [href]="getPortalUrl(org)" target="_blank" class="text-brand-light hover:text-brand transition-colors text-xs truncate max-w-[150px] inline-block" title="Open Portal">
+                        {{ getPortalUrl(org) }}
+                      </a>
+                      <button (click)="copyPortalUrl(org)" class="text-muted hover:text-main transition-colors" title="Copy URL">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                      </button>
+                    </div>
+                  </td>
                   <td class="px-6 py-4">
                     <span *ngIf="org.attributes.current_subscription" class="px-2 py-1 rounded text-xs font-medium" 
                           [ngClass]="{'bg-green-500/10 text-green-400': org.attributes.current_subscription.status === 'ACTIVE', 'bg-blue-500/10 text-blue-400': org.attributes.current_subscription.status === 'TRIALING', 'bg-red-500/10 text-red-400': org.attributes.current_subscription.status === 'PAST_DUE'}">
@@ -121,12 +133,12 @@ interface SubscriptionPlan {
         <form [formGroup]="orgForm" (ngSubmit)="submitForm()" class="space-y-6">
           
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Organization Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Organization Code (Optional)</label>
             <input type="text" formControlName="organization_code" 
                    class="input-field" 
                    placeholder="e.g. ACME">
             <p *ngIf="orgForm.get('organization_code')?.invalid && orgForm.get('organization_code')?.touched" class="text-xs text-red-400 mt-1">
-              Code is required.
+              Code is invalid.
             </p>
           </div>
 
@@ -250,10 +262,11 @@ export class OrganizationListPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);
   private confirmService = inject(ConfirmService);
+  private router = inject(Router);
 
   constructor() {
     this.orgForm = this.fb.group({
-      organization_code: ['', Validators.required],
+      organization_code: [''],
       organization_name: ['', Validators.required],
       contact_email: ['', Validators.email],
       plan_code: [''],
@@ -294,25 +307,11 @@ export class OrganizationListPageComponent implements OnInit {
   }
 
   openCreateForm() {
-    this.isEditing = false;
-    this.currentEditUuid = null;
-    this.orgForm.enable();
-    this.orgForm.reset();
-    this.isSlideOverOpen = true;
+    this.router.navigate(['/governance/organizations/create']);
   }
 
   openEditForm(org: Organization) {
-    this.isEditing = true;
-    this.currentEditUuid = org.uuid;
-    this.orgForm.enable();
-    this.orgForm.patchValue({
-      organization_code: org.attributes.organization_code,
-      organization_name: org.attributes.organization_name,
-      contact_email: org.attributes.contact_email
-    });
-    // Intentionally restrict changing the organization code for existing tenants
-    this.orgForm.get('organization_code')?.disable();
-    this.isSlideOverOpen = true;
+    this.router.navigate(['/governance/organizations', org.uuid, 'edit']);
   }
 
   openBillingView(org: Organization) {
@@ -411,5 +410,28 @@ export class OrganizationListPageComponent implements OnInit {
           }
         });
     }
+  }
+
+  getPortalUrl(org: Organization): string {
+    const code = org.attributes.organization_code ? org.attributes.organization_code.toLowerCase() : org.uuid.toLowerCase();
+    const port = window.location.port ? ':' + window.location.port : '';
+    // Use the current hostname but replace the tenant part with the organization's code
+    // E.g. if current is portal.snapflect.localhost, replace 'portal' with org code
+    const hostParts = window.location.hostname.split('.');
+    if (hostParts.length > 1) {
+        hostParts[0] = code;
+    } else {
+        hostParts.unshift(code);
+    }
+    return `${window.location.protocol}//${hostParts.join('.')}${port}`;
+  }
+
+  copyPortalUrl(org: Organization) {
+    const url = this.getPortalUrl(org);
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastService.success('Copied', 'Portal URL copied to clipboard.');
+    }).catch(() => {
+      this.toastService.error('Error', 'Failed to copy URL.');
+    });
   }
 }

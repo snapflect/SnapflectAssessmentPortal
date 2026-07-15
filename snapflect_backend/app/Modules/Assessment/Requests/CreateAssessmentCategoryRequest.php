@@ -18,7 +18,7 @@ class CreateAssessmentCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_code' => ['required', 'string', 'max:50'],
+            'category_code' => ['nullable', 'string', 'max:50', \Illuminate\Validation\Rule::unique('assessment_categories')->whereNull('deleted_date')],
             'category_name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000']
         ];

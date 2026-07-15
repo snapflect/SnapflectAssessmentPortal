@@ -38,7 +38,7 @@ describe('errorInterceptor', () => {
         next: () => fail('Should have failed with 401'),
         error: (error) => {
           expect(error.status).toEqual(401);
-          expect(toastServiceSpy.warning).toHaveBeenCalledWith('Access Denied', 'You do not have permission to perform this action.');
+          expect(toastServiceSpy.warning).toHaveBeenCalledWith('Session Expired', 'Please log in again.');
           done();
         }
       });

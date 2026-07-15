@@ -7,6 +7,7 @@ namespace App\Modules\Governance\Models;
 use App\Shared\Traits\HasAuditFields;
 use App\Shared\Traits\HasUuid;
 use App\Shared\Traits\BelongsToOrganization;
+use App\Traits\ArchivesCodesOnDelete;
 use App\Modules\Security\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Department extends Model
 {
-    use HasUuid, HasAuditFields, BelongsToOrganization;
+    use HasUuid, HasAuditFields, BelongsToOrganization, ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'department_code';
+    }
 
     public const DELETED_AT = 'deleted_date';
     public const CREATED_AT = 'created_date';

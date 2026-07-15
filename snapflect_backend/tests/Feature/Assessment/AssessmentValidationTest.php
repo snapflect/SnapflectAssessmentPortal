@@ -37,7 +37,7 @@ class AssessmentValidationTest extends TestCase
         $response = $this->actingAs($this->adminUser)->postJson('/api/v1/assessment/assessments', []);
         
         $response->assertJsonStructure([
-            'detail' => ['assessment_code', 'assessment_name', 'assessment_category_uuid', 'assessment_type_uuid']
+            'detail' => ['assessment_name', 'assessment_category_uuid', 'assessment_type_uuid']
         ]);
     }
 
@@ -46,7 +46,7 @@ class AssessmentValidationTest extends TestCase
         $response = $this->actingAs($this->adminUser)->postJson('/api/v1/assessment/assessments', []);
         
         $response->assertStatus(422);
-        $response->assertJsonPath('detail.assessment_code.0', 'The assessment code is mandatory.');
+        $response->assertJsonPath('detail.assessment_name.0', 'The assessment name field is required.');
     }
 
     public function test_blueprint_creation_fails_without_required_fields()

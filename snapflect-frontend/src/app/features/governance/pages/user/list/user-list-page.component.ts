@@ -18,9 +18,15 @@ interface User {
     email: string;
     status: string;
     organization_id?: number;
+    business_unit_id?: number;
+    department_id?: number;
+    location_id?: number;
   };
   relationships?: {
     roles?: any[];
+    business_unit?: { attributes: { business_unit_name: string } };
+    department?: { attributes: { department_name: string } };
+    location?: { attributes: { location_name: string } };
   };
 }
 
@@ -66,6 +72,7 @@ interface Organization {
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
                 <th scope="col" class="px-6 py-4 font-medium">Email</th>
+                <th scope="col" class="px-6 py-4 font-medium">Placement</th>
                 <th scope="col" class="px-6 py-4 font-medium">Status</th>
                 <th scope="col" class="px-6 py-4 font-medium">Roles</th>
                 <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
@@ -73,7 +80,7 @@ interface Organization {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && users.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-muted">
+                <td colspan="6" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -83,13 +90,21 @@ interface Organization {
               </tr>
               <ng-container *ngIf="users | globalSearch: searchTerm as filteredUsers">
                 <tr *ngIf="!loading && filteredUsers.length === 0">
-                  <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                  <td colspan="6" class="px-6 py-12 text-center text-slate-500">
                     No users found matching your search.
                   </td>
                 </tr>
                 <tr *ngFor="let user of filteredUsers" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-main">{{ user.attributes.first_name }} {{ user.attributes.last_name }}</td>
                   <td class="px-6 py-4">{{ user.attributes.email }}</td>
+                  <td class="px-6 py-4">
+                    <div class="flex flex-col space-y-1">
+                      <span class="text-xs text-brand-light" *ngIf="user.relationships?.business_unit">BU: {{ user.relationships?.business_unit?.attributes?.business_unit_name }}</span>
+                      <span class="text-xs text-muted" *ngIf="user.relationships?.department">Dept: {{ user.relationships?.department?.attributes?.department_name }}</span>
+                      <span class="text-xs text-slate-400" *ngIf="user.relationships?.location">Loc: {{ user.relationships?.location?.attributes?.location_name }}</span>
+                      <span class="text-xs text-slate-500 italic" *ngIf="!user.relationships?.business_unit && !user.relationships?.department && !user.relationships?.location">No placement</span>
+                    </div>
+                  </td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full"
                           [ngClass]="user.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
@@ -124,47 +139,83 @@ interface Organization {
                       (closeEvent)="closeForm()">
         <form [formGroup]="userForm" (ngSubmit)="submitForm()" class="space-y-6">
 
-          <div *ngIf="isPlatformAdmin">
+          <div *ngIf="isPlatformAdmin" class="pb-2">
             <label class="block text-sm font-medium text-muted mb-1">Organization *</label>
-            <select formControlName="organization_id" class="input-field">
+            <select formControlName="organization_id" class="input-field" (change)="onOrgChange()">
               <option [ngValue]="null" disabled>Select an Organization</option>
               <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.attributes.organization_name }}</option>
             </select>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-muted mb-1">First Name *</label>
-              <input type="text" formControlName="first_name" class="input-field" placeholder="John">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-muted mb-1">Last Name *</label>
-              <input type="text" formControlName="last_name" class="input-field" placeholder="Doe">
-            </div>
-          </div>
-
+          <!-- Personal Information Section -->
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Email Address *</label>
-            <input type="email" formControlName="email" class="input-field" placeholder="john.doe@company.com">
+            <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Personal Information</h4>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-muted mb-1">First Name *</label>
+                  <input type="text" formControlName="first_name" class="input-field" placeholder="John">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-muted mb-1">Last Name *</label>
+                  <input type="text" formControlName="last_name" class="input-field" placeholder="Doe">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-muted mb-1">Email Address *</label>
+                <input type="email" formControlName="email" class="input-field" placeholder="john.doe@company.com">
+              </div>
+
+              <div *ngIf="!isEditing">
+                <label class="block text-sm font-medium text-muted mb-1">Temporary Password *</label>
+                <input type="password" formControlName="password" class="input-field" placeholder="Min 12 chars">
+                <p class="text-xs text-slate-500 mt-1">Must be at least 12 characters long.</p>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!isEditing">
-            <label class="block text-sm font-medium text-muted mb-1">Temporary Password *</label>
-            <input type="password" formControlName="password" class="input-field" placeholder="Min 12 chars">
-            <p class="text-xs text-slate-500 mt-1">Must be at least 12 characters long.</p>
+          <!-- Role & Placement Section -->
+          <div class="pt-4 border-t border-border-light">
+            <h4 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Role & Placement</h4>
+            <div class="space-y-4 bg-input-bg/30 p-4 rounded-lg border border-white/5">
+              
+              <div *ngIf="!isEditing">
+                <label class="block text-sm font-medium text-muted mb-1">Initial Role <span class="text-slate-500 font-normal">(optional)</span></label>
+                <select formControlName="initial_role_uuid" class="input-field">
+                  <option [ngValue]="null">No role — assign later</option>
+                  <option *ngFor="let role of allRoles" [ngValue]="role.uuid">{{ role.attributes.role_name }}</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-muted mb-1">Business Unit <span class="text-slate-500 font-normal">(optional)</span></label>
+                <select formControlName="business_unit_id" class="input-field" (change)="onBUChange()">
+                  <option [ngValue]="null">None</option>
+                  <option *ngFor="let bu of filteredBusinessUnits" [ngValue]="bu.id">{{ bu.attributes.business_unit_name }}</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-muted mb-1">Department <span class="text-slate-500 font-normal">(optional)</span></label>
+                  <select formControlName="department_id" class="input-field">
+                    <option [ngValue]="null">None</option>
+                    <option *ngFor="let dept of filteredDepartments" [ngValue]="dept.id">{{ dept.attributes.department_name }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-muted mb-1">Location <span class="text-slate-500 font-normal">(optional)</span></label>
+                  <select formControlName="location_id" class="input-field">
+                    <option [ngValue]="null">None</option>
+                    <option *ngFor="let loc of filteredLocations" [ngValue]="loc.id">{{ loc.attributes.location_name }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Fix 8: Optional initial role assignment during user creation -->
-          <div *ngIf="!isEditing" class="border-t border-border-light pt-4">
-            <label class="block text-sm font-medium text-muted mb-1">Initial Role <span class="text-slate-500 font-normal">(optional)</span></label>
-            <select formControlName="initial_role_uuid" class="input-field">
-              <option [ngValue]="null">No role — assign later via Manage Roles</option>
-              <option *ngFor="let role of allRoles" [ngValue]="role.uuid">{{ role.attributes.role_name }}</option>
-            </select>
-            <p class="text-xs text-slate-500 mt-1">The selected role will be automatically assigned after the user is created.</p>
-          </div>
-
-          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-8">
+          <div class="pt-6 flex justify-end space-x-3 border-t border-border-light mt-4">
             <button type="button" class="btn-secondary" (click)="closeForm()">Cancel</button>
             <button type="submit" class="btn-primary" [disabled]="userForm.invalid || submitting">
               <span *ngIf="submitting">Saving...</span>
@@ -253,6 +304,13 @@ export class UserListPageComponent implements OnInit {
   // Fix 7: Platform admin flag — derived from the authenticated user's roles
   isPlatformAdmin = false;
 
+  businessUnits: any[] = [];
+  filteredBusinessUnits: any[] = [];
+  departments: any[] = [];
+  filteredDepartments: any[] = [];
+  locations: any[] = [];
+  filteredLocations: any[] = [];
+
   // Fix 7: Role Modal State — full management panel
   isRoleModalOpen = false;
   activeUserForRole: User | null = null;
@@ -272,6 +330,9 @@ export class UserListPageComponent implements OnInit {
   constructor() {
     this.userForm = this.fb.group({
       organization_id: [null, Validators.required],
+      business_unit_id: [null],
+      department_id: [null],
+      location_id: [null],
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -281,10 +342,56 @@ export class UserListPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.fetchUsers();
     this.fetchOrganizations();
     // Fix 7: Derive PLATFORM_ADMIN status from the UserStore (populated at login)
     this.isPlatformAdmin = this.userStore.hasAnyRole(['PLATFORM_ADMIN']);
+  }
+
+  onOrgChange() {
+    const orgId = this.userForm.get('organization_id')?.value;
+    if (orgId) {
+      this.http.get<any>(`${environment.apiUrl}/governance/business-units?per_page=100&organization_id=${orgId}`).subscribe({
+        next: (res) => {
+          this.businessUnits = res.data ? res.data : res;
+          this.filteredBusinessUnits = [...this.businessUnits];
+        }
+      });
+      this.http.get<any>(`${environment.apiUrl}/governance/locations?per_page=100&organization_id=${orgId}`).subscribe({
+        next: (res) => {
+          this.locations = res.data ? res.data : res;
+          this.filteredLocations = [...this.locations];
+        }
+      });
+    } else {
+      this.filteredBusinessUnits = [];
+      this.filteredLocations = [];
+    }
+    this.userForm.patchValue({ business_unit_id: null, department_id: null, location_id: null });
+    this.onBUChange();
+  }
+
+  onBUChange() {
+    const buId = this.userForm.get('business_unit_id')?.value;
+    const orgId = this.userForm.get('organization_id')?.value;
+    
+    // We only fetch departments dynamically if the user changed the BU, or Org.
+    // If we have an orgId, we fetch its departments. Then filter by BU on the client side.
+    if (orgId) {
+       this.http.get<any>(`${environment.apiUrl}/governance/departments?per_page=100&organization_id=${orgId}`).subscribe({
+         next: (res) => {
+            this.departments = res.data ? res.data : res;
+            if (buId) {
+              this.filteredDepartments = this.departments.filter(d => d.attributes.business_unit_id === buId);
+            } else {
+              this.filteredDepartments = [...this.departments];
+            }
+         }
+       });
+    } else {
+      this.filteredDepartments = [];
+    }
+    
+    this.userForm.patchValue({ department_id: null });
   }
 
   fetchOrganizations() {
@@ -337,7 +444,14 @@ export class UserListPageComponent implements OnInit {
     this.isEditing = false;
     this.currentEditUuid = null;
     this.userForm.enable();
-    this.userForm.reset({ organization_id: this.organizations.length > 0 ? this.organizations[0].id : null, initial_role_uuid: null });
+    const defaultOrgId = this.organizations.length > 0 ? this.organizations[0].id : null;
+    this.userForm.reset({ organization_id: defaultOrgId, initial_role_uuid: null });
+    
+    // Trigger filters based on default org if any
+    if (defaultOrgId) {
+      setTimeout(() => this.onOrgChange(), 100);
+    }
+
     // Require password for create
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(12)]);
     this.userForm.get('password')?.updateValueAndValidity();
@@ -356,11 +470,51 @@ export class UserListPageComponent implements OnInit {
 
     this.userForm.patchValue({
       organization_id: user.attributes?.organization_id ?? (this.organizations.length > 0 ? this.organizations[0].id : null),
+      business_unit_id: user.attributes?.business_unit_id ?? null,
+      department_id: user.attributes?.department_id ?? null,
+      location_id: user.attributes?.location_id ?? null,
       first_name: user.attributes.first_name,
       last_name: user.attributes.last_name,
       email: user.attributes.email,
       initial_role_uuid: null
     });
+    
+    // Trigger filtering but preserve the patched values
+    setTimeout(() => {
+        const orgId = this.userForm.get('organization_id')?.value;
+        const buId = this.userForm.get('business_unit_id')?.value;
+        const deptId = this.userForm.get('department_id')?.value;
+        const locId = this.userForm.get('location_id')?.value;
+        
+        if (orgId) {
+            this.http.get<any>(`${environment.apiUrl}/governance/business-units?per_page=100&organization_id=${orgId}`).subscribe({
+                next: (res) => {
+                    this.businessUnits = res.data ? res.data : res;
+                    this.filteredBusinessUnits = [...this.businessUnits];
+                    this.userForm.patchValue({ business_unit_id: buId }, { emitEvent: false });
+                }
+            });
+            this.http.get<any>(`${environment.apiUrl}/governance/locations?per_page=100&organization_id=${orgId}`).subscribe({
+                next: (res) => {
+                    this.locations = res.data ? res.data : res;
+                    this.filteredLocations = [...this.locations];
+                    this.userForm.patchValue({ location_id: locId }, { emitEvent: false });
+                }
+            });
+            this.http.get<any>(`${environment.apiUrl}/governance/departments?per_page=100&organization_id=${orgId}`).subscribe({
+                next: (res) => {
+                    this.departments = res.data ? res.data : res;
+                    if (buId) {
+                        this.filteredDepartments = this.departments.filter(d => d.attributes.business_unit_id === buId);
+                    } else {
+                        this.filteredDepartments = [...this.departments];
+                    }
+                    this.userForm.patchValue({ department_id: deptId }, { emitEvent: false });
+                }
+            });
+        }
+    }, 100);
+
     this.userForm.get('organization_id')?.disable();
     // Intentionally restrict changing the primary identity email for existing users
     this.userForm.get('email')?.disable();
@@ -411,7 +565,7 @@ export class UserListPageComponent implements OnInit {
           },
           error: (err) => {
             this.submitting = false;
-            const msg = err.error?.message || 'Failed to update user.';
+            const msg = this.extractErrorMessage(err) || 'Failed to update user.';
             this.toastService.error('Error', msg);
           }
         });
@@ -448,7 +602,7 @@ export class UserListPageComponent implements OnInit {
           },
           error: (err) => {
             this.submitting = false;
-            const msg = err.error?.message || 'Failed to provision user.';
+            const msg = this.extractErrorMessage(err) || 'Failed to provision user.';
             this.toastService.error('Error', msg);
           }
         });
@@ -508,7 +662,7 @@ export class UserListPageComponent implements OnInit {
         },
         error: (err) => {
           role._assigning = false;
-          const msg = err.error?.message || 'Failed to assign role.';
+          const msg = this.extractErrorMessage(err) || 'Failed to assign role.';
           this.toastService.error('Error', msg);
         }
       });
@@ -536,9 +690,22 @@ export class UserListPageComponent implements OnInit {
         },
         error: (err) => {
           role._revoking = false;
-          const msg = err.error?.message || 'Failed to revoke role.';
+          const msg = this.extractErrorMessage(err) || 'Failed to revoke role.';
           this.toastService.error('Error', msg);
         }
       });
+  }
+  private extractErrorMessage(err: any): string | null {
+    if (err?.error?.detail) {
+      if (typeof err.error.detail === 'string') {
+        return err.error.detail;
+      } else if (typeof err.error.detail === 'object') {
+        const keys = Object.keys(err.error.detail);
+        if (keys.length > 0) {
+          return err.error.detail[keys[0]][0];
+        }
+      }
+    }
+    return err?.error?.message || null;
   }
 }

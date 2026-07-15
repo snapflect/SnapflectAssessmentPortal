@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+<w:body>
+    <w:bookmarkStart w:id="20" w:name="X309912e2ffdeb6f92004772aee1788c52073370" />
+    <w:p><w:pPr><w:pStyle w:val="Heading1" /></w:pPr><w:r><w:t xml:space="preserve">100_LOCAL_APPLICATION_LAUNCH_AND_MANUAL_TEST_PREPARATION</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Review:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">097_FRAMEWORK_BOOTSTRAP_REPORT.md</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">098_DEFECT_REMEDIATION_REPORT.md</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">099_LOCAL_RUNTIME_VALIDATION_REPORT.md</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Review all Sprint 01–05 implementation artifacts.</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">OBJECTIVE</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Prepare the application for manual end-to-end testing.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Rebuild and launch both:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Angular Frontend</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1001" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Laravel Backend</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Provide all information required for human QA testing.</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 1</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">ENVIRONMENT VERIFICATION</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Verify:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">PHP</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Composer</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Node</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">NPM</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Angular CLI</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Database Engine</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Report missing dependencies.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">If dependencies are missing:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Provide installation instructions.</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 2</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">BACKEND BUILD</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Navigate to backend project.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Execute:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">composer install</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Verify:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">composer.json</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">autoload generation</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">service providers</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">repository bindings</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">route registration</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">policy registration</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Execute:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan optimize:clear</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan config:clear</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan cache:clear</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan route:list</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Run migrations:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan migrate</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Run seeders if available:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan db:seed</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Launch backend:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">php artisan serve</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Capture:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Backend URL</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Port</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Startup logs</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Errors</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Warnings</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 3</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">FRONTEND BUILD</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Navigate to frontend project.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Execute:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">npm install</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Execute:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">ng build</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Execute:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">ng test –watch=false</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Launch frontend:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">ng serve</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Capture:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Frontend URL</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Port</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Startup logs</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Errors</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Warnings</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 4</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">API CONNECTIVITY VALIDATION</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Verify:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">environment.ts</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">environment.prod.ts</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">API Base URL</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Validate:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Login endpoint</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Governance endpoints</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Assessment endpoints</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Delivery endpoints</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Results endpoints</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Reporting endpoints</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Certificate endpoints</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Document failures.</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 5</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">MANUAL TEST DATA</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Create or identify:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Platform Admin</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Organization Admin</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Evaluator</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Candidate</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Provide:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Email</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Username</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Password</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Role</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Organization</w:t></w:r></w:p>
+    <w:p><w:r><w:pict><v:rect style="width:0;height:1.5pt" o:hralign="center" o:hrstd="t" o:hr="t" /></w:pict></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">If users do not exist:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Generate seed instructions.</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 6</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">MANUAL TEST CHECKLIST</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Generate detailed manual testing checklist.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Authentication</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Login</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Logout</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Forgot Password</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1002" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Change Password</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Governance</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Organizations</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Departments</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Roles</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Permissions</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1003" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Users</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Assessment</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Create Assessment</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Create Question</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Create Competency</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Build Blueprint</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1004" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Publish Assessment</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Delivery</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Launch Session</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Start Attempt</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Save Answers</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Auto Save</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1005" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Submit Attempt</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Results</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1006" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">View Result</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1006" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">View Competency Breakdown</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1006" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">View Version History</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1006" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Manual Review</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Reporting</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1007" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Assessment Reports</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1007" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Candidate Reports</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1007" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Exports</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="FirstParagraph" /></w:pPr><w:r><w:t xml:space="preserve">Certificates</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">View Certificate</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Download Certificate</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="Compact" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1008" /></w:numPr></w:pPr><w:r><w:t xml:space="preserve">Verify Certificate</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">PHASE 7</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">GENERATE REPORT</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Generate:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">100_LOCAL_LAUNCH_REPORT.md</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Include:</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Environment Status</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Backend Launch Status</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Frontend Launch Status</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">URLs</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Credentials</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Database Status</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">API Connectivity Status</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Manual Testing Checklist</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Known Issues</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Blockers</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Go / No-Go Recommendation</w:t></w:r></w:p>
+    <w:tbl><w:tblPr><w:tblStyle w:val="Table" /><w:tblW w:type="auto" w:w="0" /><w:tblLook w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="0" w:noVBand="0" w:val="0000" /></w:tblPr><w:tblGrid><w:gridCol w:w="7920" /></w:tblGrid><w:tr><w:tc><w:tcPr /><w:p><w:pPr><w:pStyle w:val="Compact" /><w:jc w:val="left" /></w:pPr><w:r><w:t xml:space="preserve">STOP</w:t></w:r></w:p></w:tc></w:tr></w:tbl>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Do NOT modify architecture.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Do NOT generate Sprint 06 artifacts.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Do NOT generate release artifacts.</w:t></w:r></w:p>
+    <w:p><w:pPr><w:pStyle w:val="BodyText" /></w:pPr><w:r><w:t xml:space="preserve">Stop after application launch and report generation.</w:t></w:r></w:p>
+    <w:bookmarkEnd w:id="20" />
+    <w:sectPr>
+      <w:footnotePr>
+        
+                
+        <w:numRestart w:val="eachSect" />
+        
+              
+      </w:footnotePr>
+    </w:sectPr>
+  </w:body>
+</w:document>

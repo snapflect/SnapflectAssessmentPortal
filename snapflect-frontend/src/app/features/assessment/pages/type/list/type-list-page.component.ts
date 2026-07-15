@@ -101,8 +101,8 @@ interface AssessmentType {
                       (closeEvent)="closeForm()">
         <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Code *</label>
-            <input type="text" formControlName="type_code" class="input-field" placeholder="e.g. MCQ">
+            <label class="block text-sm font-medium text-muted mb-1">Code (Optional)</label>
+            <input type="text" formControlName="type_code" class="input-field" placeholder="Leave blank to auto-generate">
           </div>
           <div>
             <label class="block text-sm font-medium text-muted mb-1">Name *</label>
@@ -148,7 +148,7 @@ export class TypeListPageComponent implements OnInit {
 
   constructor() {
     this.form = this.fb.group({
-      type_code: ['', Validators.required],
+      type_code: [''],
       type_name: ['', Validators.required],
       status: ['ACTIVE', Validators.required],
       description: ['']

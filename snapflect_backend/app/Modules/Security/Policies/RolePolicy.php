@@ -35,7 +35,7 @@ class RolePolicy
 
     public function create(User $user): bool
     {
-        return $user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN');
+        return $user->roles->contains('role_code', 'CLIENT_ADMIN');
     }
 
     public function update(User $user, Role $role): bool
@@ -43,7 +43,7 @@ class RolePolicy
         if ($role->organization_id === null || $role->is_system_role) {
             return false; // Only Platform Admins can update system/global roles
         }
-        return ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) && $user->organization_id === $role->organization_id;
+        return ($user->roles->contains('role_code', 'CLIENT_ADMIN')) && $user->organization_id === $role->organization_id;
     }
 
     public function delete(User $user, Role $role): bool
@@ -51,7 +51,7 @@ class RolePolicy
         if ($role->organization_id === null || $role->is_system_role) {
             return false;
         }
-        return ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) && $user->organization_id === $role->organization_id;
+        return ($user->roles->contains('role_code', 'CLIENT_ADMIN')) && $user->organization_id === $role->organization_id;
     }
 
     public function restore(User $user, Role $role): bool

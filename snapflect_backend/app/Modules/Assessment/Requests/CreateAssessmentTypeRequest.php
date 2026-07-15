@@ -18,7 +18,7 @@ class CreateAssessmentTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type_code' => ['required', 'string', 'max:50'],
+            'type_code' => ['nullable', 'string', 'max:50', \Illuminate\Validation\Rule::unique('assessment_types')->whereNull('deleted_date')],
             'type_name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000']
         ];

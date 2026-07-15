@@ -24,7 +24,8 @@ interface Department {
       attributes: {
         business_unit_name: string;
       }
-    }
+    };
+    users_count?: number;
   };
 }
 
@@ -84,13 +85,14 @@ interface BusinessUnit {
                 <th scope="col" class="px-6 py-4 font-medium">Business Unit</th>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
+                <th scope="col" class="px-6 py-4 font-medium text-center">Headcount</th>
                 <th scope="col" class="px-6 py-4 font-medium">Status</th>
                 <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && departments.length === 0">
-                <td colspan="4" class="px-6 py-12 text-center text-muted">
+                <td colspan="6" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -100,7 +102,7 @@ interface BusinessUnit {
               </tr>
               <ng-container *ngIf="departments | globalSearch: searchTerm as filteredDepartments">
                 <tr *ngIf="!loading && filteredDepartments.length === 0">
-                  <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                  <td colspan="6" class="px-6 py-12 text-center text-slate-500">
                     No departments found matching your search.
                   </td>
                 </tr>
@@ -108,6 +110,11 @@ interface BusinessUnit {
                   <td class="px-6 py-4 text-muted">{{ dept.relationships?.business_unit?.attributes?.business_unit_name || '-' }}</td>
                   <td class="px-6 py-4 font-medium text-brand-light">{{ dept.attributes.department_code }}</td>
                   <td class="px-6 py-4 text-main font-medium">{{ dept.attributes.department_name }}</td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="bg-brand/10 text-brand px-2 py-1 rounded text-xs font-medium border border-brand/20">
+                      {{ dept.relationships?.users_count || 0 }}
+                    </span>
+                  </td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full"
                           [ngClass]="dept.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
@@ -150,10 +157,10 @@ interface BusinessUnit {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Department Code *</label>
+            <label class="block text-sm font-medium text-muted mb-1">Department Code (Optional)</label>
             <input type="text" formControlName="department_code" 
                    class="input-field" 
-                   placeholder="e.g. ENG">
+                   placeholder="Leave blank to auto-generate">
           </div>
 
           <div>
@@ -203,7 +210,7 @@ export class DepartmentListPageComponent implements OnInit {
     this.deptForm = this.fb.group({
       organization_id: [null, Validators.required],
       business_unit_id: [null, Validators.required],
-      department_code: ['', Validators.required],
+      department_code: [''],
       department_name: ['', Validators.required]
     });
   }
@@ -211,7 +218,6 @@ export class DepartmentListPageComponent implements OnInit {
   ngOnInit() {
     this.fetchDepartments();
     this.fetchOrganizations();
-    this.fetchBusinessUnits();
     this.isPlatformAdmin = this.userStore.hasAnyRole(['PLATFORM_ADMIN']);
   }
 
@@ -224,19 +230,16 @@ export class DepartmentListPageComponent implements OnInit {
       });
   }
 
-  fetchBusinessUnits() {
-    this.http.get<any>(`${environment.apiUrl}/governance/business-units?per_page=100`)
-      .subscribe({
-        next: (response) => {
-          this.businessUnits = response.data ? response.data : response;
-        }
-      });
-  }
-
   onOrgChange() {
     const orgId = this.deptForm.get('organization_id')?.value;
     if (orgId) {
-      this.filteredBusinessUnits = this.businessUnits.filter(bu => bu.attributes.organization_id === orgId);
+      this.http.get<any>(`${environment.apiUrl}/governance/business-units?per_page=100&organization_id=${orgId}`)
+        .subscribe({
+          next: (response) => {
+            this.businessUnits = response.data ? response.data : response;
+            this.filteredBusinessUnits = [...this.businessUnits];
+          }
+        });
     } else {
       this.filteredBusinessUnits = [];
     }
@@ -284,6 +287,12 @@ export class DepartmentListPageComponent implements OnInit {
       department_code: dept.attributes.department_code,
       department_name: dept.attributes.department_name
     });
+    
+    // In edit mode, we need to fetch BUs for the organization if we haven't already, or they might be empty initially.
+    // onOrgChange fetches them asynchronously, so we must set the BU value after BUs are loaded.
+    setTimeout(() => {
+        this.deptForm.patchValue({ business_unit_id: dept.attributes.business_unit_id }, { emitEvent: false });
+    }, 150);
     // Intentionally restrict changing the structural code and org/bu for existing departments
     this.deptForm.get('department_code')?.disable();
     this.deptForm.get('organization_id')?.disable();

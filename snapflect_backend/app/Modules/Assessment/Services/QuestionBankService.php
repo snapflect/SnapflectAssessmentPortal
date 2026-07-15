@@ -19,10 +19,25 @@ class QuestionBankService
     public function create(?int $organizationId, CreateQuestionBankDto $dto, int $userId): \Illuminate\Database\Eloquent\Model
     {
         return DB::transaction(function () use ($organizationId, $dto, $userId) {
+            $bankCode = $dto->bank_code;
+            if (empty($bankCode)) {
+                $baseCode = Str::slug($dto->bank_name);
+                $bankCode = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Assessment\Models\QuestionBank::where('bank_code', $bankCode)->whereNull('deleted_date')->exists()) {
+                    $bankCode = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+            }
+
+            $user = \App\Modules\Security\Models\User::find($userId);
+
             $data = [
                 'uuid' => Str::uuid()->toString(),
                 'organization_id' => $organizationId,
-                'bank_code' => $dto->bank_code,
+                'business_unit_id' => $dto->business_unit_id ?? $user?->business_unit_id,
+                'department_id' => $dto->department_id ?? $user?->department_id,
+                'bank_code' => $bankCode,
                 'bank_name' => $dto->bank_name,
                 'is_system_bank' => is_null($organizationId),
                 'description' => $dto->description,

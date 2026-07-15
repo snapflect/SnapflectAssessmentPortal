@@ -37,7 +37,7 @@ class QuestionRequestTest extends TestCase
         $rules = $request->rules();
 
         $this->assertContains('required', $rules['question_bank_uuid']);
-        $this->assertContains('required', $rules['question_code']);
+        $this->assertContains('nullable', $rules['question_code']);
         $this->assertContains('required', $rules['question_type']);
         $this->assertContains('required', $rules['question_text']);
         $this->assertContains('required', $rules['max_score']);

@@ -6,6 +6,7 @@ namespace App\Modules\Assessment\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Modules\Assessment\DTOs\CreateAssessmentDto;
+use Illuminate\Validation\Rule;
 
 class CreateAssessmentRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class CreateAssessmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'assessment_code' => ['required', 'string', 'max:50'],
+            'assessment_code' => ['nullable', 'string', 'max:50', Rule::unique('assessments')->whereNull('deleted_date')],
             'assessment_name' => ['required', 'string', 'max:255'],
             'assessment_category_uuid' => ['required', 'uuid'],
             'assessment_type_uuid' => ['required', 'uuid'],

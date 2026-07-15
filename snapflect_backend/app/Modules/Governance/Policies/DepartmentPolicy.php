@@ -27,30 +27,22 @@ class DepartmentPolicy
 
     public function view(User $user, Department $department): bool
     {
-        return $user->organization_id === $department->organization_id;
+        return $user->canAccessPlacement($department);
     }
 
     public function create(User $user): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN');
+        return $user->hasRole('CLIENT_ADMIN');
     }
 
     public function update(User $user, Department $department): bool
     {
-        if ($user->roles->contains('role_code', 'ORG_ADMIN')) {
-            return $user->organization_id === $department->organization_id;
-        }
-
-        if ($user->roles->contains('role_code', 'DEPT_MANAGER')) {
-            return $user->department_id === $department->id;
-        }
-
-        return false;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $department->organization_id;
     }
 
     public function delete(User $user, Department $department): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') && $user->organization_id === $department->organization_id;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $department->organization_id;
     }
 
     public function restore(User $user, Department $department): bool

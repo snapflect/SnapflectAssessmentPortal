@@ -7,6 +7,7 @@ namespace App\Modules\Assessment\Models;
 use App\Shared\Traits\HasUuid;
 use App\Shared\Traits\BelongsToOrganization;
 use App\Shared\Traits\HasAuditFields;
+use App\Traits\ArchivesCodesOnDelete;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,12 @@ class AssessmentTemplate extends Model
     use HasUuid;
     use BelongsToOrganization;
     use HasAuditFields;
+    use ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'template_code';
+    }
 
     protected $fillable = [
         'uuid',

@@ -46,8 +46,10 @@ describe('UserListPageComponent', () => {
     mockToastService = jasmine.createSpyObj('ToastService', ['success', 'error']);
     mockConfirmService = jasmine.createSpyObj('ConfirmService', ['confirm']);
     mockConfirmService.confirm.and.returnValue(Promise.resolve(true));
-    mockUserStore = jasmine.createSpyObj('UserStore', ['hasAnyRole']);
+    mockUserStore = jasmine.createSpyObj('UserStore', ['hasAnyRole', 'hasAnyPermission', 'hasPermission']);
     mockUserStore.hasAnyRole.and.returnValue(true); // By default, act as PLATFORM_ADMIN
+    mockUserStore.hasAnyPermission.and.returnValue(true);
+    mockUserStore.hasPermission.and.returnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [

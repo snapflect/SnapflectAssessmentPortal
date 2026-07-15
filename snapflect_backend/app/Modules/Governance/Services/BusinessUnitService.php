@@ -13,6 +13,9 @@ use App\Modules\Governance\Repositories\BusinessUnitRepositoryInterface;
 use App\Modules\Governance\Repositories\OrganizationRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Core\Exceptions\BusinessRuleException;
+use App\Modules\Security\Models\User;
+use App\Modules\Governance\Models\Department;
 
 class BusinessUnitService
 {
@@ -29,6 +32,24 @@ class BusinessUnitService
             $data = $dto->toArray();
             $data['created_by'] = $userId;
             $data['modified_by'] = $userId;
+            
+            if (empty($data['business_unit_code'])) {
+                $baseSlug = \Illuminate\Support\Str::slug($data['business_unit_name']);
+                if (empty($baseSlug)) {
+                    $baseSlug = 'bu'; // Fallback if name is non-Latin
+                }
+                $slug = $baseSlug;
+                $counter = 1;
+                while (BusinessUnit::where('organization_id', $data['organization_id'])
+                                   ->where('business_unit_code', $slug)
+                                   ->whereNull('deleted_date')
+                                   ->exists()) {
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+                $data['business_unit_code'] = $slug;
+            }
+
             return $this->businessUnitRepository->create($data);
         });
     }
@@ -47,6 +68,14 @@ class BusinessUnitService
     {
         return DB::transaction(function () use ($uuid, $userId) {
             $businessUnit = $this->findByUuid($uuid);
+            
+            if (User::where('business_unit_id', $businessUnit->id)->whereNull('deleted_date')->exists()) {
+                throw new BusinessRuleException("Cannot delete business unit because it has active users assigned.");
+            }
+            if (Department::where('business_unit_id', $businessUnit->id)->whereNull('deleted_date')->exists()) {
+                throw new BusinessRuleException("Cannot delete business unit because it contains active departments.");
+            }
+
             $this->businessUnitRepository->update($businessUnit, ['deleted_by' => $userId, 'is_deleted' => true]);
             return $this->businessUnitRepository->delete($businessUnit);
         });

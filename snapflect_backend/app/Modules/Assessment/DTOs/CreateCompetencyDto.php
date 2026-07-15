@@ -9,13 +9,13 @@ use App\Shared\DTOs\BaseDto;
 readonly class CreateCompetencyDto extends BaseDto
 {
     public ?string $competency_group_uuid;
-    public string $competency_code;
+    public ?string $competency_code;
     public string $competency_name;
     public ?string $proficiency_level;
     public ?string $description;
 
     public function __construct(
-        ?string $competency_group_uuid = null, string $competency_code = null, string $competency_name = null, ?string $proficiency_level = null, ?string $description = null
+        ?string $competency_group_uuid = null, ?string $competency_code = null, string $competency_name = null, ?string $proficiency_level = null, ?string $description = null
     ) {
         $this->competency_group_uuid = $competency_group_uuid;
         $this->competency_code = $competency_code;

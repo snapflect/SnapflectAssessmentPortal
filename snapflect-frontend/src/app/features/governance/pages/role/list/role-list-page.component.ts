@@ -142,8 +142,8 @@ interface Permission {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Role Code *</label>
-            <input type="text" formControlName="role_code" class="input-field" placeholder="e.g. EDITOR">
+            <label class="block text-sm font-medium text-muted mb-1">Role Code (Optional)</label>
+            <input type="text" formControlName="role_code" class="input-field" placeholder="Leave blank to auto-generate">
           </div>
 
           <div>
@@ -269,7 +269,7 @@ export class RoleListPageComponent implements OnInit {
   constructor() {
     this.roleForm = this.fb.group({
       organization_id: [null],
-      role_code: ['', Validators.required],
+      role_code: [''],
       role_name: ['', Validators.required],
       description: ['']
     });

@@ -28,8 +28,8 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     public function search(string $term): Collection { return Department::where('department_name', 'like', "%{$term}%")->get(); }
     public function searchByOrganization(int $organizationId, string $term): Collection { return Department::where('organization_id', $organizationId)->where('department_name', 'like', "%{$term}%")->get(); }
     public function query(): Builder { return Department::query(); }
-    public function paginate(int $perPage = 15): LengthAwarePaginator { return Department::with('businessUnit')->paginate($perPage); }
-    public function paginateByOrganization(int $organizationId, int $perPage = 15): LengthAwarePaginator { return Department::with('businessUnit')->where('organization_id', $organizationId)->paginate($perPage); }
+    public function paginate(int $perPage = 15): LengthAwarePaginator { return Department::with(['businessUnit'])->withCount('users')->paginate($perPage); }
+    public function paginateByOrganization(int $organizationId, int $perPage = 15): LengthAwarePaginator { return Department::with(['businessUnit'])->withCount('users')->where('organization_id', $organizationId)->paginate($perPage); }
     public function create(array $data): Department { return Department::create($data); }
     public function update(Department $department, array $data): bool { return $department->update($data); }
     public function delete(Department $department): bool { return $department->delete(); }

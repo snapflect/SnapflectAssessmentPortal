@@ -8,7 +8,7 @@ use App\Shared\DTOs\BaseDto;
 
 readonly class CreateAssessmentTypeDto extends BaseDto
 {
-public string $type_code;
+public ?string $type_code;
 public string $type_name;
 public ?string $description;
 

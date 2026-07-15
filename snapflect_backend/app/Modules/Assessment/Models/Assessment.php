@@ -16,7 +16,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Assessment extends Model
 {
-    use HasFactory, HasUuid, BelongsToOrganization, HasAuditFields;
+    use HasFactory, HasUuid, BelongsToOrganization, HasAuditFields, \App\Traits\ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'assessment_code';
+    }
 
     protected static function newFactory()
     {

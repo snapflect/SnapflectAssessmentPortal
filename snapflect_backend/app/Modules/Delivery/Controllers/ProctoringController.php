@@ -17,7 +17,7 @@ class ProctoringController extends Controller
         $organizationId = $request->user() ? $request->user()->organization_id : 1;
 
         // Fetch LAUNCHED sessions
-        $sessions = AssessmentSession::where('organization_id', $organizationId)
+        $sessions = AssessmentSession::forUser($request->user())
             ->where('session_status', 'LAUNCHED')
             ->with(['candidate', 'assessment', 'latestAttempt'])
             ->get();

@@ -57,6 +57,10 @@ class ApiProblemDetailsRenderer
             return $e->getStatusCode();
         }
 
+        if ($e instanceof \App\Core\Exceptions\TenantValidationException) {
+            return 400;
+        }
+
         if ($e instanceof SubmissionException) {
             return match ($e->getErrorCode()) {
                 SubmissionException::ATTEMPT_NOT_FOUND => 404,
@@ -109,6 +113,10 @@ class ApiProblemDetailsRenderer
 
         if ($e instanceof SubmissionException) {
             return $e->getErrorCode();
+        }
+
+        if ($e instanceof \App\Core\Exceptions\TenantValidationException) {
+            return 'TENANT_VALIDATION_FAILED';
         }
 
         if ($e instanceof SessionLaunchException) {

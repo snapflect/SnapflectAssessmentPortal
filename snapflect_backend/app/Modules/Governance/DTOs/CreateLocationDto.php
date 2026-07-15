@@ -10,7 +10,7 @@ readonly class CreateLocationDto extends BaseDto
 {
     public function __construct(
         public int $organization_id,
-        public string $location_code,
+        public ?string $location_code,
         public string $location_name,
         public ?string $address = null,
         public ?string $city = null,
@@ -23,7 +23,7 @@ readonly class CreateLocationDto extends BaseDto
     {
         return new self(
             organization_id: (int) $data['organization_id'],
-            location_code: $data['location_code'],
+            location_code: $data['location_code'] ?? null,
             location_name: $data['location_name'],
             address: $data['address'] ?? null,
             city: $data['city'] ?? null,

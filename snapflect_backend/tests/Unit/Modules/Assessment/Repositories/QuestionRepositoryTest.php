@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Modules\Assessment\Repositories;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TenancyTestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use App\Modules\Assessment\Repositories\Eloquent\QuestionRepository;
 use App\Modules\Assessment\Models\Question;
 use App\Modules\Assessment\Models\QuestionBank;
 
-class QuestionRepositoryTest extends TestCase
+class QuestionRepositoryTest extends TenancyTestCase
 {
-    use RefreshDatabase, WithFaker;
+    use WithFaker;
 
     protected QuestionRepository $repository;
 
@@ -23,10 +22,10 @@ class QuestionRepositoryTest extends TestCase
         $this->repository = new QuestionRepository(new Question());
     }
 
-    protected function createQuestionBank(int $orgId = 1): QuestionBank
+    protected function createQuestionBank(?int $orgId = null): QuestionBank
     {
         return QuestionBank::create([
-            'organization_id' => $orgId,
+            'organization_id' => $orgId ?? $this->organization->id,
             'bank_code' => $this->faker->unique()->word,
             'bank_name' => 'Test Bank',
             'is_system_bank' => false,
@@ -38,7 +37,7 @@ class QuestionRepositoryTest extends TestCase
 
     protected function createQuestion(array $overrides = []): Question
     {
-        $bank = $this->createQuestionBank($overrides['organization_id'] ?? 1);
+        $bank = $this->createQuestionBank($overrides['organization_id'] ?? null);
         $data = array_merge([
             'question_bank_id' => $bank->id,
             'question_code' => $this->faker->unique()->word,

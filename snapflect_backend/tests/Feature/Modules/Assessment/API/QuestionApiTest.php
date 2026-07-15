@@ -21,10 +21,12 @@ class QuestionApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(\Database\Seeders\CustomRbacSeeder::class);
+        
         $this->user = User::factory()->create();
-        $role1 = Role::factory()->create(['role_code' => 'CLIENT_ADMIN', 'role_name' => 'CLIENT_ADMIN']);
-        $role2 = Role::factory()->create(['role_code' => 'ORG_ADMIN', 'role_name' => 'ORG_ADMIN']);
-        $this->user->roles()->attach([$role1->id, $role2->id]);
+        $role = Role::where('role_code', 'CLIENT_ADMIN')->first()
+            ?? Role::factory()->create(['role_code' => 'CLIENT_ADMIN', 'role_name' => 'CLIENT_ADMIN']);
+        $this->user->roles()->attach($role->id);
     }
 
     public function test_returns_200_ok()

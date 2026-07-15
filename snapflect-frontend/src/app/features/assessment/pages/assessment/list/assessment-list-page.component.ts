@@ -202,8 +202,8 @@ interface AssessmentCategory { uuid: string; attributes: { category_name: string
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-muted mb-1">Code *</label>
-              <input type="text" formControlName="assessment_code" class="input-field" placeholder="e.g. ASSESS-001">
+              <label class="block text-sm font-medium text-muted mb-1">Code (Optional)</label>
+              <input type="text" formControlName="assessment_code" class="input-field" placeholder="Leave blank to auto-generate">
             </div>
             <div>
               <label class="block text-sm font-medium text-muted mb-1">Name *</label>
@@ -299,7 +299,7 @@ export class AssessmentListPageComponent implements OnInit {
 
   constructor() {
     this.assessmentForm = this.fb.group({
-      assessment_code: ['', Validators.required],
+      assessment_code: [''],
       assessment_name: ['', Validators.required],
       description: [''],
       assessment_type_uuid: ['', Validators.required],

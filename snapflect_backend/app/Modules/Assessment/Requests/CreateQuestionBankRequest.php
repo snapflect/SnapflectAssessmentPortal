@@ -6,6 +6,7 @@ namespace App\Modules\Assessment\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Modules\Assessment\DTOs\CreateQuestionBankDto;
+use Illuminate\Validation\Rule;
 
 class CreateQuestionBankRequest extends FormRequest
 {
@@ -19,7 +20,7 @@ class CreateQuestionBankRequest extends FormRequest
     {
         return [
             'organization_id' => ['nullable', 'integer'],
-            'bank_code' => ['required', 'string', 'max:50'],
+            'bank_code' => ['nullable', 'string', 'max:50', Rule::unique('question_banks')->whereNull('deleted_date')],
             'bank_name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000']
         ];

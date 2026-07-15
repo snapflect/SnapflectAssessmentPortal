@@ -21,6 +21,16 @@ class RoleService
     {
         return DB::transaction(function () use ($dto, $userId) {
             $data = $dto->toArray();
+            if (empty($data['role_code'])) {
+                $baseCode = \Illuminate\Support\Str::slug($data['role_name']);
+                $code = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Security\Models\Role::where('role_code', $code)->whereNull('deleted_date')->exists()) {
+                    $code = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                $data['role_code'] = $code;
+            }
             $data['created_by'] = $userId;
             $data['modified_by'] = $userId;
             return $this->roleRepository->create($data);

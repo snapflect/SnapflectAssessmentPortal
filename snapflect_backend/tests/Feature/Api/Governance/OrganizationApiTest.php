@@ -13,6 +13,11 @@ class OrganizationApiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Prevent Stancl/Tenancy from trying to create a physical database during tests.
+        \Illuminate\Support\Facades\Event::fake([
+            \Stancl\Tenancy\Events\TenantCreated::class,
+            \Stancl\Tenancy\Events\DomainCreated::class,
+        ]);
         $this->seed(\Database\Seeders\CustomRbacSeeder::class);
         $this->seed(\Database\Seeders\BillingSeeder::class);
     }
@@ -45,7 +50,6 @@ class OrganizationApiTest extends TestCase
         $response->assertStatus(422)
                  ->assertJsonStructure([
                      'detail' => [
-                         'organization_code',
                          'organization_name',
                          'contact_email'
                      ]

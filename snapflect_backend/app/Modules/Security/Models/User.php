@@ -17,14 +17,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Stancl\Tenancy\Database\Concerns\CentralConnection;
+use App\Core\Traits\HasPlacementScope;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasUuid, HasAuditFields, BelongsToOrganization, Notifiable;
+    use HasFactory, HasUuid, HasAuditFields, BelongsToOrganization, Notifiable, CentralConnection, HasPlacementScope;
 
     protected static function newFactory()
     {
         return \Database\Factories\UserFactory::new();
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function ($model) {
+            if (method_exists($model, 'isForceDeleting') && !$model->isForceDeleting()) {
+                if (!empty($model->email) && !str_contains($model->email, '::d_')) {
+                    $suffix = '::d_' . time();
+                    $allowedOriginalLength = 255 - strlen($suffix);
+                    $originalEmail = substr($model->email, 0, $allowedOriginalLength);
+                    $model->email = $originalEmail . $suffix;
+                    $model->saveQuietly();
+                }
+            }
+        });
     }
 
     public const DELETED_AT = 'deleted_date';
@@ -125,5 +142,13 @@ class User extends Authenticatable
     public function manualScoreReviews(): HasMany
     {
         return $this->hasMany(\App\Modules\Results\Models\ManualScoreReview::class, 'reviewed_by', 'id');
+    }
+
+    public function canAccessPlacement(\Illuminate\Database\Eloquent\Model $target): bool
+    {
+        return $target::query()
+            ->forUser($this)
+            ->where($target->getKeyName(), $target->getKey())
+            ->exists();
     }
 }

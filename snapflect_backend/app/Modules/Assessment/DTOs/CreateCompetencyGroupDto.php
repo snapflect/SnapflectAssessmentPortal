@@ -8,12 +8,12 @@ use App\Shared\DTOs\BaseDto;
 
 readonly class CreateCompetencyGroupDto extends BaseDto
 {
-public string $group_code;
+public ?string $group_code;
 public string $group_name;
 public ?string $description;
 
     public function __construct(
-        string $group_code = null, string $group_name = null, ?string $description = null
+        ?string $group_code = null, string $group_name = null, ?string $description = null
     ) {
 $this->group_code = $group_code;
 $this->group_name = $group_name;

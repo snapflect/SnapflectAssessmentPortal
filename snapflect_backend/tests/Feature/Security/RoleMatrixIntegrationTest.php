@@ -2,25 +2,19 @@
 
 namespace Tests\Feature\Security;
 
-use Tests\TestCase;
+use Tests\TenancyTestCase;
 use App\Modules\Security\Models\User;
 use App\Modules\Security\Models\Role;
 use App\Modules\Governance\Models\Organization;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class RoleMatrixIntegrationTest extends TestCase
+class RoleMatrixIntegrationTest extends TenancyTestCase
 {
-    use RefreshDatabase;
-
-    protected $organization;
     protected $readOnlyUser;
     protected $clientAdminUser;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        $this->organization = Organization::factory()->create();
 
         $readOnlyRole = Role::factory()->create([
             'role_name' => 'Read Only',

@@ -1,3 +1,4 @@
+import { RouterTestingModule } from '@angular/router/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ManualReviewPageComponent } from './manual-review-page.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -24,7 +25,7 @@ describe('ManualReviewPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ManualReviewPageComponent, HttpClientTestingModule, ReactiveFormsModule]
+      imports: [ManualReviewPageComponent, HttpClientTestingModule, ReactiveFormsModule, HttpClientTestingModule, RouterTestingModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ManualReviewPageComponent);
@@ -117,7 +118,7 @@ describe('ManualReviewPageComponent', () => {
     
     const patchReq = httpMock.expectOne(`${environment.apiUrl}/results/manual-reviews/${mockReview.uuid}`);
     expect(patchReq.request.method).toBe('PATCH');
-    expect(patchReq.request.body).toEqual({ awarded_score: 8, notes: 'Good' });
+    expect(patchReq.request.body).toEqual({ reviewed_score: 8, review_comments: 'Good', review_status: 'COMPLETED' });
     patchReq.flush({});
     
     expect(component.submitting).toBeFalse();

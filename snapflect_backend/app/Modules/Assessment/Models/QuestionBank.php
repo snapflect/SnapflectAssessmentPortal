@@ -12,12 +12,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Core\Traits\HasPlacementScope;
 
 class QuestionBank extends Model
 {
     use HasUuid;
     use BelongsToOrganization;
     use HasAuditFields;
+    use HasPlacementScope;
+    use \App\Traits\ArchivesCodesOnDelete;
+
+    public function getCodeField(): string
+    {
+        return 'bank_code';
+    }
 
     public const CREATED_AT = 'created_date';
     public const UPDATED_AT = 'modified_date';
@@ -25,6 +33,8 @@ class QuestionBank extends Model
     protected $fillable = [
         'uuid',
         'organization_id',
+        'business_unit_id',
+        'department_id',
         'bank_code',
         'bank_name',
         'is_system_bank',

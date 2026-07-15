@@ -22,6 +22,11 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
     Route::prefix('delivery')->group(function() {
         Route::post('register', [\App\Modules\Delivery\Controllers\PublicRegistrationController::class, 'register']);
     });
+
+    Route::prefix('security')->group(function() {
+        // Public SAML ACS endpoint (IdP posts directly here)
+        Route::post('saml/{organizationUuid}/acs', [\App\Http\Controllers\SamlController::class, 'acs'])->name('saml.acs');
+    });
 });
 
 // Protected API V1 Grouping

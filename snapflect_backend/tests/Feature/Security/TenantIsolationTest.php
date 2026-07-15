@@ -13,23 +13,24 @@ class TenantIsolationTest extends TestCase
 
     public function test_org_admin_cannot_see_users_from_another_organization(): void
     {
-        // Arrange
+        // Arrange: two separate organizations
         $orgA = Organization::factory()->create();
         $orgB = Organization::factory()->create();
 
-        $adminA = User::factory()->create(['organization_id' => $orgA->id]);
+        // Create an ORG_ADMIN user belonging to orgA
         $role = Role::factory()->create(['role_code' => 'ORG_ADMIN']);
+        $adminA = User::factory()->create(['organization_id' => $orgA->id]);
         $adminA->roles()->attach($role->id);
 
+        // Create a user belonging to orgB
         $userB = User::factory()->create(['organization_id' => $orgB->id]);
 
-        $this->actingAs($adminA);
+        // Act: adminA attempts to view userB's profile
+        $response = $this->actingAs($adminA)
+                         ->getJson('/api/v1/security/users/' . $userB->uuid);
 
-        // Act
-        $response = $this->getJson('/api/v1/security/users/' . $userB->uuid);
-
-        // Assert
-        // Policy should block viewing a user outside their tenant
+        // Assert: Policy should block cross-org access
         $response->assertStatus(403);
     }
 }
+

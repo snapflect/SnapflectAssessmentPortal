@@ -42,6 +42,11 @@ return [
             'synchronous' => null,
         ],
 
+        'tenant_template' => [
+            'driver' => env('DB_CONNECTION', 'sqlite'),
+            'database' => null, // Dynamic
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

@@ -11,6 +11,9 @@ Route::apiResource('users', UserController::class)->parameters([
     'users' => 'uuid'
 ]);
 
+Route::post('users/invite', [UserController::class, 'invite'])
+    ->name('users.invite');
+
 Route::get('users/{userUuid}/activity', [UserController::class, 'activityLogs'])
     ->name('users.activity');
 
@@ -36,3 +39,7 @@ Route::post('roles/{roleUuid}/permissions', [RoleController::class, 'assignPermi
 Route::apiResource('permissions', PermissionController::class)->parameters([
     'permissions' => 'uuid'
 ]);
+
+// SAML Configuration Routes
+Route::get('saml/{organizationUuid}', [\App\Http\Controllers\SamlController::class, 'show'])->name('saml.show');
+Route::post('saml/{organizationUuid}', [\App\Http\Controllers\SamlController::class, 'update'])->name('saml.update');

@@ -27,22 +27,22 @@ class LocationPolicy
 
     public function view(User $user, Location $location): bool
     {
-        return $user->organization_id === $location->organization_id;
+        return $user->canAccessPlacement($location);
     }
 
     public function create(User $user): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN');
+        return $user->hasRole('CLIENT_ADMIN');
     }
 
     public function update(User $user, Location $location): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') && $user->organization_id === $location->organization_id;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $location->organization_id;
     }
 
     public function delete(User $user, Location $location): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') && $user->organization_id === $location->organization_id;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $location->organization_id;
     }
 
     public function restore(User $user, Location $location): bool

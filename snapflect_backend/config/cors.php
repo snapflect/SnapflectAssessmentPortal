@@ -24,7 +24,7 @@ return [
         'https://localhost:4200'
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => ['#^http://([a-zA-Z0-9\-]+\.)?snapflect\.localhost:4200$#', '#^http://.*\.localhost:4200$#'],
 
     'allowed_headers' => ['*'],
 

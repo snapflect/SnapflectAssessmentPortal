@@ -149,8 +149,8 @@ interface Question {
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-muted mb-1">Question Code *</label>
-              <input type="text" formControlName="question_code" class="input-field" placeholder="e.g. Q-MATH-01">
+              <label class="block text-sm font-medium text-muted mb-1">Question Code (Optional)</label>
+              <input type="text" formControlName="question_code" class="input-field" placeholder="Leave blank to auto-generate">
             </div>
           </div>
 
@@ -321,7 +321,7 @@ export class QuestionListPageComponent implements OnInit {
   constructor() {
     this.questionForm = this.fb.group({
       question_bank_uuid: ['', Validators.required],
-      question_code: ['', Validators.required],
+      question_code: [''],
       question_type: ['MCQ', Validators.required],
       difficulty_level: ['MEDIUM', Validators.required],
       question_text: ['', Validators.required],

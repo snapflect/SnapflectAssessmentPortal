@@ -14,6 +14,8 @@ use App\Modules\Governance\Repositories\OrganizationRepositoryInterface;
 use App\Modules\Governance\Repositories\BusinessUnitRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Core\Exceptions\BusinessRuleException;
+use App\Modules\Security\Models\User;
 
 class DepartmentService
 {
@@ -29,6 +31,16 @@ class DepartmentService
 
         return DB::transaction(function () use ($dto, $userId) {
             $data = $dto->toArray();
+            if (empty($data['department_code'])) {
+                $baseCode = \Illuminate\Support\Str::slug($data['department_name']);
+                $code = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Governance\Models\Department::where('department_code', $code)->whereNull('deleted_date')->exists()) {
+                    $code = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                $data['department_code'] = $code;
+            }
             $data['created_by'] = $userId;
             $data['modified_by'] = $userId;
             return $this->departmentRepository->create($data);
@@ -54,6 +66,11 @@ class DepartmentService
     {
         return DB::transaction(function () use ($uuid, $userId) {
             $department = $this->findByUuid($uuid);
+            
+            if (User::where('department_id', $department->id)->whereNull('deleted_date')->exists()) {
+                throw new BusinessRuleException("Cannot delete department because it has active users assigned.");
+            }
+
             $this->departmentRepository->update($department, ['deleted_by' => $userId, 'is_deleted' => true]);
             return $this->departmentRepository->delete($department);
         });

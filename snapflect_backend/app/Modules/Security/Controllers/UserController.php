@@ -13,13 +13,16 @@ use App\Modules\Security\Requests\CreateUserRequest;
 use App\Modules\Security\Requests\UpdateUserRequest;
 use App\Modules\Security\Resources\UserResource;
 use App\Modules\Security\Models\User;
+use App\Modules\Security\Services\UserInvitationService;
+use App\Modules\Governance\Models\Organization;
 
 class UserController extends Controller
 {
     use AuthorizesRequests;
 
     public function __construct(
-        private readonly UserService $userService
+        private readonly UserService $userService,
+        private readonly UserInvitationService $userInvitationService
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -29,7 +32,7 @@ class UserController extends Controller
         $perPage = min(100, (int) $request->query('per_page', 15));
         
         $include = $request->query('include', '');
-        $relations = [];
+        $relations = ['businessUnit', 'department', 'location'];
         if (str_contains($include, 'roles')) {
             $relations[] = 'roles';
         }
@@ -74,6 +77,35 @@ class UserController extends Controller
                 'message' => 'Operation completed successfully'
             ])
         );
+    }
+
+    public function invite(Request $request): JsonResponse
+    {
+        $this->authorize('create', User::class);
+
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'role_code' => 'required|string',
+            'organization_id' => 'required|integer',
+        ]);
+
+        if (!$request->user()->roles->contains('role_code', 'PLATFORM_ADMIN')) {
+            if ($request->user()->organization_id !== (int) $validated['organization_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to invite users to this organization.'
+                ], 403);
+            }
+        }
+
+        $org = Organization::findOrFail($validated['organization_id']);
+        
+        $this->userInvitationService->inviteUser($org, $validated['email'], $validated['role_code']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Invitation sent successfully'
+        ]);
     }
 
     public function update(UpdateUserRequest $request, string $uuid): JsonResponse

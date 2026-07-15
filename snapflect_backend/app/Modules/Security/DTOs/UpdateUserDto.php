@@ -9,6 +9,7 @@ use App\Shared\DTOs\BaseDto;
 readonly class UpdateUserDto extends BaseDto
 {
     public function __construct(
+        public array $providedKeys = [],
         public ?int $business_unit_id = null,
         public ?int $department_id = null,
         public ?int $location_id = null,
@@ -22,9 +23,10 @@ readonly class UpdateUserDto extends BaseDto
     public static function fromArray(array $data): self
     {
         return new self(
-            business_unit_id: isset($data['business_unit_id']) ? (int) $data['business_unit_id'] : null,
-            department_id: isset($data['department_id']) ? (int) $data['department_id'] : null,
-            location_id: isset($data['location_id']) ? (int) $data['location_id'] : null,
+            providedKeys: array_keys($data),
+            business_unit_id: array_key_exists('business_unit_id', $data) && $data['business_unit_id'] !== null ? (int) $data['business_unit_id'] : null,
+            department_id: array_key_exists('department_id', $data) && $data['department_id'] !== null ? (int) $data['department_id'] : null,
+            location_id: array_key_exists('location_id', $data) && $data['location_id'] !== null ? (int) $data['location_id'] : null,
             first_name: $data['first_name'] ?? null,
             last_name: $data['last_name'] ?? null,
             email: $data['email'] ?? null,
@@ -35,15 +37,18 @@ readonly class UpdateUserDto extends BaseDto
 
     public function toArray(): array
     {
-        return array_filter([
-            'business_unit_id' => $this->business_unit_id,
-            'department_id' => $this->department_id,
-            'location_id' => $this->location_id,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'email' => $this->email,
-            'password' => $this->password,
-            'status' => $this->status,
-        ], fn($value) => $value !== null);
+        $data = [];
+        $fields = [
+            'business_unit_id', 'department_id', 'location_id',
+            'first_name', 'last_name', 'email', 'password', 'status'
+        ];
+        
+        foreach ($fields as $field) {
+            if (in_array($field, $this->providedKeys)) {
+                $data[$field] = $this->{$field};
+            }
+        }
+        
+        return $data;
     }
 }

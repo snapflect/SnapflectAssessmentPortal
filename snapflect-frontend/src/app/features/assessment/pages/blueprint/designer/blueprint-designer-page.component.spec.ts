@@ -1,3 +1,4 @@
+import { RouterTestingModule } from '@angular/router/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BlueprintDesignerPageComponent } from './blueprint-designer-page.component';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -11,7 +12,7 @@ describe('BlueprintDesignerPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BlueprintDesignerPageComponent, HttpClientTestingModule],
+      imports: [BlueprintDesignerPageComponent, HttpClientTestingModule, RouterTestingModule],
       providers: [
         {
           provide: ActivatedRoute,
@@ -33,7 +34,7 @@ describe('BlueprintDesignerPageComponent', () => {
   });
 
   it('should initialize and load blueprints, competencies, tags, and banks', () => {
-    const reqBlueprints = httpMock.expectOne(`${environment.apiUrl}/assessment/blueprints?include=assessment,sections.rules.competency,sections.rules.tag&per_page=100`);
+    const reqBlueprints = httpMock.expectOne(`${environment.apiUrl}/assessment/blueprints?include=assessment,sections.rules.competency,sections.rules.tag&per_page=100&assessment_uuid=test-uuid`);
     expect(reqBlueprints.request.method).toBe('GET');
     reqBlueprints.flush({ data: [{ uuid: 'bp1', relationships: { assessment: { uuid: 'test-uuid' } } }] });
 

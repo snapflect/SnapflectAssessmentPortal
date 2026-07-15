@@ -20,6 +20,9 @@ interface Location {
     country: string | null;
     status: string;
   };
+  relationships?: {
+    users_count?: number;
+  };
 }
 
 @Component({
@@ -58,6 +61,7 @@ interface Location {
               <tr>
                 <th scope="col" class="px-6 py-4 font-medium">Code</th>
                 <th scope="col" class="px-6 py-4 font-medium">Name</th>
+                <th scope="col" class="px-6 py-4 font-medium text-center">Headcount</th>
                 <th scope="col" class="px-6 py-4 font-medium">City</th>
                 <th scope="col" class="px-6 py-4 font-medium">Country</th>
                 <th scope="col" class="px-6 py-4 font-medium">Status</th>
@@ -66,7 +70,7 @@ interface Location {
             </thead>
             <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
               <tr *ngIf="loading && locations.length === 0">
-                <td colspan="6" class="px-6 py-12 text-center text-muted">
+                <td colspan="7" class="px-6 py-12 text-center text-muted">
                   <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -76,13 +80,18 @@ interface Location {
               </tr>
               <ng-container *ngIf="locations | globalSearch: searchTerm as filteredLocations">
                 <tr *ngIf="!loading && filteredLocations.length === 0">
-                  <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                  <td colspan="7" class="px-6 py-12 text-center text-slate-500">
                     No locations found matching your search.
                   </td>
                 </tr>
                 <tr *ngFor="let loc of filteredLocations" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
                   <td class="px-6 py-4 font-medium text-brand-light">{{ loc.attributes.location_code }}</td>
                   <td class="px-6 py-4 text-main font-medium">{{ loc.attributes.location_name }}</td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="bg-brand/10 text-brand px-2 py-1 rounded text-xs font-medium border border-brand/20">
+                      {{ loc.relationships?.users_count || 0 }}
+                    </span>
+                  </td>
                   <td class="px-6 py-4">{{ loc.attributes.city || '-' }}</td>
                   <td class="px-6 py-4">{{ loc.attributes.country || '-' }}</td>
                   <td class="px-6 py-4">
@@ -118,8 +127,8 @@ interface Location {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Location Code *</label>
-            <input type="text" formControlName="location_code" class="input-field" placeholder="e.g. NY-HQ">
+            <label class="block text-sm font-medium text-muted mb-1">Location Code (Optional)</label>
+            <input type="text" formControlName="location_code" class="input-field" placeholder="Leave blank to auto-generate">
           </div>
 
           <div>
@@ -175,7 +184,7 @@ export class LocationListPageComponent implements OnInit {
   constructor() {
     this.locForm = this.fb.group({
       organization_id: [1, Validators.required],
-      location_code: ['', Validators.required],
+      location_code: [''],
       location_name: ['', Validators.required],
       city: [''],
       country: ['']

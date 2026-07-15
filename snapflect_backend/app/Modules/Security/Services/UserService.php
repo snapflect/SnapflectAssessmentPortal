@@ -54,6 +54,17 @@ class UserService
             );
 
             $data = $dto->toArray();
+            
+            if (array_key_exists('business_unit_id', $data) && $data['business_unit_id'] === null && $user->hasRole('BU_MANAGER')) {
+                throw new TenantValidationException("Cannot clear Business Unit placement while the user holds the BU_MANAGER role.");
+            }
+            if (array_key_exists('department_id', $data) && $data['department_id'] === null && $user->hasRole('DEPT_MANAGER')) {
+                throw new TenantValidationException("Cannot clear Department placement while the user holds the DEPT_MANAGER role.");
+            }
+            if (array_key_exists('location_id', $data) && $data['location_id'] === null && $user->hasRole('LOCATION_MANAGER')) {
+                throw new TenantValidationException("Cannot clear Location placement while the user holds the LOCATION_MANAGER role.");
+            }
+
             $data['modified_by'] = $userId;
             return $this->userRepository->update($user, $data);
         });
@@ -106,6 +117,16 @@ class UserService
                 if (!$assigner || !$assigner->roles->contains('role_code', 'PLATFORM_ADMIN')) {
                     throw new \Illuminate\Auth\Access\AuthorizationException("Only Platform Administrators can assign the PLATFORM_ADMIN role.");
                 }
+            }
+
+            if ($role->role_code === 'BU_MANAGER' && $user->business_unit_id === null) {
+                throw new TenantValidationException("Cannot assign BU_MANAGER to a user without a Business Unit placement.");
+            }
+            if ($role->role_code === 'DEPT_MANAGER' && $user->department_id === null) {
+                throw new TenantValidationException("Cannot assign DEPT_MANAGER to a user without a Department placement.");
+            }
+            if ($role->role_code === 'LOCATION_MANAGER' && $user->location_id === null) {
+                throw new TenantValidationException("Cannot assign LOCATION_MANAGER to a user without a Location placement.");
             }
 
             // Use firstOrCreate so the Eloquent model events fire (HasUuid auto-generates the uuid column)

@@ -29,21 +29,12 @@ class UserPolicy
         if ($user->id === $model->id) {
             return true;
         }
-
-        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
-            return $user->organization_id === $model->organization_id;
-        }
-
-        if ($user->roles->contains('role_code', 'DEPT_MANAGER')) {
-            return $user->department_id === $model->department_id;
-        }
-
-        return false;
+        return $user->canAccessPlacement($model);
     }
 
     public function create(User $user): bool
     {
-        return $user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN') || $user->roles->contains('role_code', 'DEPT_MANAGER');
+        return $user->hasRole('CLIENT_ADMIN');
     }
 
     public function update(User $user, User $model): bool
@@ -52,28 +43,12 @@ class UserPolicy
             return true;
         }
 
-        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
-            return $user->organization_id === $model->organization_id;
-        }
-
-        if ($user->roles->contains('role_code', 'DEPT_MANAGER')) {
-            return $user->department_id === $model->department_id;
-        }
-
-        return false;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $model->organization_id;
     }
 
     public function delete(User $user, User $model): bool
     {
-        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
-            return $user->organization_id === $model->organization_id;
-        }
-
-        if ($user->roles->contains('role_code', 'DEPT_MANAGER')) {
-            return $user->department_id === $model->department_id;
-        }
-
-        return false;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $model->organization_id;
     }
 
     public function restore(User $user, User $model): bool
@@ -92,10 +67,7 @@ class UserPolicy
      */
     public function assignRole(User $user, User $model): bool
     {
-        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
-            return $user->organization_id === $model->organization_id;
-        }
-        return false;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $model->organization_id;
     }
 
     /**
@@ -104,9 +76,6 @@ class UserPolicy
      */
     public function revokeRole(User $user, User $model): bool
     {
-        if ($user->roles->contains('role_code', 'CLIENT_ADMIN') || $user->roles->contains('role_code', 'ORG_ADMIN')) {
-            return $user->organization_id === $model->organization_id;
-        }
-        return false;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $model->organization_id;
     }
 }

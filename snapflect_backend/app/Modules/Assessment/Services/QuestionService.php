@@ -30,6 +30,21 @@ class QuestionService
             }
 
             $data = $dto->toArray();
+
+            if (empty($data['question_code'])) {
+                $baseCode = Str::slug(Str::limit(strip_tags($data['question_text']), 30, ''));
+                if (empty($baseCode)) {
+                    $baseCode = 'q';
+                }
+                $code = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Assessment\Models\Question::where('question_code', $code)->whereNull('deleted_date')->exists()) {
+                    $code = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                $data['question_code'] = $code;
+            }
+
             $data['organization_id'] = $organizationId;
             $data['question_bank_id'] = $bank->id;
             $data['created_by'] = $userId;

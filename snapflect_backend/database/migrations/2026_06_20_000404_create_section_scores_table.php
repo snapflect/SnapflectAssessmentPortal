@@ -13,7 +13,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('organization_id');
             $table->unsignedBigInteger('assessment_result_id');
-            $table->unsignedBigInteger('assessment_section_id');
+            $table->unsignedBigInteger('assessment_section_id')->nullable();
             $table->decimal('section_score', 10, 2)->default(0.00);
             $table->decimal('section_percentage', 10, 2)->default(0.00);
             $table->decimal('section_weight', 10, 2)->default(1.00);

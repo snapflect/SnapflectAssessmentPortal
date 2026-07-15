@@ -27,22 +27,22 @@ class BusinessUnitPolicy
 
     public function view(User $user, BusinessUnit $businessUnit): bool
     {
-        return $user->organization_id === $businessUnit->organization_id;
+        return $user->canAccessPlacement($businessUnit);
     }
 
     public function create(User $user): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN');
+        return $user->hasRole('CLIENT_ADMIN');
     }
 
     public function update(User $user, BusinessUnit $businessUnit): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') && $user->organization_id === $businessUnit->organization_id;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $businessUnit->organization_id;
     }
 
     public function delete(User $user, BusinessUnit $businessUnit): bool
     {
-        return $user->roles->contains('role_code', 'ORG_ADMIN') && $user->organization_id === $businessUnit->organization_id;
+        return $user->hasRole('CLIENT_ADMIN') && $user->organization_id === $businessUnit->organization_id;
     }
 
     public function restore(User $user, BusinessUnit $businessUnit): bool

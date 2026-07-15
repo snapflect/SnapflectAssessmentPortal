@@ -32,7 +32,7 @@ class OrganizationController extends Controller
             $organizations = $this->organizationService->paginate($perPage);
             $organizations->load('currentSubscription.plan');
         } else {
-            // For ORG_ADMIN, only return their own organization.
+            // For CLIENT_ADMIN, only return their own organization.
             $organization = $this->organizationService->findByUuid($request->user()->organization->uuid ?? '');
             $organization->load('currentSubscription.plan');
             // Wrap it in a LengthAwarePaginator to match the paginate return type
@@ -127,5 +127,96 @@ class OrganizationController extends Controller
             ],
             'success' => true
         ]);
+    }
+
+    public function inviteAdmin(string $uuid, Request $request): JsonResponse
+    {
+        $organization = $this->organizationService->findByUuid($uuid);
+        $this->authorize('update', $organization);
+
+        $email = $organization->contact_email;
+        if (!$email) {
+            return response()->json(['success' => false, 'message' => 'Organization has no contact email.'], 400);
+        }
+
+        // Find or create the user
+        $user = \App\Modules\Security\Models\User::firstOrCreate(
+            ['email' => $email],
+            [
+                'organization_id' => $organization->id,
+                'first_name' => 'Client',
+                'last_name' => 'Admin',
+                'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(32)),
+                'status' => 'ACTIVE'
+            ]
+        );
+
+        // Generate a password reset token
+        $token = \Illuminate\Support\Facades\Password::broker()->createToken($user);
+        
+        // Build the claim URL
+        $tenantId = strtolower($organization->organization_code ?? $organization->uuid);
+        $claimUrl = "http://{$tenantId}.snapflect.localhost:4200/claim-account?token={$token}&email=" . urlencode($email);
+
+        // Send the custom invite email
+        \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\AdminInviteMail($claimUrl, $organization->organization_name));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin invite sent successfully'
+        ]);
+    }
+
+    public function updateSmtp(string $uuid, Request $request): JsonResponse
+    {
+        $organization = $this->organizationService->findByUuid($uuid);
+        $this->authorize('update', $organization);
+
+        $validated = $request->validate([
+            'smtp_host' => 'required|string',
+            'smtp_port' => 'required|integer',
+            'smtp_username' => 'required|string',
+            'smtp_password' => 'required|string',
+            'smtp_encryption' => 'nullable|string',
+            'smtp_from_address' => 'required|email',
+            'smtp_from_name' => 'required|string',
+        ]);
+
+        $tenantId = strtolower($organization->organization_code ?? $organization->uuid);
+        $tenant = \App\Models\Tenant::find($tenantId);
+
+        if (!$tenant) {
+            return response()->json(['success' => false, 'message' => 'Tenant not found.'], 404);
+        }
+
+        $tenant->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'SMTP settings updated successfully'
+        ]);
+    }
+
+    public function uploadLogo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'logo' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('logos', $filename, 'public');
+            
+            $logoUrl = \Illuminate\Support\Facades\Storage::url($path);
+            
+            return response()->json([
+                'success' => true,
+                'data' => ['logo_path' => $logoUrl],
+                'message' => 'Logo uploaded successfully'
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No file uploaded'], 400);
     }
 }

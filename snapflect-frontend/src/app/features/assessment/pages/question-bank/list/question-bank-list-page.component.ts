@@ -123,8 +123,8 @@ interface QuestionBank {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Bank Code *</label>
-            <input type="text" formControlName="bank_code" class="input-field" placeholder="e.g. IT-SEC-01">
+            <label class="block text-sm font-medium text-muted mb-1">Bank Code (Optional)</label>
+            <input type="text" formControlName="bank_code" class="input-field" placeholder="Leave blank to auto-generate">
           </div>
 
           <div>
@@ -169,7 +169,7 @@ export class QuestionBankListPageComponent implements OnInit {
   constructor() {
     this.bankForm = this.fb.group({
       organization_id: [null],
-      bank_code: ['', Validators.required],
+      bank_code: [''],
       bank_name: ['', Validators.required],
       description: ['']
     });

@@ -37,6 +37,17 @@ class ExecutionApiTest extends TestCase
         $this->user = User::factory()->create();
         $this->qUuid = Str::uuid()->toString();
 
+        \Illuminate\Support\Facades\DB::table('question_banks')->insert([
+            'id' => 1,
+            'uuid' => Str::uuid()->toString(),
+            'organization_id' => $this->user->organization_id,
+            'bank_name' => 'Default Bank',
+            'bank_code' => 'DEFAULT_BANK',
+            'status' => 'ACTIVE',
+            'created_date' => Carbon::now(),
+            'modified_date' => Carbon::now()
+        ]);
+
         $this->assessment = Assessment::factory()->create([
             'organization_id' => $this->user->organization_id,
             'assessment_name' => 'Test Assessment',
@@ -116,6 +127,68 @@ class ExecutionApiTest extends TestCase
         ]);
         $this->attempt->option_order_json = json_encode([$this->qUuid => [$optUuid]]);
         $this->attempt->save();
+
+        \Illuminate\Support\Facades\DB::table('questions')->insert([
+            'id' => 999,
+            'uuid' => $this->qUuid,
+            'organization_id' => $this->user->organization_id,
+            'question_bank_id' => 1,
+            'question_text' => 'Test',
+            'question_code' => 'Q_999',
+            'question_type' => 'MULTIPLE_CHOICE',
+            'difficulty_level' => 'EASY',
+            'status' => 'ACTIVE',
+            'created_date' => Carbon::now(),
+            'modified_date' => Carbon::now()
+        ]);
+
+        $sUuid = Str::uuid()->toString();
+
+        \Illuminate\Support\Facades\DB::table('assessment_blueprints')->insert([
+            'id' => 1,
+            'uuid' => Str::uuid()->toString(),
+            'organization_id' => $this->user->organization_id,
+            'assessment_id' => $this->assessment->id,
+            'blueprint_name' => 'Default Blueprint',
+            'created_date' => Carbon::now(),
+            'modified_date' => Carbon::now()
+        ]);
+
+        \Illuminate\Support\Facades\DB::table('blueprint_sections')->insert([
+            'id' => 1,
+            'uuid' => $sUuid,
+            'blueprint_id' => 1,
+            'section_name' => 'Default Section',
+            'display_order' => 1,
+            'selection_strategy' => 'RANDOM',
+            'created_date' => Carbon::now(),
+            'modified_date' => Carbon::now()
+        ]);
+
+        \Illuminate\Support\Facades\DB::table('attempt_sections')->insert([
+            'id' => 1,
+            'uuid' => Str::uuid()->toString(),
+            'organization_id' => $this->user->organization_id,
+            'assessment_attempt_id' => $this->attempt->id,
+            'snapshot_section_uuid' => $sUuid,
+            'section_name' => 'Default Section',
+            'display_order' => 1,
+            'created_date' => Carbon::now()
+        ]);
+
+        \Illuminate\Support\Facades\DB::table('attempt_questions')->insert([
+            'id' => 999,
+            'uuid' => Str::uuid()->toString(),
+            'organization_id' => $this->user->organization_id,
+            'assessment_attempt_id' => $this->attempt->id,
+            'attempt_section_id' => 1,
+            'snapshot_question_uuid' => $this->qUuid,
+            'question_code' => 'Q_999',
+            'question_type' => 'MULTIPLE_CHOICE',
+            'difficulty_level' => 'EASY',
+            'display_order' => 1,
+            'created_date' => Carbon::now()
+        ]);
     }
 
     public function test_timer_endpoint_success()

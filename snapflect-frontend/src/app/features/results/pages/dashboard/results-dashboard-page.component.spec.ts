@@ -64,7 +64,7 @@ describe('ResultsDashboardPageComponent', () => {
       component.fetchRecentResults();
       expect(component.resultsLoading).toBeTrue();
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/results/?include=candidate,assessment&per_page=20`);
+      const req = httpMock.expectOne(`${environment.apiUrl}/results/?include=candidate,assessment,assessmentAttempt&per_page=20&latest_attempt_per_candidate=true`);
       expect(req.request.method).toBe('GET');
       req.flush({ data: [{ uuid: '123' }] });
 
@@ -74,7 +74,7 @@ describe('ResultsDashboardPageComponent', () => {
 
     it('should handle fetchRecentResults success without .data wrapper', () => {
       component.fetchRecentResults();
-      const req = httpMock.expectOne(`${environment.apiUrl}/results/?include=candidate,assessment&per_page=20`);
+      const req = httpMock.expectOne(`${environment.apiUrl}/results/?include=candidate,assessment,assessmentAttempt&per_page=20&latest_attempt_per_candidate=true`);
       req.flush([{ uuid: '123' }]);
 
       expect(component.recentResults.length).toBe(1);
@@ -83,7 +83,7 @@ describe('ResultsDashboardPageComponent', () => {
 
     it('should handle fetchRecentResults error', () => {
       component.fetchRecentResults();
-      const req = httpMock.expectOne(`${environment.apiUrl}/results/?include=candidate,assessment&per_page=20`);
+      const req = httpMock.expectOne(`${environment.apiUrl}/results/?include=candidate,assessment,assessmentAttempt&per_page=20&latest_attempt_per_candidate=true`);
       req.error(new ErrorEvent('Network error'));
 
       expect(component.resultsLoading).toBeFalse();

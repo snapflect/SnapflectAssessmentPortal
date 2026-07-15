@@ -1,6 +1,7 @@
-import { Component, output, inject } from '@angular/core';
+import { Component, output, input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +10,7 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
 @Component({
   selector: 'app-login-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()" class="glass-card p-8">
       <div class="mb-6">
@@ -28,7 +29,7 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
       <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
           <label for="password" class="block text-sm font-medium text-muted">Password</label>
-          <a href="#" class="text-sm font-medium text-brand-light hover:text-main transition-colors">Forgot password?</a>
+          <a routerLink="/auth/forgot-password" class="text-sm font-medium text-brand-light hover:text-main transition-colors">Forgot password?</a>
         </div>
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -39,6 +40,10 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
         <p *ngIf="form.get('password')?.touched && form.get('password')?.invalid" class="mt-2 text-sm text-red-400">
           Password is required.
         </p>
+      </div>
+
+      <div *ngIf="errorMessage()" class="mb-6 bg-red-50 text-red-600 p-3 rounded-md text-sm">
+        {{ errorMessage() }}
       </div>
 
       <button type="submit" [disabled]="form.invalid" class="w-full btn-primary flex justify-center items-center h-11">
@@ -52,6 +57,7 @@ import { LoginRequestModel } from '../../../../shared/models/auth.models';
 export class LoginFormComponent {
   private fb = inject(FormBuilder);
   submitLogin = output<LoginRequestModel>();
+  errorMessage = input<string | null>(null);
 
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],

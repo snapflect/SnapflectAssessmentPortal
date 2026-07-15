@@ -29,7 +29,12 @@ class LocationController extends Controller
         $perPage = min(100, (int) $request->query('per_page', 15));
         
         if ($request->user()->roles->contains('role_code', 'PLATFORM_ADMIN')) {
-            $locations = $this->locationService->paginate($perPage);
+            if ($request->has('organization_id')) {
+                $organizationId = (int) $request->query('organization_id');
+                $locations = $this->locationService->paginateByOrganization($organizationId, $perPage);
+            } else {
+                $locations = $this->locationService->paginate($perPage);
+            }
         } else {
             $organizationId = $request->user()->organization_id;
             $locations = $this->locationService->paginateByOrganization($organizationId, $perPage);

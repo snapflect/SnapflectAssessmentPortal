@@ -17,6 +17,9 @@ class CustomRbacSeeder extends Seeder
             'REVIEWER' => 'Reviewer',
             'CANDIDATE' => 'Candidate',
             'CLIENT_ADMIN' => 'Client Admin',
+            'BU_MANAGER' => 'Business Unit Manager',
+            'DEPT_MANAGER' => 'Department Manager',
+            'LOCATION_MANAGER' => 'Location Manager',
             'PROCTOR' => 'Proctor',
             'BILLING_ADMIN' => 'Billing Admin',
             'READ_ONLY' => 'Read Only',
@@ -89,6 +92,22 @@ class CustomRbacSeeder extends Seeder
             'ASSESSMENT_MANAGER' => [
                 'Assessment.QuestionBanks.View', 'Assessment.QuestionBanks.Manage', 'Assessment.Questions.View', 'Assessment.Questions.Manage', 'Assessment.Questions.Create', 'Assessment.Questions.Review', 'Assessment.Competencies.View', 'Assessment.Competencies.Manage', 'Assessment.Catalog.View', 'Assessment.Catalog.Manage', 'Assessment.Blueprints.View', 'Assessment.Blueprints.Manage', 'Assessment.Publications.View', 'Assessment.Publications.Manage',
                 'Results.Analytics.View', 'Results.Analytics.Export', 'Results.ManualScoring.Score', 'Results.AllResults.View',
+                'Support.Tickets.Create'
+            ],
+            'BU_MANAGER' => [
+                'Governance.Departments.View', 'Governance.Departments.Manage', 
+                'Security.Users.View', 'Security.Users.Manage',
+                'Results.Analytics.View', 'Results.Analytics.Export', 'Results.AllResults.View',
+                'Support.Tickets.Create'
+            ],
+            'DEPT_MANAGER' => [
+                'Security.Users.View', 'Security.Users.Manage',
+                'Results.Analytics.View', 'Results.Analytics.Export', 'Results.AllResults.View',
+                'Support.Tickets.Create'
+            ],
+            'LOCATION_MANAGER' => [
+                'Governance.Locations.View', 'Governance.Locations.Manage',
+                'Security.Users.View',
                 'Support.Tickets.Create'
             ],
             'CONTENT_CREATOR' => [

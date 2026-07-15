@@ -142,8 +142,8 @@ interface Competency {
       <app-slide-over [isOpen]="isGroupFormOpen" title="Create Competency Group" description="Groups help categorize related competencies." (closeEvent)="closeGroupForm()">
         <form [formGroup]="groupForm" (ngSubmit)="submitGroup()" class="space-y-5">
           <div>
-            <label class="block text-sm font-medium text-muted mb-1">Group Code *</label>
-            <input type="text" formControlName="group_code" class="input-field" placeholder="e.g. TECH">
+            <label class="block text-sm font-medium text-muted mb-1">Group Code (Optional)</label>
+            <input type="text" formControlName="group_code" class="input-field" placeholder="Leave blank to auto-generate">
           </div>
           <div>
             <label class="block text-sm font-medium text-muted mb-1">Group Name *</label>
@@ -168,8 +168,8 @@ interface Competency {
         <form [formGroup]="competencyForm" (ngSubmit)="submitCompetency()" class="space-y-5">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-muted mb-1">Code *</label>
-              <input type="text" formControlName="competency_code" class="input-field" placeholder="e.g. TECH-SQL-01">
+              <label class="block text-sm font-medium text-muted mb-1">Code (Optional)</label>
+              <input type="text" formControlName="competency_code" class="input-field" placeholder="Leave blank to auto-generate">
             </div>
             <div>
               <label class="block text-sm font-medium text-muted mb-1">Group</label>
@@ -230,12 +230,12 @@ export class CompetencyListPageComponent implements OnInit {
 
   constructor() {
     this.groupForm = this.fb.group({
-      group_code: ['', Validators.required],
+      group_code: [''],
       group_name: ['', Validators.required],
       description: ['']
     });
     this.competencyForm = this.fb.group({
-      competency_code: ['', Validators.required],
+      competency_code: [''],
       competency_name: ['', Validators.required],
       proficiency_level: ['INTERMEDIATE', Validators.required],
       description: [''],

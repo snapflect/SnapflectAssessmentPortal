@@ -9,7 +9,7 @@ use App\Shared\DTOs\BaseDto;
 readonly class CreatePermissionDto extends BaseDto
 {
     public function __construct(
-        public string $permission_code,
+        public ?string $permission_code,
         public string $module,
         public ?string $description = null,
         public ?string $status = 'ACTIVE'
@@ -18,7 +18,7 @@ readonly class CreatePermissionDto extends BaseDto
     public static function fromArray(array $data): self
     {
         return new self(
-            permission_code: $data['permission_code'],
+            permission_code: $data['permission_code'] ?? null,
             module: $data['module'],
             description: $data['description'] ?? null,
             status: $data['status'] ?? 'ACTIVE'

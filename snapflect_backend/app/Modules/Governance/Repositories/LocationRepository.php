@@ -27,8 +27,8 @@ class LocationRepository implements LocationRepositoryInterface
     public function search(string $term): Collection { return Location::where('location_name', 'like', "%{$term}%")->get(); }
     public function searchByOrganization(int $organizationId, string $term): Collection { return Location::where('organization_id', $organizationId)->where('location_name', 'like', "%{$term}%")->get(); }
     public function query(): Builder { return Location::query(); }
-    public function paginate(int $perPage = 15): LengthAwarePaginator { return Location::paginate($perPage); }
-    public function paginateByOrganization(int $organizationId, int $perPage = 15): LengthAwarePaginator { return Location::where('organization_id', $organizationId)->paginate($perPage); }
+    public function paginate(int $perPage = 15): LengthAwarePaginator { return Location::withCount('users')->paginate($perPage); }
+    public function paginateByOrganization(int $organizationId, int $perPage = 15): LengthAwarePaginator { return Location::withCount('users')->where('organization_id', $organizationId)->paginate($perPage); }
     public function create(array $data): Location { return Location::create($data); }
     public function update(Location $location, array $data): bool { return $location->update($data); }
     public function delete(Location $location): bool { return $location->delete(); }

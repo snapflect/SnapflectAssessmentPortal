@@ -24,6 +24,16 @@ class CompetencyService
     {
         return DB::transaction(function () use ($organizationId, $dto) {
             $data = $dto->toArray();
+            if (empty($data['competency_code'])) {
+                $baseCode = Str::slug($data['competency_name']);
+                $code = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Assessment\Models\Competency::where('competency_code', $code)->whereNull('deleted_date')->exists()) {
+                    $code = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                $data['competency_code'] = $code;
+            }
             $data['uuid'] = Str::uuid()->toString();
             $data['organization_id'] = $organizationId;
             $data['created_by'] = auth()->id();
@@ -75,6 +85,16 @@ class CompetencyService
     {
         return DB::transaction(function () use ($organizationId, $dto) {
             $data = $dto->toArray();
+            if (empty($data['group_code'])) {
+                $baseCode = Str::slug($data['group_name']);
+                $code = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Assessment\Models\CompetencyGroup::where('group_code', $code)->whereNull('deleted_date')->exists()) {
+                    $code = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                $data['group_code'] = $code;
+            }
             $data['uuid'] = Str::uuid()->toString();
             $data['organization_id'] = $organizationId;
             $data['created_by'] = auth()->id();

@@ -9,14 +9,19 @@ use App\Shared\DTOs\BaseDto;
 readonly class CreateQuestionBankDto extends BaseDto
 {
     public ?int $organization_id;
-    public string $bank_code;
+    public ?int $business_unit_id;
+    public ?int $department_id;
+    public ?string $bank_code;
     public string $bank_name;
     public ?string $description;
 
     public function __construct(
-        ?int $organization_id = null, string $bank_code = null, string $bank_name = null, ?string $description = null
+        ?int $organization_id = null, ?string $bank_code = null, string $bank_name = null, ?string $description = null,
+        ?int $business_unit_id = null, ?int $department_id = null
     ) {
         $this->organization_id = $organization_id;
+        $this->business_unit_id = $business_unit_id;
+        $this->department_id = $department_id;
         $this->bank_code = $bank_code;
         $this->bank_name = $bank_name;
         $this->description = $description;
@@ -28,7 +33,9 @@ readonly class CreateQuestionBankDto extends BaseDto
             $data['organization_id'] ?? null,
             $data['bank_code'] ?? null,
             $data['bank_name'] ?? null,
-            $data['description'] ?? null
+            $data['description'] ?? null,
+            $data['business_unit_id'] ?? null,
+            $data['department_id'] ?? null
         );
     }
 

@@ -32,6 +32,16 @@ class AssessmentService
     {
         return DB::transaction(function () use ($organizationId, $dto) {
             $data = $dto->toArray();
+            if (empty($data['assessment_code'])) {
+                $baseCode = \Illuminate\Support\Str::slug($data['assessment_name']);
+                $code = $baseCode;
+                $counter = 1;
+                while (\App\Modules\Assessment\Models\Assessment::where('assessment_code', $code)->whereNull('deleted_date')->exists()) {
+                    $code = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+                $data['assessment_code'] = $code;
+            }
             $data['organization_id'] = $organizationId;
             $data['current_state'] = PublicationStateMachine::STATE_DRAFT;
             $data['uuid'] = (string) \Illuminate\Support\Str::uuid();

@@ -9,7 +9,7 @@ use App\Shared\DTOs\BaseDto;
 readonly class CreateRoleDto extends BaseDto
 {
     public function __construct(
-        public string $role_code,
+        public ?string $role_code,
         public string $role_name,
         public ?int $organization_id = null,
         public ?string $description = null,
@@ -20,7 +20,7 @@ readonly class CreateRoleDto extends BaseDto
     public static function fromArray(array $data): self
     {
         return new self(
-            role_code: $data['role_code'],
+            role_code: $data['role_code'] ?? null,
             role_name: $data['role_name'],
             organization_id: isset($data['organization_id']) ? (int) $data['organization_id'] : null,
             description: $data['description'] ?? null,

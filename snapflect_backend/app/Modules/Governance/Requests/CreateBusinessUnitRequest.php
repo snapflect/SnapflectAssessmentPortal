@@ -10,11 +10,12 @@ class CreateBusinessUnitRequest extends FormRequest {
         return [ 
             'organization_id' => ['required', 'integer'], 
             'business_unit_code' => [
-                'required', 
+                'nullable', 
                 'string', 
                 'max:50', 
                 Rule::unique('business_units')->where(function ($query) {
-                    return $query->where('organization_id', $this->organization_id);
+                    return $query->where('organization_id', $this->organization_id)
+                                 ->whereNull('deleted_date');
                 })
             ], 
             'business_unit_name' => ['required', 'string', 'max:255'] 

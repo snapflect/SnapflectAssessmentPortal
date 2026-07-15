@@ -38,32 +38,7 @@ return new class extends Migration
             $table->index('is_deleted');
         });
         
-        // Add foreign keys to the audit fields safely after users exists
-        Schema::table('organizations', function (Blueprint $table) {
-            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('modified_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('deleted_by')->references('id')->on('users')->restrictOnDelete();
-        });
-        Schema::table('business_units', function (Blueprint $table) {
-            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('modified_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('deleted_by')->references('id')->on('users')->restrictOnDelete();
-        });
-        Schema::table('departments', function (Blueprint $table) {
-            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('modified_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('deleted_by')->references('id')->on('users')->restrictOnDelete();
-        });
-        Schema::table('locations', function (Blueprint $table) {
-            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('modified_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('deleted_by')->references('id')->on('users')->restrictOnDelete();
-        });
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('modified_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('deleted_by')->references('id')->on('users')->restrictOnDelete();
-        });
+
     }
 
     public function down(): void

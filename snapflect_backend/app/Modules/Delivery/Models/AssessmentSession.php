@@ -14,10 +14,11 @@ use App\Modules\Assessment\Models\Assessment;
 use App\Modules\Assessment\Models\AssessmentVersion;
 use App\Modules\Assessment\Models\AssessmentSnapshot;
 use App\Modules\Security\Models\User;
+use App\Core\Traits\HasPlacementScope;
 
 class AssessmentSession extends Model
 {
-    use HasUuid, HasAuditFields, BelongsToOrganization;
+    use HasUuid, HasAuditFields, BelongsToOrganization, HasPlacementScope;
 
     protected $table = 'assessment_sessions';
 
