@@ -8,6 +8,9 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 import { GlobalSearchPipe } from '../../../../../shared/pipes/global-search.pipe';
 import { UserStore } from '../../../../../shared/stores/user.store';
+import { AppPageHeaderComponent } from '../../../../../shared/components/app-page-header/app-page-header.component';
+import { DataTableShellComponent } from '../../../../../shared/components/app-data-table-shell/app-data-table-shell.component';
+import { StatusBadgeComponent } from '../../../../../shared/components/app-status-badge/app-status-badge.component';
 
 interface Role {
   id: number;
@@ -45,86 +48,57 @@ interface Permission {
 @Component({
   selector: 'app-role-list-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, SlideOverComponent, GlobalSearchPipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, SlideOverComponent, GlobalSearchPipe, AppPageHeaderComponent, DataTableShellComponent, StatusBadgeComponent],
   template: `
     <div class="h-full flex flex-col relative">
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-main">Roles</h2>
-          <p class="text-muted text-sm mt-1">Manage RBAC roles and assign permissions via the matrix.</p>
-        </div>
-        <button *ngIf="(userStore.hasAnyPermission(['Security.Roles.Manage'])) && userStore.hasAnyPermission(['Security.Roles.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
+      <app-page-header title="Roles" subtitle="Manage RBAC roles and assign permissions via the matrix.">
+        <button action *ngIf="userStore.hasAnyPermission(['Security.Roles.Manage'])" (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
           Add Role
         </button>
-      </div>
+      </app-page-header>
 
-      <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
-          <div class="relative w-64">
-            <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search roles...">
-          </div>
-        </div>
+      <app-data-table-shell
+        [loading]="loading"
+        [items]="roles | globalSearch: searchTerm"
+        [(searchTerm)]="searchTerm"
+        searchPlaceholder="Search roles..."
+        emptyMessage="No roles found matching your search.">
+        
+        <ng-template #header>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </ng-template>
 
-        <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-muted">
-            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
-              <tr>
-                <th scope="col" class="px-6 py-4 font-medium">Code</th>
-                <th scope="col" class="px-6 py-4 font-medium">Name</th>
-                <th scope="col" class="px-6 py-4 font-medium">Type</th>
-                <th scope="col" class="px-6 py-4 font-medium">Status</th>
-                <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
-              <tr *ngIf="loading && roles.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-muted">
-                  <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading roles...
-                </td>
-              </tr>
-              <ng-container *ngIf="roles | globalSearch: searchTerm as filteredRoles">
-                <tr *ngIf="!loading && filteredRoles.length === 0">
-                  <td colspan="5" class="px-6 py-12 text-center text-slate-500">
-                    No roles found matching your search.
-                  </td>
-                </tr>
-                <tr *ngFor="let role of filteredRoles" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
-                  <td class="px-6 py-4 font-medium text-brand-light">{{ role.attributes.role_code }}</td>
-                  <td class="px-6 py-4 text-main font-medium">
-                    {{ role.attributes.role_name }}
-                    <p class="text-xs text-slate-500 mt-1 font-normal">{{ role.attributes.description }}</p>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-xs" *ngIf="role.attributes.is_system_role">System</span>
-                    <span class="bg-slate-500/10 text-muted border border-slate-500/20 px-2 py-0.5 rounded text-xs" *ngIf="!role.attributes.is_system_role">Custom</span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full"
-                          [ngClass]="role.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
-                      {{ role.attributes.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right space-x-3">
-                    <button *ngIf="userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase" (click)="openPermissionsModal(role)">Permissions</button>
-                    <button *ngIf="(userStore.hasAnyPermission(['Security.Roles.Manage'])) && userStore.hasAnyPermission(['Security.Roles.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(role)">Edit</button>
-                    <button *ngIf="(!role.attributes.is_system_role) && userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-muted hover:text-red-400 transition-colors" (click)="deleteRole(role.uuid)">Delete</button>
-                  </td>
-                </tr>
-              </ng-container>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <ng-template #row let-role>
+          <tr>
+            <td class="font-medium text-brand-light">{{ role.attributes.role_code }}</td>
+            <td class="text-main font-medium">
+              {{ role.attributes.role_name }}
+              <p class="text-xs text-slate-500 mt-1 font-normal">{{ role.attributes.description }}</p>
+            </td>
+            <td>
+              <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-xs" *ngIf="role.attributes.is_system_role">System</span>
+              <span class="bg-slate-500/10 text-muted border border-slate-500/20 px-2 py-0.5 rounded text-xs" *ngIf="!role.attributes.is_system_role">Custom</span>
+            </td>
+            <td>
+              <app-status-badge [status]="role.attributes.status"></app-status-badge>
+            </td>
+            <td class="text-right space-x-3">
+              <button *ngIf="userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-brand-light hover:text-main transition-colors text-xs font-medium uppercase" (click)="openPermissionsModal(role)">Permissions</button>
+              <button *ngIf="userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-muted hover:text-main transition-colors" (click)="openEditForm(role)">Edit</button>
+              <button *ngIf="!role.attributes.is_system_role && userStore.hasAnyPermission(['Security.Roles.Manage'])" class="text-muted hover:text-red-400 transition-colors" (click)="deleteRole(role.uuid)">Delete</button>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table-shell>
 
       <!-- Create / Edit Role Form SlideOver -->
       <app-slide-over [isOpen]="isSlideOverOpen" 

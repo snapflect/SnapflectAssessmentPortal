@@ -8,6 +8,10 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 import { GlobalSearchPipe } from '../../../../../shared/pipes/global-search.pipe';
 import { UserStore } from '../../../../../shared/stores/user.store';
+import { AppPageHeaderComponent } from '../../../../../shared/components/app-page-header/app-page-header.component';
+import { DataTableShellComponent } from '../../../../../shared/components/app-data-table-shell/app-data-table-shell.component';
+import { StatusBadgeComponent } from '../../../../../shared/components/app-status-badge/app-status-badge.component';
+import { CountBadgeComponent } from '../../../../../shared/components/app-count-badge/app-count-badge.component';
 
 interface Department {
   id: number;
@@ -49,88 +53,56 @@ interface BusinessUnit {
 @Component({
   selector: 'app-department-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SlideOverComponent, GlobalSearchPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SlideOverComponent, GlobalSearchPipe, AppPageHeaderComponent, DataTableShellComponent, StatusBadgeComponent, CountBadgeComponent],
   template: `
     <div class="h-full flex flex-col relative">
       <!-- Page Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-main">Departments</h2>
-          <p class="text-muted text-sm mt-1">Manage hierarchical structure and team grouping.</p>
-        </div>
-        <button *ngIf="(userStore.hasAnyPermission(['Governance.Departments.Manage'])) && userStore.hasAnyPermission(['Governance.Departments.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
+      <app-page-header title="Departments" subtitle="Manage hierarchical structure and team grouping.">
+        <button action *ngIf="userStore.hasAnyPermission(['Governance.Departments.Manage'])" (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
           Add Department
         </button>
-      </div>
+      </app-page-header>
 
       <!-- Data Table -->
-      <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
-          <div class="relative w-64">
-            <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search departments...">
-          </div>
-          
-        </div>
+      <app-data-table-shell
+        [loading]="loading"
+        [items]="departments | globalSearch: searchTerm"
+        [(searchTerm)]="searchTerm"
+        searchPlaceholder="Search departments..."
+        emptyMessage="No departments found matching your search.">
+        
+        <ng-template #header>
+          <tr>
+            <th>Business Unit</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th class="text-center">Headcount</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </ng-template>
 
-        <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-muted">
-            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
-              <tr>
-                <th scope="col" class="px-6 py-4 font-medium">Business Unit</th>
-                <th scope="col" class="px-6 py-4 font-medium">Code</th>
-                <th scope="col" class="px-6 py-4 font-medium">Name</th>
-                <th scope="col" class="px-6 py-4 font-medium text-center">Headcount</th>
-                <th scope="col" class="px-6 py-4 font-medium">Status</th>
-                <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
-              <tr *ngIf="loading && departments.length === 0">
-                <td colspan="6" class="px-6 py-12 text-center text-muted">
-                  <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading departments...
-                </td>
-              </tr>
-              <ng-container *ngIf="departments | globalSearch: searchTerm as filteredDepartments">
-                <tr *ngIf="!loading && filteredDepartments.length === 0">
-                  <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                    No departments found matching your search.
-                  </td>
-                </tr>
-                <tr *ngFor="let dept of filteredDepartments" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
-                  <td class="px-6 py-4 text-muted">{{ dept.relationships?.business_unit?.attributes?.business_unit_name || '-' }}</td>
-                  <td class="px-6 py-4 font-medium text-brand-light">{{ dept.attributes.department_code }}</td>
-                  <td class="px-6 py-4 text-main font-medium">{{ dept.attributes.department_name }}</td>
-                  <td class="px-6 py-4 text-center">
-                    <span class="bg-brand/10 text-brand px-2 py-1 rounded text-xs font-medium border border-brand/20">
-                      {{ dept.relationships?.users_count || 0 }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full"
-                          [ngClass]="dept.attributes.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'">
-                      {{ dept.attributes.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right space-x-3">
-                    <button *ngIf="(userStore.hasAnyPermission(['Governance.Departments.Manage'])) && userStore.hasAnyPermission(['Governance.Departments.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(dept)">Edit</button>
-                    <button *ngIf="(userStore.hasAnyPermission(['Governance.Departments.Manage'])) && userStore.hasAnyPermission(['Governance.Departments.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteDept(dept.uuid)">Delete</button>
-                  </td>
-                </tr>
-              </ng-container>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <ng-template #row let-dept>
+          <tr>
+            <td class="text-muted">{{ dept.relationships?.business_unit?.attributes?.business_unit_name || '-' }}</td>
+            <td class="font-medium text-brand-light">{{ dept.attributes.department_code }}</td>
+            <td class="text-main font-medium">{{ dept.attributes.department_name }}</td>
+            <td class="text-center">
+              <app-count-badge [count]="dept.relationships?.users_count || 0" label="Users"></app-count-badge>
+            </td>
+            <td>
+              <app-status-badge [status]="dept.attributes.status"></app-status-badge>
+            </td>
+            <td class="text-right space-x-3">
+              <button *ngIf="userStore.hasAnyPermission(['Governance.Departments.Manage'])" class="text-muted hover:text-main transition-colors" (click)="openEditForm(dept)">Edit</button>
+              <button *ngIf="userStore.hasAnyPermission(['Governance.Departments.Manage'])" class="text-muted hover:text-red-400 transition-colors" (click)="deleteDept(dept.uuid)">Delete</button>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table-shell>
 
       <!-- SlideOver Form -->
       <app-slide-over [isOpen]="isSlideOverOpen" 

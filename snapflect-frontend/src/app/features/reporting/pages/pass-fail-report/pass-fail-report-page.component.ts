@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { AppPageHeaderComponent } from '../../../../shared/components/app-page-header/app-page-header.component';
+import { DataTableShellComponent } from '../../../../shared/components/app-data-table-shell/app-data-table-shell.component';
 
 interface PassFailReportRow {
   assessment_name: string;
@@ -13,71 +15,54 @@ interface PassFailReportRow {
 @Component({
   selector: 'app-pass-fail-report-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AppPageHeaderComponent, DataTableShellComponent],
   template: `
-    <div class="h-full flex flex-col">
+    <div class="h-full flex flex-col relative">
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6 shrink-0">
-        <div>
-          <h2 class="text-2xl font-bold text-main">Pass/Fail Analysis</h2>
-          <p class="text-muted text-sm mt-1">Breakdown of assessment pass rates and outcomes.</p>
-        </div>
-        <button class="px-4 py-2 bg-brand text-white text-sm font-semibold rounded-md hover:bg-brand-dark transition-colors">
+      <app-page-header title="Pass/Fail Analysis" subtitle="Breakdown of assessment pass rates and outcomes.">
+        <button action class="btn-primary">
           Export CSV
         </button>
-      </div>
+      </app-page-header>
 
       <!-- Main Content -->
-      <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="overflow-x-auto flex-1 p-0">
-          <table class="w-full text-left border-collapse">
-            <thead class="bg-brand/5 border-b border-border sticky top-0 z-10">
-              <tr>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider">Assessment Name</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Total Attempts</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Passed</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Failed</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Pass Rate</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border/50">
-              <tr *ngIf="loading">
-                <td colspan="5" class="p-8 text-center text-muted">
-                  Loading report data...
-                </td>
-              </tr>
-              <tr *ngIf="!loading && data.length === 0">
-                <td colspan="5" class="p-8 text-center text-muted">
-                  No pass/fail data available.
-                </td>
-              </tr>
-              <tr *ngFor="let row of data" class="hover:bg-brand/5 transition-colors group">
-                <td class="p-4">
-                  <span class="font-medium text-main">{{ row.assessment_name }}</span>
-                </td>
-                <td class="p-4 text-right text-muted">{{ row.passed + row.failed }}</td>
-                <td class="p-4 text-right">
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
-                    {{ row.passed }}
-                  </span>
-                </td>
-                <td class="p-4 text-right">
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400">
-                    {{ row.failed }}
-                  </span>
-                </td>
-                <td class="p-4 text-right">
-                  <div class="flex items-center justify-end gap-3">
-                    <span class="font-medium" [class]="getPassRateClass(row.pass_percentage)">
-                      {{ row.pass_percentage | number:'1.0-1' }}%
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <app-data-table-shell
+        [loading]="loading"
+        [items]="data"
+        emptyMessage="No pass/fail data available.">
+        
+        <ng-template #header>
+          <tr>
+            <th>Assessment Name</th>
+            <th class="text-right">Total Attempts</th>
+            <th class="text-right">Passed</th>
+            <th class="text-right">Failed</th>
+            <th class="text-right">Pass Rate</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #row let-row>
+          <tr>
+            <td class="font-medium text-main">{{ row.assessment_name }}</td>
+            <td class="text-right text-muted">{{ row.passed + row.failed }}</td>
+            <td class="text-right">
+              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-success/10 text-success border border-success/20">
+                {{ row.passed }}
+              </span>
+            </td>
+            <td class="text-right">
+              <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-danger/10 text-danger border border-danger/20">
+                {{ row.failed }}
+              </span>
+            </td>
+            <td class="text-right">
+              <span class="font-medium" [class]="getPassRateClass(row.pass_percentage)">
+                {{ row.pass_percentage | number:'1.0-1' }}%
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table-shell>
     </div>
   `
 })
@@ -101,8 +86,8 @@ export class PassFailReportPageComponent implements OnInit {
   }
 
   getPassRateClass(rate: number): string {
-    if (rate >= 80) return 'text-emerald-500';
-    if (rate >= 60) return 'text-amber-500';
-    return 'text-rose-500';
+    if (rate >= 80) return 'text-success';
+    if (rate >= 60) return 'text-warning';
+    return 'text-danger';
   }
 }

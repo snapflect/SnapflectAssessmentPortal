@@ -9,6 +9,9 @@ import { SlideOverComponent } from '../../../../../shared/components/slide-over/
 import { ToastService } from '../../../../../core/services/toast.service';
 import { ConfirmService } from '../../../../../core/services/confirm.service';
 import { GlobalSearchPipe } from '../../../../../shared/pipes/global-search.pipe';
+import { AppPageHeaderComponent } from '../../../../../shared/components/app-page-header/app-page-header.component';
+import { DataTableShellComponent } from '../../../../../shared/components/app-data-table-shell/app-data-table-shell.component';
+import { StatusBadgeComponent } from '../../../../../shared/components/app-status-badge/app-status-badge.component';
 
 interface Organization {
   id: number;
@@ -36,94 +39,68 @@ interface SubscriptionPlan {
 @Component({
   selector: 'app-organization-list-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, SlideOverComponent, GlobalSearchPipe],
+  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, SlideOverComponent, GlobalSearchPipe, AppPageHeaderComponent, DataTableShellComponent, StatusBadgeComponent],
   template: `
     <div class="h-full flex flex-col relative">
       <!-- Page Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-main">Organizations</h2>
-          <p class="text-muted text-sm mt-1">Manage tenants and their settings across the platform.</p>
-        </div>
-        <button *ngIf="(userStore.hasAnyPermission(['Governance.Organizations.Manage'])) && userStore.hasAnyPermission(['Governance.Organizations.Manage'])"  (click)="openCreateForm()" class="btn-primary flex items-center">
+      <app-page-header title="Organizations" subtitle="Manage tenants and their settings across the platform.">
+        <button action *ngIf="userStore.hasAnyPermission(['Governance.Organizations.Manage'])" (click)="openCreateForm()" class="btn-primary flex items-center">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
           Provision Workspace
         </button>
-      </div>
+      </app-page-header>
 
       <!-- Data Table -->
-      <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg">
-          <div class="relative w-64">
-            <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            <input type="text" [(ngModel)]="searchTerm" class="input-field pl-10 py-2 text-sm bg-page/50" placeholder="Search organizations...">
-          </div>
-        </div>
+      <app-data-table-shell
+        [loading]="loading"
+        [items]="organizations | globalSearch: searchTerm"
+        [(searchTerm)]="searchTerm"
+        searchPlaceholder="Search organizations..."
+        emptyMessage="No organizations found matching your search.">
+        
+        <ng-template #header>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Portal URL</th>
+            <th>Plan</th>
+            <th>Contact Email</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </ng-template>
 
-        <div class="overflow-auto flex-1">
-          <table class="w-full text-left text-sm text-muted">
-            <thead class="text-xs text-muted uppercase bg-card sticky top-0 z-10 shadow-sm">
-              <tr>
-                <th scope="col" class="px-6 py-4 font-medium">Code</th>
-                <th scope="col" class="px-6 py-4 font-medium">Name</th>
-                <th scope="col" class="px-6 py-4 font-medium">Portal URL</th>
-                <th scope="col" class="px-6 py-4 font-medium">Plan</th>
-                <th scope="col" class="px-6 py-4 font-medium">Contact Email</th>
-                <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody [class.opacity-50]="loading" [class.pointer-events-none]="loading" class="transition-opacity duration-300">
-              <tr *ngIf="loading && organizations.length === 0">
-                <td colspan="4" class="px-6 py-12 text-center text-muted">
-                  <svg class="animate-spin h-8 w-8 mx-auto text-brand-light mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading organizations...
-                </td>
-              </tr>
-              <ng-container *ngIf="organizations | globalSearch: searchTerm as filteredOrgs">
-                <tr *ngIf="!loading && filteredOrgs.length === 0">
-                  <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                    No organizations found matching your search.
-                  </td>
-                </tr>
-                <tr *ngFor="let org of filteredOrgs" class="border-b border-white/5 hover:hover:brightness-110 transition-colors">
-                  <td class="px-6 py-4 font-medium text-brand-light">{{ org.attributes.organization_code }}</td>
-                  <td class="px-6 py-4 text-main font-medium">{{ org.attributes.organization_name }}</td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center space-x-2">
-                      <a [href]="getPortalUrl(org)" target="_blank" class="text-brand-light hover:text-brand transition-colors text-xs truncate max-w-[150px] inline-block" title="Open Portal">
-                        {{ getPortalUrl(org) }}
-                      </a>
-                      <button (click)="copyPortalUrl(org)" class="text-muted hover:text-main transition-colors" title="Copy URL">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                      </button>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <span *ngIf="org.attributes.current_subscription" class="px-2 py-1 rounded text-xs font-medium" 
-                          [ngClass]="{'bg-green-500/10 text-green-400': org.attributes.current_subscription.status === 'ACTIVE', 'bg-blue-500/10 text-blue-400': org.attributes.current_subscription.status === 'TRIALING', 'bg-red-500/10 text-red-400': org.attributes.current_subscription.status === 'PAST_DUE'}">
-                      {{ org.attributes.current_subscription.plan_name }} ({{ org.attributes.current_subscription.status }})
-                    </span>
-                    <span *ngIf="!org.attributes.current_subscription" class="text-xs text-muted">No Plan</span>
-                  </td>
-                  <td class="px-6 py-4">{{ org.attributes.contact_email || 'N/A' }}</td>
-                  <td class="px-6 py-4 text-right space-x-3">
-                    <button class="text-muted hover:text-brand transition-colors" (click)="openBillingView(org)">Billing</button>
-                    <button *ngIf="(userStore.hasAnyPermission(['Governance.Organizations.Manage'])) && userStore.hasAnyPermission(['Governance.Organizations.Manage'])"  class="text-muted hover:text-main transition-colors" (click)="openEditForm(org)">Edit</button>
-                    <button *ngIf="(userStore.hasAnyPermission(['Governance.Organizations.Manage'])) && userStore.hasAnyPermission(['Governance.Organizations.Manage'])"  class="text-muted hover:text-red-400 transition-colors" (click)="deleteOrg(org.uuid)">Delete</button>
-                  </td>
-                </tr>
-              </ng-container>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <ng-template #row let-org>
+          <tr>
+            <td class="font-medium text-brand-light">{{ org.attributes.organization_code }}</td>
+            <td class="text-main font-medium">{{ org.attributes.organization_name }}</td>
+            <td>
+              <div class="flex items-center space-x-2">
+                <a [href]="getPortalUrl(org)" target="_blank" class="text-brand-light hover:text-brand transition-colors text-xs truncate max-w-[150px] inline-block" title="Open Portal">
+                  {{ getPortalUrl(org) }}
+                </a>
+                <button (click)="copyPortalUrl(org)" class="text-muted hover:text-main transition-colors" title="Copy URL">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+              </div>
+            </td>
+            <td>
+              <div class="flex items-center gap-2" *ngIf="org.attributes.current_subscription">
+                <span>{{ org.attributes.current_subscription.plan_name }}</span>
+                <app-status-badge [status]="org.attributes.current_subscription.status"></app-status-badge>
+              </div>
+              <span *ngIf="!org.attributes.current_subscription" class="text-xs text-muted">No Plan</span>
+            </td>
+            <td>{{ org.attributes.contact_email || 'N/A' }}</td>
+            <td class="text-right space-x-3">
+              <button class="text-muted hover:text-brand transition-colors" (click)="openBillingView(org)">Billing</button>
+              <button *ngIf="userStore.hasAnyPermission(['Governance.Organizations.Manage'])" class="text-muted hover:text-main transition-colors" (click)="openEditForm(org)">Edit</button>
+              <button *ngIf="userStore.hasAnyPermission(['Governance.Organizations.Manage'])" class="text-muted hover:text-red-400 transition-colors" (click)="deleteOrg(org.uuid)">Delete</button>
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table-shell>
 
       <!-- SlideOver Form -->
       <app-slide-over [isOpen]="isSlideOverOpen" 

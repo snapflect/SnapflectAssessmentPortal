@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
+import { AppPageHeaderComponent } from '../../../../shared/components/app-page-header/app-page-header.component';
+import { DataTableShellComponent } from '../../../../shared/components/app-data-table-shell/app-data-table-shell.component';
 
 interface CompetencyReportRow {
   competency_name: string;
@@ -13,66 +15,49 @@ interface CompetencyReportRow {
 @Component({
   selector: 'app-competency-report-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AppPageHeaderComponent, DataTableShellComponent],
   template: `
-    <div class="h-full flex flex-col">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6 shrink-0">
-        <div>
-          <h2 class="text-2xl font-bold text-main">Competency Coverage Report</h2>
-          <p class="text-muted text-sm mt-1">Detailed analysis of candidate performance by competency area.</p>
-        </div>
-        <button class="px-4 py-2 bg-brand text-white text-sm font-semibold rounded-md hover:bg-brand-dark transition-colors">
+    <div class="h-full flex flex-col relative">
+      <app-page-header title="Competency Coverage Report" subtitle="Detailed analysis of candidate performance by competency area.">
+        <button action class="btn-primary">
           Export CSV
         </button>
-      </div>
+      </app-page-header>
 
-      <!-- Main Content -->
-      <div class="glass-card flex-1 overflow-hidden flex flex-col">
-        <div class="overflow-x-auto flex-1 p-0">
-          <table class="w-full text-left border-collapse">
-            <thead class="bg-brand/5 border-b border-border sticky top-0 z-10">
-              <tr>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider">Competency Name</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Candidates Evaluated</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Proficient Count</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Proficiency Rate</th>
-                <th class="p-4 text-xs font-semibold text-muted uppercase tracking-wider text-right">Avg Score</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border/50">
-              <tr *ngIf="loading">
-                <td colspan="5" class="p-8 text-center text-muted">
-                  Loading report data...
-                </td>
-              </tr>
-              <tr *ngIf="!loading && data.length === 0">
-                <td colspan="5" class="p-8 text-center text-muted">
-                  No competency data available.
-                </td>
-              </tr>
-              <tr *ngFor="let row of data" class="hover:bg-brand/5 transition-colors group">
-                <td class="p-4">
-                  <span class="font-medium text-main">{{ row.competency_name }}</span>
-                </td>
-                <td class="p-4 text-right text-muted">{{ row.candidates_evaluated }}</td>
-                <td class="p-4 text-right text-muted">{{ row.proficient_count }}</td>
-                <td class="p-4 text-right">
-                  <div class="flex items-center justify-end gap-2">
-                    <span class="text-xs text-muted">{{ getProficiencyRate(row) | number:'1.0-1' }}%</span>
-                    <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                      <div class="h-full bg-emerald-500 rounded-full" [style.width.%]="getProficiencyRate(row)"></div>
-                    </div>
-                  </div>
-                </td>
-                <td class="p-4 text-right font-medium text-main">
-                  {{ row.average_score }}%
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <app-data-table-shell
+        [loading]="loading"
+        [items]="data"
+        emptyMessage="No competency data available.">
+        
+        <ng-template #header>
+          <tr>
+            <th>Competency Name</th>
+            <th class="text-right">Candidates Evaluated</th>
+            <th class="text-right">Proficient Count</th>
+            <th class="text-right">Proficiency Rate</th>
+            <th class="text-right">Avg Score</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #row let-row>
+          <tr>
+            <td class="font-medium text-main">{{ row.competency_name }}</td>
+            <td class="text-right text-muted">{{ row.candidates_evaluated }}</td>
+            <td class="text-right text-muted">{{ row.proficient_count }}</td>
+            <td class="text-right">
+              <div class="flex items-center justify-end gap-2">
+                <span class="text-xs text-muted">{{ getProficiencyRate(row) | number:'1.0-1' }}%</span>
+                <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-success rounded-full" [style.width.%]="getProficiencyRate(row)"></div>
+                </div>
+              </div>
+            </td>
+            <td class="text-right font-medium text-main">
+              {{ row.average_score }}%
+            </td>
+          </tr>
+        </ng-template>
+      </app-data-table-shell>
     </div>
   `
 })
