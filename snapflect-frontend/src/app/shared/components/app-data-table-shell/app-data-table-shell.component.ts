@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
       <!-- Search Bar -->
       <div class="p-4 border-b border-border-light flex justify-between items-center bg-input-bg" *ngIf="showSearch()">
         <div class="relative w-64">
-          <svg class="w-5 h-5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 absolute left-3 top-2.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           <input type="text" 
@@ -45,9 +45,9 @@ import { FormsModule } from '@angular/forms';
 
             <!-- Empty State -->
             <tr *ngIf="!loading() && items().length === 0">
-              <td colspan="100%" class="px-6 py-12 text-center text-slate-500 bg-surface/30">
+              <td colspan="100%" class="px-6 py-12 text-center text-muted bg-surface/30">
                 <div class="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-4 border border-border-light">
-                  <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                   </svg>
                 </div>
@@ -66,7 +66,7 @@ import { FormsModule } from '@angular/forms';
   `,
   styles: [`
     ::ng-deep tbody > tr {
-      @apply border-b border-border-light hover:bg-slate-50 dark:hover:bg-white/5 transition-colors;
+      @apply border-b border-border-light hover:bg-surface-light transition-colors;
     }
     ::ng-deep tbody > tr > td {
       @apply px-6 py-4;

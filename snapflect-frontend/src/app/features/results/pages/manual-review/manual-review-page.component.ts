@@ -39,7 +39,7 @@ interface PendingReview {
         </div>
         <div class="flex items-center gap-3">
           <span class="text-sm text-slate-500 hover:brightness-110 px-3 py-1.5 rounded-lg border border-border-light">
-            <span class="text-amber-400 font-bold">{{ pendingReviews.length }}</span> pending
+            <span class="text-warning font-bold">{{ pendingReviews.length }}</span> pending
           </span>
         </div>
       </div>
@@ -78,7 +78,7 @@ interface PendingReview {
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-xs text-slate-500">#{{ i + 1 }}</span>
                   <span class="text-xs px-1.5 py-0.5 rounded uppercase font-bold"
-                        [ngClass]="review.attributes.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'">
+                        [ngClass]="review.attributes.status === 'PENDING' ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'">
                     {{ review.attributes.status }}
                   </span>
                 </div>

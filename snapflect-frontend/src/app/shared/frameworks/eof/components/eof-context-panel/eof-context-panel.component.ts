@@ -79,9 +79,9 @@ import { EofWizardConfig, EofValidationRule } from '../../models/eof-config.mode
           <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-4">Live Preview</h3>
           <div class="bg-card rounded-lg border border-border-light overflow-hidden shadow-sm">
             <div class="h-10 bg-surface border-b border-border-light flex items-center px-4 gap-2">
-              <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+              <div class="w-3 h-3 rounded-full bg-danger/50"></div>
+              <div class="w-3 h-3 rounded-full bg-warning/50"></div>
+              <div class="w-3 h-3 rounded-full bg-success/50"></div>
             </div>
             <div class="p-4 flex flex-col items-center text-center">
               <div class="w-12 h-12 bg-surface border border-border-light rounded-md mb-3 flex items-center justify-center text-muted text-xs">Logo</div>
@@ -97,9 +97,9 @@ import { EofWizardConfig, EofValidationRule } from '../../models/eof-config.mode
       <div class="p-6 space-y-8" *ngIf="activeStepIndex === 4">
         <div>
           <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-4">Security Score</h3>
-          <div class="bg-gradient-to-br from-yellow-500/10 to-transparent border border-yellow-500/20 rounded-lg p-4 flex items-center justify-between">
-            <span class="text-3xl font-black text-yellow-500">65<span class="text-sm">%</span></span>
-            <span class="text-xs font-medium text-yellow-500/80 uppercase tracking-wider">Fair</span>
+          <div class="bg-gradient-to-br from-warning/10 to-transparent border border-warning/20 rounded-lg p-4 flex items-center justify-between">
+            <span class="text-3xl font-black text-warning">65<span class="text-sm">%</span></span>
+            <span class="text-xs font-medium text-warning/80 uppercase tracking-wider">Fair</span>
           </div>
           <p class="text-xs text-muted mt-3">Enforce MFA and SAML to achieve an Excellent security score.</p>
         </div>
@@ -112,9 +112,9 @@ import { EofWizardConfig, EofValidationRule } from '../../models/eof-config.mode
             <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             Provisioning Check
           </h3>
-          <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-            <p class="text-sm text-green-500 font-medium mb-1">Ready to Activate</p>
-            <p class="text-xs text-green-500/70">All blocking rules satisfied. You may provision this tenant.</p>
+          <div class="bg-success/10 border border-success/20 rounded-lg p-4">
+            <p class="text-sm text-success font-medium mb-1">Ready to Activate</p>
+            <p class="text-xs text-success/70">All blocking rules satisfied. You may provision this tenant.</p>
           </div>
         </div>
       </div>

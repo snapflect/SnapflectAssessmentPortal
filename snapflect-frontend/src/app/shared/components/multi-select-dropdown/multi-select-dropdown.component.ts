@@ -20,18 +20,18 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
         (click)="toggleOpen()">
         
         <div class="flex flex-wrap gap-1.5 items-center flex-1 w-0 min-h-[28px]">
-          <span *ngIf="selectedItems.length === 0" class="text-slate-500 text-sm py-0.5 truncate">{{ placeholder }}</span>
+          <span *ngIf="selectedItems.length === 0" class="text-muted text-sm py-0.5 truncate">{{ placeholder }}</span>
           
           <span *ngFor="let item of selectedItems" 
                 class="bg-brand/10 text-brand-light text-xs px-2 py-1 rounded-md flex items-center gap-1 border border-brand/20 shadow-sm max-w-full">
             <span class="truncate">{{ getLabel(item) }}</span>
-            <button type="button" class="hover:text-red-400 focus:outline-none opacity-60 hover:opacity-100 flex-shrink-0" (click)="removeItem(item, $event)">
+            <button type="button" class="hover:text-danger focus:outline-none opacity-60 hover:opacity-100 flex-shrink-0" (click)="removeItem(item, $event)">
               &times;
             </button>
           </span>
         </div>
 
-        <svg class="w-4 h-4 text-slate-400 transition-transform flex-shrink-0 mt-1.5" [class.rotate-180]="isOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-muted transition-transform flex-shrink-0 mt-1.5" [class.rotate-180]="isOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </div>
@@ -44,7 +44,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
           <input type="checkbox" [checked]="isSelected(opt)" class="w-4 h-4 rounded bg-black/50 border-white/20 text-brand focus:ring-brand focus:ring-offset-0 cursor-pointer pointer-events-none">
           <span class="flex-1">{{ getLabel(opt) }}</span>
         </div>
-        <div *ngIf="options.length === 0" class="px-4 py-6 text-sm text-slate-500 text-center italic">
+        <div *ngIf="options.length === 0" class="px-4 py-6 text-sm text-muted text-center italic">
           No options available.
         </div>
       </div>

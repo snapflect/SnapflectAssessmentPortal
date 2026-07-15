@@ -62,13 +62,13 @@ interface PendingReview {
       <div *ngIf="!loading && !isClientAdmin && metrics" class="flex flex-col gap-8">
         <!-- Welcome Banner -->
         <div class="glass-card p-6 flex items-center justify-between relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-brand/5 pointer-events-none"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-warning/10 to-brand/5 pointer-events-none"></div>
           <div class="z-10">
             <h3 class="text-2xl font-bold text-main">Welcome back, {{ userStore.profile()?.first_name || 'Reviewer' }}! 👋</h3>
-            <p class="text-muted text-sm mt-1">You have <span class="font-semibold text-amber-500">{{ metrics.pending_reviews }} pending manual reviews</span> in your queue.</p>
+            <p class="text-muted text-sm mt-1">You have <span class="font-semibold text-warning">{{ metrics.pending_reviews }} pending manual reviews</span> in your queue.</p>
           </div>
           <a routerLink="/scoring/manual"
-             class="z-10 flex-shrink-0 ml-6 px-5 py-2.5 rounded-lg font-semibold text-sm bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 hover:opacity-90 transition-opacity flex items-center gap-2">
+             class="z-10 flex-shrink-0 ml-6 px-5 py-2.5 rounded-lg font-semibold text-sm bg-warning text-white shadow-lg shadow-warning/20 hover:opacity-90 transition-opacity flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             Start Reviewing
           </a>
@@ -76,17 +76,17 @@ interface PendingReview {
 
         <!-- Stat Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="glass-card p-6 flex flex-col relative overflow-hidden group border border-amber-500/20">
-            <div class="p-3 bg-amber-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
-              <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <div class="glass-card p-6 flex flex-col relative overflow-hidden group border border-warning/20">
+            <div class="p-3 bg-warning/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
+              <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <p class="text-muted text-sm font-medium z-10">Pending Reviews</p>
             <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics.pending_reviews }}</h3>
-            <a routerLink="/scoring/manual" class="mt-3 text-xs text-amber-400 hover:underline z-10">View queue →</a>
+            <a routerLink="/scoring/manual" class="mt-3 text-xs text-warning hover:underline z-10">View queue →</a>
           </div>
           <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
-            <div class="p-3 bg-emerald-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
-              <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <div class="p-3 bg-success/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
+              <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
             <p class="text-muted text-sm font-medium z-10">Completed Reviews</p>
             <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics.completed_reviews }}</h3>
@@ -101,8 +101,8 @@ interface PendingReview {
             <span class="mt-3 text-xs text-muted z-10">Scoring consistency</span>
           </div>
           <div class="glass-card p-6 flex flex-col relative overflow-hidden group">
-            <div class="p-3 bg-indigo-500/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
-              <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="p-3 bg-info/20 rounded-lg w-12 h-12 flex items-center justify-center mb-4 z-10">
+              <svg class="w-6 h-6 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             </div>
             <p class="text-muted text-sm font-medium z-10">Avg Turnaround</p>
             <h3 class="text-3xl font-bold text-main mt-1 z-10">{{ metrics.turnaround_time || 'N/A' }}</h3>
@@ -124,7 +124,7 @@ interface PendingReview {
                     <p class="text-sm font-bold text-main">{{ item.candidate_name }}</p>
                     <p class="text-xs text-muted truncate max-w-[180px]">{{ item.assessment_name }}</p>
                   </div>
-                  <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500">
+                  <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-warning/10 text-warning">
                     {{ item.status }}
                   </span>
                 </div>
@@ -141,7 +141,7 @@ interface PendingReview {
             </div>
             <div *ngIf="!metrics.priority_queue || metrics.priority_queue.length === 0" class="text-center py-10 px-4">
               <div class="w-12 h-12 rounded-full bg-surface-darker/50 flex items-center justify-center mx-auto mb-3">
-                <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               </div>
               <p class="text-sm font-medium text-main">You're all caught up!</p>
               <p class="text-xs text-muted mt-1">No pending reviews at the moment.</p>
@@ -170,12 +170,12 @@ interface PendingReview {
                   <p class="text-xs text-muted">{{ rev.email }}</p>
                 </td>
                 <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500">
+                  <span class="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded-full text-xs font-bold bg-warning/10 text-warning">
                     {{ rev.pending_reviews }}
                   </span>
                 </td>
                 <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500">
+                  <span class="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 rounded-full text-xs font-bold bg-success/10 text-success">
                     {{ rev.completed_reviews }}
                   </span>
                 </td>

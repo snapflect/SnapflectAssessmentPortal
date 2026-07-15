@@ -25,8 +25,8 @@ import { EofWizardConfig, EofStepConfig } from '../../models/eof-config.model';
               <span class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ring-4 ring-input-bg transition-colors"
                     [ngClass]="{
                       'bg-brand text-white': activeIndex === i,
-                      'bg-green-500/20 text-green-400': activeIndex !== i && step.status === 'valid',
-                      'bg-red-500/20 text-red-400': activeIndex !== i && step.status === 'invalid',
+                      'bg-success/20 text-success': activeIndex !== i && step.status === 'valid',
+                      'bg-danger/20 text-danger': activeIndex !== i && step.status === 'invalid',
                       'bg-white/10 text-muted': activeIndex !== i && step.status === 'pending'
                     }">
                 <ng-container *ngIf="step.status === 'valid' && activeIndex !== i">✓</ng-container>
@@ -47,8 +47,8 @@ import { EofWizardConfig, EofStepConfig } from '../../models/eof-config.model';
                 <!-- Smart Metadata -->
                 <span class="text-[10px] uppercase tracking-wider font-semibold mt-0.5"
                       [ngClass]="{
-                        'text-red-400': step.status === 'invalid',
-                        'text-yellow-500': step.status === 'warning',
+                        'text-danger': step.status === 'invalid',
+                        'text-warning': step.status === 'warning',
                         'text-muted/60': step.status === 'pending' || step.status === 'valid'
                       }">
                   <ng-container *ngIf="step.status === 'invalid'">Blocking Errors</ng-container>

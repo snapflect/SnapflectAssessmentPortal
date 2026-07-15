@@ -70,15 +70,15 @@ describe('ConfirmModalComponent', () => {
   });
 
   it('should return correct icon container class', () => {
-    expect(component.getIconContainerClass('danger')).toContain('bg-red-500/10');
-    expect(component.getIconContainerClass('warning')).toContain('bg-amber-500/10');
-    expect(component.getIconContainerClass('info')).toContain('bg-blue-500/10');
-    expect(component.getIconContainerClass()).toContain('bg-blue-500/10');
+    expect(component.getIconContainerClass('danger')).toContain('bg-danger/10');
+    expect(component.getIconContainerClass('warning')).toContain('bg-warning/10');
+    expect(component.getIconContainerClass('info')).toContain('bg-info/10');
+    expect(component.getIconContainerClass()).toContain('bg-info/10');
   });
 
-  it('should return correct confirm button class', () => {
-    expect(component.getConfirmButtonClass('danger')).toContain('bg-red-500');
-    expect(component.getConfirmButtonClass('warning')).toContain('bg-amber-500');
+  it('should return correct confirm button class based on variant', () => {
+    expect(component.getConfirmButtonClass('danger')).toContain('bg-danger');
+    expect(component.getConfirmButtonClass('warning')).toContain('bg-warning');
     expect(component.getConfirmButtonClass('info')).toContain('bg-brand');
     expect(component.getConfirmButtonClass()).toContain('bg-brand');
   });
@@ -86,8 +86,8 @@ describe('ConfirmModalComponent', () => {
   it('should render correct SVG based on variant', () => {
     confirmService.state.set({ isOpen: true, options: { variant: 'danger' } });
     fixture.detectChanges();
-    let compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('svg.text-red-400')).toBeTruthy();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('svg.text-danger')).toBeTruthy();
     
     confirmService.state.set({ isOpen: true, options: { variant: 'warning' } });
     fixture.detectChanges();

@@ -61,11 +61,11 @@ export class ToastContainerComponent {
 
   getToastClasses(type: ToastType): string {
     switch (type) {
-      case 'success': return 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20';
-      case 'error': return 'bg-red-600 text-white shadow-lg shadow-red-600/20';
-      case 'warning': return 'bg-amber-500 text-white shadow-lg shadow-amber-500/20';
-      case 'info': return 'bg-blue-600 text-white shadow-lg shadow-blue-600/20';
-      default: return 'bg-gray-800 text-white shadow-lg';
+      case 'success': return 'bg-success text-white shadow-lg shadow-success/20';
+      case 'error': return 'bg-danger text-white shadow-lg shadow-danger/20';
+      case 'warning': return 'bg-warning text-black shadow-lg shadow-warning/20';
+      case 'info': return 'bg-info text-white shadow-lg shadow-info/20';
+      default: return 'bg-surface-light text-main shadow-lg';
     }
   }
 }

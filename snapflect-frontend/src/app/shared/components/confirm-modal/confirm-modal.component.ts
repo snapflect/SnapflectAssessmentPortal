@@ -19,9 +19,9 @@ import { ConfirmService } from '../../../core/services/confirm.service';
         <!-- Header -->
         <div class="px-6 py-5 border-b border-white/5 flex items-center gap-4">
           <div [ngClass]="getIconContainerClass(options?.variant)" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg *ngIf="options?.variant === 'danger'" class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <svg *ngIf="options?.variant === 'warning'" class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <svg *ngIf="options?.variant === 'info' || !options?.variant" class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <svg *ngIf="options?.variant === 'danger'" class="w-5 h-5 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <svg *ngIf="options?.variant === 'warning'" class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <svg *ngIf="options?.variant === 'info' || !options?.variant" class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
           <h3 class="text-lg font-bold text-main">{{ options?.title }}</h3>
         </div>
@@ -71,19 +71,19 @@ export class ConfirmModalComponent {
 
   getIconContainerClass(variant?: string): string {
     switch (variant) {
-      case 'danger': return 'bg-red-500/10 border border-red-500/20';
-      case 'warning': return 'bg-amber-500/10 border border-amber-500/20';
+      case 'danger': return 'bg-danger/10 border border-danger/20';
+      case 'warning': return 'bg-warning/10 border border-warning/20';
       case 'info':
-      default: return 'bg-blue-500/10 border border-blue-500/20';
+      default: return 'bg-info/10 border border-info/20';
     }
   }
 
   getConfirmButtonClass(variant?: string): string {
     switch (variant) {
-      case 'danger': return 'bg-red-500 hover:bg-red-400 text-main focus:ring-red-500/50';
-      case 'warning': return 'bg-amber-500 hover:bg-amber-400 text-black focus:ring-amber-500/50';
+      case 'danger': return 'bg-danger hover:brightness-110 text-white focus:ring-danger/50';
+      case 'warning': return 'bg-warning hover:brightness-110 text-black focus:ring-warning/50';
       case 'info':
-      default: return 'bg-brand hover:bg-brand-light text-main focus:ring-brand/50';
+      default: return 'bg-brand hover:bg-brand-light text-white focus:ring-brand/50';
     }
   }
 }

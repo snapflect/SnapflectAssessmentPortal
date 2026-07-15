@@ -14,8 +14,8 @@ import { NotificationService } from '../../../core/services/notification.service
         
         <!-- Unread Badge -->
         <span *ngIf="notificationService.unreadCount() > 0" class="absolute top-1 right-1 flex h-3 w-3">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-danger"></span>
         </span>
       </button>
 
@@ -31,7 +31,7 @@ import { NotificationService } from '../../../core/services/notification.service
         </div>
 
         <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
-          <div *ngIf="notificationService.notifications().length === 0" class="p-6 text-center text-slate-500">
+          <div *ngIf="notificationService.notifications().length === 0" class="p-6 text-center text-muted">
             <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
             <p class="text-sm">You have no notifications.</p>
           </div>
@@ -46,7 +46,7 @@ import { NotificationService } from '../../../core/services/notification.service
 
             <div class="flex-shrink-0 mt-1">
               <div class="w-8 h-8 rounded-full flex items-center justify-center"
-                   [ngClass]="notif.read_at ? 'bg-slate-500/10 text-slate-400' : 'bg-brand/20 text-brand-light'">
+                   [ngClass]="notif.read_at ? 'bg-surface-light text-muted' : 'bg-brand/20 text-brand-light'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>

@@ -60,7 +60,7 @@ interface ResultVersion {
               <tr *ngFor="let version of versions; let i = index" class="hover:bg-brand/5 transition-colors group">
                 <td class="p-4">
                   <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-700 text-slate-300 font-medium text-xs">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-light text-muted font-medium text-xs">
                       v{{ version.version_number }}
                     </span>
                     <span *ngIf="i === 0" class="text-[10px] uppercase font-bold text-brand border border-brand/30 px-1.5 py-0.5 rounded bg-brand/10">Current</span>
@@ -74,7 +74,7 @@ interface ResultVersion {
                 </td>
                 <td class="p-4">
                   <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" 
-                        [ngClass]="version.pass_fail_status === 'PASS' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'">
+                        [ngClass]="version.pass_fail_status === 'PASS' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'">
                     {{ version.pass_fail_status }}
                   </span>
                 </td>

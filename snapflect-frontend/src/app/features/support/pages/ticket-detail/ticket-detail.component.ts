@@ -21,9 +21,9 @@ import { UserStore } from '../../../../shared/stores/user.store';
               <h2 class="text-2xl font-bold text-main">{{ ticket().subject }}</h2>
               <span class="px-2.5 py-1 rounded-full text-xs font-semibold tracking-wider"
                     [ngClass]="{
-                      'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': ticket().status === 'OPEN',
-                      'bg-amber-500/10 text-amber-400 border border-amber-500/20': ticket().status === 'IN_PROGRESS',
-                      'bg-slate-500/10 text-slate-400 border border-slate-500/20': ticket().status === 'RESOLVED' || ticket().status === 'CLOSED'
+                      'bg-success/10 text-success border border-success/20': ticket().status === 'OPEN',
+                      'bg-warning/10 text-warning border border-warning/20': ticket().status === 'IN_PROGRESS',
+                      'bg-surface-light text-muted border border-border': ticket().status === 'RESOLVED' || ticket().status === 'CLOSED'
                     }">
                 {{ ticket().status.replace('_', ' ') }}
               </span>
@@ -64,13 +64,13 @@ import { UserStore } from '../../../../shared/stores/user.store';
         <div *ngFor="let reply of ticket().replies" class="glass-card p-6">
           <div class="flex items-center space-x-3 mb-4">
             <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                 [ngClass]="reply.user_id === ticket().user_id ? 'bg-brand/20 text-brand-light' : 'bg-amber-500/20 text-amber-500'">
+                 [ngClass]="reply.user_id === ticket().user_id ? 'bg-brand/20 text-brand-light' : 'bg-warning/20 text-warning'">
               {{ reply.user?.first_name?.charAt(0) }}{{ reply.user?.last_name?.charAt(0) }}
             </div>
             <div>
               <p class="font-medium text-main">
                 {{ reply.user?.first_name }} {{ reply.user?.last_name }}
-                <span *ngIf="reply.user_id !== ticket().user_id" class="ml-2 text-xs bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded border border-amber-500/20">Support Agent</span>
+                <span *ngIf="reply.user_id !== ticket().user_id" class="ml-2 text-xs bg-warning/10 text-warning px-2 py-0.5 rounded border border-warning/20">Support Agent</span>
               </p>
               <p class="text-xs text-muted">{{ reply.created_at | date:'MMM d, y, h:mm a' }}</p>
             </div>
